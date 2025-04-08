@@ -49,22 +49,11 @@ requirements:
 - Machine has a supported version of CPython or PyPy installed.
 - Machine has [poetry](https://python-poetry.org/) installed.
 
-To run the `nitypes` regression tests in a specific version of Python, run the following command in the
-root of the distribution:
+To run the `nitypes` regression tests, run the following command in the root of the distribution:
 
 ```sh
-$ poetry run pytest
+$ poetry run pytest -v
 ```
-
-To run the regression tests in all Python interpreters supported by `nitypes`, run the following
-commands in the root of the distribution:
-
-```sh
-$ poetry run tox
-```
-
-This requires you to have all the Python interpreters supported by `nitypes` installed on your
-machine.
 
 # Developer Certificate of Origin (DCO)
 
