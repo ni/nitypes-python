@@ -1,0 +1,56 @@
+[tool.poetry]
+name = "nitypes"
+version = "0.0.1"
+license = "MIT"
+description = "Data types for NI Python APIs"
+authors = ["NI <opensource@ni.com>"]
+maintainers = ["Brad Keryan <brad.keryan@ni.com>"]
+packages = [{ include = "nitypes", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+numpy = [
+  {version = ">=1.22", python = ">=3.9,<3.12"},
+  {version = ">=1.26", python = ">=3.12,<3.13"},
+  {version = ">=2.1", python = "^3.13"},
+]
+hightime = "^0.2.2"
+
+[tool.poetry.group.lint.dependencies]
+bandit = { version = ">=1.7", extras = ["toml"] }
+ni-python-styleguide = ">=0.4.1"
+mypy = ">=1.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = ">=7.2"
+pytest-cov = ">=4.0"
+pytest-mock = ">=3.0"
+
+[tool.black]
+line-length = 100
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules --strict-markers"
+testpaths = ["tests"]
+
+[build-system]
+requires = ["poetry>=1.2"]
+build-backend = "poetry.masonry.api"
+
+[tool.mypy]
+files = "examples/,src/,tests/"
+plugins = "numpy.typing.mypy_plugin"
+namespace_packages = true
+strict = true
+
+[[tool.mypy.overrides]]
+module = [
+  # https://github.com/ni/hightime/issues/4 - Add type annotations
+  "hightime.*",
+]
+ignore_missing_imports = true
+
+[tool.bandit]
+skips = [
+  "B101", # assert_used
+]
