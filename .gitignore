@@ -1,0 +1,21 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+# Unit tests
+.tox/
+test_results/
+
+# Coverage output
+.coverage
+htmlcov/
+
+# Environments
+.env
+.venv
+
+# Built artifacts
+dist/
+docs/_build/
+
+# Common editor metadata
+.vscode/
