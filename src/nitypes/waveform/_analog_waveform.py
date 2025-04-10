@@ -161,14 +161,20 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         start_index = operator.index(start_index)
         sample_count = operator.index(sample_count)
 
+        # TODO: support negative index?
+        if start_index < 0:
+            raise ValueError(f"Start index {start_index} is less than zero.")
+        elif start_index > len(data):
+            raise ValueError(f"Start index {start_index} is greater than array length {len(data)}.")
+
         if sample_count == -1:
-            sample_count = len(data)
+            sample_count = len(data) - start_index
+        elif sample_count < 0:
+            raise ValueError(f"Sample count {sample_count} is less than zero.")
         elif sample_count > len(data):
             raise ValueError(
                 f"Sample count {sample_count} is greater than array length {len(data)}."
             )
-        elif sample_count < 0:
-            raise ValueError(f"Sample count {sample_count} is less than zero.")
 
         if start_index + sample_count > len(data):
             raise ValueError(
