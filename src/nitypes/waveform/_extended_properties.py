@@ -9,6 +9,12 @@ if sys.version_info >= (3, 10):
 else:
     from typing_extensions import TypeAlias
 
+# Extended property keys
+CHANNEL_NAME = "NI_ChannelName"
+LINE_NAMES = "NI_LineNames"
+UNIT_DESCRIPTION = "NI_UnitDescription"
+
+
 ExtendedPropertyValue: TypeAlias = bool | float | int | str
 """An ExtendedPropertyDictionary value."""
 

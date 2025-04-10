@@ -8,7 +8,11 @@ from typing import TYPE_CHECKING, Any, Generic, SupportsIndex, overload
 import numpy as np
 import numpy.typing as npt
 
-from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
+from nitypes.waveform._extended_properties import (
+    CHANNEL_NAME,
+    UNIT_DESCRIPTION,
+    ExtendedPropertyDictionary,
+)
 
 # Don't use typing_extensions at run time.
 if not TYPE_CHECKING or sys.version_info >= (3, 13):
@@ -145,6 +149,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             array = array.copy()
         return AnalogWaveform(array, start_index=start_index, sample_count=sample_count)
 
+    __slots__ = ["_data", "_start_index", "_sample_count", "_extended_properties", "__weakref__"]
+
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self,
         data: npt.NDArray[_ScalarType_co],
@@ -176,28 +182,27 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     @property
     def raw_data(self) -> npt.NDArray[_ScalarType_co]:
-        """Get the raw analog waveform data."""
+        """The raw analog waveform data."""
         return self._data[self._start_index : self._start_index + self._sample_count]
 
     @property
     def scaled_data(self) -> npt.NDArray[np.float64]:
-        """Get the scaled analog waveform data."""
+        """The scaled analog waveform data."""
         # TODO: implement scaling
         return self.raw_data.astype(np.float64)
 
     @property
     def sample_count(self) -> int:
-        """Get the number of samples in the analog waveform."""
+        """The number of samples in the analog waveform."""
         return self._sample_count
 
     @property
     def capacity(self) -> int:
-        """Get the total capacity available for analog waveform data."""
+        """The total capacity available for analog waveform data."""
         return len(self._data)
 
     @capacity.setter
     def capacity(self, value: int) -> None:
-        """Set the total capacity available for analog waveform data."""
         if value < 0:
             raise ValueError(f"Capacity {value} is less than zero.")
         if value < self._start_index + self._sample_count:
@@ -208,6 +213,37 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             self._data.resize(value)
 
     @property
+    def dtype(self) -> np.dtype[_ScalarType_co]:
+        """The NumPy dtype for the analog waveform data."""
+        return self._data.dtype
+
+    @property
     def extended_properties(self) -> ExtendedPropertyDictionary:
-        """Get the extended properties for the analog waveform."""
+        """The extended properties for the analog waveform."""
         return self._extended_properties
+
+    @property
+    def channel_name(self) -> str:
+        """The name of the device channel from which the analog waveform was acquired."""
+        value = self._extended_properties.get(CHANNEL_NAME, "")
+        assert isinstance(value, str)
+        return value
+
+    @channel_name.setter
+    def channel_name(self, value: str) -> None:
+        if not isinstance(value, str):
+            raise TypeError(f"Channel name {value} is not a str.")
+        self._extended_properties[CHANNEL_NAME] = value
+
+    @property
+    def unit_description(self) -> str:
+        """The unit of measurement, such as volts, of the analog waveform."""
+        value = self._extended_properties.get(UNIT_DESCRIPTION, "")
+        assert isinstance(value, str)
+        return value
+
+    @unit_description.setter
+    def unit_description(self, value: str) -> None:
+        if not isinstance(value, str):
+            raise TypeError(f"Unit description {value} is not a str.")
+        self._extended_properties[UNIT_DESCRIPTION] = value

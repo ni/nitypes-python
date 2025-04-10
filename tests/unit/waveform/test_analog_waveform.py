@@ -1,7 +1,9 @@
 import itertools
+import weakref
 from typing import Any, assert_type
 
 import numpy as np
+import pytest
 
 from nitypes.waveform import AnalogWaveform
 
@@ -10,7 +12,7 @@ def test___no_args___create___creates_empty_waveform_with_default_dtype() -> Non
     waveform = AnalogWaveform.create()
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 0
-    assert waveform.raw_data.dtype == np.float64
+    assert waveform.dtype == np.float64
     assert_type(waveform, AnalogWaveform[np.float64])
 
 
@@ -18,7 +20,7 @@ def test___sample_count___create___creates_waveform_with_sample_count_and_defaul
     waveform = AnalogWaveform.create(10)
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
-    assert waveform.raw_data.dtype == np.float64
+    assert waveform.dtype == np.float64
     assert_type(waveform, AnalogWaveform[np.float64])
 
 
@@ -26,7 +28,7 @@ def test___sample_count_and_dtype___create___creates_waveform_with_sample_count_
     waveform = AnalogWaveform.create(10, np.int32)
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
-    assert waveform.raw_data.dtype == np.int32
+    assert waveform.dtype == np.int32
     assert_type(waveform, AnalogWaveform[np.int32])
 
 
@@ -36,7 +38,7 @@ def test___sample_count_and_dtype_str___create___creates_waveform_with_sample_co
     waveform = AnalogWaveform.create(10, "i4")
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
-    assert waveform.raw_data.dtype == np.int32
+    assert waveform.dtype == np.int32
     assert_type(waveform, AnalogWaveform[Any])  # dtype not inferred from string
 
 
@@ -47,7 +49,7 @@ def test___sample_count_and_dtype_any___create___creates_waveform_with_sample_co
     waveform = AnalogWaveform.create(10, dtype)
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
-    assert waveform.raw_data.dtype == np.int32
+    assert waveform.dtype == np.int32
     assert_type(waveform, AnalogWaveform[Any])  # dtype not inferred from np.dtype[Any]
 
 
@@ -58,7 +60,7 @@ def test___sample_count_dtype_and_capacity___create___creates_waveform_with_samp
 
     assert waveform.sample_count == len(waveform.raw_data) == 10
     assert waveform.capacity == 20
-    assert waveform.raw_data.dtype == np.int32
+    assert waveform.dtype == np.int32
     assert_type(waveform, AnalogWaveform[np.int32])
 
 
@@ -66,7 +68,7 @@ def test___unspecified_dtype___from_iter___creates_waveform_with_default_dtype()
     waveform = AnalogWaveform.from_iter([1.1, 2.2, 3.3, 4.4, 5.5])
 
     assert waveform.raw_data.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert waveform.raw_data.dtype == np.float64
+    assert waveform.dtype == np.float64
     assert_type(waveform, AnalogWaveform[np.float64])
 
 
@@ -74,7 +76,7 @@ def test___dtype___from_iter___creates_waveform_with_specified_dtype() -> None:
     waveform = AnalogWaveform.from_iter([1, 2, 3, 4, 5], np.int32)
 
     assert waveform.raw_data.tolist() == [1, 2, 3, 4, 5]
-    assert waveform.raw_data.dtype == np.int32
+    assert waveform.dtype == np.int32
     assert_type(waveform, AnalogWaveform[np.int32])
 
 
@@ -93,7 +95,7 @@ def test___float64_array___from_ndarray___creates_waveform_with_float64_dtype() 
     waveform = AnalogWaveform.from_ndarray(data)
 
     assert waveform.raw_data.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert waveform.raw_data.dtype == np.float64
+    assert waveform.dtype == np.float64
     assert_type(waveform, AnalogWaveform[np.float64])
 
 
@@ -103,7 +105,7 @@ def test___int32_array___from_ndarray___creates_waveform_with_int32_dtype() -> N
     waveform = AnalogWaveform.from_ndarray(data)
 
     assert waveform.raw_data.tolist() == [1, 2, 3, 4, 5]
-    assert waveform.raw_data.dtype == np.int32
+    assert waveform.dtype == np.int32
     assert_type(waveform, AnalogWaveform[np.int32])
 
 
@@ -131,3 +133,36 @@ def test___array_subset___from_ndarray___creates_waveform_with_array_subset() ->
     waveform = AnalogWaveform.from_ndarray(data, start_index=1, sample_count=3)
 
     assert waveform.raw_data.tolist() == [2, 3, 4]
+
+
+def test___waveform___set_channel_name___sets_extended_property() -> None:
+    waveform = AnalogWaveform.create()
+
+    waveform.channel_name = "Dev1/ai0"
+
+    assert waveform.channel_name == "Dev1/ai0"
+    assert waveform.extended_properties["NI_ChannelName"] == "Dev1/ai0"
+
+
+def test___waveform___set_unit_description___sets_extended_property() -> None:
+    waveform = AnalogWaveform.create()
+
+    waveform.unit_description = "Volts"
+
+    assert waveform.unit_description == "Volts"
+    assert waveform.extended_properties["NI_UnitDescription"] == "Volts"
+
+
+def test___waveform___set_undefined_property___raises_attribute_error() -> None:
+    waveform = AnalogWaveform.create()
+
+    with pytest.raises(AttributeError):
+        waveform.undefined_property = "Whatever"  # type: ignore[attr-defined]
+
+
+def test___waveform___take_weak_ref___references_waveform() -> None:
+    waveform = AnalogWaveform.create()
+
+    waveform_ref = weakref.ref(waveform)
+
+    assert waveform_ref() is waveform
