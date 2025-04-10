@@ -1,4 +1,3 @@
-import itertools
 import weakref
 from typing import Any, assert_type
 
@@ -64,67 +63,72 @@ def test___sample_count_dtype_and_capacity___create___creates_waveform_with_samp
     assert_type(waveform, AnalogWaveform[np.int32])
 
 
-def test___unspecified_dtype___from_iter___creates_waveform_with_default_dtype() -> None:
-    waveform = AnalogWaveform.from_iter([1.1, 2.2, 3.3, 4.4, 5.5])
-
-    assert waveform.raw_data.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
-    assert waveform.dtype == np.float64
-    assert_type(waveform, AnalogWaveform[np.float64])
-
-
-def test___dtype___from_iter___creates_waveform_with_specified_dtype() -> None:
-    waveform = AnalogWaveform.from_iter([1, 2, 3, 4, 5], np.int32)
-
-    assert waveform.raw_data.tolist() == [1, 2, 3, 4, 5]
-    assert waveform.dtype == np.int32
-    assert_type(waveform, AnalogWaveform[np.int32])
-
-
-def test___infinite_iterator_and_sample_count___from_iter___creates_waveform_with_specified_sample_count() -> (
-    None
-):
-    waveform = AnalogWaveform.from_iter(itertools.repeat(3), sample_count=5)
-
-    assert waveform.raw_data.tolist() == [3, 3, 3, 3, 3]
-    assert waveform.sample_count == 5
-
-
-def test___float64_array___from_ndarray___creates_waveform_with_float64_dtype() -> None:
+def test___float64_array___from_array_1d___creates_waveform_with_float64_dtype() -> None:
     data = np.array([1.1, 2.2, 3.3, 4.4, 5.5], np.float64)
 
-    waveform = AnalogWaveform.from_ndarray(data)
+    waveform = AnalogWaveform.from_array_1d(data)
 
     assert waveform.raw_data.tolist() == [1.1, 2.2, 3.3, 4.4, 5.5]
     assert waveform.dtype == np.float64
     assert_type(waveform, AnalogWaveform[np.float64])
 
 
-def test___int32_array___from_ndarray___creates_waveform_with_int32_dtype() -> None:
+def test___int32_array___from_array_1d___creates_waveform_with_int32_dtype() -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
 
-    waveform = AnalogWaveform.from_ndarray(data)
+    waveform = AnalogWaveform.from_array_1d(data)
 
     assert waveform.raw_data.tolist() == [1, 2, 3, 4, 5]
     assert waveform.dtype == np.int32
     assert_type(waveform, AnalogWaveform[np.int32])
 
 
-def test___copy___from_ndarray___creates_waveform_with_array_copy() -> None:
+def test___array_like___from_array_1d___raises_value_error() -> None:
+    data = [1, 2, 3, 4, 5]
+
+    with pytest.raises(ValueError) as exc:
+        _ = AnalogWaveform.from_array_1d(data)
+
+    assert exc.value.args[0] == "The dtype parameter must be specified for array-like objects."
+
+
+def test___array_like_and_dtype___from_array_1d___creates_waveform_with_specified_dtype() -> None:
+    data = [1, 2, 3, 4, 5]
+
+    waveform = AnalogWaveform.from_array_1d(data, np.int32)
+
+    assert waveform.raw_data.tolist() == data
+    assert waveform.dtype == np.int32
+    assert_type(waveform, AnalogWaveform[np.int32])
+
+
+def test___copy___from_array_1d___creates_waveform_with_array_copy() -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
 
-    waveform = AnalogWaveform.from_ndarray(data, copy=True)
+    waveform = AnalogWaveform.from_array_1d(data, copy=True)
 
     assert waveform._data is not data
     assert waveform.raw_data.tolist() == data.tolist()
 
 
-def test___no_copy___from_ndarray___creates_waveform_with_array_reference() -> None:
+def test___no_copy___from_array_1d___creates_waveform_with_array_reference() -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
 
-    waveform = AnalogWaveform.from_ndarray(data, copy=False)
+    waveform = AnalogWaveform.from_array_1d(data, copy=False)
 
     assert waveform._data is data
     assert waveform.raw_data.tolist() == data.tolist()
+
+
+def test___no_copy_array_like___from_array_1d___raises_value_error() -> None:
+    data = [1, 2, 3, 4, 5]
+
+    with pytest.raises(ValueError) as exc:
+        _ = AnalogWaveform.from_array_1d(data, np.int32, copy=False)
+
+    assert exc.value.args[0].startswith(
+        "Unable to avoid copy while creating an array as requested."
+    )
 
 
 @pytest.mark.parametrize(
@@ -141,12 +145,14 @@ def test___no_copy___from_ndarray___creates_waveform_with_array_reference() -> N
         (1, 4, [2, 3, 4, 5]),
     ],
 )
-def test___array_subset___from_ndarray___creates_waveform_with_array_subset(
+def test___array_subset___from_array_1d___creates_waveform_with_array_subset(
     start_index: int, sample_count: int, expected_data: list[int]
 ) -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
 
-    waveform = AnalogWaveform.from_ndarray(data, start_index=start_index, sample_count=sample_count)
+    waveform = AnalogWaveform.from_array_1d(
+        data, start_index=start_index, sample_count=sample_count
+    )
 
     assert waveform.raw_data.tolist() == expected_data
 
@@ -175,13 +181,13 @@ def test___array_subset___from_ndarray___creates_waveform_with_array_subset(
         ),
     ],
 )
-def test___invalid_array_subset___from_ndarray___raises_value_error(
+def test___invalid_array_subset___from_array_1d___raises_value_error(
     start_index: int, sample_count: int, expected_message: str
 ) -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
 
     with pytest.raises(ValueError) as exc:
-        _ = AnalogWaveform.from_ndarray(data, start_index=start_index, sample_count=sample_count)
+        _ = AnalogWaveform.from_array_1d(data, start_index=start_index, sample_count=sample_count)
 
     assert exc.value.args[0] == expected_message
 
@@ -193,7 +199,7 @@ def test___invalid_array_subset___from_ndarray___raises_value_error(
 def test___waveform___set_capacity___resizes_array_and_pads_with_zeros(
     capacity: int, expected_data: list[int]
 ) -> None:
-    waveform = AnalogWaveform.from_iter([1, 2, 3])
+    waveform = AnalogWaveform.from_array_1d([1, 2, 3], np.int32)
 
     waveform.capacity = capacity
 
@@ -214,7 +220,7 @@ def test___waveform___set_capacity___resizes_array_and_pads_with_zeros(
 def test___invalid_capacity___set_capacity___raises_value_error(
     capacity: int, expected_message: str
 ) -> None:
-    waveform = AnalogWaveform.from_iter([1, 2, 3])
+    waveform = AnalogWaveform.from_array_1d([1, 2, 3], np.int32)
 
     with pytest.raises(ValueError) as exc:
         waveform.capacity = capacity

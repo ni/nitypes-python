@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import operator
-import sys
-from collections.abc import Iterable
-from typing import TYPE_CHECKING, Any, Generic, SupportsIndex, overload
+from typing import Any, Generic, SupportsIndex, TypeVar, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -14,20 +12,8 @@ from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
 )
 
-# Don't use typing_extensions at run time.
-if not TYPE_CHECKING or sys.version_info >= (3, 13):
-    from typing import TypeVar
-else:
-    from typing_extensions import TypeVar
-
-_DType = TypeVar("_DType", bound=np.dtype[Any])
-if TYPE_CHECKING or sys.version_info >= (3, 13):
-    # PEP 696 – Type Defaults for Type Parameters
-    _ScalarType = TypeVar("_ScalarType", bound=np.generic, default=np.float64)
-    _ScalarType_co = TypeVar("_ScalarType_co", bound=np.generic, covariant=True, default=np.float64)
-else:
-    _ScalarType = TypeVar("_ScalarType", bound=np.generic)
-    _ScalarType_co = TypeVar("_ScalarType_co", bound=np.generic, covariant=True)
+_ScalarType = TypeVar("_ScalarType", bound=np.generic)
+_ScalarType_co = TypeVar("_ScalarType_co", bound=np.generic, covariant=True)
 
 
 class AnalogWaveform(Generic[_ScalarType_co]):
@@ -35,8 +21,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     To construct an analog waveform, use one of the static methods:
     - create
-    - from_iter
-    - from_ndarray
+    - from_array_1d
     """
 
     @overload
@@ -85,59 +70,53 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     @overload
     @staticmethod
-    def from_iter(
-        iter: Iterable[Any],
+    def from_array_1d(
+        # This should be np.ndarray[tuple[int], np.dtype[_ScalarType]] but NumPy typing is
+        # experimental and array creation functions don't always infer the correct shape as of NumPy
+        # 2.2 (2025).
+        array: npt.NDArray[_ScalarType],
         dtype: None = ...,
-        sample_count: SupportsIndex = ...,
-    ) -> AnalogWaveform[np.float64]: ...
-
-    @overload
-    @staticmethod
-    def from_iter(
-        iter: Iterable[Any],
-        dtype: type[_ScalarType] | np.dtype[_ScalarType] = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex = ...,
         sample_count: SupportsIndex = ...,
     ) -> AnalogWaveform[_ScalarType]: ...
 
     @overload
     @staticmethod
-    def from_iter(
-        iter: Iterable[Any],
+    def from_array_1d(
+        array: npt.ArrayLike,
+        dtype: type[_ScalarType] | np.dtype[_ScalarType] = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex = ...,
+        sample_count: SupportsIndex = ...,
+    ) -> AnalogWaveform[_ScalarType]: ...
+
+    @overload
+    @staticmethod
+    def from_array_1d(
+        array: npt.ArrayLike,
         dtype: npt.DTypeLike = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex = ...,
         sample_count: SupportsIndex = ...,
     ) -> AnalogWaveform[Any]: ...
 
     @staticmethod
-    def from_iter(
-        iter: Iterable[Any],
-        dtype: npt.DTypeLike = np.float64,
-        sample_count: SupportsIndex = -1,
-    ) -> AnalogWaveform[_ScalarType]:
-        """Construct an analog waveform from an iterable object.
-
-        Args:
-            iter: The iterable object containing the analog waveform data.
-            dtype: The NumPy data type for the analog waveform data.
-            sample_count: The number of items to read from the iterable. By default, all items
-                are read.
-
-        Returns:
-            An analog waveform containing a copy of the data from the iterable object.
-        """
-        return AnalogWaveform(np.fromiter(iter, dtype, sample_count))
-
-    @staticmethod
-    def from_ndarray(
-        array: npt.NDArray[_ScalarType],
+    def from_array_1d(
+        array: npt.ArrayLike,
+        dtype: npt.DTypeLike = None,
         *,
-        copy: bool = True,
+        copy: bool | None = True,
         start_index: SupportsIndex = 0,
         sample_count: SupportsIndex = -1,
     ) -> AnalogWaveform[_ScalarType]:
         """Construct an analog waveform from a NumPy array.
 
         Args:
-            array: The Numpy array containing the analog waveform data.
+            array: The Numpy array or array-like object containing the analog waveform data.
             copy: Specifies whether to copy the array or reference the passed-in array.
             start_index: The array index at which the analog waveform data begins.
             sample_count: The number of samples in the analog waveform.
@@ -145,9 +124,11 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         Returns:
             An analog waveform containing a copy or reference to the NumPy array.
         """
-        if copy:
-            array = array.copy()
-        return AnalogWaveform(array, start_index=start_index, sample_count=sample_count)
+        if not isinstance(array, np.ndarray) and dtype is None:
+            raise ValueError("The dtype parameter must be specified for array-like objects.")
+        return AnalogWaveform(
+            np.asarray(array, dtype, copy=copy), start_index=start_index, sample_count=sample_count
+        )
 
     __slots__ = ["_data", "_start_index", "_sample_count", "_extended_properties", "__weakref__"]
 
