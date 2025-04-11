@@ -1,12 +1,18 @@
 import array
 import itertools
+import sys
 import weakref
-from typing import Any, SupportsIndex, assert_type
+from typing import Any, SupportsIndex
 
 import numpy as np
 import pytest
 
 from nitypes.waveform import AnalogWaveform
+
+if sys.version_info >= (3, 11):
+    from typing import assert_type
+else:
+    from typing_extensions import assert_type
 
 
 ###############################################################################
@@ -562,7 +568,7 @@ def test___referenced_array___set_capacity___reference_sees_size_change() -> Non
     assert len(data) == 10
     assert waveform.capacity == 10
     assert data.tolist() == [1, 2, 3, 0, 0, 0, 0, 0, 0, 0]
-    assert waveform.raw_data.tolist() == [1,2,3]
+    assert waveform.raw_data.tolist() == [1, 2, 3]
     assert waveform._data.tolist() == [1, 2, 3, 0, 0, 0, 0, 0, 0, 0]
 
 
@@ -574,6 +580,7 @@ def test___array_with_external_buffer___set_capacity___raises_value_error() -> N
         waveform.capacity = 10
 
     assert exc.value.args[0].startswith("cannot resize this array: it does not own its data")
+
 
 ###############################################################################
 # misc
