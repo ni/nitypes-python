@@ -13,7 +13,7 @@ from nitypes.waveform import AnalogWaveform
 # create
 ###############################################################################
 def test___no_args___create___creates_empty_waveform_with_default_dtype() -> None:
-    waveform = AnalogWaveform.create()
+    waveform = AnalogWaveform()
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 0
     assert waveform.dtype == np.float64
@@ -21,7 +21,7 @@ def test___no_args___create___creates_empty_waveform_with_default_dtype() -> Non
 
 
 def test___sample_count___create___creates_waveform_with_sample_count_and_default_dtype() -> None:
-    waveform = AnalogWaveform.create(10)
+    waveform = AnalogWaveform(10)
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.float64
@@ -29,7 +29,7 @@ def test___sample_count___create___creates_waveform_with_sample_count_and_defaul
 
 
 def test___sample_count_and_dtype___create___creates_waveform_with_sample_count_and_dtype() -> None:
-    waveform = AnalogWaveform.create(10, np.int32)
+    waveform = AnalogWaveform(10, np.int32)
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.int32
@@ -39,7 +39,7 @@ def test___sample_count_and_dtype___create___creates_waveform_with_sample_count_
 def test___sample_count_and_dtype_str___create___creates_waveform_with_sample_count_and_dtype() -> (
     None
 ):
-    waveform = AnalogWaveform.create(10, "i4")
+    waveform = AnalogWaveform(10, "i4")
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.int32
@@ -50,7 +50,7 @@ def test___sample_count_and_dtype_any___create___creates_waveform_with_sample_co
     None
 ):
     dtype: np.dtype[Any] = np.dtype(np.int32)
-    waveform = AnalogWaveform.create(10, dtype)
+    waveform = AnalogWaveform(10, dtype)
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.int32
@@ -60,7 +60,7 @@ def test___sample_count_and_dtype_any___create___creates_waveform_with_sample_co
 def test___sample_count_dtype_and_capacity___create___creates_waveform_with_sample_count_dtype_and_capacity() -> (
     None
 ):
-    waveform = AnalogWaveform.create(10, np.int32, capacity=20)
+    waveform = AnalogWaveform(10, np.int32, capacity=20)
 
     assert waveform.sample_count == len(waveform.raw_data) == 10
     assert waveform.capacity == 20
@@ -557,7 +557,7 @@ def test___invalid_capacity___set_capacity___raises_value_error(
 # misc
 ###############################################################################
 def test___waveform___set_channel_name___sets_extended_property() -> None:
-    waveform = AnalogWaveform.create()
+    waveform = AnalogWaveform()
 
     waveform.channel_name = "Dev1/ai0"
 
@@ -566,7 +566,7 @@ def test___waveform___set_channel_name___sets_extended_property() -> None:
 
 
 def test___waveform___set_unit_description___sets_extended_property() -> None:
-    waveform = AnalogWaveform.create()
+    waveform = AnalogWaveform()
 
     waveform.unit_description = "Volts"
 
@@ -575,14 +575,14 @@ def test___waveform___set_unit_description___sets_extended_property() -> None:
 
 
 def test___waveform___set_undefined_property___raises_attribute_error() -> None:
-    waveform = AnalogWaveform.create()
+    waveform = AnalogWaveform()
 
     with pytest.raises(AttributeError):
         waveform.undefined_property = "Whatever"  # type: ignore[attr-defined]
 
 
 def test___waveform___take_weak_ref___references_waveform() -> None:
-    waveform = AnalogWaveform.create()
+    waveform = AnalogWaveform()
 
     waveform_ref = weakref.ref(waveform)
 

@@ -22,16 +22,13 @@ _ScalarType_co = TypeVar("_ScalarType_co", bound=np.generic, covariant=True)
 # - npt.ArrayLike accepts some types that np.asarray() does not, such as buffers, so we are
 #   explicitly using npt.NDArray | Sequence instead of npt.ArrayLike.
 # - _ScalarType is bound to np.generic, so Sequence[_ScalarType] will not match list[int].
+# - We are not using PEP 696 – Type Defaults for Type Parameters because it makes the type parameter
+#   default to np.float64 in some cases where it should be inferred as Any, such as when dtype is
+#   specified as a str.
 
 
 class AnalogWaveform(Generic[_ScalarType_co]):
-    """An analog waveform, which encapsulates analog data and timing information.
-
-    To construct an analog waveform, use one of the static methods:
-    - create
-    - from_array_1d
-    - from_array_2d
-    """
+    """An analog waveform, which encapsulates analog data and timing information."""
 
     @overload
     @staticmethod
@@ -238,7 +235,52 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
 
+    # If neither dtype nor _data is specified, the type parameter defaults to np.float64.
+    @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[np.float64],
+        sample_count: SupportsIndex | None = ...,
+        dtype: None = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        _data: None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[_ScalarType_co],
+        sample_count: SupportsIndex | None = ...,
+        dtype: type[_ScalarType_co] | np.dtype[_ScalarType_co] = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        _data: None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[_ScalarType_co],
+        sample_count: SupportsIndex | None = ...,
+        dtype: None = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        _data: npt.NDArray[_ScalarType_co] | None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[Any],
+        sample_count: SupportsIndex | None = ...,
+        dtype: npt.DTypeLike = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        _data: npt.NDArray[Any] | None = ...,
+    ) -> None: ...
+
+    def __init__(
         self,
         sample_count: SupportsIndex | None = None,
         dtype: npt.DTypeLike = None,
@@ -247,6 +289,23 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         capacity: SupportsIndex | None = None,
         _data: npt.NDArray[_ScalarType_co] | None = None,
     ) -> None:
+        """Construct an analog waveform.
+
+        Args:
+            sample_count: The number of samples in the analog waveform.
+            dtype: The NumPy data type for the analog waveform data. If not specified, the data
+                type defaults to np.float64.
+            start_index: The sample index at which the analog waveform data begins.
+            sample_count: The number of samples in the analog waveform.
+            capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
+                appending samples to the waveform.
+
+        Returns:
+            An analog waveform.
+
+        Arguments that are prefixed with an underscore are internal implementation details and are
+        subject to change.
+        """
         if _data is None:
             self._init_with_new_array(
                 sample_count, dtype, start_index=start_index, capacity=capacity
