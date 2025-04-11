@@ -32,53 +32,6 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     @overload
     @staticmethod
-    def create(
-        sample_count: SupportsIndex | None = ...,
-        dtype: None = ...,
-        *,
-        capacity: SupportsIndex | None = ...,
-    ) -> AnalogWaveform[np.float64]: ...
-
-    @overload
-    @staticmethod
-    def create(
-        sample_count: SupportsIndex | None = ...,
-        dtype: type[_ScalarType] | np.dtype[_ScalarType] = ...,
-        *,
-        capacity: SupportsIndex | None = ...,
-    ) -> AnalogWaveform[_ScalarType]: ...
-
-    @overload
-    @staticmethod
-    def create(
-        sample_count: SupportsIndex | None = ...,
-        dtype: npt.DTypeLike = ...,
-        *,
-        capacity: SupportsIndex | None = ...,
-    ) -> AnalogWaveform[Any]: ...
-
-    @staticmethod
-    def create(
-        sample_count: SupportsIndex = 0,
-        dtype: npt.DTypeLike = np.float64,
-        *,
-        capacity: SupportsIndex | None = None,
-    ) -> AnalogWaveform[_ScalarType]:
-        """Construct an analog waveform.
-
-        Args:
-            sample_count: The number of samples in the analog waveform.
-            dtype: The NumPy data type for the analog waveform data. If not specified, this
-                argument defaults to np.float64.
-            capacity: The total capacity of the analog waveform.
-
-        Returns:
-            An analog waveform with the specified sample count, data type, and capacity.
-        """
-        return AnalogWaveform(dtype=dtype, sample_count=sample_count, capacity=capacity)
-
-    @overload
-    @staticmethod
     def from_array_1d(
         array: npt.NDArray[_ScalarType],
         dtype: None = ...,
