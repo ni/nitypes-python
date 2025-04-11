@@ -114,6 +114,18 @@ def test___int32_array_with_dtype___from_array_1d___creates_waveform_with_specif
     assert_type(waveform, AnalogWaveform[np.int32])
 
 
+def test___int16_ndarray_with_mismatched_dtype___from_array_1d___creates_waveform_with_specified_dtype() -> (
+    None
+):
+    data = np.array([1, 2, 3, 4, 5], np.int16)
+
+    waveform = AnalogWaveform.from_array_1d(data, np.int32)
+
+    assert waveform.raw_data.tolist() == data.tolist()
+    assert waveform.dtype == np.int32
+    assert_type(waveform, AnalogWaveform[np.int32])
+
+
 def test___int_list_with_dtype___from_array_1d___creates_waveform_with_specified_dtype() -> None:
     data = [1, 2, 3, 4, 5]
 
@@ -311,6 +323,20 @@ def test___int32_ndarray___from_array_2d___creates_waveform_with_int32_dtype() -
     data = np.array([[1, 2, 3], [4, 5, 6]], np.int32)
 
     waveforms = AnalogWaveform.from_array_2d(data)
+
+    assert len(waveforms) == 2
+    for i in range(len(waveforms)):
+        assert waveforms[i].raw_data.tolist() == data[i].tolist()
+        assert waveforms[i].dtype == np.int32
+        assert_type(waveforms[i], AnalogWaveform[np.int32])
+
+
+def test___int16_ndarray_with_mismatched_dtype___from_array_2d___creates_waveform_with_specified_dtype() -> (
+    None
+):
+    data = np.array([[1, 2, 3], [4, 5, 6]], np.int16)
+
+    waveforms = AnalogWaveform.from_array_2d(data, np.int32)
 
     assert len(waveforms) == 2
     for i in range(len(waveforms)):

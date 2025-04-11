@@ -332,12 +332,10 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
         if dtype is None:
             dtype = data.dtype
-        elif dtype != data.dtype:
-            raise ValueError(
-                "The data type of the input array must match the requested data type.\n\n"
-                f"Array data type: {data.dtype}\n"
-                f"Requested data type: {dtype}"
-            )
+        if dtype != data.dtype:
+            # from_array_1d() converts the input array to the requested dtype, so this error may be
+            # unreachable.
+            raise TypeError("The data type of the input array must match the requested data type.")
         validate_dtype(dtype, _ANALOG_DTYPES)
 
         capacity = arg_to_uint("capacity", capacity, len(data))
