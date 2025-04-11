@@ -7,6 +7,7 @@ from typing import MutableMapping, Iterator
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
+    from typing import Union
     from typing_extensions import TypeAlias
 
 # Extended property keys
@@ -15,8 +16,12 @@ LINE_NAMES = "NI_LineNames"
 UNIT_DESCRIPTION = "NI_UnitDescription"
 
 
-ExtendedPropertyValue: TypeAlias = bool | float | int | str
-"""An ExtendedPropertyDictionary value."""
+if sys.version_info >= (3, 10):
+    ExtendedPropertyValue: TypeAlias = bool | float | int | str
+    """An ExtendedPropertyDictionary value."""
+else:
+    ExtendedPropertyValue: TypeAlias = Union[bool, float, int, str]
+    """An ExtendedPropertyDictionary value."""
 
 
 class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):

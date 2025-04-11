@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from collections.abc import Sequence
 from typing import Any, Generic, SupportsIndex, TypeVar, overload
 
@@ -12,6 +13,9 @@ from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
 )
 from nitypes.waveform._utils import arg_to_uint, validate_dtype
+
+if sys.version_info < (3, 10):
+    import array as std_array
 
 _ScalarType = TypeVar("_ScalarType", bound=np.generic)
 _ScalarType_co = TypeVar("_ScalarType_co", bound=np.generic, covariant=True)
@@ -103,7 +107,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                 raise ValueError(
                     f"The input array must be a one-dimensional array or sequence.\n\nNumber of dimensions: {array.ndim}"
                 )
-        elif isinstance(array, Sequence):
+        elif isinstance(array, Sequence) or (
+            sys.version_info < (3, 10) and isinstance(array, std_array.array)
+        ):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
@@ -177,7 +183,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                 raise ValueError(
                     f"The input array must be a two-dimensional array or nested sequence.\n\nNumber of dimensions: {array.ndim}"
                 )
-        elif isinstance(array, Sequence):
+        elif isinstance(array, Sequence) or (
+            sys.version_info < (3, 10) and isinstance(array, std_array.array)
+        ):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
