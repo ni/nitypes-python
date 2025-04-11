@@ -107,7 +107,7 @@ def test___int32_ndarray___from_array_1d___creates_waveform_with_int32_dtype() -
 
 
 def test___int32_array_with_dtype___from_array_1d___creates_waveform_with_specified_dtype() -> None:
-    data = array.array("l", [1, 2, 3, 4, 5])
+    data = array.array("i", [1, 2, 3, 4, 5])
 
     waveform = AnalogWaveform.from_array_1d(data, np.int32)
 
@@ -224,12 +224,12 @@ def test___int32_ndarray_no_copy___from_array_1d___creates_waveform_linked_to_sa
 
 
 def test___int32_array_no_copy___from_array_1d___creates_waveform_linked_to_same_buffer() -> None:
-    data = array.array("l", [1, 2, 3, 4, 5])
+    data = array.array("i", [1, 2, 3, 4, 5])
 
     waveform = AnalogWaveform.from_array_1d(data, dtype=np.int32, copy=False)
 
     assert waveform.raw_data.tolist() == data.tolist()
-    data[:] = array.array("l", [5, 4, 3, 2, 1])
+    data[:] = array.array("i", [5, 4, 3, 2, 1])
     assert waveform.raw_data.tolist() == data.tolist()
 
 
@@ -350,7 +350,7 @@ def test___int16_ndarray_with_mismatched_dtype___from_array_2d___creates_wavefor
 def test___int32_array_list_with_dtype___from_array_2d___creates_waveform_with_specified_dtype() -> (
     None
 ):
-    data = [array.array("l", [1, 2, 3]), array.array("l", [4, 5, 6])]
+    data = [array.array("i", [1, 2, 3]), array.array("i", [4, 5, 6])]
 
     waveforms = AnalogWaveform.from_array_2d(data, np.int32)
 
@@ -483,15 +483,15 @@ def test___int32_ndarray_no_copy___from_array_2d___creates_waveform_linked_to_sa
 def test___int32_array_list_no_copy___from_array_2d___creates_waveform_linked_to_same_buffer() -> (
     None
 ):
-    data = [array.array("l", [1, 2, 3]), array.array("l", [4, 5, 6])]
+    data = [array.array("i", [1, 2, 3]), array.array("i", [4, 5, 6])]
 
     waveforms = AnalogWaveform.from_array_2d(data, dtype=np.int32, copy=False)
 
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
-    data[0][:] = array.array("l", [3, 2, 1])
-    data[1][:] = array.array("l", [6, 5, 4])
+    data[0][:] = array.array("i", [3, 2, 1])
+    data[1][:] = array.array("i", [6, 5, 4])
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
 
@@ -626,7 +626,7 @@ def test___referenced_array___set_capacity___reference_sees_size_change() -> Non
 
 
 def test___array_with_external_buffer___set_capacity___raises_value_error() -> None:
-    data = array.array("l", [1, 2, 3])
+    data = array.array("i", [1, 2, 3])
     waveform = AnalogWaveform.from_array_1d(data, np.int32, copy=False)
 
     with pytest.raises(ValueError) as exc:

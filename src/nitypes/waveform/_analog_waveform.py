@@ -20,17 +20,26 @@ if sys.version_info < (3, 10):
 _ScalarType = TypeVar("_ScalarType", bound=np.generic)
 _ScalarType_co = TypeVar("_ScalarType_co", bound=np.generic, covariant=True)
 
+# Use the C types here because np.isdtype() considers some of them to be distinct types, even when
+# they have the same size (e.g. np.intc vs. np.int_ vs. np.long).
 _ANALOG_DTYPES = (
-    np.float32,
-    np.float64,
-    np.int8,
-    np.int16,
-    np.int32,
-    np.int64,
-    np.uint8,
-    np.uint16,
-    np.uint32,
-    np.uint64,
+    # Floating point
+    np.single,
+    np.double,
+    # Signed integers
+    np.byte,
+    np.short,
+    np.intc,
+    np.int_,
+    np.long,
+    np.longlong,
+    # Unsigned integers
+    np.ubyte,
+    np.ushort,
+    np.uintc,
+    np.uint,
+    np.ulong,
+    np.ulonglong,
 )
 
 # Note about NumPy type hints:
