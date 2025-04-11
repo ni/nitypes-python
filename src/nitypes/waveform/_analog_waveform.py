@@ -11,10 +11,23 @@ from nitypes.waveform._extended_properties import (
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
 )
-from nitypes.waveform._utils import arg_to_uint
+from nitypes.waveform._utils import arg_to_uint, validate_dtype
 
 _ScalarType = TypeVar("_ScalarType", bound=np.generic)
 _ScalarType_co = TypeVar("_ScalarType_co", bound=np.generic, covariant=True)
+
+_ANALOG_DTYPES = (
+    np.float32,
+    np.float64,
+    np.int8,
+    np.int16,
+    np.int32,
+    np.int64,
+    np.uint8,
+    np.uint16,
+    np.uint32,
+    np.uint64,
+)
 
 # Note about NumPy type hints:
 # - At time of writing (April 2025), shape typing is still under development, so we do not
@@ -282,6 +295,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
         if dtype is None:
             dtype = np.float64
+        validate_dtype(dtype, _ANALOG_DTYPES)
 
         if start_index > capacity:
             raise ValueError(
@@ -320,10 +334,11 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             dtype = data.dtype
         elif dtype != data.dtype:
             raise ValueError(
-                "The dtype of the input array must match the specified dtype.\n\n"
-                f"Array dtype: {data.dtype}\n"
-                f"Specified dtype: {dtype}"
+                "The data type of the input array must match the requested data type.\n\n"
+                f"Array data type: {data.dtype}\n"
+                f"Requested data type: {dtype}"
             )
+        validate_dtype(dtype, _ANALOG_DTYPES)
 
         capacity = arg_to_uint("capacity", capacity, len(data))
         if capacity != len(data):

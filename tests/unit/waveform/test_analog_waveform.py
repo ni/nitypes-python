@@ -74,6 +74,13 @@ def test___sample_count_dtype_and_capacity___create___creates_waveform_with_samp
     assert_type(waveform, AnalogWaveform[np.int32])
 
 
+def test___sample_count_and_unsupported_dtype___create___raises_type_error() -> None:
+    with pytest.raises(TypeError) as exc:
+        _ = AnalogWaveform(10, np.complex128)
+
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
+
+
 ###############################################################################
 # from_array_1d
 ###############################################################################
@@ -169,6 +176,15 @@ def test___iterable___from_array_1d___raises_type_error() -> None:
     assert exc.value.args[0].startswith(
         "The input array must be a one-dimensional array or sequence."
     )
+
+
+def test___ndarray_with_unsupported_dtype___from_array_1d___raises_type_error() -> None:
+    data = np.zeros(3, np.complex128)
+
+    with pytest.raises(TypeError) as exc:
+        _ = AnalogWaveform.from_array_1d(data)
+
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
 
 
 def test___copy___from_array_1d___creates_waveform_linked_to_different_buffer() -> None:
@@ -397,6 +413,15 @@ def test___iterable_list___from_array_2d___raises_type_error() -> None:
         _ = AnalogWaveform.from_array_2d(data, np.int32)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith("int() argument must be")
+
+
+def test___ndarray_with_unsupported_dtype___from_array_2d___raises_type_error() -> None:
+    data = np.zeros((2, 3), np.complex128)
+
+    with pytest.raises(TypeError) as exc:
+        _ = AnalogWaveform.from_array_2d(data)
+
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
 
 
 def test___copy___from_array_2d___creates_waveform_linked_to_different_buffer() -> None:
