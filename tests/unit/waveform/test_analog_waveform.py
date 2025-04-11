@@ -553,6 +553,28 @@ def test___invalid_capacity___set_capacity___raises_value_error(
     assert exc.value.args[0].startswith(expected_message)
 
 
+def test___referenced_array___set_capacity___reference_sees_size_change() -> None:
+    data = np.array([1, 2, 3], np.int32)
+    waveform = AnalogWaveform.from_array_1d(data, np.int32, copy=False)
+
+    waveform.capacity = 10
+
+    assert len(data) == 10
+    assert waveform.capacity == 10
+    assert data.tolist() == [1, 2, 3, 0, 0, 0, 0, 0, 0, 0]
+    assert waveform.raw_data.tolist() == [1,2,3]
+    assert waveform._data.tolist() == [1, 2, 3, 0, 0, 0, 0, 0, 0, 0]
+
+
+def test___array_with_external_buffer___set_capacity___raises_value_error() -> None:
+    data = array.array("l", [1, 2, 3])
+    waveform = AnalogWaveform.from_array_1d(data, np.int32, copy=False)
+
+    with pytest.raises(ValueError) as exc:
+        waveform.capacity = 10
+
+    assert exc.value.args[0].startswith("cannot resize this array: it does not own its data")
+
 ###############################################################################
 # misc
 ###############################################################################

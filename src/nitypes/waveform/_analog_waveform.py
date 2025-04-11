@@ -420,7 +420,13 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     @property
     def capacity(self) -> int:
-        """The total capacity available for analog waveform data."""
+        """The total capacity available for analog waveform data.
+
+        Setting the capacity resizes the underlying NumPy array in-place.
+        - Other Python objects with references to the array will see the array size change.
+        - If the array has a reference to an external buffer (such as an array.array), attempting
+          to resize it raises ValueError.
+        """
         return len(self._data)
 
     @capacity.setter
@@ -436,7 +442,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                 f"Number of samples: {self._start_index + self._sample_count}"
             )
         if value != len(self._data):
-            self._data.resize(value)
+            self._data.resize(value, refcheck=False)
 
     @property
     def dtype(self) -> np.dtype[_ScalarType_co]:
