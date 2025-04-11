@@ -645,6 +645,15 @@ def test___waveform___set_channel_name___sets_extended_property() -> None:
     assert waveform.extended_properties["NI_ChannelName"] == "Dev1/ai0"
 
 
+def test___invalid_type___set_channel_name___raises_type_error() -> None:
+    waveform = AnalogWaveform()
+
+    with pytest.raises(TypeError) as exc:
+        waveform.channel_name = 1  # type: ignore[assignment]
+
+    assert exc.value.args[0].startswith("The channel name must be a str.")
+
+
 def test___waveform___set_unit_description___sets_extended_property() -> None:
     waveform = AnalogWaveform()
 
@@ -652,6 +661,15 @@ def test___waveform___set_unit_description___sets_extended_property() -> None:
 
     assert waveform.unit_description == "Volts"
     assert waveform.extended_properties["NI_UnitDescription"] == "Volts"
+
+
+def test___invalid_type___set_unit_description___raises_type_error() -> None:
+    waveform = AnalogWaveform()
+
+    with pytest.raises(TypeError) as exc:
+        waveform.unit_description = None  # type: ignore[assignment]
+
+    assert exc.value.args[0].startswith("The unit description must be a str.")
 
 
 def test___waveform___set_undefined_property___raises_attribute_error() -> None:
