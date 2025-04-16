@@ -188,3 +188,49 @@ def test___timestamps___create_with_irregular_interval___creates_waveform_timing
     assert not timing._has_sample_interval
     assert timing.sample_interval_mode == WaveformSampleIntervalMode.IRREGULAR
     assert timing._timestamps == timestamps
+
+
+###############################################################################
+# get_timestamps
+###############################################################################
+def test___no_interval___get_timestamps___raises_runtime_error() -> None:
+    start_time = dt.datetime.now(dt.timezone.utc)
+    timing = WaveformTiming.create_with_no_interval(start_time)
+
+    with pytest.raises(RuntimeError) as exc:
+        _ = timing.get_timestamps(0, 5)
+
+    assert exc.value.args[0].startswith(
+        "The waveform timing does not have valid timestamp information."
+    )
+
+
+def test___regular_interval___get_timestamps___gets_timestamps() -> None:
+    start_time = dt.datetime.now(dt.timezone.utc)
+    sample_interval = dt.timedelta(milliseconds=1)
+    timing = WaveformTiming.create_with_regular_interval(sample_interval, start_time)
+
+    assert list(timing.get_timestamps(3, 4)) == [
+        start_time + 3 * sample_interval,
+        start_time + 4 * sample_interval,
+        start_time + 5 * sample_interval,
+        start_time + 6 * sample_interval,
+    ]
+
+
+def test___irregular_interval___get_timestamps___gets_timestamps() -> None:
+    start_time = dt.datetime.now(dt.timezone.utc)
+    sample_interval = dt.timedelta(milliseconds=1)
+    timestamps = [start_time + i * sample_interval for i in range(10)]
+    timing = WaveformTiming.create_with_irregular_interval(timestamps)
+
+    assert list(timing.get_timestamps(0, 10)) == timestamps
+
+
+def test___irregular_interval_subset___get_timestamps___gets_timestamps() -> None:
+    start_time = dt.datetime.now(dt.timezone.utc)
+    sample_interval = dt.timedelta(milliseconds=1)
+    timestamps = [start_time + i * sample_interval for i in range(10)]
+    timing = WaveformTiming.create_with_irregular_interval(timestamps)
+
+    assert list(timing.get_timestamps(3, 4)) == timestamps[3:7]

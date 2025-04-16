@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import datetime as dt
+import operator
 from abc import ABC
+from collections.abc import Generator, Iterable
 from enum import Enum
-from typing import Generic, TypeVar
+from typing import Generic, SupportsIndex, TypeVar
 
 # Note about NumPy type hints:
 # - ht.datetime and ht.timedelta are subclasses of dt.datetime and dt.timedelta.
@@ -105,6 +107,48 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
     def sample_interval_mode(self) -> WaveformSampleIntervalMode:
         """The sample interval mode that specifies how the waveform is sampled."""
         return self._sample_interval_mode
+
+    def get_timestamps(
+        self, start_index: SupportsIndex, count: SupportsIndex
+    ) -> Iterable[_TDateTime_co]:
+        """Retrieve the timestamps of the waveform samples.
+
+        Args:
+            start_index: The sample index of the first timestamp to retrieve.
+            count: The number of timestamps to retrieve.
+
+        Returns:
+            An iterable containing the requested timestamps.
+        """
+        start_index = operator.index(start_index)
+        count = operator.index(count)
+
+        if start_index < 0:
+            raise ValueError("The sample index must be a non-negative integer.")
+        if count < 0:
+            raise ValueError("The count must be a non-negative integer.")
+
+        if self._sample_interval_mode == WaveformSampleIntervalMode.REGULAR and self.has_timestamp:
+            return self._generate_regular_timestamps(start_index, count)
+        elif self._sample_interval_mode == WaveformSampleIntervalMode.IRREGULAR:
+            assert self._timestamps is not None
+            if count > len(self._timestamps):
+                raise ValueError("The count must be less or equal to the number of timestamps.")
+            return self._timestamps[start_index : start_index + count]
+        else:
+            raise RuntimeError(
+                "The waveform timing does not have valid timestamp information. To obtain timestamps, the waveform must be irregular or must be initialized with a valid time stamp and sample interval."
+            )
+
+    def _generate_regular_timestamps(
+        self, start_index: int, count: int
+    ) -> Generator[_TDateTime_co]:
+        sample_interval = self.sample_interval
+        timestamp = self.start_time + start_index * sample_interval
+        for i in range(count):
+            if i != 0:
+                timestamp += sample_interval
+            yield timestamp
 
     def __eq__(self, value: object) -> bool:  # noqa: D105 - Missing docstring in magic method
         if not isinstance(value, BaseWaveformTiming):
