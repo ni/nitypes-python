@@ -4,21 +4,25 @@ import datetime as dt
 from collections.abc import Sequence
 from typing import ClassVar
 
-from nitypes.waveform._base_timing import BaseWaveformTiming, SampleIntervalMode
+from nitypes.waveform._timing._base import BaseTiming, SampleIntervalMode
 
 
-class WaveformTiming(BaseWaveformTiming[dt.datetime, dt.timedelta]):
-    """Waveform timing using the standard datetime module."""
+class Timing(BaseTiming[dt.datetime, dt.timedelta]):
+    """Waveform timing using the standard datetime module.
+
+    The standard datetime module has up to microsecond precision. For higher precision, use
+    PrecisionTiming.
+    """
 
     _DEFAULT_TIME_OFFSET = dt.timedelta()
 
-    empty: ClassVar[WaveformTiming]
+    empty: ClassVar[Timing]
 
-    # TODO: can these be classmethods in BaseWaveformTiming?
+    # TODO: can these be classmethods in BaseTiming?
     @staticmethod
     def create_with_no_interval(
         timestamp: dt.datetime | None = None, time_offset: dt.timedelta | None = None
-    ) -> WaveformTiming:
+    ) -> Timing:
         """Create a waveform timing object with no sample interval.
 
         Args:
@@ -30,14 +34,14 @@ class WaveformTiming(BaseWaveformTiming[dt.datetime, dt.timedelta]):
         Returns:
             A waveform timing object.
         """
-        return WaveformTiming(SampleIntervalMode.NONE, timestamp, time_offset)
+        return Timing(SampleIntervalMode.NONE, timestamp, time_offset)
 
     @staticmethod
     def create_with_regular_interval(
         sample_interval: dt.timedelta,
         timestamp: dt.datetime | None = None,
         time_offset: dt.timedelta | None = None,
-    ) -> WaveformTiming:
+    ) -> Timing:
         """Create a waveform timing object with a regular sample interval.
 
         Args:
@@ -50,12 +54,12 @@ class WaveformTiming(BaseWaveformTiming[dt.datetime, dt.timedelta]):
         Returns:
             A waveform timing object.
         """
-        return WaveformTiming(SampleIntervalMode.REGULAR, timestamp, time_offset, sample_interval)
+        return Timing(SampleIntervalMode.REGULAR, timestamp, time_offset, sample_interval)
 
     @staticmethod
     def create_with_irregular_interval(
         timestamps: Sequence[dt.datetime],
-    ) -> WaveformTiming:
+    ) -> Timing:
         """Create a waveform timing object with an irregular sample interval.
 
         Args:
@@ -65,7 +69,7 @@ class WaveformTiming(BaseWaveformTiming[dt.datetime, dt.timedelta]):
         Returns:
             A waveform timing object.
         """
-        return WaveformTiming(SampleIntervalMode.IRREGULAR, timestamps=timestamps)
+        return Timing(SampleIntervalMode.IRREGULAR, timestamps=timestamps)
 
     @staticmethod
     def _get_datetime_type() -> type[dt.datetime]:
@@ -77,7 +81,7 @@ class WaveformTiming(BaseWaveformTiming[dt.datetime, dt.timedelta]):
 
     @staticmethod
     def _get_default_time_offset() -> dt.timedelta:
-        return WaveformTiming._DEFAULT_TIME_OFFSET
+        return Timing._DEFAULT_TIME_OFFSET
 
     def __init__(
         self,
@@ -90,12 +94,12 @@ class WaveformTiming(BaseWaveformTiming[dt.datetime, dt.timedelta]):
         """Construct a waveform timing object.
 
         Most applications should use the named constructors instead:
-        - WaveformTiming.create_with_no_interval
-        - WaveformTiming.create_with_regular_interval
-        - WaveformTiming.create_with_irregular_interval
+        - Timing.create_with_no_interval
+        - Timing.create_with_regular_interval
+        - Timing.create_with_irregular_interval
         """
         super().__init__(sample_interval_mode, timestamp, time_offset, sample_interval, timestamps)
 
 
-WaveformTiming.empty = WaveformTiming.create_with_no_interval()
+Timing.empty = Timing.create_with_no_interval()
 """A waveform timing object with no timestamp, time offset, or sample interval."""

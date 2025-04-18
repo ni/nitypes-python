@@ -9,12 +9,6 @@ from typing import Generic, SupportsIndex, TypeVar
 
 from nitypes.waveform._utils import add_note
 
-# Note about NumPy type hints:
-# - ht.datetime and ht.timedelta are subclasses of dt.datetime and dt.timedelta.
-# - BaseWaveformTiming[ht.datetime, ht.timedelta] is a BaseWaveformTiming[dt.datetime, dt.timedelta]
-#   due to covariance.
-# - PrecisionWaveformTiming is not a subclass of WaveformTiming.
-
 
 class SampleIntervalMode(Enum):
     """The sample interval mode that specifies how the waveform is sampled."""
@@ -29,14 +23,12 @@ class SampleIntervalMode(Enum):
     """Irregular sample interval."""
 
 
-_TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
-_TDateTime_co = TypeVar("_TDateTime_co", bound=dt.datetime, covariant=True)
-
-_TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
-_TTimeDelta_co = TypeVar("_TTimeDelta_co", bound=dt.timedelta, covariant=True)
+# TODO: should these be constrained types? I guess we'll find out when we add NI-BTF types.
+_TDateTime_co = TypeVar("_TDateTime_co", bound=dt.datetime)
+_TTimeDelta_co = TypeVar("_TTimeDelta_co", bound=dt.timedelta)
 
 
-class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
+class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
     """Base class for waveform timing information."""
 
     @staticmethod
@@ -249,7 +241,8 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         )
 
     def __repr__(self) -> str:  # noqa: D105 - Missing docstring in magic method
-        args = [str(self.sample_interval_mode)]
+        # For Enum, __str__ is an unqualified ctor expression like E.V and __repr__ is <E.V: 0>.
+        args = [f"{self.sample_interval_mode.__class__.__module__}.{self.sample_interval_mode}"]
         if self._timestamp is not None:
             args.append(f"timestamp={self._timestamp!r}")
         if self._time_offset != self.__class__._get_default_time_offset():
@@ -258,5 +251,4 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
             args.append(f"sample_interval={self.sample_interval!r}")
         if self._timestamps is not None:
             args.append(f"timestamps={self._timestamps!r}")
-        # TODO: should this include the package name? the enum's str/repr does not.
-        return f"{self.__class__.__name__}({', '.join(args)})"
+        return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
