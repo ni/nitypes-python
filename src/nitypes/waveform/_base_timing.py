@@ -279,4 +279,5 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
             args.append(f"sample_interval={self._sample_interval!r}")
         if self._sample_interval_mode == SampleIntervalMode.IRREGULAR:
             args.append(f"timestamps={self._timestamps!r}")
-        return f"{self.__class__.__module__}.{self.__class__.__qualname__}({', '.join(args)})"
+        # TODO: should this include the package name? the enum's str/repr does not.
+        return f"{self.__class__.__name__}({', '.join(args)})"
