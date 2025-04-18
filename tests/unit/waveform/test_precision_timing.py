@@ -43,7 +43,7 @@ def test___empty___default_time_offset() -> None:
 
 
 def test___empty___no_sample_interval() -> None:
-    assert not PrecisionWaveformTiming.empty._has_sample_interval
+    assert PrecisionWaveformTiming.empty._sample_interval is None
     with pytest.raises(RuntimeError) as exc:
         _ = PrecisionWaveformTiming.empty.sample_interval
 
@@ -63,7 +63,7 @@ def test___no_args___create_with_no_interval___creates_empty_waveform_timing() -
     assert_type(timing, PrecisionWaveformTiming)
     assert not timing.has_timestamp
     assert timing.time_offset == ht.timedelta()
-    assert not timing._has_sample_interval
+    assert timing._sample_interval is None
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
@@ -74,7 +74,7 @@ def test___timestamp___create_with_no_interval___creates_waveform_timing_with_ti
     assert_type(timing, PrecisionWaveformTiming)
     assert timing.timestamp == timestamp
     assert timing.time_offset == ht.timedelta()
-    assert not timing._has_sample_interval
+    assert timing._sample_interval is None
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
@@ -88,7 +88,7 @@ def test___timestamp_and_time_offset___create_with_no_interval___creates_wavefor
     assert_type(timing, PrecisionWaveformTiming)
     assert timing.timestamp == timestamp
     assert timing.time_offset == time_offset
-    assert not timing._has_sample_interval
+    assert timing._sample_interval is None
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
@@ -101,7 +101,7 @@ def test___time_offset___create_with_no_interval___creates_waveform_timing_with_
     assert_type(timing, PrecisionWaveformTiming)
     assert not timing.has_timestamp
     assert timing.time_offset == time_offset
-    assert not timing._has_sample_interval
+    assert timing._sample_interval is None
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
@@ -191,7 +191,7 @@ def test___timestamps___create_with_irregular_interval___creates_waveform_timing
     assert_type(timing, PrecisionWaveformTiming)
     assert not timing.has_timestamp
     assert timing.time_offset == ht.timedelta()
-    assert not timing._has_sample_interval
+    assert timing._sample_interval is None
     assert timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
     assert timing._timestamps == timestamps
 

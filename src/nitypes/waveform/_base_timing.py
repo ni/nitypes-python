@@ -54,11 +54,6 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
     def _get_default_time_offset() -> _TTimeDelta_co:
         raise NotImplementedError()
 
-    @staticmethod
-    @abstractmethod
-    def _get_default_sample_interval() -> _TTimeDelta_co:
-        raise NotImplementedError()
-
     __slots__ = [
         "_sample_interval_mode",
         "_timestamp",
@@ -70,7 +65,7 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
     _sample_interval_mode: SampleIntervalMode
     _timestamp: _TDateTime_co | None
     _time_offset: _TTimeDelta_co
-    _sample_interval: _TTimeDelta_co
+    _sample_interval: _TTimeDelta_co | None
     _timestamps: list[_TDateTime_co] | None
 
     def __init__(
@@ -155,9 +150,6 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         if time_offset is None:
             time_offset = self.__class__._get_default_time_offset()
 
-        if sample_interval is None:
-            sample_interval = self.__class__._get_default_sample_interval()
-
         if timestamps is not None and not isinstance(timestamps, list):
             timestamps = list(timestamps)
 
@@ -186,30 +178,17 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         return self.timestamp + self.time_offset
 
     @property
-    def _has_time_offset(self) -> bool:
-        return (
-            self._sample_interval_mode in (SampleIntervalMode.NONE, SampleIntervalMode.REGULAR)
-            and self._time_offset != self.__class__._get_default_time_offset()
-        )
-
-    @property
     def time_offset(self) -> _TTimeDelta_co:
         """The time difference between the timestamp and the first sample."""
         return self._time_offset
 
     @property
-    def _has_sample_interval(self) -> bool:
-        return (
-            self._sample_interval_mode == SampleIntervalMode.REGULAR
-            and self._sample_interval != self.__class__._get_default_sample_interval()
-        )
-
-    @property
     def sample_interval(self) -> _TTimeDelta_co:
         """The time interval between samples."""
-        if self._sample_interval_mode != SampleIntervalMode.REGULAR:
+        value = self._sample_interval
+        if value is None:
             raise RuntimeError("The waveform timing does not have a sample interval.")
-        return self._sample_interval
+        return value
 
     @property
     def sample_interval_mode(self) -> SampleIntervalMode:
@@ -271,13 +250,13 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
 
     def __repr__(self) -> str:  # noqa: D105 - Missing docstring in magic method
         args = [str(self.sample_interval_mode)]
-        if self.has_timestamp:
-            args.append(f"timestamp={self.timestamp!r}")
-        if self._has_time_offset:
-            args.append(f"time_offset={self.time_offset!r}")
-        if self._has_sample_interval:
-            args.append(f"sample_interval={self._sample_interval!r}")
-        if self._sample_interval_mode == SampleIntervalMode.IRREGULAR:
+        if self._timestamp is not None:
+            args.append(f"timestamp={self._timestamp!r}")
+        if self._time_offset != self.__class__._get_default_time_offset():
+            args.append(f"time_offset={self._time_offset!r}")
+        if self._sample_interval is not None:
+            args.append(f"sample_interval={self.sample_interval!r}")
+        if self._timestamps is not None:
             args.append(f"timestamps={self._timestamps!r}")
         # TODO: should this include the package name? the enum's str/repr does not.
         return f"{self.__class__.__name__}({', '.join(args)})"

@@ -12,7 +12,6 @@ class PrecisionWaveformTiming(BaseWaveformTiming[ht.datetime, ht.timedelta]):
     """High-precision waveform timing using the hightime package."""
 
     _DEFAULT_TIME_OFFSET = ht.timedelta()
-    _DEFAULT_SAMPLE_INTERVAL = ht.timedelta()
 
     empty: ClassVar[PrecisionWaveformTiming]
 
@@ -81,10 +80,6 @@ class PrecisionWaveformTiming(BaseWaveformTiming[ht.datetime, ht.timedelta]):
     @staticmethod
     def _get_default_time_offset() -> ht.timedelta:
         return PrecisionWaveformTiming._DEFAULT_TIME_OFFSET
-
-    @staticmethod
-    def _get_default_sample_interval() -> ht.timedelta:
-        return PrecisionWaveformTiming._DEFAULT_SAMPLE_INTERVAL
 
     def __init__(
         self,
