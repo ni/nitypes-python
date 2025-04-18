@@ -15,8 +15,7 @@ numpy = [
   {version = ">=2.1", python = "^3.13"},
 ]
 # hightime = "^0.2.2"
-#hightime = { git = "https://github.com/ni/hightime.git" }
-hightime = { git = "https://github.com/ni/hightime.git", branch = "users/bkeryan/explicit-reexport" }
+hightime = { git = "https://github.com/ni/hightime.git" }
 
 [tool.poetry.group.lint.dependencies]
 bandit = { version = ">=1.7", extras = ["toml"] }
