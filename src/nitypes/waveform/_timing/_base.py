@@ -52,6 +52,7 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         "_time_offset",
         "_sample_interval",
         "_timestamps",
+        "__weakref__",
     ]
 
     _sample_interval_mode: SampleIntervalMode
