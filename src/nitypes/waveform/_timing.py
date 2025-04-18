@@ -10,6 +10,9 @@ from nitypes.waveform._base_timing import BaseWaveformTiming, SampleIntervalMode
 class WaveformTiming(BaseWaveformTiming[dt.datetime, dt.timedelta]):
     """Waveform timing using the standard datetime module."""
 
+    _DEFAULT_TIME_OFFSET = dt.timedelta()
+    _DEFAULT_SAMPLE_INTERVAL = dt.timedelta()
+
     empty: ClassVar[WaveformTiming]
 
     # TODO: can these be classmethods in BaseWaveformTiming?
@@ -75,11 +78,11 @@ class WaveformTiming(BaseWaveformTiming[dt.datetime, dt.timedelta]):
 
     @staticmethod
     def _get_default_time_offset() -> dt.timedelta:
-        return dt.timedelta()
+        return WaveformTiming._DEFAULT_TIME_OFFSET
 
     @staticmethod
     def _get_default_sample_interval() -> dt.timedelta:
-        return dt.timedelta()
+        return WaveformTiming._DEFAULT_SAMPLE_INTERVAL
 
     def __init__(
         self,
