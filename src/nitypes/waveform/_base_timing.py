@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import datetime as dt
 import operator
-from abc import ABC
-from collections.abc import Generator, Iterable
+from abc import ABC, abstractmethod
+from collections.abc import Generator, Iterable, Sequence
 from enum import Enum
 from typing import Generic, SupportsIndex, TypeVar
+
+from nitypes.waveform._utils import add_note
 
 # Note about NumPy type hints:
 # - ht.datetime and ht.timedelta are subclasses of dt.datetime and dt.timedelta.
@@ -14,7 +16,7 @@ from typing import Generic, SupportsIndex, TypeVar
 # - PrecisionWaveformTiming is not a subclass of WaveformTiming.
 
 
-class WaveformSampleIntervalMode(Enum):
+class SampleIntervalMode(Enum):
     """The sample interval mode that specifies how the waveform is sampled."""
 
     NONE = 0
@@ -37,36 +39,132 @@ _TTimeDelta_co = TypeVar("_TTimeDelta_co", bound=dt.timedelta, covariant=True)
 class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
     """Base class for waveform timing information."""
 
+    @staticmethod
+    @abstractmethod
+    def _get_datetime_type() -> type[_TDateTime_co]:
+        raise NotImplementedError()
+
+    @staticmethod
+    @abstractmethod
+    def _get_timedelta_type() -> type[_TTimeDelta_co]:
+        raise NotImplementedError()
+
+    @staticmethod
+    @abstractmethod
+    def _get_default_time_offset() -> _TTimeDelta_co:
+        raise NotImplementedError()
+
+    @staticmethod
+    @abstractmethod
+    def _get_default_sample_interval() -> _TTimeDelta_co:
+        raise NotImplementedError()
+
     __slots__ = [
+        "_sample_interval_mode",
         "_timestamp",
         "_time_offset",
         "_sample_interval",
-        "_sample_interval_mode",
         "_timestamps",
     ]
 
+    _sample_interval_mode: SampleIntervalMode
     _timestamp: _TDateTime_co | None
     _time_offset: _TTimeDelta_co
     _sample_interval: _TTimeDelta_co
-    _sample_interval_mode: WaveformSampleIntervalMode
     _timestamps: list[_TDateTime_co] | None
 
     def __init__(
         self,
+        sample_interval_mode: SampleIntervalMode,
         timestamp: _TDateTime_co | None,
-        time_offset: _TTimeDelta_co,
-        sample_interval: _TTimeDelta_co,
-        sample_interval_mode: WaveformSampleIntervalMode,
-        timestamps: list[_TDateTime_co] | None,
+        time_offset: _TTimeDelta_co | None,
+        sample_interval: _TTimeDelta_co | None,
+        timestamps: Sequence[_TDateTime_co] | None,
     ) -> None:
-        """Construct a base waveform timing object.
+        """Construct a base waveform timing object."""
+        datetime_type = self.__class__._get_datetime_type()
+        timedelta_type = self.__class__._get_timedelta_type()
 
-        This constructor is a private implementation detail.
-        """
+        try:
+            if sample_interval_mode == SampleIntervalMode.NONE:
+                if not isinstance(timestamp, (datetime_type, type(None))):
+                    raise TypeError(
+                        "The timestamp must be a datetime or None.\n" f"Provided value: {timestamp}"
+                    )
+                if not isinstance(time_offset, (timedelta_type, type(None))):
+                    raise TypeError(
+                        f"The time offset must be a timedelta or None."
+                        f"Provided value: {time_offset}"
+                    )
+                if sample_interval is not None:
+                    raise ValueError(
+                        "The sample interval argument is not supported."
+                        f"Provided value: {sample_interval}"
+                    )
+                if timestamps is not None:
+                    raise ValueError(
+                        "The timestamps argument is not supported." f"Provided value: {timestamps}"
+                    )
+            elif sample_interval_mode == SampleIntervalMode.REGULAR:
+                if not isinstance(timestamp, (datetime_type, type(None))):
+                    raise TypeError(
+                        "The timestamp must be a datetime or None.\n" f"Provided value: {timestamp}"
+                    )
+                if not isinstance(time_offset, (timedelta_type, type(None))):
+                    raise TypeError(
+                        f"The time offset must be a timedelta or None."
+                        f"Provided value: {time_offset}"
+                    )
+                if not isinstance(sample_interval, timedelta_type):
+                    raise ValueError(
+                        "The sample interval must be a timedelta."
+                        f"Provided value: {sample_interval}"
+                    )
+                if timestamps is not None:
+                    raise ValueError(
+                        "The timestamps argument is not supported." f"Provided value: {timestamps}"
+                    )
+            elif sample_interval_mode == SampleIntervalMode.IRREGULAR:
+                if timestamp is not None:
+                    raise TypeError(
+                        "The timestamp argument is not supported.\n" f"Provided value: {timestamp}"
+                    )
+                if time_offset is not None:
+                    raise TypeError(
+                        f"The time offset argument is not supported."
+                        f"Provided value: {time_offset}"
+                    )
+                if sample_interval is not None:
+                    raise ValueError(
+                        "The sample interval argument is not supported."
+                        f"Provided value: {sample_interval}"
+                    )
+                if not isinstance(timestamps, Sequence) or not all(
+                    isinstance(ts, datetime_type) for ts in timestamps
+                ):
+                    raise ValueError(
+                        "The timestamps must be a sequence of datetime objects."
+                        f"Provided value: {timestamps}"
+                    )
+            else:
+                raise ValueError(f"Unsupported sample interval mode {sample_interval_mode}.")
+        except (TypeError, ValueError) as e:
+            add_note(e, f"Sample interval mode: {sample_interval_mode}")
+            raise
+
+        if time_offset is None:
+            time_offset = self.__class__._get_default_time_offset()
+
+        if sample_interval is None:
+            sample_interval = self.__class__._get_default_sample_interval()
+
+        if timestamps is not None and not isinstance(timestamps, list):
+            timestamps = list(timestamps)
+
+        self._sample_interval_mode = sample_interval_mode
         self._timestamp = timestamp
         self._time_offset = time_offset
         self._sample_interval = sample_interval
-        self._sample_interval_mode = sample_interval_mode
         self._timestamps = timestamps
 
     @property
@@ -88,23 +186,33 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         return self.timestamp + self.time_offset
 
     @property
+    def _has_time_offset(self) -> bool:
+        return (
+            self._sample_interval_mode in (SampleIntervalMode.NONE, SampleIntervalMode.REGULAR)
+            and self._time_offset != self.__class__._get_default_time_offset()
+        )
+
+    @property
     def time_offset(self) -> _TTimeDelta_co:
         """The time difference between the timestamp and the first sample."""
         return self._time_offset
 
     @property
     def _has_sample_interval(self) -> bool:
-        return self._sample_interval_mode == WaveformSampleIntervalMode.REGULAR
+        return (
+            self._sample_interval_mode == SampleIntervalMode.REGULAR
+            and self._sample_interval != self.__class__._get_default_sample_interval()
+        )
 
     @property
     def sample_interval(self) -> _TTimeDelta_co:
         """The time interval between samples."""
-        if self._sample_interval_mode != WaveformSampleIntervalMode.REGULAR:
+        if self._sample_interval_mode != SampleIntervalMode.REGULAR:
             raise RuntimeError("The waveform timing does not have a sample interval.")
         return self._sample_interval
 
     @property
-    def sample_interval_mode(self) -> WaveformSampleIntervalMode:
+    def sample_interval_mode(self) -> SampleIntervalMode:
         """The sample interval mode that specifies how the waveform is sampled."""
         return self._sample_interval_mode
 
@@ -128,9 +236,9 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         if count < 0:
             raise ValueError("The count must be a non-negative integer.")
 
-        if self._sample_interval_mode == WaveformSampleIntervalMode.REGULAR and self.has_timestamp:
+        if self._sample_interval_mode == SampleIntervalMode.REGULAR and self.has_timestamp:
             return self._generate_regular_timestamps(start_index, count)
-        elif self._sample_interval_mode == WaveformSampleIntervalMode.IRREGULAR:
+        elif self._sample_interval_mode == SampleIntervalMode.IRREGULAR:
             assert self._timestamps is not None
             if count > len(self._timestamps):
                 raise ValueError("The count must be less or equal to the number of timestamps.")
@@ -151,7 +259,7 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
             yield timestamp
 
     def __eq__(self, value: object) -> bool:  # noqa: D105 - Missing docstring in magic method
-        if not isinstance(value, BaseWaveformTiming):
+        if not isinstance(value, self.__class__):
             return NotImplemented
         return (
             self._timestamp == value._timestamp
@@ -160,3 +268,15 @@ class BaseWaveformTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
             and self._sample_interval_mode == value._sample_interval_mode
             and self._timestamps == value._timestamps
         )
+
+    def __repr__(self) -> str:  # noqa: D105 - Missing docstring in magic method
+        args = [str(self.sample_interval_mode)]
+        if self.has_timestamp:
+            args.append(f"timestamp={self.timestamp!r}")
+        if self._has_time_offset:
+            args.append(f"time_offset={self.time_offset!r}")
+        if self._has_sample_interval:
+            args.append(f"sample_interval={self._sample_interval!r}")
+        if self._sample_interval_mode == SampleIntervalMode.IRREGULAR:
+            args.append(f"timestamps={self._timestamps!r}")
+        return f"{self.__class__.__module__}.{self.__class__.__qualname__}({', '.join(args)})"
