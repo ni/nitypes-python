@@ -40,7 +40,7 @@ def arg_to_uint(arg_description: str, value: SupportsIndex | None, default_value
     value = arg_to_int(arg_description, value, default_value)
     if value < 0:
         raise ValueError(
-            f"The {arg_description} must be a non-negative integer.\n\nProvided value: {value}"
+            f"The {arg_description} must be a non-negative integer.\n\n" f"Provided value: {value}"
         )
     return value
 
