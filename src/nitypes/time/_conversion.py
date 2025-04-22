@@ -22,7 +22,7 @@ _TTimeDelta = TypeVar("_TTimeDelta", dt.timedelta, ht.timedelta)
 
 def convert_datetime(requested_type: type[_TDateTime], value: _AnyDateTime, /) -> _TDateTime:
     """Convert a datetime object to the specified type."""
-    convert_func = _CONVERT_TO_T_DATETIME.get(requested_type)
+    convert_func = _CONVERT_DATETIME_FOR_TYPE.get(requested_type)
     if convert_func is None:
         raise TypeError(
             "The requested type must be a datetime type.\n" f"Requested type: {requested_type}"
@@ -32,7 +32,7 @@ def convert_datetime(requested_type: type[_TDateTime], value: _AnyDateTime, /) -
 
 @singledispatch
 def _convert_to_dt_datetime(value: object, /) -> dt.datetime:
-    raise TypeError("The value must be a datetime.\n" f"Provided value: {value}")
+    raise TypeError("The value must be a datetime.\n\n" f"Provided value: {value}")
 
 
 @_convert_to_dt_datetime.register
@@ -57,7 +57,7 @@ def _(value: ht.datetime, /) -> dt.datetime:
 
 @singledispatch
 def _convert_to_ht_datetime(value: object, /) -> ht.datetime:
-    raise TypeError("The value must be a datetime.\n" f"Provided value: {value}")
+    raise TypeError("The value must be a datetime.\n\n" f"Provided value: {value}")
 
 
 @_convert_to_ht_datetime.register
@@ -80,7 +80,7 @@ def _(value: ht.datetime, /) -> ht.datetime:
     return value
 
 
-_CONVERT_TO_T_DATETIME: dict[type[Any], Callable[[object], object]] = {
+_CONVERT_DATETIME_FOR_TYPE: dict[type[Any], Callable[[object], object]] = {
     dt.datetime: _convert_to_dt_datetime,
     ht.datetime: _convert_to_ht_datetime,
 }
@@ -88,7 +88,7 @@ _CONVERT_TO_T_DATETIME: dict[type[Any], Callable[[object], object]] = {
 
 def convert_timedelta(requested_type: type[_TTimeDelta], value: _AnyTimeDelta, /) -> _TTimeDelta:
     """Convert a timedelta object to the specified type."""
-    convert_func = _CONVERT_TO_T_TIMEDELTA.get(requested_type)
+    convert_func = _CONVERT_TIMEDELTA_FOR_TYPE.get(requested_type)
     if convert_func is None:
         raise TypeError(
             "The requested type must be a timedelta type.\n" f"Requested type: {requested_type}"
@@ -98,7 +98,7 @@ def convert_timedelta(requested_type: type[_TTimeDelta], value: _AnyTimeDelta, /
 
 @singledispatch
 def _convert_to_dt_timedelta(value: object, /) -> dt.timedelta:
-    raise TypeError("The value must be a timedelta.\n" f"Provided value: {value}")
+    raise TypeError("The value must be a timedelta.\n\n" f"Provided value: {value}")
 
 
 @_convert_to_dt_timedelta.register
@@ -113,7 +113,7 @@ def _(value: ht.timedelta, /) -> dt.timedelta:
 
 @singledispatch
 def _convert_to_ht_timedelta(value: object, /) -> ht.timedelta:
-    raise TypeError("The value must be a timedelta.\n" f"Provided value: {value}")
+    raise TypeError("The value must be a timedelta.\n\n" f"Provided value: {value}")
 
 
 @_convert_to_ht_timedelta.register
@@ -130,7 +130,7 @@ def _(value: ht.timedelta, /) -> ht.timedelta:
     return value
 
 
-_CONVERT_TO_T_TIMEDELTA: dict[type[Any], Callable[[object], object]] = {
+_CONVERT_TIMEDELTA_FOR_TYPE: dict[type[Any], Callable[[object], object]] = {
     dt.timedelta: _convert_to_dt_timedelta,
     ht.timedelta: _convert_to_ht_timedelta,
 }

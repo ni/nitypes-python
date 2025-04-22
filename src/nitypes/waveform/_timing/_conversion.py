@@ -23,7 +23,7 @@ _TTiming = TypeVar("_TTiming", Timing, PrecisionTiming)
 
 def convert_timing(requested_type: type[_TTiming], value: _AnyTiming, /) -> _TTiming:
     """Convert a waveform timing object to the specified type."""
-    convert_func = _CONVERT_TO_T_TIMING.get(requested_type)
+    convert_func = _CONVERT_TIMING_FOR_TYPE.get(requested_type)
     if convert_func is None:
         raise TypeError(
             "The requested type must be a waveform timing type.\n"
@@ -34,7 +34,7 @@ def convert_timing(requested_type: type[_TTiming], value: _AnyTiming, /) -> _TTi
 
 @singledispatch
 def _convert_to_standard_timing(value: object, /) -> Timing:
-    raise TypeError("The value must be a waveform timing object.\n" f"Provided value: {value}")
+    raise TypeError("The value must be a waveform timing object.\n\n" f"Provided value: {value}")
 
 
 @_convert_to_standard_timing.register
@@ -67,7 +67,7 @@ def _(value: PrecisionTiming, /) -> Timing:
 
 @singledispatch
 def _convert_to_precision_timing(value: object, /) -> PrecisionTiming:
-    raise TypeError("The value must be a waveform timing object.\n" f"Provided value: {value}")
+    raise TypeError("The value must be a waveform timing object.\n\n" f"Provided value: {value}")
 
 
 @_convert_to_precision_timing.register
@@ -98,7 +98,7 @@ def _(value: PrecisionTiming, /) -> PrecisionTiming:
     return value
 
 
-_CONVERT_TO_T_TIMING: dict[type[Any], Callable[[object], object]] = {
+_CONVERT_TIMING_FOR_TYPE: dict[type[Any], Callable[[object], object]] = {
     Timing: _convert_to_standard_timing,
     PrecisionTiming: _convert_to_precision_timing,
 }

@@ -77,15 +77,9 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         timestamps: Sequence[_TDateTime_co] | None,
     ) -> None:
         """Construct a base waveform timing object."""
-        validate_func = self.__class__._VALIDATE_INIT_ARGS.get(sample_interval_mode)
-        if validate_func is None:
-            raise ValueError(f"Unsupported sample interval mode {sample_interval_mode}.")
-
-        try:
-            validate_func(self, timestamp, time_offset, sample_interval, timestamps)
-        except (TypeError, ValueError) as e:
-            add_note(e, f"Sample interval mode: {sample_interval_mode}")
-            raise
+        self._validate_init_args(
+            sample_interval_mode, timestamp, time_offset, sample_interval, timestamps
+        )
 
         if timestamps is not None and not isinstance(timestamps, list):
             timestamps = list(timestamps)
@@ -95,6 +89,24 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         self._time_offset = time_offset
         self._sample_interval = sample_interval
         self._timestamps = timestamps
+
+    def _validate_init_args(
+        self,
+        sample_interval_mode: SampleIntervalMode,
+        timestamp: _TDateTime_co | None,
+        time_offset: _TTimeDelta_co | None,
+        sample_interval: _TTimeDelta_co | None,
+        timestamps: Sequence[_TDateTime_co] | None,
+    ) -> None:
+        validate_func = self.__class__._VALIDATE_INIT_ARGS_FOR_MODE.get(sample_interval_mode)
+        if validate_func is None:
+            raise ValueError(f"Unsupported sample interval mode {sample_interval_mode}.")
+
+        try:
+            validate_func(self, timestamp, time_offset, sample_interval, timestamps)
+        except (TypeError, ValueError) as e:
+            add_note(e, f"Sample interval mode: {sample_interval_mode}")
+            raise
 
     def _validate_init_args_none(
         self,
@@ -158,7 +170,7 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
                 f"Provided value: {timestamps}"
             )
 
-    _VALIDATE_INIT_ARGS = {
+    _VALIDATE_INIT_ARGS_FOR_MODE = {
         SampleIntervalMode.NONE: _validate_init_args_none,
         SampleIntervalMode.REGULAR: _validate_init_args_regular,
         SampleIntervalMode.IRREGULAR: _validate_init_args_irregular,
