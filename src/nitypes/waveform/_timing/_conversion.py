@@ -49,7 +49,7 @@ def _(value: PrecisionTiming, /) -> Timing:
         None if value._timestamp is None else convert_datetime(dt.datetime, value._timestamp),
         (
             None
-            if value._time_offset == PrecisionTiming._DEFAULT_TIME_OFFSET
+            if value._time_offset is None
             else convert_timedelta(dt.timedelta, value._time_offset)
         ),
         (
@@ -77,7 +77,7 @@ def _(value: Timing, /) -> PrecisionTiming:
         None if value._timestamp is None else convert_datetime(ht.datetime, value._timestamp),
         (
             None
-            if value._time_offset == PrecisionTiming._DEFAULT_TIME_OFFSET
+            if value._time_offset is None
             else convert_timedelta(ht.timedelta, value._time_offset)
         ),
         (

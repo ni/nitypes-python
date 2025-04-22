@@ -82,7 +82,7 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
 
     _sample_interval_mode: SampleIntervalMode
     _timestamp: _TDateTime_co | None
-    _time_offset: _TTimeDelta_co
+    _time_offset: _TTimeDelta_co | None
     _sample_interval: _TTimeDelta_co | None
     _timestamps: list[_TDateTime_co] | None
 
@@ -104,9 +104,6 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         except (TypeError, ValueError) as e:
             add_note(e, f"Sample interval mode: {sample_interval_mode}")
             raise
-
-        if time_offset is None:
-            time_offset = self.__class__._get_default_time_offset()
 
         if timestamps is not None and not isinstance(timestamps, list):
             timestamps = list(timestamps)
@@ -208,7 +205,10 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
     @property
     def time_offset(self) -> _TTimeDelta_co:
         """The time difference between the timestamp and the first sample."""
-        return self._time_offset
+        value = self._time_offset
+        if value is None:
+            return self.__class__._get_default_time_offset()
+        return value
 
     @property
     def sample_interval(self) -> _TTimeDelta_co:
@@ -281,10 +281,10 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         args = [f"{self.sample_interval_mode.__class__.__module__}.{self.sample_interval_mode}"]
         if self._timestamp is not None:
             args.append(f"timestamp={self._timestamp!r}")
-        if self._time_offset != self.__class__._get_default_time_offset():
+        if self._time_offset is not None:
             args.append(f"time_offset={self._time_offset!r}")
         if self._sample_interval is not None:
-            args.append(f"sample_interval={self.sample_interval!r}")
+            args.append(f"sample_interval={self._sample_interval!r}")
         if self._timestamps is not None:
             args.append(f"timestamps={self._timestamps!r}")
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"

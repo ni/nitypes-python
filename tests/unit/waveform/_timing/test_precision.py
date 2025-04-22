@@ -351,6 +351,10 @@ def test___different_value___equality___not_equal(
             "nitypes.waveform.PrecisionTiming(nitypes.waveform.SampleIntervalMode.NONE, timestamp=hightime.datetime(2025, 1, 1, 0, 0), time_offset=hightime.timedelta(seconds=1))",
         ),
         (
+            PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1), ht.timedelta()),
+            "nitypes.waveform.PrecisionTiming(nitypes.waveform.SampleIntervalMode.NONE, timestamp=hightime.datetime(2025, 1, 1, 0, 0), time_offset=hightime.timedelta())",
+        ),
+        (
             PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1)),
             "nitypes.waveform.PrecisionTiming(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=hightime.timedelta(microseconds=1000))",
         ),

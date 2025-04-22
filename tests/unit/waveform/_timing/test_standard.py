@@ -335,6 +335,10 @@ def test___different_value___equality___not_equal(
             "nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.NONE, timestamp=datetime.datetime(2025, 1, 1, 0, 0), time_offset=datetime.timedelta(seconds=1))",
         ),
         (
+            Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta()),
+            "nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.NONE, timestamp=datetime.datetime(2025, 1, 1, 0, 0), time_offset=datetime.timedelta(0))",
+        ),
+        (
             Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
             "nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=datetime.timedelta(microseconds=1000))",
         ),
