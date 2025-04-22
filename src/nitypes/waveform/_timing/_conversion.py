@@ -26,7 +26,7 @@ def convert_timing(requested_type: type[_TTiming], value: _AnyTiming, /) -> _TTi
     convert_func = _CONVERT_TIMING_FOR_TYPE.get(requested_type)
     if convert_func is None:
         raise TypeError(
-            "The requested type must be a waveform timing type.\n"
+            "The requested type must be a waveform timing type.\n\n"
             f"Requested type: {requested_type}"
         )
     return cast(_TTiming, convert_func(value))

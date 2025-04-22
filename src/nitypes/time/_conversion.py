@@ -25,7 +25,7 @@ def convert_datetime(requested_type: type[_TDateTime], value: _AnyDateTime, /) -
     convert_func = _CONVERT_DATETIME_FOR_TYPE.get(requested_type)
     if convert_func is None:
         raise TypeError(
-            "The requested type must be a datetime type.\n" f"Requested type: {requested_type}"
+            "The requested type must be a datetime type.\n\n" f"Requested type: {requested_type}"
         )
     return cast(_TDateTime, convert_func(value))
 
@@ -91,7 +91,7 @@ def convert_timedelta(requested_type: type[_TTimeDelta], value: _AnyTimeDelta, /
     convert_func = _CONVERT_TIMEDELTA_FOR_TYPE.get(requested_type)
     if convert_func is None:
         raise TypeError(
-            "The requested type must be a timedelta type.\n" f"Requested type: {requested_type}"
+            "The requested type must be a timedelta type.\n\n" f"Requested type: {requested_type}"
         )
     return cast(_TTimeDelta, convert_func(value))
 
