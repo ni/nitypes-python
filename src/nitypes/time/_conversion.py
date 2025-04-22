@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import datetime as dt
 import sys
+from collections.abc import Callable
 from functools import singledispatch
-from typing import TypeVar, Union
+from typing import Any, TypeVar, Union, cast
 
 import hightime as ht
 
@@ -21,15 +22,12 @@ _TTimeDelta = TypeVar("_TTimeDelta", dt.timedelta, ht.timedelta)
 
 def convert_datetime(requested_type: type[_TDateTime], value: _AnyDateTime, /) -> _TDateTime:
     """Convert a datetime object to the specified type."""
-    if requested_type is dt.datetime:
-        # `if requested_type is T` does not seem to narrow the type of _TDateTime.
-        return _convert_to_dt_datetime(value)  # type: ignore[return-value]
-    elif requested_type is ht.datetime:
-        return _convert_to_ht_datetime(value)
-    else:
+    convert_func = _CONVERT_TO_T_DATETIME.get(requested_type)
+    if convert_func is None:
         raise TypeError(
             "The requested type must be a datetime type.\n" f"Requested type: {requested_type}"
         )
+    return cast(_TDateTime, convert_func(value))
 
 
 @singledispatch
@@ -82,27 +80,20 @@ def _(value: ht.datetime, /) -> ht.datetime:
     return value
 
 
+_CONVERT_TO_T_DATETIME: dict[type[Any], Callable[[object], object]] = {
+    dt.datetime: _convert_to_dt_datetime,
+    ht.datetime: _convert_to_ht_datetime,
+}
+
+
 def convert_timedelta(requested_type: type[_TTimeDelta], value: _AnyTimeDelta, /) -> _TTimeDelta:
     """Convert a timedelta object to the specified type."""
-    if requested_type is dt.timedelta:
-        # `if requested_type is T` does not seem to narrow the type of _TTimeDelta.
-        return _convert_to_dt_timedelta(value)  # type: ignore[return-value]
-    elif requested_type is ht.timedelta:
-        return _convert_to_ht_timedelta(value)
-    else:
+    convert_func = _CONVERT_TO_T_TIMEDELTA.get(requested_type)
+    if convert_func is None:
         raise TypeError(
             "The requested type must be a timedelta type.\n" f"Requested type: {requested_type}"
         )
-
-
-# @convert_timedelta.register
-# def _(requested_type: type[dt.timedelta], value: _TTimeDeltaIn, /) -> dt.timedelta:
-#     return _convert_to_dt_timedelta(value)
-
-
-# @convert_timedelta.register
-# def _(requested_type: type[ht.timedelta], value: _TTimeDeltaIn, /) -> ht.timedelta:
-#     return _convert_to_ht_timedelta(value)
+    return cast(_TTimeDelta, convert_func(value))
 
 
 @singledispatch
@@ -137,3 +128,9 @@ def _(value: dt.timedelta, /) -> ht.timedelta:
 @_convert_to_ht_timedelta.register
 def _(value: ht.timedelta, /) -> ht.timedelta:
     return value
+
+
+_CONVERT_TO_T_TIMEDELTA: dict[type[Any], Callable[[object], object]] = {
+    dt.timedelta: _convert_to_dt_timedelta,
+    ht.timedelta: _convert_to_ht_timedelta,
+}

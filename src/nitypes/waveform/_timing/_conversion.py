@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import datetime as dt
 import sys
+from collections.abc import Callable
 from functools import singledispatch
-from typing import TypeVar, Union
+from typing import Any, TypeVar, Union, cast
 
 import hightime as ht
 
@@ -22,16 +23,13 @@ _TTiming = TypeVar("_TTiming", Timing, PrecisionTiming)
 
 def convert_timing(requested_type: type[_TTiming], value: _AnyTiming, /) -> _TTiming:
     """Convert a waveform timing object to the specified type."""
-    if requested_type is Timing:
-        # `if requested_type is T` does not seem to narrow the type of _TTiming.
-        return _convert_to_standard_timing(value)  # type: ignore[return-value]
-    elif requested_type is PrecisionTiming:
-        return _convert_to_precision_timing(value)  # type: ignore[return-value]
-    else:
+    convert_func = _CONVERT_TO_T_TIMING.get(requested_type)
+    if convert_func is None:
         raise TypeError(
             "The requested type must be a waveform timing type.\n"
             f"Requested type: {requested_type}"
         )
+    return cast(_TTiming, convert_func(value))
 
 
 @singledispatch
@@ -98,3 +96,9 @@ def _(value: Timing, /) -> PrecisionTiming:
 @_convert_to_precision_timing.register
 def _(value: PrecisionTiming, /) -> PrecisionTiming:
     return value
+
+
+_CONVERT_TO_T_TIMING: dict[type[Any], Callable[[object], object]] = {
+    Timing: _convert_to_standard_timing,
+    PrecisionTiming: _convert_to_precision_timing,
+}
