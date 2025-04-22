@@ -35,7 +35,7 @@ def convert_timing(requested_type: type[_TTiming], value: _AnyTiming, /) -> _TTi
 
 
 @singledispatch
-def _convert_to_standard_timing(value: _AnyTiming, /) -> Timing:
+def _convert_to_standard_timing(value: object, /) -> Timing:
     raise TypeError("The value must be a waveform timing object.\n" f"Provided value: {value}")
 
 
@@ -68,7 +68,7 @@ def _(value: PrecisionTiming, /) -> Timing:
 
 
 @singledispatch
-def _convert_to_precision_timing(value: _AnyTiming, /) -> PrecisionTiming:
+def _convert_to_precision_timing(value: object, /) -> PrecisionTiming:
     raise TypeError("The value must be a waveform timing object.\n" f"Provided value: {value}")
 
 
