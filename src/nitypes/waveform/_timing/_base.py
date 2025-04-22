@@ -2,18 +2,12 @@ from __future__ import annotations
 
 import datetime as dt
 import operator
-import sys
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Generator, Iterable, Sequence
+from collections.abc import Generator, Iterable, Sequence
 from enum import Enum
 from typing import Generic, SupportsIndex, TypeVar
 
 from nitypes.waveform._utils import add_note
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
 
 
 class SampleIntervalMode(Enum):
@@ -39,18 +33,6 @@ def _validate_unsupported_arg(arg_description: str, value: object) -> None:
         raise ValueError(
             f"The {arg_description} argument is not supported.\n\n" f"Provided value: {value}"
         )
-
-
-_ValidateInitArgsFunc: TypeAlias = Callable[
-    [
-        "BaseTiming[_TDateTime_co, _TTimeDelta_co]",
-        _TDateTime_co | None,
-        _TTimeDelta_co | None,
-        _TTimeDelta_co | None,
-        Sequence[_TDateTime_co] | None,
-    ],
-    None,
-]
 
 
 class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
@@ -176,9 +158,7 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
                 f"Provided value: {timestamps}"
             )
 
-    _VALIDATE_INIT_ARGS: dict[
-        SampleIntervalMode, _ValidateInitArgsFunc[_TDateTime_co, _TTimeDelta_co]
-    ] = {
+    _VALIDATE_INIT_ARGS = {
         SampleIntervalMode.NONE: _validate_init_args_none,
         SampleIntervalMode.REGULAR: _validate_init_args_regular,
         SampleIntervalMode.IRREGULAR: _validate_init_args_irregular,
