@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 import array
+import datetime as dt
 import itertools
 import sys
 import weakref
 from typing import Any, SupportsIndex
 
+import hightime as ht
 import numpy as np
 import pytest
 
-from nitypes.waveform import AnalogWaveform
+from nitypes.waveform import AnalogWaveform, PrecisionTiming, Timing
 
 if sys.version_info >= (3, 11):
     from typing import assert_type
@@ -636,7 +638,7 @@ def test___array_with_external_buffer___set_capacity___raises_value_error() -> N
 
 
 ###############################################################################
-# misc
+# extended properties
 ###############################################################################
 def test___waveform___set_channel_name___sets_extended_property() -> None:
     waveform = AnalogWaveform()
@@ -687,3 +689,45 @@ def test___waveform___take_weak_ref___references_waveform() -> None:
     waveform_ref = weakref.ref(waveform)
 
     assert waveform_ref() is waveform
+
+
+###############################################################################
+# timing
+###############################################################################
+def test___waveform___has_empty_timing() -> None:
+    waveform = AnalogWaveform()
+
+    assert_type(waveform.timing, Timing)
+    assert waveform.timing is Timing.empty
+    assert_type(waveform.precision_timing, PrecisionTiming)
+    assert waveform.precision_timing is PrecisionTiming.empty
+
+
+def test___waveform_with_timing___get_precision_timing___converts_timing() -> None:
+    waveform = AnalogWaveform()
+    waveform.timing = Timing.create_with_regular_interval(
+        dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+    )
+
+    precision_timing = waveform.precision_timing
+
+    assert_type(precision_timing, PrecisionTiming)
+    assert isinstance(precision_timing, PrecisionTiming)
+    assert precision_timing == PrecisionTiming.create_with_regular_interval(
+        ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+    )
+
+
+def test___waveform_with_precision_timing___get_timing___converts_timing() -> None:
+    waveform = AnalogWaveform()
+    waveform.precision_timing = PrecisionTiming.create_with_regular_interval(
+        ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+    )
+
+    timing = waveform.timing
+
+    assert_type(timing, Timing)
+    assert isinstance(timing, Timing)
+    assert timing == Timing.create_with_regular_interval(
+        dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+    )

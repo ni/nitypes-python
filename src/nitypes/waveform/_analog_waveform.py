@@ -12,6 +12,9 @@ from nitypes.waveform._extended_properties import (
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
 )
+from nitypes.waveform._timing._conversion import convert_timing
+from nitypes.waveform._timing._precision import PrecisionTiming
+from nitypes.waveform._timing._standard import Timing
 from nitypes.waveform._utils import arg_to_uint, validate_dtype
 
 if sys.version_info < (3, 10):
@@ -211,12 +214,22 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             for i in range(len(array))
         ]
 
-    __slots__ = ["_data", "_start_index", "_sample_count", "_extended_properties", "__weakref__"]
+    __slots__ = [
+        "_data",
+        "_start_index",
+        "_sample_count",
+        "_extended_properties",
+        "_timing",
+        "_precision_timing",
+        "__weakref__",
+    ]
 
     _data: npt.NDArray[_ScalarType_co]
     _start_index: int
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
+    _timing: Timing | None
+    _precision_timing: PrecisionTiming | None
 
     # If neither dtype nor _data is specified, the type parameter defaults to np.float64.
     @overload
@@ -332,6 +345,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._start_index = start_index
         self._sample_count = sample_count
         self._extended_properties = ExtendedPropertyDictionary()
+        self._timing = Timing.empty
+        self._precision_timing = None
 
     def _init_with_provided_array(
         self,
@@ -384,6 +399,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._start_index = start_index
         self._sample_count = sample_count
         self._extended_properties = ExtendedPropertyDictionary()
+        self._timing = Timing.empty
+        self._precision_timing = None
 
     @property
     def raw_data(self) -> npt.NDArray[_ScalarType_co]:
@@ -464,3 +481,62 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                 "The unit description must be a str.\n\n" f"Unit description: {value!r}"
             )
         self._extended_properties[UNIT_DESCRIPTION] = value
+
+    @property
+    def timing(self) -> Timing:
+        """The timing information of the analog waveform.
+
+        The default value is Timing.empty.
+        """
+        if self._timing is None:
+            if self._precision_timing is PrecisionTiming.empty:
+                self._timing = Timing.empty
+            elif self._precision_timing is not None:
+                self._timing = convert_timing(Timing, self._precision_timing)
+            else:
+                raise RuntimeError("The waveform has no timing information.")
+        return self._timing
+
+    @timing.setter
+    def timing(self, value: Timing) -> None:
+        if not isinstance(value, Timing):
+            raise TypeError("The timing information must be a Timing object.")
+        self._timing = value
+        self._precision_timing = None
+
+    @property
+    def is_precision_timing_initialized(self) -> bool:
+        """Indicates whether the waveform's precision timing information is initialized."""
+        return self._precision_timing is not None
+
+    @property
+    def precision_timing(self) -> PrecisionTiming:
+        """The precision timing information of the analog waveform.
+
+        The default value is PrecisionTiming.empty.
+
+        Use AnalogWaveform.precision_timing instead of AnalogWaveform.timing to obtain timing
+        information with higher precision than AnalogWaveform.timing. If the timing information is
+        set using AnalogWaveform.precision_timing, then this property returns timing information
+        with up to yoctosecond precision. If the timing information is set using
+        AnalogWaveform.timing, then the timing information returned has up to microsecond precision.
+
+        Accessing this property can potentially decrease performance if the timing information is
+        set using AnalogWaveform.timing. Use AnalogWaveform.is_precision_timing_initialized to
+        determine if AnalogWaveform.precision_timing has been initialized.
+        """
+        if self._precision_timing is None:
+            if self._timing is Timing.empty:
+                self._precision_timing = PrecisionTiming.empty
+            elif self._timing is not None:
+                self._precision_timing = convert_timing(PrecisionTiming, self._timing)
+            else:
+                raise RuntimeError("The waveform has no timing information.")
+        return self._precision_timing
+
+    @precision_timing.setter
+    def precision_timing(self, value: PrecisionTiming) -> None:
+        if not isinstance(value, PrecisionTiming):
+            raise TypeError("The precision timing information must be a PrecisionTiming object.")
+        self._precision_timing = value
+        self._timing = None

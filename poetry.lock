@@ -275,9 +275,14 @@ version = "0.2.2"
 description = "Hightime Python API"
 optional = false
 python-versions = "*"
-files = [
-    {file = "hightime-0.2.2-py3-none-any.whl", hash = "sha256:5109a449bb3a75dbf305147777de71634c91b943d47cfbee18ed2f34a8307e0b"},
-]
+files = []
+develop = false
+
+[package.source]
+type = "git"
+url = "https://github.com/ni/hightime.git"
+reference = "HEAD"
+resolved_reference = "2cde13a89c443dcfbdbf3d00b483b62d7a3e9fc8"
 
 [[package]]
 name = "iniconfig"
@@ -968,4 +973,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "40bb6c7868636a199d0fe96cc3879155eb23cb6b837e68a2c82ee136e7433439"
+content-hash = "c366b73f5478503e15e680172753359d476906c979e10791b88e273e8ba65761"
