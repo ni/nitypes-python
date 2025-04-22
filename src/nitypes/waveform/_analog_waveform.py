@@ -407,6 +407,37 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         """The raw analog waveform data."""
         return self._data[self._start_index : self._start_index + self._sample_count]
 
+    def get_raw_data(
+        self, start_index: SupportsIndex | None = 0, sample_count: SupportsIndex | None = None
+    ) -> npt.NDArray[_ScalarType_co]:
+        """Get a subset of the raw analog waveform data.
+
+        Args:
+            start_index: The sample index at which the data begins.
+            sample_count: The number of samples to return.
+
+        Returns:
+            A subset of the raw analog waveform data.
+        """
+        start_index = arg_to_uint("sample index", start_index, 0)
+        if start_index > self.sample_count:
+            raise ValueError(
+                "The start index must be less than or equal to the number of samples in the waveform.\n\n"
+                f"Start index: {start_index}\n"
+                f"Number of samples: {self.sample_count}"
+            )
+
+        sample_count = arg_to_uint("sample count", sample_count, self.sample_count - start_index)
+        if start_index + sample_count > self.sample_count:
+            raise ValueError(
+                "The sum of the start index and sample count must be less than or equal to the number of samples in the waveform.\n\n"
+                f"Start index: {start_index}\n"
+                f"Sample count: {sample_count}\n"
+                f"Number of samples: {self.sample_count}"
+            )
+
+        return self.raw_data[start_index : start_index + sample_count]
+
     @property
     def scaled_data(self) -> npt.NDArray[np.float64]:
         """The scaled analog waveform data."""
