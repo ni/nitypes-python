@@ -46,10 +46,9 @@ class LinearScaleMode(ScaleMode):
         return self._offset
 
     def _transform_data(self, data: npt.NDArray[_TScaled]) -> npt.NDArray[_TScaled]:
-        # TODO: are numpy's __mul__ and __add__ operators missing overloads for np.float32?
-        gain = np.array(self.gain, data.dtype)
-        offset = np.array(self.offset, data.dtype)
-        return data * gain + offset
+        # https://github.com/numpy/numpy/issues/28805 - TYP: mypy infers that adding/multiplying a
+        # npt.NDArray[np.float32] with a float promotes dtype to Any or np.float64
+        return data * self._gain + self._offset  # type: ignore[operator,no-any-return]
 
     def __repr__(  # noqa: D105 - Missing docstring in magic method (auto-generated noqa)
         self,
