@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from typing import SupportsFloat
 
 import numpy as np
 import numpy.typing as npt
@@ -26,7 +27,7 @@ else:
     ],
 )
 def test___gain_and_offset___construct___constructs_with_gain_and_offset(
-    gain: float, offset: float
+    gain: SupportsFloat, offset: SupportsFloat
 ) -> None:
     scale_mode = LinearScaleMode(gain, offset)
 
@@ -43,10 +44,10 @@ def test___gain_and_offset___construct___constructs_with_gain_and_offset(
     ],
 )
 def test__invalid_gain_or_offset___construct___raises_type_error(
-    gain: float, offset: float, expected_message: str
+    gain: object, offset: object, expected_message: str
 ) -> None:
     with pytest.raises(TypeError) as exc:
-        _ = LinearScaleMode(gain, offset)
+        _ = LinearScaleMode(gain, offset)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(expected_message)
 
