@@ -32,7 +32,7 @@ def convert_datetime(requested_type: type[_TDateTime], value: _AnyDateTime, /) -
 
 @singledispatch
 def _convert_to_dt_datetime(value: object, /) -> dt.datetime:
-    raise TypeError("The value must be a datetime.\n\n" f"Provided value: {value}")
+    raise TypeError("The value must be a datetime.\n\n" f"Provided value: {value!r}")
 
 
 @_convert_to_dt_datetime.register
@@ -57,7 +57,7 @@ def _(value: ht.datetime, /) -> dt.datetime:
 
 @singledispatch
 def _convert_to_ht_datetime(value: object, /) -> ht.datetime:
-    raise TypeError("The value must be a datetime.\n\n" f"Provided value: {value}")
+    raise TypeError("The value must be a datetime.\n\n" f"Provided value: {value!r}")
 
 
 @_convert_to_ht_datetime.register
@@ -98,7 +98,7 @@ def convert_timedelta(requested_type: type[_TTimeDelta], value: _AnyTimeDelta, /
 
 @singledispatch
 def _convert_to_dt_timedelta(value: object, /) -> dt.timedelta:
-    raise TypeError("The value must be a timedelta.\n\n" f"Provided value: {value}")
+    raise TypeError("The value must be a timedelta.\n\n" f"Provided value: {value!r}")
 
 
 @_convert_to_dt_timedelta.register
@@ -113,7 +113,7 @@ def _(value: ht.timedelta, /) -> dt.timedelta:
 
 @singledispatch
 def _convert_to_ht_timedelta(value: object, /) -> ht.timedelta:
-    raise TypeError("The value must be a timedelta.\n\n" f"Provided value: {value}")
+    raise TypeError("The value must be a timedelta.\n\n" f"Provided value: {value!r}")
 
 
 @_convert_to_ht_timedelta.register
