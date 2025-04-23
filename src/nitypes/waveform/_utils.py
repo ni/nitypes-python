@@ -42,6 +42,7 @@ def arg_to_float(
 
     if not isinstance(value, float):
         try:
+            # Use value.__float__() because float(value) also accepts strings.
             return value.__float__()
         except AttributeError:
             raise TypeError(
