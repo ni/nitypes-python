@@ -14,11 +14,41 @@ else:
     from typing_extensions import assert_type
 
 
-def test___gain_and_offset___construct___constructs_with_gain_and_offset() -> None:
-    scale_mode = LinearScaleMode(1.2345, 0.006789)
+@pytest.mark.parametrize(
+    "gain, offset",
+    [
+        (1.0, 0.0),
+        (1.2345, 0.006789),
+        (3, 4),
+        (np.float64(1.2345), np.float64(0.006789)),
+        # np.float32 is not a subclass of float, but it supports __float__.
+        (np.float32(1.2345), np.float32(0.006789)),
+    ],
+)
+def test___gain_and_offset___construct___constructs_with_gain_and_offset(
+    gain: float, offset: float
+) -> None:
+    scale_mode = LinearScaleMode(gain, offset)
 
-    assert scale_mode.gain == 1.2345
-    assert scale_mode.offset == 0.006789
+    assert scale_mode.gain == gain
+    assert scale_mode.offset == offset
+
+
+@pytest.mark.parametrize(
+    "gain, offset, expected_message",
+    [
+        (None, 0.0, "The gain must be a floating point number."),
+        ("1.0", 0.0, "The gain must be a floating point number."),
+        (1.0, "0.0", "The offset must be a floating point number."),
+    ],
+)
+def test__invalid_gain_or_offset___construct___raises_type_error(
+    gain: float, offset: float, expected_message: str
+) -> None:
+    with pytest.raises(TypeError) as exc:
+        _ = LinearScaleMode(gain, offset)
+
+    assert exc.value.args[0].startswith(expected_message)
 
 
 def test___empty_waveform___get_scaled_data___returns_empty_scaled_data() -> None:
@@ -124,3 +154,9 @@ def test___array_subset___get_scaled_data___returns_scaled_data_subset() -> None
     assert_type(scaled_data, npt.NDArray[np.float64])
     assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.float64
     assert list(scaled_data) == [7.0, 10.0]
+
+
+def test___scale_mode___repr___looks_ok() -> None:
+    scale_mode = LinearScaleMode(1.2345, 0.006789)
+
+    assert repr(scale_mode) == "nitypes.waveform.LinearScaleMode(1.2345, 0.006789)"

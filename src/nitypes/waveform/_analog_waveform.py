@@ -319,8 +319,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
     ) -> None:
-        start_index = arg_to_uint("start index", start_index)
-        sample_count = arg_to_uint("sample count", sample_count)
+        start_index = arg_to_uint("start index", start_index, 0)
+        sample_count = arg_to_uint("sample count", sample_count, 0)
         capacity = arg_to_uint("capacity", capacity, sample_count)
 
         if dtype is None:
@@ -378,7 +378,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                 f"Array length: {len(data)}"
             )
 
-        start_index = arg_to_uint("start index", start_index)
+        start_index = arg_to_uint("start index", start_index, 0)
         if start_index > capacity:
             raise ValueError(
                 "The start index must be less than or equal to the input array length.\n\n"

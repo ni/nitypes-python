@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import operator
 import sys
-from typing import SupportsIndex
+from typing import SupportsFloat, SupportsIndex
 
 import numpy as np
 import numpy.typing as npt
@@ -28,14 +28,55 @@ def add_note(exception: Exception, note: str) -> None:
         exception.args = (message,) + exception.args[1:]
 
 
-def arg_to_int(arg_description: str, value: SupportsIndex | None, default_value: int = 0) -> int:
+def arg_to_float(
+    arg_description: str, value: SupportsFloat | None, default_value: float | None = None
+) -> float:
+    """Convert an argument to a float."""
+    if value is None:
+        if default_value is None:
+            raise TypeError(
+                f"The {arg_description} must be a floating point number.\n\n"
+                f"Provided value: {value}"
+            )
+        return default_value
+
+    if not isinstance(value, float):
+        try:
+            return value.__float__()
+        except AttributeError:
+            raise TypeError(
+                f"The {arg_description} must be a floating point number.\n\n"
+                f"Provided value: {value}"
+            ) from None
+
+    return value
+
+
+def arg_to_int(
+    arg_description: str, value: SupportsIndex | None, default_value: int | None = None
+) -> int:
     """Convert an argument to a signed integer."""
     if value is None:
+        if default_value is None:
+            raise TypeError(
+                f"The {arg_description} must be an integer.\n\n" f"Provided value: {value}"
+            )
         return default_value
-    return operator.index(value)
+
+    if not isinstance(value, int):
+        try:
+            return operator.index(value)
+        except AttributeError:
+            raise TypeError(
+                f"The {arg_description} must be an integer.\n\n" f"Provided value: {value}"
+            ) from None
+
+    return value
 
 
-def arg_to_uint(arg_description: str, value: SupportsIndex | None, default_value: int = 0) -> int:
+def arg_to_uint(
+    arg_description: str, value: SupportsIndex | None, default_value: int | None = None
+) -> int:
     """Convert an argument to an unsigned integer."""
     value = arg_to_int(arg_description, value, default_value)
     if value < 0:

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
-import numpy as np
+from typing import SupportsFloat
+
 import numpy.typing as npt
 
 from nitypes.waveform._scaling._base import ScaleMode, _TScaled
+from nitypes.waveform._utils import arg_to_float
 
 
 class LinearScaleMode(ScaleMode):
@@ -14,7 +16,7 @@ class LinearScaleMode(ScaleMode):
     _gain: float
     _offset: float
 
-    def __init__(self, gain: float, offset: float) -> None:
+    def __init__(self, gain: SupportsFloat, offset: SupportsFloat) -> None:
         """Construct a scale mode object that scales data linearly.
 
         Args:
@@ -24,16 +26,8 @@ class LinearScaleMode(ScaleMode):
         Returns:
             A scale mode that scales data linearly.
         """
-        if not isinstance(gain, (float, int)):
-            raise TypeError(
-                "The gain must be a floating point number.\n\n" f"Provided value: {gain}"
-            )
-        if not isinstance(offset, (float, int)):
-            raise TypeError(
-                "The offset must be a floating point number.\n\n" f"Provided value: {offset}"
-            )
-        self._gain = gain
-        self._offset = offset
+        self._gain = arg_to_float("gain", gain)
+        self._offset = arg_to_float("offset", offset)
 
     @property
     def gain(self) -> float:
