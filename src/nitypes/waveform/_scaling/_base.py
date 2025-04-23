@@ -6,13 +6,18 @@ from typing import TYPE_CHECKING, Any, ClassVar, SupportsIndex, TypeVar, overloa
 import numpy as np
 import numpy.typing as npt
 
-from nitypes.waveform._analog_waveform import AnalogWaveform
 from nitypes.waveform._utils import validate_dtype
 
 if TYPE_CHECKING:
+    # circular imports
+    from nitypes.waveform._analog_waveform import AnalogWaveform
     from nitypes.waveform._scaling._none import NoneScaleMode
 
 _TRaw = TypeVar("_TRaw", bound=np.generic)
+
+# It might make sense to constrain this to np.float32 or np.float64 once
+# https://github.com/numpy/numpy/issues/28805 is fixed, but bound=np.generic currently has more
+# predictable results.
 _TScaled = TypeVar("_TScaled", bound=np.generic)
 
 
@@ -81,6 +86,8 @@ class ScaleMode(ABC):
         Returns:
             The scaled analog waveform data.
         """
+        from nitypes.waveform._analog_waveform import AnalogWaveform
+
         if not isinstance(waveform, AnalogWaveform):
             raise TypeError(
                 "The waveform must be an AnalogWaveform object.\n\n" f"Type: {type(waveform)}"

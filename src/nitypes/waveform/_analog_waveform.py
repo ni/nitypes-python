@@ -12,6 +12,7 @@ from nitypes.waveform._extended_properties import (
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
 )
+from nitypes.waveform._scaling._base import ScaleMode
 from nitypes.waveform._timing._conversion import convert_timing
 from nitypes.waveform._timing._precision import PrecisionTiming
 from nitypes.waveform._timing._standard import Timing
@@ -221,6 +222,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         "_extended_properties",
         "_timing",
         "_precision_timing",
+        "_scale_mode",
         "__weakref__",
     ]
 
@@ -230,6 +232,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     _extended_properties: ExtendedPropertyDictionary
     _timing: Timing | None
     _precision_timing: PrecisionTiming | None
+    _scale_mode: ScaleMode
 
     # If neither dtype nor _data is specified, the type parameter defaults to np.float64.
     @overload
@@ -347,6 +350,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._extended_properties = ExtendedPropertyDictionary()
         self._timing = Timing.empty
         self._precision_timing = None
+        self._scale_mode = ScaleMode.none
 
     def _init_with_provided_array(
         self,
@@ -401,6 +405,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._extended_properties = ExtendedPropertyDictionary()
         self._timing = Timing.empty
         self._precision_timing = None
+        self._scale_mode = ScaleMode.none
 
     @property
     def raw_data(self) -> npt.NDArray[_ScalarType_co]:
@@ -495,7 +500,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @channel_name.setter
     def channel_name(self, value: str) -> None:
         if not isinstance(value, str):
-            raise TypeError("The channel name must be a str.\n\n" f"Channel name: {value!r}")
+            raise TypeError("The channel name must be a str.\n\n" f"Provided value: {value!r}")
         self._extended_properties[CHANNEL_NAME] = value
 
     @property
@@ -508,9 +513,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @unit_description.setter
     def unit_description(self, value: str) -> None:
         if not isinstance(value, str):
-            raise TypeError(
-                "The unit description must be a str.\n\n" f"Unit description: {value!r}"
-            )
+            raise TypeError("The unit description must be a str.\n\n" f"Provided value: {value!r}")
         self._extended_properties[UNIT_DESCRIPTION] = value
 
     @property
@@ -571,3 +574,16 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             raise TypeError("The precision timing information must be a PrecisionTiming object.")
         self._precision_timing = value
         self._timing = None
+
+    @property
+    def scale_mode(self) -> ScaleMode:
+        """The scale mode of the analog waveform."""
+        return self._scale_mode
+
+    @scale_mode.setter
+    def scale_mode(self, value: ScaleMode) -> None:
+        if not isinstance(value, ScaleMode):
+            raise TypeError(
+                "The scale mode must be a ScaleMode object.\n\n" f"Provided value: {value!r}"
+            )
+        self._scale_mode = value
