@@ -36,6 +36,3 @@ PrecisionTiming.__module__ = __name__
 SampleIntervalMode.__module__ = __name__
 ScaleMode.__module__ = __name__
 Timing.__module__ = __name__
-
-ScaleMode.none = NoneScaleMode()
-"""A scale mode that does not scale data."""
