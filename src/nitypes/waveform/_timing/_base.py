@@ -277,48 +277,17 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
             )
         if self._timestamps is None or other._timestamps is None:
             raise RuntimeError("The sample interval mode must be irregular.")
-        if not self._are_timings_monotonic(other):
-            raise ValueError("The timestamps must be in ascending or descending order.")
 
         if len(self._timestamps) == 0:
             return other
         elif len(other._timestamps) == 0:
             return self
         else:
+            # The constructor will verify that the combined list of timestamps is monotonic. This is
+            # not optimal for a large number of appends.
             return self.__class__(
                 SampleIntervalMode.IRREGULAR, None, None, None, self._timestamps + other._timestamps
             )
-
-    def _are_timings_monotonic(self, other: Self) -> bool:
-        assert self._timestamps is not None and other._timestamps is not None
-        if len(self._timestamps) == 0 or len(other._timestamps) == 0:
-            return True
-
-        first_time = self._timestamps[0]
-        last_time = self._timestamps[-1]
-        other_first_time = other._timestamps[0]
-        other_last_time = other._timestamps[-1]
-
-        # Timestamps must increase or decrease sequentially.
-        raw_direction = _get_direction(first_time, last_time)
-        raw_other_direction = _get_direction(other_first_time, other_last_time)
-        raw_join_direction = _get_direction(last_time, other_first_time)
-
-        join_direction = raw_join_direction
-        if join_direction == 0:
-            join_direction = raw_direction
-        if join_direction == 0:
-            join_direction = raw_other_direction
-
-        direction = raw_direction
-        if direction == 0:
-            direction = join_direction
-
-        other_direction = raw_other_direction
-        if other_direction == 0:
-            other_direction = join_direction
-
-        return direction == other_direction and direction == join_direction
 
 
 def _are_timestamps_monotonic(timestamps: Sequence[_TDateTime_co]) -> bool:
