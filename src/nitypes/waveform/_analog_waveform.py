@@ -452,7 +452,11 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     @property
     def scaled_data(self) -> npt.NDArray[np.float64]:
-        """The scaled analog waveform data."""
+        """The scaled analog waveform data.
+
+        This property converts all of the waveform samples to float64 and scales them. To scale a
+        subset of the waveform or convert to float32, use the get_scaled_data() method instead.
+        """
         return self.get_scaled_data()
 
     # If dtype is not specified, _ScaledDataType defaults to np.float64.
@@ -490,11 +494,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
     ) -> npt.NDArray[Any]:
-        """Get a subset of the scaled analog waveform data.
+        """Get a subset of the scaled analog waveform data with the specified dtype.
 
         Args:
-            start_index: The sample index at which the data begins.
-            sample_count: The number of samples to return.
+            dtype: The NumPy data type to use for scaled data.
+            start_index: The sample index at which to start scaling.
+            sample_count: The number of samples to scale.
 
         Returns:
             A subset of the scaled analog waveform data.
@@ -504,7 +509,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         validate_dtype(dtype, _SCALED_DTYPES)
 
         raw_data = self.get_raw_data(start_index, sample_count)
-        return self._scale_mode._transform_data(raw_data.astype(dtype))
+        converted_data = raw_data.astype(dtype)
+        return self._scale_mode._transform_data(converted_data)
 
     @property
     def sample_count(self) -> int:
