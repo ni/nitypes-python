@@ -9,6 +9,7 @@ from typing import Generic, SupportsIndex, TypeVar
 
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import add_note, invalid_arg_type
+from nitypes._typing import Self
 
 
 class SampleIntervalMode(Enum):
@@ -25,8 +26,9 @@ class SampleIntervalMode(Enum):
 
 
 # TODO: should these be constrained types? I guess we'll find out when we add NI-BTF types.
-_TDateTime_co = TypeVar("_TDateTime_co", bound=dt.datetime)
-_TTimeDelta_co = TypeVar("_TTimeDelta_co", bound=dt.timedelta)
+_TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
+_TDateTime_co = TypeVar("_TDateTime_co", bound=dt.datetime, covariant=True)
+_TTimeDelta_co = TypeVar("_TTimeDelta_co", bound=dt.timedelta, covariant=True)
 
 
 class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
@@ -150,6 +152,8 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
             isinstance(ts, datetime_type) for ts in timestamps
         ):
             raise invalid_arg_type("timestamps", "sequence of datetime objects", timestamps)
+        if not _are_timestamps_monotonic(timestamps):
+            raise ValueError("The timestamps must be in ascending or descending order.")
 
     _VALIDATE_INIT_ARGS_FOR_MODE = {
         SampleIntervalMode.NONE: _validate_init_args_none,
@@ -265,3 +269,75 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         if self._timestamps is not None:
             args.append(f"timestamps={self._timestamps!r}")
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
+
+    def _append_timing(self, other: Self) -> Self:
+        if not isinstance(other, self.__class__):
+            raise TypeError(
+                "The input waveform(s) must have the same waveform timing type as the current waveform."
+            )
+        if self._timestamps is None or other._timestamps is None:
+            raise RuntimeError("The sample interval mode must be irregular.")
+        if not self._are_timings_monotonic(other):
+            raise ValueError("The timestamps must be in ascending or descending order.")
+
+        if len(self._timestamps) == 0:
+            return other
+        elif len(other._timestamps) == 0:
+            return self
+        else:
+            return self.__class__(
+                SampleIntervalMode.IRREGULAR, None, None, None, self._timestamps + other._timestamps
+            )
+
+    def _are_timings_monotonic(self, other: Self) -> bool:
+        assert self._timestamps is not None and other._timestamps is not None
+        if len(self._timestamps) == 0 or len(other._timestamps) == 0:
+            return True
+
+        first_time = self._timestamps[0]
+        last_time = self._timestamps[-1]
+        other_first_time = other._timestamps[0]
+        other_last_time = other._timestamps[-1]
+
+        # Timestamps must increase or decrease sequentially.
+        raw_direction = _get_direction(first_time, last_time)
+        raw_other_direction = _get_direction(other_first_time, other_last_time)
+        raw_join_direction = _get_direction(last_time, other_first_time)
+
+        join_direction = raw_join_direction
+        if join_direction == 0:
+            join_direction = raw_direction
+        if join_direction == 0:
+            join_direction = raw_other_direction
+
+        direction = raw_direction
+        if direction == 0:
+            direction = join_direction
+
+        other_direction = raw_other_direction
+        if other_direction == 0:
+            other_direction = join_direction
+
+        return direction == other_direction and direction == join_direction
+
+
+def _are_timestamps_monotonic(timestamps: Sequence[_TDateTime_co]) -> bool:
+    direction = 0
+    for i in range(1, len(timestamps)):
+        comparison = _get_direction(timestamps[i - 1], timestamps[i])
+        if comparison == 0:
+            continue
+
+        if direction == 0:
+            direction = comparison
+        elif comparison != direction:
+            return False
+    return True
+
+
+def _get_direction(left: _TDateTime, right: _TDateTime) -> int:
+    if left < right:
+        return -1
+    if right < left:
+        return 1
+    return 0

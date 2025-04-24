@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime as dt
 import sys
 from collections.abc import Sequence
 from typing import (
@@ -10,10 +11,11 @@ from typing import (
     overload,
 )
 
+import hightime as ht
 import numpy as np
 import numpy.typing as npt
 
-from nitypes._arguments import arg_to_uint, validate_dtype
+from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
@@ -21,7 +23,13 @@ from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
 )
 from nitypes.waveform._scaling import NO_SCALING, ScaleMode
-from nitypes.waveform._timing import PrecisionTiming, Timing, convert_timing
+from nitypes.waveform._timing import (
+    BaseTiming,
+    PrecisionTiming,
+    SampleIntervalMode,
+    Timing,
+    convert_timing,
+)
 
 if sys.version_info < (3, 10):
     import array as std_array
@@ -228,6 +236,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         "_start_index",
         "_sample_count",
         "_extended_properties",
+        "_base_timing_",
         "_timing",
         "_precision_timing",
         "_scale_mode",
@@ -238,6 +247,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     _start_index: int
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
+    _base_timing_: BaseTiming[Any, Any]
     _timing: Timing | None
     _precision_timing: PrecisionTiming | None
     _scale_mode: ScaleMode
@@ -580,6 +590,18 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._extended_properties[UNIT_DESCRIPTION] = value
 
     @property
+    def _base_timing(self) -> BaseTiming[Any, Any]:
+        return self._base_timing_
+
+    @_base_timing.setter
+    def _base_timing(self, value: BaseTiming[Any, Any]) -> None:
+        if not isinstance(value, BaseTiming):
+            raise invalid_arg_type("timing information", "BaseTiming object", value)
+        self._base_timing_ = value
+        self._timing = value if isinstance(value, Timing) else None
+        self._precision_timing = value if isinstance(value, PrecisionTiming) else None
+
+    @property
     def timing(self) -> Timing:
         """The timing information of the analog waveform.
 
@@ -588,18 +610,15 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         if self._timing is None:
             if self._precision_timing is PrecisionTiming.empty:
                 self._timing = Timing.empty
-            elif self._precision_timing is not None:
-                self._timing = convert_timing(Timing, self._precision_timing)
             else:
-                raise RuntimeError("The waveform has no timing information.")
+                self._timing = convert_timing(Timing, self._base_timing)
         return self._timing
 
     @timing.setter
     def timing(self, value: Timing) -> None:
         if not isinstance(value, Timing):
             raise invalid_arg_type("timing information", "Timing object", value)
-        self._timing = value
-        self._precision_timing = None
+        self._base_timing = value
 
     @property
     def is_precision_timing_initialized(self) -> bool:
@@ -625,18 +644,15 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         if self._precision_timing is None:
             if self._timing is Timing.empty:
                 self._precision_timing = PrecisionTiming.empty
-            elif self._timing is not None:
-                self._precision_timing = convert_timing(PrecisionTiming, self._timing)
             else:
-                raise RuntimeError("The waveform has no timing information.")
+                self._precision_timing = convert_timing(PrecisionTiming, self._base_timing)
         return self._precision_timing
 
     @precision_timing.setter
     def precision_timing(self, value: PrecisionTiming) -> None:
         if not isinstance(value, PrecisionTiming):
             raise invalid_arg_type("precision timing information", "PrecisionTiming object", value)
-        self._precision_timing = value
-        self._timing = None
+        self._base_timing = value
 
     @property
     def scale_mode(self) -> ScaleMode:
@@ -648,3 +664,119 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         if not isinstance(value, ScaleMode):
             raise invalid_arg_type("scale mode", "ScaleMode object", value)
         self._scale_mode = value
+
+    def append(
+        self,
+        other: (
+            npt.NDArray[_ScalarType_co]
+            | AnalogWaveform[_ScalarType_co]
+            | Sequence[AnalogWaveform[_ScalarType_co]]
+        ),
+        /,
+        timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
+    ) -> None:
+        """Append data to the analog waveform.
+
+        Args:
+            other: The array or waveform(s) to append.
+            timestamps: A sequence of timestamps for irregular timing.
+        """
+        if isinstance(other, np.ndarray):
+            self._append_array(other, timestamps)
+        elif isinstance(other, AnalogWaveform):
+            validate_unsupported_arg("timestamps", timestamps)
+            self._append_waveform(other)
+        elif isinstance(other, Sequence) and all(isinstance(x, AnalogWaveform) for x in other):
+            validate_unsupported_arg("timestamps", timestamps)
+            self._append_waveforms(other)
+        else:
+            raise invalid_arg_type("input", "array or waveform(s)", other)
+
+    def _append_array(
+        self,
+        array: npt.NDArray[_ScalarType_co],
+        timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
+    ) -> None:
+        if array.dtype != self.dtype:
+            raise TypeError(
+                "The data type of the input array must match the waveform data type.\n\n"
+                f"Input array data type: {array.dtype}\n"
+                f"Waveform data type: {self.dtype}"
+            )
+        if array.ndim != 1:
+            raise ValueError(
+                "The input array must be a one-dimensional array.\n\n"
+                f"Number of dimensions: {array.ndim}"
+            )
+
+        if timestamps is None:
+            if self._base_timing.sample_interval_mode not in (
+                SampleIntervalMode.NONE,
+                SampleIntervalMode.REGULAR,
+            ):
+                raise RuntimeError(
+                    "The sample interval mode of the waveform timing must be regular or none."
+                )
+        else:
+            if self._base_timing.sample_interval_mode != SampleIntervalMode.IRREGULAR:
+                raise RuntimeError(
+                    "The sample interval mode of the waveform timing must be irregular."
+                )
+            if len(array) != len(timestamps):
+                raise ValueError(
+                    "The number of irregular timestamps must be equal to the input array length.\n\n"
+                    f"Number of timestamps: {len(timestamps)}\n"
+                    f"Array length: {len(array)}"
+                )
+
+        self._increase_capacity(len(array))
+
+        if timestamps is not None:
+            timing = self._base_timing.__class__(
+                SampleIntervalMode.IRREGULAR, None, None, None, timestamps
+            )
+            self._base_timing = self._base_timing._append_timing(timing)
+
+        offset = self._start_index + self._sample_count
+        self._data[offset : offset + len(array)] = array
+        self._sample_count += len(array)
+
+    def _append_waveform(self, waveform: AnalogWaveform[_ScalarType_co]) -> None:
+        self._append_waveforms([waveform])
+
+    def _append_waveforms(self, waveforms: Sequence[AnalogWaveform[_ScalarType_co]]) -> None:
+        for waveform in waveforms:
+            if waveform.dtype != self.dtype:
+                raise TypeError(
+                    "The data type of the input waveform must match the waveform data type.\n\n"
+                    f"Input waveform data type: {waveform.dtype}\n"
+                    f"Waveform data type: {self.dtype}"
+                )
+
+            is_irregular = self._base_timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+            is_other_irregular = (
+                waveform._base_timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+            )
+            if is_irregular != is_other_irregular:
+                raise RuntimeError(
+                    "The timing of one or more waveforms does not match the timing of the current waveform."
+                )
+
+        self._increase_capacity(sum(waveform.sample_count for waveform in waveforms))
+
+        if is_irregular:
+            new_timing = self._base_timing
+            for waveform in waveforms:
+                new_timing = new_timing._append_timing(waveform._base_timing)
+            self._base_timing = new_timing
+
+        offset = self._start_index + self._sample_count
+        for waveform in waveforms:
+            self._data[offset : offset + waveform.sample_count] = waveform.raw_data
+            offset += waveform.sample_count
+            self._sample_count += waveform.sample_count
+
+    def _increase_capacity(self, amount: int) -> None:
+        new_capacity = self._start_index + self._sample_count + amount
+        if new_capacity > self.capacity:
+            self.capacity = new_capacity
