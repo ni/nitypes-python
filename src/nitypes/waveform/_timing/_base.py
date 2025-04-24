@@ -243,11 +243,15 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         elif self._sample_interval_mode == SampleIntervalMode.IRREGULAR:
             assert self._timestamps is not None
             if count > len(self._timestamps):
-                raise ValueError("The count must be less or equal to the number of timestamps.")
+                raise ValueError(
+                    "The count must be less than or equal to the number of timestamps."
+                )
             return self._timestamps[start_index : start_index + count]
         else:
             raise RuntimeError(
-                "The waveform timing does not have valid timestamp information. To obtain timestamps, the waveform must be irregular or must be initialized with a valid time stamp and sample interval."
+                "The waveform timing does not have valid timestamp information. "
+                "To obtain timestamps, the waveform must be irregular or must be initialized "
+                "with a valid time stamp and sample interval."
             )
 
     def _generate_regular_timestamps(
