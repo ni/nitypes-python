@@ -7,6 +7,7 @@ from typing import Any, Generic, SupportsIndex, TypeVar, overload
 import numpy as np
 import numpy.typing as npt
 
+from nitypes._arguments import arg_to_uint, validate_dtype
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     UNIT_DESCRIPTION,
@@ -16,7 +17,6 @@ from nitypes.waveform._scaling import NO_SCALING, ScaleMode
 from nitypes.waveform._timing._conversion import convert_timing
 from nitypes.waveform._timing._precision import PrecisionTiming
 from nitypes.waveform._timing._standard import Timing
-from nitypes.waveform._utils import arg_to_uint, validate_dtype
 
 if sys.version_info < (3, 10):
     import array as std_array

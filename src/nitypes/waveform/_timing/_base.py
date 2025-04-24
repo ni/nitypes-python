@@ -7,7 +7,7 @@ from collections.abc import Generator, Iterable, Sequence
 from enum import Enum
 from typing import Generic, SupportsIndex, TypeVar
 
-from nitypes.waveform._utils import add_note
+from nitypes._exceptions import add_note
 
 
 class SampleIntervalMode(Enum):

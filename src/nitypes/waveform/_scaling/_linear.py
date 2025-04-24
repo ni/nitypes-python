@@ -4,8 +4,8 @@ from typing import SupportsFloat
 
 import numpy.typing as npt
 
+from nitypes._arguments import arg_to_float
 from nitypes.waveform._scaling._base import ScaleMode, _ScalarType
-from nitypes.waveform._utils import arg_to_float
 
 
 class LinearScaleMode(ScaleMode):
