@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy.typing as npt
 
-from nitypes.waveform._scaling._base import ScaleMode, _TScaled
+from nitypes.waveform._scaling._base import ScaleMode, _ScalarType
 
 
 class NoneScaleMode(ScaleMode):
@@ -10,7 +10,7 @@ class NoneScaleMode(ScaleMode):
 
     __slots__ = ()
 
-    def _transform_data(self, data: npt.NDArray[_TScaled]) -> npt.NDArray[_TScaled]:
+    def _transform_data(self, data: npt.NDArray[_ScalarType]) -> npt.NDArray[_ScalarType]:
         return data
 
     def __repr__(  # noqa: D105 - Missing docstring in magic method (auto-generated noqa)

@@ -4,7 +4,7 @@ from typing import SupportsFloat
 
 import numpy.typing as npt
 
-from nitypes.waveform._scaling._base import ScaleMode, _TScaled
+from nitypes.waveform._scaling._base import ScaleMode, _ScalarType
 from nitypes.waveform._utils import arg_to_float
 
 
@@ -39,7 +39,7 @@ class LinearScaleMode(ScaleMode):
         """The offset of the linear scale."""
         return self._offset
 
-    def _transform_data(self, data: npt.NDArray[_TScaled]) -> npt.NDArray[_TScaled]:
+    def _transform_data(self, data: npt.NDArray[_ScalarType]) -> npt.NDArray[_ScalarType]:
         # https://github.com/numpy/numpy/issues/28805 - TYP: mypy infers that adding/multiplying a
         # npt.NDArray[np.float32] with a float promotes dtype to Any or np.float64
         return data * self._gain + self._offset  # type: ignore[operator,no-any-return]

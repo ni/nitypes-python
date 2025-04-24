@@ -13,9 +13,9 @@ import numpy.typing as npt
 import pytest
 
 from nitypes.waveform import (
+    NO_SCALING,
     AnalogWaveform,
     LinearScaleMode,
-    NO_SCALING,
     NoneScaleMode,
     PrecisionTiming,
     ScaleMode,
@@ -748,6 +748,45 @@ def test___float32_dtype___get_scaled_data___converts_to_float32() -> None:
     assert_type(scaled_data, npt.NDArray[np.float32])
     assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.float32
     assert list(scaled_data) == [0.5, 2.5, 4.5, 6.5]
+
+
+@pytest.mark.parametrize(
+    "waveform_dtype",
+    [
+        np.float32,
+        np.float64,
+        np.int8,
+        np.int16,
+        np.int32,
+        np.int64,
+        np.uint8,
+        np.uint16,
+        np.uint32,
+        np.uint64,
+    ],
+)
+@pytest.mark.parametrize("scaled_dtype", [np.float32, np.float64])
+def test___varying_dtype___get_scaled_data___converts_to_requested_dtype(
+    waveform_dtype: npt.DTypeLike, scaled_dtype: npt.DTypeLike
+) -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], waveform_dtype)
+    waveform.scale_mode = LinearScaleMode(3.0, 4.0)
+
+    scaled_data = waveform.get_scaled_data(scaled_dtype)
+
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == scaled_dtype
+    assert list(scaled_data) == [4.0, 7.0, 10.0, 13.0]
+
+
+def test___unsupported_dtype___get_scaled_data___raises_type_error() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+    waveform.scale_mode = LinearScaleMode(3.0, 4.0)
+
+    with pytest.raises(TypeError) as exc:
+        _ = waveform.get_scaled_data(np.int32)
+
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
+    assert "Supported data types: float32, float64" in exc.value.args[0]
 
 
 def test___array_subset___get_scaled_data___returns_array_subset() -> None:

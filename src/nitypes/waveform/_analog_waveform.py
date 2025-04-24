@@ -46,6 +46,13 @@ _ANALOG_DTYPES = (
     np.ulonglong,
 )
 
+_SCALED_DTYPES = (
+    # Floating point
+    np.single,
+    np.double,
+)
+
+
 # Note about NumPy type hints:
 # - At time of writing (April 2025), shape typing is still under development, so we do not
 #   distinguish between 1D and 2D arrays in type hints.
@@ -446,7 +453,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @property
     def scaled_data(self) -> npt.NDArray[np.float64]:
         """The scaled analog waveform data."""
-        return self._scale_mode.get_scaled_data(self)
+        return self.get_scaled_data()
 
     # If dtype is not specified, _ScaledDataType defaults to np.float64.
     @overload
@@ -492,9 +499,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         Returns:
             A subset of the scaled analog waveform data.
         """
-        return self._scale_mode.get_scaled_data(
-            self, dtype, start_index=start_index, sample_count=sample_count
-        )
+        if dtype is None:
+            dtype = np.float64
+        validate_dtype(dtype, _SCALED_DTYPES)
+
+        raw_data = self.get_raw_data(start_index, sample_count)
+        return self._scale_mode._transform_data(raw_data.astype(dtype))
 
     @property
     def sample_count(self) -> int:
