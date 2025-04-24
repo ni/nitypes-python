@@ -8,6 +8,7 @@ import numpy as np
 import numpy.typing as npt
 
 from nitypes._arguments import arg_to_uint, validate_dtype
+from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     UNIT_DESCRIPTION,
@@ -125,7 +126,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         if isinstance(array, np.ndarray):
             if array.ndim != 1:
                 raise ValueError(
-                    f"The input array must be a one-dimensional array or sequence.\n\nNumber of dimensions: {array.ndim}"
+                    "The input array must be a one-dimensional array or sequence.\n\n"
+                    f"Number of dimensions: {array.ndim}"
                 )
         elif isinstance(array, Sequence) or (
             sys.version_info < (3, 10) and isinstance(array, std_array.array)
@@ -134,7 +136,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
             raise TypeError(
-                f"The input array must be a one-dimensional array or sequence.\n\nType: {type(array)}"
+                "The input array must be a one-dimensional array or sequence.\n\n"
+                f"Type: {type(array)}"
             )
 
         return AnalogWaveform(
@@ -201,7 +204,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         if isinstance(array, np.ndarray):
             if array.ndim != 2:
                 raise ValueError(
-                    f"The input array must be a two-dimensional array or nested sequence.\n\nNumber of dimensions: {array.ndim}"
+                    "The input array must be a two-dimensional array or nested sequence.\n\n"
+                    f"Number of dimensions: {array.ndim}"
                 )
         elif isinstance(array, Sequence) or (
             sys.version_info < (3, 10) and isinstance(array, std_array.array)
@@ -210,7 +214,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
             raise TypeError(
-                f"The input array must be a two-dimensional array or nested sequence.\n\nType: {type(array)}"
+                "The input array must be a two-dimensional array or nested sequence.\n\n"
+                f"Type: {type(array)}"
             )
 
         return [
@@ -530,10 +535,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     @capacity.setter
     def capacity(self, value: int) -> None:
-        if value < 0:
-            raise ValueError(
-                "The capacity must be a non-negative integer.\n\n" f"Capacity: {value}"
-            )
+        value = arg_to_uint("capacity", value)
         if value < self._start_index + self._sample_count:
             raise ValueError(
                 "The capacity must be equal to or greater than the number of samples in the waveform.\n\n"
@@ -563,7 +565,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @channel_name.setter
     def channel_name(self, value: str) -> None:
         if not isinstance(value, str):
-            raise TypeError("The channel name must be a str.\n\n" f"Provided value: {value!r}")
+            raise invalid_arg_type("channel name", "str", value)
         self._extended_properties[CHANNEL_NAME] = value
 
     @property
@@ -576,7 +578,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @unit_description.setter
     def unit_description(self, value: str) -> None:
         if not isinstance(value, str):
-            raise TypeError("The unit description must be a str.\n\n" f"Provided value: {value!r}")
+            raise invalid_arg_type("unit description", "str", value)
         self._extended_properties[UNIT_DESCRIPTION] = value
 
     @property
@@ -597,7 +599,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @timing.setter
     def timing(self, value: Timing) -> None:
         if not isinstance(value, Timing):
-            raise TypeError("The timing information must be a Timing object.")
+            raise invalid_arg_type("timing information", "Timing object", value)
         self._timing = value
         self._precision_timing = None
 
@@ -634,7 +636,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @precision_timing.setter
     def precision_timing(self, value: PrecisionTiming) -> None:
         if not isinstance(value, PrecisionTiming):
-            raise TypeError("The precision timing information must be a PrecisionTiming object.")
+            raise invalid_arg_type("precision timing information", "PrecisionTiming object", value)
         self._precision_timing = value
         self._timing = None
 
@@ -646,7 +648,5 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @scale_mode.setter
     def scale_mode(self, value: ScaleMode) -> None:
         if not isinstance(value, ScaleMode):
-            raise TypeError(
-                "The scale mode must be a ScaleMode object.\n\n" f"Provided value: {value!r}"
-            )
+            raise invalid_arg_type("scale mode", "ScaleMode object", value)
         self._scale_mode = value

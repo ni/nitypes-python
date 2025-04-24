@@ -6,6 +6,8 @@ from typing import SupportsFloat, SupportsIndex
 import numpy as np
 import numpy.typing as npt
 
+from nitypes._exceptions import invalid_arg_type, invalid_arg_value, unsupported_arg
+
 
 def arg_to_float(
     arg_description: str, value: SupportsFloat | None, default_value: float | None = None
@@ -39,10 +41,7 @@ def arg_to_float(
     """
     if value is None:
         if default_value is None:
-            raise TypeError(
-                f"The {arg_description} must be a floating point number.\n\n"
-                f"Provided value: {value!r}"
-            )
+            raise invalid_arg_type(arg_description, "floating point number", value)
         value = default_value
 
     if not isinstance(value, float):
@@ -50,10 +49,7 @@ def arg_to_float(
             # Use value.__float__() because float(value) also accepts strings.
             return value.__float__()
         except Exception:
-            raise TypeError(
-                f"The {arg_description} must be a floating point number.\n\n"
-                f"Provided value: {value!r}"
-            ) from None
+            raise invalid_arg_type(arg_description, "floating point number", value) from None
 
     return value
 
@@ -90,18 +86,14 @@ def arg_to_int(
     """
     if value is None:
         if default_value is None:
-            raise TypeError(
-                f"The {arg_description} must be an integer.\n\n" f"Provided value: {value!r}"
-            )
+            raise invalid_arg_type(arg_description, "integer", value)
         value = default_value
 
     if not isinstance(value, int):
         try:
             return operator.index(value)
         except Exception:
-            raise TypeError(
-                f"The {arg_description} must be an integer.\n\n" f"Provided value: {value!r}"
-            ) from None
+            raise invalid_arg_type(arg_description, "integer", value) from None
 
     return value
 
@@ -132,10 +124,7 @@ def arg_to_uint(
     """
     value = arg_to_int(arg_description, value, default_value)
     if value < 0:
-        raise ValueError(
-            f"The {arg_description} must be a non-negative integer.\n\n"
-            f"Provided value: {value!r}"
-        )
+        raise invalid_arg_value(arg_description, "non-negative integer", value)
     return value
 
 
@@ -163,3 +152,9 @@ def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, 
             f"Data type: {np.dtype(dtype)}\n"
             f"Supported data types: {', '.join(supported_dtype_names)}"
         )
+
+
+def validate_unsupported_arg(arg_description: str, value: object) -> None:
+    """Validate that an unsupported argument is None."""
+    if value is not None:
+        raise unsupported_arg(arg_description, value)
