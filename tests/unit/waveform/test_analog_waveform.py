@@ -15,6 +15,7 @@ import pytest
 from nitypes.waveform import (
     AnalogWaveform,
     LinearScaleMode,
+    NO_SCALING,
     NoneScaleMode,
     PrecisionTiming,
     ScaleMode,
@@ -923,9 +924,9 @@ def test___waveform_with_precision_timing___get_timing___converts_timing() -> No
 ###############################################################################
 # scale_mode
 ###############################################################################
-def test___waveform___scale_mode___defaults_to_scale_mode_none() -> None:
+def test___waveform___scale_mode___defaults_to_no_scaling() -> None:
     waveform = AnalogWaveform()
 
     assert_type(waveform.scale_mode, ScaleMode)
     assert isinstance(waveform.scale_mode, NoneScaleMode)
-    assert waveform.scale_mode is ScaleMode.none
+    assert waveform.scale_mode is NO_SCALING

@@ -12,7 +12,7 @@ from nitypes.waveform._extended_properties import (
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
 )
-from nitypes.waveform._scaling._base import ScaleMode
+from nitypes.waveform._scaling import NO_SCALING, ScaleMode
 from nitypes.waveform._timing._conversion import convert_timing
 from nitypes.waveform._timing._precision import PrecisionTiming
 from nitypes.waveform._timing._standard import Timing
@@ -350,7 +350,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._extended_properties = ExtendedPropertyDictionary()
         self._timing = Timing.empty
         self._precision_timing = None
-        self._scale_mode = ScaleMode.none
+        self._scale_mode = NO_SCALING
 
     def _init_with_provided_array(
         self,
@@ -405,7 +405,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._extended_properties = ExtendedPropertyDictionary()
         self._timing = Timing.empty
         self._precision_timing = None
-        self._scale_mode = ScaleMode.none
+        self._scale_mode = NO_SCALING
 
     @property
     def raw_data(self) -> npt.NDArray[_ScalarType_co]:

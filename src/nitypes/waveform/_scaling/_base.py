@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, ClassVar, SupportsIndex, TypeVar, overload
+from typing import TYPE_CHECKING, Any, SupportsIndex, TypeVar, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -11,7 +11,6 @@ from nitypes.waveform._utils import validate_dtype
 if TYPE_CHECKING:
     # circular imports
     from nitypes.waveform._analog_waveform import AnalogWaveform
-    from nitypes.waveform._scaling._none import NoneScaleMode
 
 _TRaw = TypeVar("_TRaw", bound=np.generic)
 
@@ -32,8 +31,6 @@ class ScaleMode(ABC):
     """An object that specifies how the waveform is scaled."""
 
     __slots__ = ()
-
-    none: ClassVar[NoneScaleMode]
 
     # If dtype is not specified, _ScaledDataType defaults to np.float64.
     @overload
