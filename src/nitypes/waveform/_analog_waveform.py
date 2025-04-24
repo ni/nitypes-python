@@ -446,8 +446,55 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @property
     def scaled_data(self) -> npt.NDArray[np.float64]:
         """The scaled analog waveform data."""
-        # TODO: implement scaling
-        return self.raw_data.astype(np.float64)
+        return self._scale_mode.get_scaled_data(self)
+
+    # If dtype is not specified, _ScaledDataType defaults to np.float64.
+    @overload
+    def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self,
+        dtype: None = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+    ) -> npt.NDArray[np.float64]: ...
+
+    @overload
+    def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self,
+        dtype: type[_ScalarType] | np.dtype[_ScalarType] = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+    ) -> npt.NDArray[_ScalarType]: ...
+
+    @overload
+    def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self,
+        dtype: npt.DTypeLike = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+    ) -> npt.NDArray[Any]: ...
+
+    def get_scaled_data(
+        self,
+        dtype: npt.DTypeLike = None,
+        *,
+        start_index: SupportsIndex | None = 0,
+        sample_count: SupportsIndex | None = None,
+    ) -> npt.NDArray[Any]:
+        """Get a subset of the scaled analog waveform data.
+
+        Args:
+            start_index: The sample index at which the data begins.
+            sample_count: The number of samples to return.
+
+        Returns:
+            A subset of the scaled analog waveform data.
+        """
+        return self._scale_mode.get_scaled_data(
+            self, dtype, start_index=start_index, sample_count=sample_count
+        )
 
     @property
     def sample_count(self) -> int:
