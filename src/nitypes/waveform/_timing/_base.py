@@ -7,7 +7,7 @@ from collections.abc import Generator, Iterable, Sequence
 from enum import Enum
 from typing import Generic, SupportsIndex, TypeVar
 
-from nitypes.waveform._utils import add_note
+from nitypes._exceptions import add_note
 
 
 class SampleIntervalMode(Enum):
@@ -31,7 +31,7 @@ _TTimeDelta_co = TypeVar("_TTimeDelta_co", bound=dt.timedelta)
 def _validate_unsupported_arg(arg_description: str, value: object) -> None:
     if value is not None:
         raise ValueError(
-            f"The {arg_description} argument is not supported.\n\n" f"Provided value: {value}"
+            f"The {arg_description} argument is not supported.\n\n" f"Provided value: {value!r}"
         )
 
 
@@ -119,11 +119,12 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         timedelta_type = self.__class__._get_timedelta_type()
         if not isinstance(timestamp, (datetime_type, type(None))):
             raise TypeError(
-                "The timestamp must be a datetime or None.\n\n" f"Provided value: {timestamp}"
+                "The timestamp must be a datetime or None.\n\n" f"Provided value: {timestamp!r}"
             )
         if not isinstance(time_offset, (timedelta_type, type(None))):
             raise TypeError(
-                f"The time offset must be a timedelta or None.\n\n" f"Provided value: {time_offset}"
+                f"The time offset must be a timedelta or None.\n\n"
+                f"Provided value: {time_offset!r}"
             )
         _validate_unsupported_arg("sample interval", sample_interval)
         _validate_unsupported_arg("timestamps", timestamps)
@@ -139,15 +140,17 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         timedelta_type = self.__class__._get_timedelta_type()
         if not isinstance(timestamp, (datetime_type, type(None))):
             raise TypeError(
-                "The timestamp must be a datetime or None.\n\n" f"Provided value: {timestamp}"
+                "The timestamp must be a datetime or None.\n\n" f"Provided value: {timestamp!r}"
             )
         if not isinstance(time_offset, (timedelta_type, type(None))):
             raise TypeError(
-                f"The time offset must be a timedelta or None.\n\n" f"Provided value: {time_offset}"
+                f"The time offset must be a timedelta or None.\n\n"
+                f"Provided value: {time_offset!r}"
             )
         if not isinstance(sample_interval, timedelta_type):
             raise TypeError(
-                "The sample interval must be a timedelta.\n\n" f"Provided value: {sample_interval}"
+                "The sample interval must be a timedelta.\n\n"
+                f"Provided value: {sample_interval!r}"
             )
         _validate_unsupported_arg("timestamps", timestamps)
 
@@ -167,7 +170,7 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         ):
             raise TypeError(
                 "The timestamps must be a sequence of datetime objects.\n\n"
-                f"Provided value: {timestamps}"
+                f"Provided value: {timestamps!r}"
             )
 
     _VALIDATE_INIT_ARGS_FOR_MODE = {
@@ -240,11 +243,15 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         elif self._sample_interval_mode == SampleIntervalMode.IRREGULAR:
             assert self._timestamps is not None
             if count > len(self._timestamps):
-                raise ValueError("The count must be less or equal to the number of timestamps.")
+                raise ValueError(
+                    "The count must be less than or equal to the number of timestamps."
+                )
             return self._timestamps[start_index : start_index + count]
         else:
             raise RuntimeError(
-                "The waveform timing does not have valid timestamp information. To obtain timestamps, the waveform must be irregular or must be initialized with a valid time stamp and sample interval."
+                "The waveform timing does not have valid timestamp information. "
+                "To obtain timestamps, the waveform must be irregular or must be initialized "
+                "with a valid time stamp and sample interval."
             )
 
     def _generate_regular_timestamps(

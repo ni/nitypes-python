@@ -7,15 +7,16 @@ from typing import Any, Generic, SupportsIndex, TypeVar, overload
 import numpy as np
 import numpy.typing as npt
 
+from nitypes._arguments import arg_to_uint, validate_dtype
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
 )
+from nitypes.waveform._scaling import NO_SCALING, ScaleMode
 from nitypes.waveform._timing._conversion import convert_timing
 from nitypes.waveform._timing._precision import PrecisionTiming
 from nitypes.waveform._timing._standard import Timing
-from nitypes.waveform._utils import arg_to_uint, validate_dtype
 
 if sys.version_info < (3, 10):
     import array as std_array
@@ -44,6 +45,13 @@ _ANALOG_DTYPES = (
     np.ulong,
     np.ulonglong,
 )
+
+_SCALED_DTYPES = (
+    # Floating point
+    np.single,
+    np.double,
+)
+
 
 # Note about NumPy type hints:
 # - At time of writing (April 2025), shape typing is still under development, so we do not
@@ -221,6 +229,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         "_extended_properties",
         "_timing",
         "_precision_timing",
+        "_scale_mode",
         "__weakref__",
     ]
 
@@ -230,6 +239,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     _extended_properties: ExtendedPropertyDictionary
     _timing: Timing | None
     _precision_timing: PrecisionTiming | None
+    _scale_mode: ScaleMode
 
     # If neither dtype nor _data is specified, the type parameter defaults to np.float64.
     @overload
@@ -319,8 +329,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
     ) -> None:
-        start_index = arg_to_uint("start index", start_index)
-        sample_count = arg_to_uint("sample count", sample_count)
+        start_index = arg_to_uint("start index", start_index, 0)
+        sample_count = arg_to_uint("sample count", sample_count, 0)
         capacity = arg_to_uint("capacity", capacity, sample_count)
 
         if dtype is None:
@@ -347,6 +357,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._extended_properties = ExtendedPropertyDictionary()
         self._timing = Timing.empty
         self._precision_timing = None
+        self._scale_mode = NO_SCALING
 
     def _init_with_provided_array(
         self,
@@ -378,7 +389,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                 f"Array length: {len(data)}"
             )
 
-        start_index = arg_to_uint("start index", start_index)
+        start_index = arg_to_uint("start index", start_index, 0)
         if start_index > capacity:
             raise ValueError(
                 "The start index must be less than or equal to the input array length.\n\n"
@@ -401,17 +412,105 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._extended_properties = ExtendedPropertyDictionary()
         self._timing = Timing.empty
         self._precision_timing = None
+        self._scale_mode = NO_SCALING
 
     @property
     def raw_data(self) -> npt.NDArray[_ScalarType_co]:
         """The raw analog waveform data."""
         return self._data[self._start_index : self._start_index + self._sample_count]
 
+    def get_raw_data(
+        self, start_index: SupportsIndex | None = 0, sample_count: SupportsIndex | None = None
+    ) -> npt.NDArray[_ScalarType_co]:
+        """Get a subset of the raw analog waveform data.
+
+        Args:
+            start_index: The sample index at which the data begins.
+            sample_count: The number of samples to return.
+
+        Returns:
+            A subset of the raw analog waveform data.
+        """
+        start_index = arg_to_uint("sample index", start_index, 0)
+        if start_index > self.sample_count:
+            raise ValueError(
+                "The start index must be less than or equal to the number of samples in the waveform.\n\n"
+                f"Start index: {start_index}\n"
+                f"Number of samples: {self.sample_count}"
+            )
+
+        sample_count = arg_to_uint("sample count", sample_count, self.sample_count - start_index)
+        if start_index + sample_count > self.sample_count:
+            raise ValueError(
+                "The sum of the start index and sample count must be less than or equal to the number of samples in the waveform.\n\n"
+                f"Start index: {start_index}\n"
+                f"Sample count: {sample_count}\n"
+                f"Number of samples: {self.sample_count}"
+            )
+
+        return self.raw_data[start_index : start_index + sample_count]
+
     @property
     def scaled_data(self) -> npt.NDArray[np.float64]:
-        """The scaled analog waveform data."""
-        # TODO: implement scaling
-        return self.raw_data.astype(np.float64)
+        """The scaled analog waveform data.
+
+        This property converts all of the waveform samples to float64 and scales them. To scale a
+        subset of the waveform or convert to float32, use the get_scaled_data() method instead.
+        """
+        return self.get_scaled_data()
+
+    # If dtype is not specified, _ScaledDataType defaults to np.float64.
+    @overload
+    def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self,
+        dtype: None = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+    ) -> npt.NDArray[np.float64]: ...
+
+    @overload
+    def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self,
+        dtype: type[_ScalarType] | np.dtype[_ScalarType] = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+    ) -> npt.NDArray[_ScalarType]: ...
+
+    @overload
+    def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self,
+        dtype: npt.DTypeLike = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+    ) -> npt.NDArray[Any]: ...
+
+    def get_scaled_data(
+        self,
+        dtype: npt.DTypeLike = None,
+        *,
+        start_index: SupportsIndex | None = 0,
+        sample_count: SupportsIndex | None = None,
+    ) -> npt.NDArray[Any]:
+        """Get a subset of the scaled analog waveform data with the specified dtype.
+
+        Args:
+            dtype: The NumPy data type to use for scaled data.
+            start_index: The sample index at which to start scaling.
+            sample_count: The number of samples to scale.
+
+        Returns:
+            A subset of the scaled analog waveform data.
+        """
+        if dtype is None:
+            dtype = np.float64
+        validate_dtype(dtype, _SCALED_DTYPES)
+
+        raw_data = self.get_raw_data(start_index, sample_count)
+        converted_data = raw_data.astype(dtype)
+        return self._scale_mode._transform_data(converted_data)
 
     @property
     def sample_count(self) -> int:
@@ -464,7 +563,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @channel_name.setter
     def channel_name(self, value: str) -> None:
         if not isinstance(value, str):
-            raise TypeError("The channel name must be a str.\n\n" f"Channel name: {value!r}")
+            raise TypeError("The channel name must be a str.\n\n" f"Provided value: {value!r}")
         self._extended_properties[CHANNEL_NAME] = value
 
     @property
@@ -477,9 +576,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @unit_description.setter
     def unit_description(self, value: str) -> None:
         if not isinstance(value, str):
-            raise TypeError(
-                "The unit description must be a str.\n\n" f"Unit description: {value!r}"
-            )
+            raise TypeError("The unit description must be a str.\n\n" f"Provided value: {value!r}")
         self._extended_properties[UNIT_DESCRIPTION] = value
 
     @property
@@ -540,3 +637,16 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             raise TypeError("The precision timing information must be a PrecisionTiming object.")
         self._precision_timing = value
         self._timing = None
+
+    @property
+    def scale_mode(self) -> ScaleMode:
+        """The scale mode of the analog waveform."""
+        return self._scale_mode
+
+    @scale_mode.setter
+    def scale_mode(self, value: ScaleMode) -> None:
+        if not isinstance(value, ScaleMode):
+            raise TypeError(
+                "The scale mode must be a ScaleMode object.\n\n" f"Provided value: {value!r}"
+            )
+        self._scale_mode = value

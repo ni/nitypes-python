@@ -9,9 +9,18 @@ from typing import Any, SupportsIndex
 
 import hightime as ht
 import numpy as np
+import numpy.typing as npt
 import pytest
 
-from nitypes.waveform import AnalogWaveform, PrecisionTiming, Timing
+from nitypes.waveform import (
+    NO_SCALING,
+    AnalogWaveform,
+    LinearScaleMode,
+    NoneScaleMode,
+    PrecisionTiming,
+    ScaleMode,
+    Timing,
+)
 
 if sys.version_info >= (3, 11):
     from typing import assert_type
@@ -574,6 +583,224 @@ def test___invalid_array_subset___from_array_2d___raises_value_error(
 
 
 ###############################################################################
+# raw_data
+###############################################################################
+def test___int32_waveform___raw_data___returns_int32_data() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+
+    raw_data = waveform.raw_data
+
+    assert_type(raw_data, npt.NDArray[np.int32])
+    assert isinstance(raw_data, np.ndarray) and raw_data.dtype == np.int32
+    assert list(raw_data) == [0, 1, 2, 3]
+
+
+def test___int32_waveform_with_linear_scale___raw_data___returns_int32_data() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+    waveform.scale_mode = LinearScaleMode(2.0, 0.5)
+
+    raw_data = waveform.raw_data
+
+    assert_type(raw_data, npt.NDArray[np.int32])
+    assert isinstance(raw_data, np.ndarray) and raw_data.dtype == np.int32
+    assert list(raw_data) == [0, 1, 2, 3]
+
+
+###############################################################################
+# get_raw_data
+###############################################################################
+def test___int32_waveform___get_raw_data___returns_raw_data() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+
+    scaled_data = waveform.get_raw_data()
+
+    assert_type(scaled_data, npt.NDArray[np.int32])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.int32
+    assert list(scaled_data) == [0, 1, 2, 3]
+
+
+def test___int32_waveform_with_linear_scale___get_raw_data___returns_raw_data() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+    waveform.scale_mode = LinearScaleMode(2.0, 0.5)
+
+    scaled_data = waveform.get_raw_data()
+
+    assert_type(scaled_data, npt.NDArray[np.int32])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.int32
+    assert list(scaled_data) == [0, 1, 2, 3]
+
+
+@pytest.mark.parametrize(
+    "start_index, sample_count, expected_raw_data",
+    [
+        (None, None, [0, 1, 2, 3]),
+        (0, None, [0, 1, 2, 3]),
+        (1, None, [1, 2, 3]),
+        (3, None, [3]),
+        (4, None, []),
+        (None, None, [0, 1, 2, 3]),
+        (None, 1, [0]),
+        (None, 3, [0, 1, 2]),
+        (None, 4, [0, 1, 2, 3]),
+        (1, 2, [1, 2]),
+        (4, 0, []),
+    ],
+)
+def test___array_subset___get_raw_data___returns_array_subset(
+    start_index: int, sample_count: int, expected_raw_data: list[int]
+) -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+    waveform.scale_mode = LinearScaleMode(2.0, 0.5)
+
+    scaled_data = waveform.get_raw_data(start_index=start_index, sample_count=sample_count)
+
+    assert_type(scaled_data, npt.NDArray[np.int32])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.int32
+    assert list(scaled_data) == expected_raw_data
+
+
+@pytest.mark.parametrize(
+    "start_index, sample_count, expected_message",
+    [
+        (
+            5,
+            None,
+            "The start index must be less than or equal to the number of samples in the waveform.",
+        ),
+        (
+            0,
+            5,
+            "The sum of the start index and sample count must be less than or equal to the number of samples in the waveform.",
+        ),
+        (
+            4,
+            1,
+            "The sum of the start index and sample count must be less than or equal to the number of samples in the waveform.",
+        ),
+    ],
+)
+def test___invalid_array_subset___get_raw_data___returns_array_subset(
+    start_index: int, sample_count: int, expected_message: str
+) -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+    waveform.scale_mode = LinearScaleMode(2.0, 0.5)
+
+    with pytest.raises((TypeError, ValueError)) as exc:
+        _ = waveform.get_raw_data(start_index=start_index, sample_count=sample_count)
+
+    assert exc.value.args[0].startswith(expected_message)
+
+
+###############################################################################
+# scaled_data
+###############################################################################
+def test___int32_waveform___scaled_data___converts_to_float64() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+
+    scaled_data = waveform.scaled_data
+
+    assert_type(scaled_data, npt.NDArray[np.float64])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.float64
+    assert list(scaled_data) == [0, 1, 2, 3]
+
+
+def test___int32_waveform_with_linear_scale___scaled_data___applies_linear_scale() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+    waveform.scale_mode = LinearScaleMode(2.0, 0.5)
+
+    scaled_data = waveform.scaled_data
+
+    assert_type(scaled_data, npt.NDArray[np.float64])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.float64
+    assert list(scaled_data) == [0.5, 2.5, 4.5, 6.5]
+
+
+###############################################################################
+# get_scaled_data
+###############################################################################
+def test___int32_waveform___get_scaled_data___converts_to_float64() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+
+    scaled_data = waveform.get_scaled_data()
+
+    assert_type(scaled_data, npt.NDArray[np.float64])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.float64
+    assert list(scaled_data) == [0, 1, 2, 3]
+
+
+def test___int32_waveform_with_linear_scale___get_scaled_data___applies_linear_scale() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+    waveform.scale_mode = LinearScaleMode(2.0, 0.5)
+
+    scaled_data = waveform.get_scaled_data()
+
+    assert_type(scaled_data, npt.NDArray[np.float64])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.float64
+    assert list(scaled_data) == [0.5, 2.5, 4.5, 6.5]
+
+
+def test___float32_dtype___get_scaled_data___converts_to_float32() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+    waveform.scale_mode = LinearScaleMode(2.0, 0.5)
+
+    scaled_data = waveform.get_scaled_data(np.float32)
+
+    assert_type(scaled_data, npt.NDArray[np.float32])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.float32
+    assert list(scaled_data) == [0.5, 2.5, 4.5, 6.5]
+
+
+@pytest.mark.parametrize(
+    "waveform_dtype",
+    [
+        np.float32,
+        np.float64,
+        np.int8,
+        np.int16,
+        np.int32,
+        np.int64,
+        np.uint8,
+        np.uint16,
+        np.uint32,
+        np.uint64,
+    ],
+)
+@pytest.mark.parametrize("scaled_dtype", [np.float32, np.float64])
+def test___varying_dtype___get_scaled_data___converts_to_requested_dtype(
+    waveform_dtype: npt.DTypeLike, scaled_dtype: npt.DTypeLike
+) -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], waveform_dtype)
+    waveform.scale_mode = LinearScaleMode(3.0, 4.0)
+
+    scaled_data = waveform.get_scaled_data(scaled_dtype)
+
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == scaled_dtype
+    assert list(scaled_data) == [4.0, 7.0, 10.0, 13.0]
+
+
+def test___unsupported_dtype___get_scaled_data___raises_type_error() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+    waveform.scale_mode = LinearScaleMode(3.0, 4.0)
+
+    with pytest.raises(TypeError) as exc:
+        _ = waveform.get_scaled_data(np.int32)
+
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
+    assert "Supported data types: float32, float64" in exc.value.args[0]
+
+
+def test___array_subset___get_scaled_data___returns_array_subset() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
+    waveform.scale_mode = LinearScaleMode(2.0, 0.5)
+
+    scaled_data = waveform.get_scaled_data(start_index=1, sample_count=2)
+
+    assert_type(scaled_data, npt.NDArray[np.float64])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.float64
+    assert list(scaled_data) == [2.5, 4.5]
+
+
+###############################################################################
 # capacity
 ###############################################################################
 @pytest.mark.parametrize(
@@ -731,3 +958,14 @@ def test___waveform_with_precision_timing___get_timing___converts_timing() -> No
     assert timing == Timing.create_with_regular_interval(
         dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
     )
+
+
+###############################################################################
+# scale_mode
+###############################################################################
+def test___waveform___scale_mode___defaults_to_no_scaling() -> None:
+    waveform = AnalogWaveform()
+
+    assert_type(waveform.scale_mode, ScaleMode)
+    assert isinstance(waveform.scale_mode, NoneScaleMode)
+    assert waveform.scale_mode is NO_SCALING
