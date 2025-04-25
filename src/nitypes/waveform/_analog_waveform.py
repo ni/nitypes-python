@@ -366,7 +366,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._start_index = start_index
         self._sample_count = sample_count
         self._extended_properties = ExtendedPropertyDictionary()
-        self._timing = Timing.empty
+        self._base_timing_ = self._timing = Timing.empty
         self._precision_timing = None
         self._scale_mode = NO_SCALING
 
@@ -423,7 +423,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._start_index = start_index
         self._sample_count = sample_count
         self._extended_properties = ExtendedPropertyDictionary()
-        self._timing = Timing.empty
+        self._base_timing_ = self._timing = Timing.empty
         self._precision_timing = None
         self._scale_mode = NO_SCALING
 
