@@ -18,6 +18,7 @@ from nitypes.waveform import (
     LinearScaleMode,
     NoneScaleMode,
     PrecisionTiming,
+    SampleIntervalMode,
     ScaleMode,
     Timing,
 )
@@ -964,3 +965,383 @@ def test___waveform___scale_mode___defaults_to_no_scaling() -> None:
     assert_type(waveform.scale_mode, ScaleMode)
     assert isinstance(waveform.scale_mode, NoneScaleMode)
     assert waveform.scale_mode is NO_SCALING
+
+
+###############################################################################
+# append array
+###############################################################################
+def test___empty_ndarray___append___no_effect() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    array = np.array([], np.int32)
+
+    waveform.append(array)
+
+    assert list(waveform.raw_data) == [0, 1, 2]
+
+
+def test___int32_ndarray___append___appends_array() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    array = np.array([3, 4, 5], np.int32)
+
+    waveform.append(array)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
+
+
+def test___float64_ndarray___append___appends_array() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
+    array = np.array([3, 4, 5], np.float64)
+
+    waveform.append(array)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
+
+
+def test___ndarray_with_mismatched_dtype___append___raises_type_error() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
+    array = np.array([3, 4, 5], np.int32)
+
+    with pytest.raises(TypeError) as exc:
+        waveform.append(array)  # type: ignore[arg-type]
+
+    assert exc.value.args[0].startswith(
+        "The data type of the input array must match the waveform data type."
+    )
+
+
+def test___ndarray_2d___append___raises_value_error() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
+    array = np.array([[3, 4, 5], [6, 7, 8]], np.float64)
+
+    with pytest.raises(ValueError) as exc:
+        waveform.append(array)
+
+    assert exc.value.args[0].startswith("The input array must be a one-dimensional array.")
+
+
+def test___irregular_waveform_and_int32_ndarray_with_timestamps___append___appends_array() -> None:
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform_offsets = [dt.timedelta(0), dt.timedelta(1), dt.timedelta(2)]
+    waveform_timestamps = [start_time + offset for offset in waveform_offsets]
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
+    array_offsets = [dt.timedelta(3), dt.timedelta(4), dt.timedelta(5)]
+    array_timestamps = [start_time + offset for offset in array_offsets]
+    array = np.array([3, 4, 5], np.int32)
+
+    waveform.append(array, array_timestamps)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert waveform.timing._timestamps == waveform_timestamps + array_timestamps
+
+
+def test___irregular_waveform_and_int32_ndarray_without_timestamps___append___raises_runtime_error_and_does_not_append() -> (
+    None
+):
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform_offsets = [dt.timedelta(0), dt.timedelta(1), dt.timedelta(2)]
+    waveform_timestamps = [start_time + offset for offset in waveform_offsets]
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
+    array = np.array([3, 4, 5], np.int32)
+
+    with pytest.raises(RuntimeError) as exc:
+        waveform.append(array)
+
+    assert exc.value.args[0].startswith(
+        "The sample interval mode of the waveform timing must be regular or none."
+    )
+    assert list(waveform.raw_data) == [0, 1, 2]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert waveform.timing._timestamps == waveform_timestamps
+
+
+def test___irregular_waveform_and_int32_ndarray_with_wrong_timestamp_count___append___raises_value_error_and_does_not_append() -> (
+    None
+):
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform_offsets = [dt.timedelta(0), dt.timedelta(1), dt.timedelta(2)]
+    waveform_timestamps = [start_time + offset for offset in waveform_offsets]
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
+    array_offsets = [dt.timedelta(3), dt.timedelta(4)]
+    array_timestamps = [start_time + offset for offset in array_offsets]
+    array = np.array([3, 4, 5], np.int32)
+
+    with pytest.raises(ValueError) as exc:
+        waveform.append(array, array_timestamps)
+
+    assert exc.value.args[0].startswith(
+        "The number of irregular timestamps must be equal to the input array length."
+    )
+    assert list(waveform.raw_data) == [0, 1, 2]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert waveform.timing._timestamps == waveform_timestamps
+
+
+def test___regular_waveform_and_int32_ndarray_with_timestamps___append___raises_runtime_error_and_does_not_append() -> (
+    None
+):
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+    array_offsets = [dt.timedelta(3), dt.timedelta(4)]
+    array_timestamps = [start_time + offset for offset in array_offsets]
+    array = np.array([3, 4, 5], np.int32)
+
+    with pytest.raises(RuntimeError) as exc:
+        waveform.append(array, array_timestamps)
+
+    assert exc.value.args[0].startswith(
+        "The sample interval mode of the waveform timing must be irregular."
+    )
+    assert list(waveform.raw_data) == [0, 1, 2]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.REGULAR
+    assert waveform.timing.sample_interval == dt.timedelta(milliseconds=1)
+
+
+###############################################################################
+# append waveform
+###############################################################################
+def test___empty_waveform___append___no_effect() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    other = AnalogWaveform(dtype=np.int32)
+
+    waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2]
+
+
+def test___int32_waveform___append___appends_waveform() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+
+    waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
+
+
+def test___float64_waveform___append___appends_waveform() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
+    other = AnalogWaveform.from_array_1d([3, 4, 5], np.float64)
+
+    waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
+
+
+def test___waveform_with_mismatched_dtype___append___raises_type_error() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
+    other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+
+    with pytest.raises(TypeError) as exc:
+        waveform.append(other)  # type: ignore[arg-type]
+
+    assert exc.value.args[0].startswith(
+        "The data type of the input waveform must match the waveform data type."
+    )
+
+
+def test___irregular_waveform_and_irregular_waveform___append___appends_waveform() -> None:
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform_offsets = [dt.timedelta(0), dt.timedelta(1), dt.timedelta(2)]
+    waveform_timestamps = [start_time + offset for offset in waveform_offsets]
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
+    other_offsets = [dt.timedelta(3), dt.timedelta(4), dt.timedelta(5)]
+    other_timestamps = [start_time + offset for offset in other_offsets]
+    other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+    other.timing = Timing.create_with_irregular_interval(other_timestamps)
+
+    waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert waveform.timing._timestamps == waveform_timestamps + other_timestamps
+
+
+def test___irregular_waveform_and_regular_waveform___append___raises_runtime_error() -> None:
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform_offsets = [dt.timedelta(0), dt.timedelta(1), dt.timedelta(2)]
+    waveform_timestamps = [start_time + offset for offset in waveform_offsets]
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
+    other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+
+    with pytest.raises(RuntimeError) as exc:
+        waveform.append(other)
+
+    assert exc.value.args[0].startswith(
+        "The timing of one or more waveforms does not match the timing of the current waveform."
+    )
+    assert list(waveform.raw_data) == [0, 1, 2]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert waveform.timing._timestamps == waveform_timestamps
+
+
+def test___regular_waveform_and_irregular_waveform___append___raises_runtime_error() -> None:
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+    other_offsets = [dt.timedelta(3), dt.timedelta(4), dt.timedelta(5)]
+    other_timestamps = [start_time + offset for offset in other_offsets]
+    other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+    other.timing = Timing.create_with_irregular_interval(other_timestamps)
+
+    with pytest.raises(RuntimeError) as exc:
+        waveform.append(other)
+
+    assert exc.value.args[0].startswith(
+        "The timing of one or more waveforms does not match the timing of the current waveform."
+    )
+    assert list(waveform.raw_data) == [0, 1, 2]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.REGULAR
+    assert waveform.timing.sample_interval == dt.timedelta(milliseconds=1)
+
+
+def test___regular_waveform_and_regular_waveform_with_different_sample_interval___append___appends_waveform() -> (
+    None
+):
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+    other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+    other.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=2))
+
+    waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.REGULAR
+    assert waveform.timing.sample_interval == dt.timedelta(milliseconds=1)
+
+
+###############################################################################
+# append waveforms
+###############################################################################
+def test___empty_waveform_list___append___no_effect() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    other: list[AnalogWaveform[np.int32]] = []
+
+    waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2]
+
+
+def test___int32_waveform_list___append___appends_waveform() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    other = [
+        AnalogWaveform.from_array_1d([3, 4, 5], np.int32),
+        AnalogWaveform.from_array_1d([6], np.int32),
+        AnalogWaveform.from_array_1d([7, 8], np.int32),
+    ]
+
+    waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+
+def test___float64_waveform_tuple___append___appends_waveform() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
+    other = (
+        AnalogWaveform.from_array_1d([3, 4, 5], np.float64),
+        AnalogWaveform.from_array_1d([6, 7, 8], np.float64),
+    )
+
+    waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5, 6, 7, 8]
+
+
+def test___waveform_list_with_mismatched_dtype___append___raises_type_error_and_does_not_append() -> (
+    None
+):
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
+    other = [
+        AnalogWaveform.from_array_1d([3, 4, 5], np.float64),
+        AnalogWaveform.from_array_1d([6, 7, 8], np.int32),
+    ]
+
+    with pytest.raises(TypeError) as exc:
+        waveform.append(other)  # type: ignore[arg-type]
+
+    assert exc.value.args[0].startswith(
+        "The data type of the input waveform must match the waveform data type."
+    )
+    assert list(waveform.raw_data) == [0, 1, 2]
+
+
+def test___irregular_waveform_and_irregular_waveform_list___append___appends_waveform() -> None:
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform_offsets = [dt.timedelta(0), dt.timedelta(1), dt.timedelta(2)]
+    waveform_timestamps = [start_time + offset for offset in waveform_offsets]
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
+    other1_offsets = [dt.timedelta(3), dt.timedelta(4), dt.timedelta(5)]
+    other1_timestamps = [start_time + offset for offset in other1_offsets]
+    other1 = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+    other1.timing = Timing.create_with_irregular_interval(other1_timestamps)
+    other2_offsets = [dt.timedelta(6), dt.timedelta(7), dt.timedelta(8)]
+    other2_timestamps = [start_time + offset for offset in other2_offsets]
+    other2 = AnalogWaveform.from_array_1d([6, 7, 8], np.int32)
+    other2.timing = Timing.create_with_irregular_interval(other2_timestamps)
+    other = [other1, other2]
+
+    waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert (
+        waveform.timing._timestamps == waveform_timestamps + other1_timestamps + other2_timestamps
+    )
+
+
+def test___irregular_waveform_and_regular_waveform_list___append___raises_runtime_error_and_does_not_append() -> (
+    None
+):
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform_offsets = [dt.timedelta(0), dt.timedelta(1), dt.timedelta(2)]
+    waveform_timestamps = [start_time + offset for offset in waveform_offsets]
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
+    other1_offsets = [dt.timedelta(3), dt.timedelta(4), dt.timedelta(5)]
+    other1_timestamps = [start_time + offset for offset in other1_offsets]
+    other1 = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+    other1.timing = Timing.create_with_irregular_interval(other1_timestamps)
+    other2 = AnalogWaveform.from_array_1d([6, 7, 8], np.int32)
+    other2.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+    other = [other1, other2]
+
+    with pytest.raises(RuntimeError) as exc:
+        waveform.append(other)
+
+    assert exc.value.args[0].startswith(
+        "The timing of one or more waveforms does not match the timing of the current waveform."
+    )
+    assert list(waveform.raw_data) == [0, 1, 2]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert waveform.timing._timestamps == waveform_timestamps
+
+
+def test___regular_waveform_and_irregular_waveform_list___append___raises_runtime_error_and_does_not_append() -> (
+    None
+):
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+    other1 = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+    other1.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+    other2_offsets = [dt.timedelta(3), dt.timedelta(4), dt.timedelta(5)]
+    other2_timestamps = [start_time + offset for offset in other2_offsets]
+    other2 = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+    other2.timing = Timing.create_with_irregular_interval(other2_timestamps)
+    other = [other1, other2]
+
+    with pytest.raises(RuntimeError) as exc:
+        waveform.append(other)
+
+    assert exc.value.args[0].startswith(
+        "The timing of one or more waveforms does not match the timing of the current waveform."
+    )
+    assert list(waveform.raw_data) == [0, 1, 2]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.REGULAR
+    assert waveform.timing.sample_interval == dt.timedelta(milliseconds=1)
