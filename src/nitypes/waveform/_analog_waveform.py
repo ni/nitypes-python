@@ -26,7 +26,6 @@ from nitypes.waveform._scaling import NO_SCALING, ScaleMode
 from nitypes.waveform._timing import (
     BaseTiming,
     PrecisionTiming,
-    SampleIntervalMode,
     Timing,
     convert_timing,
 )

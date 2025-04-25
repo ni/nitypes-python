@@ -1,16 +1,11 @@
 from __future__ import annotations
 
 import datetime as dt
-import sys
 from collections.abc import Sequence
 from typing import ClassVar
 
+from nitypes._typing import override
 from nitypes.waveform._timing._base import BaseTiming, SampleIntervalMode
-
-if sys.version_info >= (3, 12):
-    from typing import override
-else:
-    from typing_extensions import override
 
 
 class Timing(BaseTiming[dt.datetime, dt.timedelta]):
