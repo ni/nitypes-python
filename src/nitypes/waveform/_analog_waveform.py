@@ -590,9 +590,10 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._extended_properties[UNIT_DESCRIPTION] = value
 
     def _set_base_timing(self, value: BaseTiming[Any, Any]) -> None:
-        self._base_timing = value
-        self._timing = value if isinstance(value, Timing) else None
-        self._precision_timing = value if isinstance(value, PrecisionTiming) else None
+        if self._base_timing is not value:
+            self._base_timing = value
+            self._timing = value if isinstance(value, Timing) else None
+            self._precision_timing = value if isinstance(value, PrecisionTiming) else None
 
     @property
     def timing(self) -> Timing:
@@ -713,35 +714,17 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                 "The input array must be a one-dimensional array.\n\n"
                 f"Number of dimensions: {array.ndim}"
             )
+        if timestamps is not None and len(array) != len(timestamps):
+            raise ValueError(
+                "The number of irregular timestamps must be equal to the input array length.\n\n"
+                f"Number of timestamps: {len(timestamps)}\n"
+                f"Array length: {len(array)}"
+            )
 
-        if timestamps is None:
-            if self._base_timing.sample_interval_mode not in (
-                SampleIntervalMode.NONE,
-                SampleIntervalMode.REGULAR,
-            ):
-                raise RuntimeError(
-                    "The sample interval mode of the waveform timing must be regular or none."
-                )
-        else:
-            if self._base_timing.sample_interval_mode != SampleIntervalMode.IRREGULAR:
-                raise RuntimeError(
-                    "The sample interval mode of the waveform timing must be irregular."
-                )
-            if len(array) != len(timestamps):
-                raise ValueError(
-                    "The number of irregular timestamps must be equal to the input array length.\n\n"
-                    f"Number of timestamps: {len(timestamps)}\n"
-                    f"Array length: {len(array)}"
-                )
+        new_timing = self._base_timing._append_timestamps(timestamps)
 
         self._increase_capacity(len(array))
-
-        if timestamps is not None:
-            array_timing = self._base_timing.__class__(
-                SampleIntervalMode.IRREGULAR, None, None, None, timestamps
-            )
-            new_timing = self._base_timing._append_timing(array_timing)
-            self._set_base_timing(new_timing)
+        self._set_base_timing(new_timing)
 
         offset = self._start_index + self._sample_count
         self._data[offset : offset + len(array)] = array
@@ -751,7 +734,6 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._append_waveforms([waveform])
 
     def _append_waveforms(self, waveforms: Sequence[AnalogWaveform[_ScalarType_co]]) -> None:
-        is_irregular = self._base_timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
         for waveform in waveforms:
             if waveform.dtype != self.dtype:
                 raise TypeError(
@@ -760,21 +742,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                     f"Waveform data type: {self.dtype}"
                 )
 
-            is_other_irregular = (
-                waveform._base_timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
-            )
-            if is_irregular != is_other_irregular:
-                raise RuntimeError(
-                    "The timing of one or more waveforms does not match the timing of the current waveform."
-                )
+        new_timing = self._base_timing
+        for waveform in waveforms:
+            new_timing = new_timing._append_timing(waveform._base_timing)
 
         self._increase_capacity(sum(waveform.sample_count for waveform in waveforms))
-
-        if is_irregular:
-            new_timing = self._base_timing
-            for waveform in waveforms:
-                new_timing = new_timing._append_timing(waveform._base_timing)
-            self._set_base_timing(new_timing)
+        self._set_base_timing(new_timing)
 
         offset = self._start_index + self._sample_count
         for waveform in waveforms:

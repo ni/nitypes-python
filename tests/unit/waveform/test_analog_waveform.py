@@ -1050,7 +1050,7 @@ def test___irregular_waveform_and_int32_ndarray_without_timestamps___append___ra
         waveform.append(array)
 
     assert exc.value.args[0].startswith(
-        "The sample interval mode of the waveform timing must be regular or none."
+        "The timestamps argument is required when appending to a waveform with irregular timing."
     )
     assert list(waveform.raw_data) == [0, 1, 2]
     assert waveform.timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
@@ -1086,16 +1086,14 @@ def test___regular_waveform_and_int32_ndarray_with_timestamps___append___raises_
     start_time = dt.datetime.now(dt.timezone.utc)
     waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
     waveform.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
-    array_offsets = [dt.timedelta(3), dt.timedelta(4)]
+    array_offsets = [dt.timedelta(3), dt.timedelta(4), dt.timedelta(5)]
     array_timestamps = [start_time + offset for offset in array_offsets]
     array = np.array([3, 4, 5], np.int32)
 
-    with pytest.raises(RuntimeError) as exc:
+    with pytest.raises(ValueError) as exc:
         waveform.append(array, array_timestamps)
 
-    assert exc.value.args[0].startswith(
-        "The sample interval mode of the waveform timing must be irregular."
-    )
+    assert exc.value.args[0].startswith("The timestamps argument is not supported.")
     assert list(waveform.raw_data) == [0, 1, 2]
     assert waveform.timing.sample_interval_mode == SampleIntervalMode.REGULAR
     assert waveform.timing.sample_interval == dt.timedelta(milliseconds=1)

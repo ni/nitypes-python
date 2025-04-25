@@ -50,6 +50,7 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         raise NotImplementedError()
 
     __slots__ = [
+        "_sample_interval_strategy",
         "_sample_interval_mode",
         "_timestamp",
         "_time_offset",
@@ -58,6 +59,7 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         "__weakref__",
     ]
 
+    _sample_interval_strategy: _SampleIntervalStrategy
     _sample_interval_mode: SampleIntervalMode
     _timestamp: _TDateTime_co | None
     _time_offset: _TTimeDelta_co | None
@@ -73,93 +75,27 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         timestamps: Sequence[_TDateTime_co] | None,
     ) -> None:
         """Construct a base waveform timing object."""
-        self._validate_init_args(
-            sample_interval_mode, timestamp, time_offset, sample_interval, timestamps
-        )
+        sample_interval_strategy = _SAMPLE_INTERVAL_STRATEGY_FOR_MODE.get(sample_interval_mode)
+        if sample_interval_strategy is None:
+            raise ValueError(f"Unsupported sample interval mode {sample_interval_mode}.")
+
+        try:
+            sample_interval_strategy.validate_init_args(
+                self, sample_interval_mode, timestamp, time_offset, sample_interval, timestamps
+            )
+        except (TypeError, ValueError) as e:
+            add_note(e, f"Sample interval mode: {sample_interval_mode}")
+            raise
 
         if timestamps is not None and not isinstance(timestamps, list):
             timestamps = list(timestamps)
 
+        self._sample_interval_strategy = sample_interval_strategy
         self._sample_interval_mode = sample_interval_mode
         self._timestamp = timestamp
         self._time_offset = time_offset
         self._sample_interval = sample_interval
         self._timestamps = timestamps
-
-    def _validate_init_args(
-        self,
-        sample_interval_mode: SampleIntervalMode,
-        timestamp: _TDateTime_co | None,
-        time_offset: _TTimeDelta_co | None,
-        sample_interval: _TTimeDelta_co | None,
-        timestamps: Sequence[_TDateTime_co] | None,
-    ) -> None:
-        validate_func = self.__class__._VALIDATE_INIT_ARGS_FOR_MODE.get(sample_interval_mode)
-        if validate_func is None:
-            raise ValueError(f"Unsupported sample interval mode {sample_interval_mode}.")
-
-        try:
-            validate_func(self, timestamp, time_offset, sample_interval, timestamps)
-        except (TypeError, ValueError) as e:
-            add_note(e, f"Sample interval mode: {sample_interval_mode}")
-            raise
-
-    def _validate_init_args_none(
-        self,
-        timestamp: _TDateTime_co | None,
-        time_offset: _TTimeDelta_co | None,
-        sample_interval: _TTimeDelta_co | None,
-        timestamps: Sequence[_TDateTime_co] | None,
-    ) -> None:
-        datetime_type = self.__class__._get_datetime_type()
-        timedelta_type = self.__class__._get_timedelta_type()
-        if not isinstance(timestamp, (datetime_type, type(None))):
-            raise invalid_arg_type("timestamp", "datetime or None", timestamp)
-        if not isinstance(time_offset, (timedelta_type, type(None))):
-            raise invalid_arg_type("time offset", "timedelta or None", time_offset)
-        validate_unsupported_arg("sample interval", sample_interval)
-        validate_unsupported_arg("timestamps", timestamps)
-
-    def _validate_init_args_regular(
-        self,
-        timestamp: _TDateTime_co | None,
-        time_offset: _TTimeDelta_co | None,
-        sample_interval: _TTimeDelta_co | None,
-        timestamps: Sequence[_TDateTime_co] | None,
-    ) -> None:
-        datetime_type = self.__class__._get_datetime_type()
-        timedelta_type = self.__class__._get_timedelta_type()
-        if not isinstance(timestamp, (datetime_type, type(None))):
-            raise invalid_arg_type("timestamp", "datetime or None", timestamp)
-        if not isinstance(time_offset, (timedelta_type, type(None))):
-            raise invalid_arg_type("time offset", "timedelta or None", time_offset)
-        if not isinstance(sample_interval, timedelta_type):
-            raise invalid_arg_type("sample interval", "timedelta", sample_interval)
-        validate_unsupported_arg("timestamps", timestamps)
-
-    def _validate_init_args_irregular(
-        self,
-        timestamp: _TDateTime_co | None,
-        time_offset: _TTimeDelta_co | None,
-        sample_interval: _TTimeDelta_co | None,
-        timestamps: Sequence[_TDateTime_co] | None,
-    ) -> None:
-        datetime_type = self.__class__._get_datetime_type()
-        validate_unsupported_arg("timestamp", timestamp)
-        validate_unsupported_arg("time offset", time_offset)
-        validate_unsupported_arg("sample interval", sample_interval)
-        if not isinstance(timestamps, Sequence) or not all(
-            isinstance(ts, datetime_type) for ts in timestamps
-        ):
-            raise invalid_arg_type("timestamps", "sequence of datetime objects", timestamps)
-        if not _are_timestamps_monotonic(timestamps):
-            raise ValueError("The timestamps must be in ascending or descending order.")
-
-    _VALIDATE_INIT_ARGS_FOR_MODE = {
-        SampleIntervalMode.NONE: _validate_init_args_none,
-        SampleIntervalMode.REGULAR: _validate_init_args_regular,
-        SampleIntervalMode.IRREGULAR: _validate_init_args_irregular,
-    }
 
     @property
     def has_timestamp(self) -> bool:
@@ -220,31 +156,7 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         if count < 0:
             raise ValueError("The count must be a non-negative integer.")
 
-        if self._sample_interval_mode == SampleIntervalMode.REGULAR and self.has_timestamp:
-            return self._generate_regular_timestamps(start_index, count)
-        elif self._sample_interval_mode == SampleIntervalMode.IRREGULAR:
-            assert self._timestamps is not None
-            if count > len(self._timestamps):
-                raise ValueError(
-                    "The count must be less than or equal to the number of timestamps."
-                )
-            return self._timestamps[start_index : start_index + count]
-        else:
-            raise RuntimeError(
-                "The waveform timing does not have valid timestamp information. "
-                "To obtain timestamps, the waveform must be irregular or must be initialized "
-                "with a valid time stamp and sample interval."
-            )
-
-    def _generate_regular_timestamps(
-        self, start_index: int, count: int
-    ) -> Generator[_TDateTime_co]:
-        sample_interval = self.sample_interval
-        timestamp = self.start_time + start_index * sample_interval
-        for i in range(count):
-            if i != 0:
-                timestamp += sample_interval
-            yield timestamp
+        return self._sample_interval_strategy.get_timestamps(self, start_index, count)
 
     def __eq__(self, value: object) -> bool:  # noqa: D105 - Missing docstring in magic method
         if not isinstance(value, self.__class__):
@@ -270,24 +182,27 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
             args.append(f"timestamps={self._timestamps!r}")
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
+    def _append_timestamps(self, timestamps: Sequence[_TDateTime_co] | None) -> Self:
+        new_timing = self._sample_interval_strategy.append_timestamps(self, timestamps)
+        assert isinstance(new_timing, self.__class__)
+        return new_timing
+
     def _append_timing(self, other: Self) -> Self:
         if not isinstance(other, self.__class__):
             raise TypeError(
                 "The input waveform(s) must have the same waveform timing type as the current waveform."
             )
-        if self._timestamps is None or other._timestamps is None:
-            raise RuntimeError("The sample interval mode must be irregular.")
 
-        if len(self._timestamps) == 0:
-            return other
-        elif len(other._timestamps) == 0:
-            return self
-        else:
-            # The constructor will verify that the combined list of timestamps is monotonic. This is
-            # not optimal for a large number of appends.
-            return self.__class__(
-                SampleIntervalMode.IRREGULAR, None, None, None, self._timestamps + other._timestamps
+        is_irregular = self._sample_interval_mode == SampleIntervalMode.IRREGULAR
+        other_is_irregular = other._sample_interval_mode == SampleIntervalMode.IRREGULAR
+        if is_irregular != other_is_irregular:
+            raise RuntimeError(
+                "The timing of one or more waveforms does not match the timing of the current waveform."
             )
+
+        new_timing = self._sample_interval_strategy.append_timing(self, other)
+        assert isinstance(new_timing, self.__class__)
+        return new_timing
 
 
 def _are_timestamps_monotonic(timestamps: Sequence[_TDateTime_co]) -> bool:
@@ -310,3 +225,239 @@ def _get_direction(left: _TDateTime, right: _TDateTime) -> int:
     if right < left:
         return 1
     return 0
+
+
+class _SampleIntervalStrategy(ABC):
+    @abstractmethod
+    def validate_init_args(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        sample_interval_mode: SampleIntervalMode,
+        timestamp: _TDateTime_co | None,
+        time_offset: _TTimeDelta_co | None,
+        sample_interval: _TTimeDelta_co | None,
+        timestamps: Sequence[_TDateTime_co] | None,
+    ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_timestamps(
+        self, timing: BaseTiming[_TDateTime_co, _TTimeDelta_co], start_index: int, count: int
+    ) -> Iterable[_TDateTime_co]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def append_timestamps(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        timestamps: Sequence[_TDateTime_co] | None,
+    ) -> BaseTiming[_TDateTime_co, _TTimeDelta_co]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def append_timing(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        other: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+    ) -> BaseTiming[_TDateTime_co, _TTimeDelta_co]:
+        raise NotImplementedError
+
+
+class _NoneSampleIntervalStrategy(_SampleIntervalStrategy):
+    def validate_init_args(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        sample_interval_mode: SampleIntervalMode,
+        timestamp: _TDateTime_co | None,
+        time_offset: _TTimeDelta_co | None,
+        sample_interval: _TTimeDelta_co | None,
+        timestamps: Sequence[_TDateTime_co] | None,
+    ) -> None:
+        datetime_type = timing.__class__._get_datetime_type()
+        timedelta_type = timing.__class__._get_timedelta_type()
+        if not isinstance(timestamp, (datetime_type, type(None))):
+            raise invalid_arg_type("timestamp", "datetime or None", timestamp)
+        if not isinstance(time_offset, (timedelta_type, type(None))):
+            raise invalid_arg_type("time offset", "timedelta or None", time_offset)
+        validate_unsupported_arg("sample interval", sample_interval)
+        validate_unsupported_arg("timestamps", timestamps)
+
+    def get_timestamps(
+        self, timing: BaseTiming[_TDateTime_co, _TTimeDelta_co], start_index: int, count: int
+    ) -> Iterable[_TDateTime_co]:
+        raise _no_timestamp_information()
+
+    def append_timestamps(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        timestamps: Sequence[_TDateTime_co] | None,
+    ) -> BaseTiming[_TDateTime_co, _TTimeDelta_co]:
+        try:
+            validate_unsupported_arg("timestamps", timestamps)
+        except (TypeError, ValueError) as e:
+            add_note(e, f"Sample interval mode: {timing.sample_interval_mode}")
+            raise
+        return timing
+
+    def append_timing(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        other: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+    ) -> BaseTiming[_TDateTime_co, _TTimeDelta_co]:
+        return timing
+
+
+class _RegularSampleIntervalStrategy(_SampleIntervalStrategy):
+    def validate_init_args(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        sample_interval_mode: SampleIntervalMode,
+        timestamp: _TDateTime_co | None,
+        time_offset: _TTimeDelta_co | None,
+        sample_interval: _TTimeDelta_co | None,
+        timestamps: Sequence[_TDateTime_co] | None,
+    ) -> None:
+        datetime_type = timing.__class__._get_datetime_type()
+        timedelta_type = timing.__class__._get_timedelta_type()
+        if not isinstance(timestamp, (datetime_type, type(None))):
+            raise invalid_arg_type("timestamp", "datetime or None", timestamp)
+        if not isinstance(time_offset, (timedelta_type, type(None))):
+            raise invalid_arg_type("time offset", "timedelta or None", time_offset)
+        if not isinstance(sample_interval, timedelta_type):
+            raise invalid_arg_type("sample interval", "timedelta", sample_interval)
+        validate_unsupported_arg("timestamps", timestamps)
+
+    def get_timestamps(
+        self, timing: BaseTiming[_TDateTime_co, _TTimeDelta_co], start_index: int, count: int
+    ) -> Iterable[_TDateTime_co]:
+        if timing.has_timestamp:
+            return self._generate_regular_timestamps(timing, start_index, count)
+        raise _no_timestamp_information()
+
+    def _generate_regular_timestamps(
+        self, timing: BaseTiming[_TDateTime_co, _TTimeDelta_co], start_index: int, count: int
+    ) -> Generator[_TDateTime_co]:
+        sample_interval = timing.sample_interval
+        timestamp = timing.start_time + start_index * sample_interval
+        for i in range(count):
+            if i != 0:
+                timestamp += sample_interval
+            yield timestamp
+
+    def append_timestamps(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        timestamps: Sequence[_TDateTime_co] | None,
+    ) -> BaseTiming[_TDateTime_co, _TTimeDelta_co]:
+        try:
+            validate_unsupported_arg("timestamps", timestamps)
+        except (TypeError, ValueError) as e:
+            add_note(e, f"Sample interval mode: {timing.sample_interval_mode}")
+            raise
+        return timing
+
+    def append_timing(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        other: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+    ) -> BaseTiming[_TDateTime_co, _TTimeDelta_co]:
+        return timing
+
+
+class _IrregularSampleIntervalStrategy(_SampleIntervalStrategy):
+    def validate_init_args(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        sample_interval_mode: SampleIntervalMode,
+        timestamp: _TDateTime_co | None,
+        time_offset: _TTimeDelta_co | None,
+        sample_interval: _TTimeDelta_co | None,
+        timestamps: Sequence[_TDateTime_co] | None,
+    ) -> None:
+        datetime_type = timing.__class__._get_datetime_type()
+        validate_unsupported_arg("timestamp", timestamp)
+        validate_unsupported_arg("time offset", time_offset)
+        validate_unsupported_arg("sample interval", sample_interval)
+        if not isinstance(timestamps, Sequence) or not all(
+            isinstance(ts, datetime_type) for ts in timestamps
+        ):
+            raise invalid_arg_type("timestamps", "sequence of datetime objects", timestamps)
+        if not _are_timestamps_monotonic(timestamps):
+            raise ValueError("The timestamps must be in ascending or descending order.")
+
+    def get_timestamps(
+        self, timing: BaseTiming[_TDateTime_co, _TTimeDelta_co], start_index: int, count: int
+    ) -> Iterable[_TDateTime_co]:
+        assert timing._timestamps is not None
+        if count > len(timing._timestamps):
+            raise ValueError("The count must be less than or equal to the number of timestamps.")
+        return timing._timestamps[start_index : start_index + count]
+
+    def append_timestamps(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        timestamps: Sequence[_TDateTime_co] | None,
+    ) -> BaseTiming[_TDateTime_co, _TTimeDelta_co]:
+        assert timing._timestamps is not None
+
+        if timestamps is None:
+            raise RuntimeError(
+                "The timestamps argument is required when appending to a waveform with irregular timing."
+            )
+
+        datetime_type = timing.__class__._get_datetime_type()
+        if not all(isinstance(ts, datetime_type) for ts in timestamps):
+            raise TypeError(
+                "The timestamp data type must match the timing information of the current waveform."
+            )
+
+        if len(timestamps) == 0:
+            return timing
+        else:
+            if not isinstance(timestamps, list):
+                timestamps = list(timestamps)
+
+            return timing.__class__(
+                SampleIntervalMode.IRREGULAR,
+                None,
+                None,
+                None,
+                timing._timestamps + timestamps,
+            )
+
+    def append_timing(
+        self,
+        timing: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+        other: BaseTiming[_TDateTime_co, _TTimeDelta_co],
+    ) -> BaseTiming[_TDateTime_co, _TTimeDelta_co]:
+        assert timing._timestamps is not None and other._timestamps is not None
+
+        if len(timing._timestamps) == 0:
+            return other
+        elif len(other._timestamps) == 0:
+            return timing
+        else:
+            # The constructor will verify that the combined list of timestamps is monotonic. This is
+            # not optimal for a large number of appends.
+            return timing.__class__(
+                SampleIntervalMode.IRREGULAR,
+                None,
+                None,
+                None,
+                timing._timestamps + other._timestamps,
+            )
+
+
+_SAMPLE_INTERVAL_STRATEGY_FOR_MODE: dict[SampleIntervalMode, _SampleIntervalStrategy] = {
+    SampleIntervalMode.NONE: _NoneSampleIntervalStrategy(),
+    SampleIntervalMode.REGULAR: _RegularSampleIntervalStrategy(),
+    SampleIntervalMode.IRREGULAR: _IrregularSampleIntervalStrategy(),
+}
+
+
+def _no_timestamp_information() -> RuntimeError:
+    return RuntimeError(
+        "The waveform timing does not have valid timestamp information. "
+        "To obtain timestamps, the waveform must be irregular or must be initialized "
+        "with a valid time stamp and sample interval."
+    )
