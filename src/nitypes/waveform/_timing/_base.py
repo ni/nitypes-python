@@ -200,7 +200,8 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
 
         return self._sample_interval_strategy.get_timestamps(self, start_index, count)
 
-    def __eq__(self, value: object) -> bool:  # noqa: D105 - Missing docstring in magic method
+    def __eq__(self, value: object, /) -> bool:
+        """Return self==value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
         return (
@@ -211,7 +212,8 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
             and self._timestamps == value._timestamps
         )
 
-    def __repr__(self) -> str:  # noqa: D105 - Missing docstring in magic method
+    def __repr__(self) -> str:
+        """Return repr(self)."""
         # For Enum, __str__ is an unqualified ctor expression like E.V and __repr__ is <E.V: 0>.
         args = [f"{self.sample_interval_mode.__class__.__module__}.{self.sample_interval_mode}"]
         if self._timestamp is not None:

@@ -4,7 +4,7 @@ import array
 import datetime as dt
 import itertools
 import weakref
-from typing import Any, SupportsIndex, TypeVar
+from typing import Any, SupportsIndex
 
 import hightime as ht
 import numpy as np
@@ -15,7 +15,6 @@ from nitypes._typing import assert_type
 from nitypes.waveform import (
     NO_SCALING,
     AnalogWaveform,
-    ExtendedPropertyValue,
     LinearScaleMode,
     NoneScaleMode,
     PrecisionTiming,
@@ -1424,37 +1423,6 @@ def test___regular_waveform_and_irregular_waveform_list___append___raises_runtim
 ###############################################################################
 # magic methods
 ###############################################################################
-_ScalarType = TypeVar("_ScalarType", bound=np.generic)
-
-
-def _with_timing(
-    waveform: AnalogWaveform[_ScalarType], timing: Timing
-) -> AnalogWaveform[_ScalarType]:
-    waveform.timing = timing
-    return waveform
-
-
-def _with_precision_timing(
-    waveform: AnalogWaveform[_ScalarType], precision_timing: PrecisionTiming
-) -> AnalogWaveform[_ScalarType]:
-    waveform.precision_timing = precision_timing
-    return waveform
-
-
-def _with_extended_properties(
-    waveform: AnalogWaveform[_ScalarType], extended_properties: dict[str, ExtendedPropertyValue]
-) -> AnalogWaveform[_ScalarType]:
-    waveform.extended_properties.update(extended_properties)
-    return waveform
-
-
-def _with_scale_mode(
-    waveform: AnalogWaveform[_ScalarType], scale_mode: ScaleMode
-) -> AnalogWaveform[_ScalarType]:
-    waveform.scale_mode = scale_mode
-    return waveform
-
-
 @pytest.mark.parametrize(
     "left, right",
     [
@@ -1475,34 +1443,32 @@ def _with_scale_mode(
             AnalogWaveform.from_array_1d([1, 2, 3], np.int32),
         ),
         (
-            _with_timing(
-                AnalogWaveform(), Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
             ),
-            _with_timing(
-                AnalogWaveform(), Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
-            ),
-        ),
-        (
-            _with_precision_timing(
-                AnalogWaveform(),
-                PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1)),
-            ),
-            _with_precision_timing(
-                AnalogWaveform(),
-                PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1)),
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
             ),
         ),
         (
-            _with_extended_properties(
-                AnalogWaveform(), {"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            AnalogWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
-            _with_extended_properties(
-                AnalogWaveform(), {"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            AnalogWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
         ),
         (
-            _with_scale_mode(AnalogWaveform(), LinearScaleMode(2.0, 1.0)),
-            _with_scale_mode(AnalogWaveform(), LinearScaleMode(2.0, 1.0)),
+            AnalogWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            ),
+            AnalogWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            ),
+        ),
+        (
+            AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
+            AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
         ),
         # start_index and capacity may differ as long as raw_data and sample_count are the same.
         (
@@ -1545,52 +1511,52 @@ def test___same_value___equality___equal(
             AnalogWaveform.from_array_1d([1, 2, 3], np.float64),
         ),
         (
-            _with_timing(
-                AnalogWaveform(), Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
             ),
-            _with_timing(
-                AnalogWaveform(), Timing.create_with_regular_interval(dt.timedelta(milliseconds=2))
-            ),
-        ),
-        (
-            _with_precision_timing(
-                AnalogWaveform(),
-                PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1)),
-            ),
-            _with_precision_timing(
-                AnalogWaveform(),
-                PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=2)),
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=2))
             ),
         ),
         (
-            _with_extended_properties(
-                AnalogWaveform(), {"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            AnalogWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
-            _with_extended_properties(
-                AnalogWaveform(), {"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Amps"}
+            AnalogWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=2))
             ),
         ),
         (
-            _with_scale_mode(AnalogWaveform(), LinearScaleMode(2.0, 1.0)),
-            _with_scale_mode(AnalogWaveform(), LinearScaleMode(2.0, 1.1)),
+            AnalogWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            ),
+            AnalogWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Amps"}
+            ),
+        ),
+        (
+            AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
+            AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.1)),
+        ),
+        (
+            AnalogWaveform(scale_mode=NO_SCALING),
+            AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
         ),
         # __eq__ does not convert timing, even if the values are equivalent.
         (
-            _with_timing(
-                AnalogWaveform(), Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
             ),
-            _with_precision_timing(
-                AnalogWaveform(),
-                PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1)),
+            AnalogWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
         ),
         (
-            _with_precision_timing(
-                AnalogWaveform(),
-                PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1)),
+            AnalogWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
-            _with_timing(
-                AnalogWaveform(), Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
             ),
         ),
     ],
@@ -1600,3 +1566,80 @@ def test___different_value___equality___not_equal(
 ) -> None:
     assert not (left == right)
     assert left != right
+
+
+@pytest.mark.parametrize(
+    "value, expected_repr",
+    [
+        (AnalogWaveform(), "nitypes.waveform.AnalogWaveform(0)"),
+        (
+            AnalogWaveform(5),
+            "nitypes.waveform.AnalogWaveform(5, raw_data=array([0., 0., 0., 0., 0.]))",
+        ),
+        (
+            AnalogWaveform(5, np.float64),
+            "nitypes.waveform.AnalogWaveform(5, raw_data=array([0., 0., 0., 0., 0.]))",
+        ),
+        (AnalogWaveform(0, np.int32), "nitypes.waveform.AnalogWaveform(0, int32)"),
+        (
+            AnalogWaveform(5, np.int32),
+            "nitypes.waveform.AnalogWaveform(5, int32, raw_data=array([0, 0, 0, 0, 0], dtype=int32))",
+        ),
+        (
+            AnalogWaveform(5, np.int32, start_index=5, capacity=20),
+            "nitypes.waveform.AnalogWaveform(5, int32, raw_data=array([0, 0, 0, 0, 0], dtype=int32))",
+        ),
+        (
+            AnalogWaveform.from_array_1d([1, 2, 3], np.float64),
+            "nitypes.waveform.AnalogWaveform(3, raw_data=array([1., 2., 3.]))",
+        ),
+        (
+            AnalogWaveform.from_array_1d([1, 2, 3], np.int32),
+            "nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3], dtype=int32))",
+        ),
+        (
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            ),
+            "nitypes.waveform.AnalogWaveform(0, timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=datetime.timedelta(microseconds=1000)))",
+        ),
+        (
+            AnalogWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+            "nitypes.waveform.AnalogWaveform(0, timing=nitypes.waveform.PrecisionTiming(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=hightime.timedelta(microseconds=1000)))",
+        ),
+        (
+            AnalogWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            ),
+            "nitypes.waveform.AnalogWaveform(0, extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
+        ),
+        (
+            AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
+            "nitypes.waveform.AnalogWaveform(0, scale_mode=nitypes.waveform.LinearScaleMode(2.0, 1.0))",
+        ),
+        (
+            AnalogWaveform.from_array_1d(
+                [1, 2, 3],
+                np.int32,
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+            ),
+            "nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3], dtype=int32), timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=datetime.timedelta(microseconds=1000)))",
+        ),
+        (
+            AnalogWaveform.from_array_1d(
+                [1, 2, 3],
+                np.int32,
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+            ),
+            "nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3], dtype=int32), extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
+        ),
+        (
+            AnalogWaveform.from_array_1d([1, 2, 3], np.int32, scale_mode=LinearScaleMode(2.0, 1.0)),
+            "nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3], dtype=int32), scale_mode=nitypes.waveform.LinearScaleMode(2.0, 1.0))",
+        ),
+    ],
+)
+def test___various_values___repr___looks_ok(value: AnalogWaveform[Any], expected_repr: str) -> None:
+    assert repr(value) == expected_repr

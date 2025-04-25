@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import sys
 import warnings
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import Any, Generic, SupportsIndex, TypeVar, Union, cast, overload
 
 import hightime as ht
@@ -17,6 +17,7 @@ from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
+    ExtendedPropertyValue,
 )
 from nitypes.waveform._scaling import NO_SCALING, ScaleMode
 from nitypes.waveform._timing import BaseTiming, PrecisionTiming, Timing, convert_timing
@@ -83,6 +84,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
     ) -> AnalogWaveform[_ScalarType]: ...
 
     @overload
@@ -94,6 +98,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
     ) -> AnalogWaveform[_ScalarType]: ...
 
     @overload
@@ -105,6 +112,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
     ) -> AnalogWaveform[Any]: ...
 
     @staticmethod
@@ -115,6 +125,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        timing: Timing | PrecisionTiming | None = None,
+        scale_mode: ScaleMode | None = None,
     ) -> AnalogWaveform[_ScalarType]:
         """Construct an analog waveform from a one-dimensional array or sequence.
 
@@ -125,6 +138,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             copy: Specifies whether to copy the array or save a reference to it.
             start_index: The sample index at which the analog waveform data begins.
             sample_count: The number of samples in the analog waveform.
+            extended_properties: The extended properties of the analog waveform.
+            timing: The timing information of the analog waveform.
+            scale_mode: The scale mode of the analog waveform.
 
         Returns:
             An analog waveform containing the specified data.
@@ -143,9 +159,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             raise invalid_arg_type("input array", "one-dimensional array or sequence", array)
 
         return AnalogWaveform(
-            _data=np.asarray(array, dtype, copy=copy),
+            raw_data=np.asarray(array, dtype, copy=copy),
             start_index=start_index,
             sample_count=sample_count,
+            extended_properties=extended_properties,
+            timing=timing,
+            scale_mode=scale_mode,
         )
 
     @overload
@@ -157,6 +176,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
     ) -> list[AnalogWaveform[_ScalarType]]: ...
 
     @overload
@@ -168,6 +190,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
     ) -> list[AnalogWaveform[_ScalarType]]: ...
 
     @overload
@@ -179,6 +204,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
     ) -> list[AnalogWaveform[Any]]: ...
 
     @staticmethod
@@ -189,6 +217,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        timing: Timing | PrecisionTiming | None = None,
+        scale_mode: ScaleMode | None = None,
     ) -> list[AnalogWaveform[_ScalarType]]:
         """Construct a list of analog waveforms from a two-dimensional array or nested sequence.
 
@@ -199,9 +230,16 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             copy: Specifies whether to copy the array or save a reference to it.
             start_index: The sample index at which the analog waveform data begins.
             sample_count: The number of samples in the analog waveform.
+            extended_properties: The extended properties of the analog waveform.
+            timing: The timing information of the analog waveform.
+            scale_mode: The scale mode of the analog waveform.
 
         Returns:
             A list containing an analog waveform for each row of the specified data.
+
+        When constructing multiple analog waveforms, the same extended properties, timing
+        information, and scale mode are applied to all analog waveforms. Consider assigning
+        these properties after construction.
         """
         if isinstance(array, np.ndarray):
             if array.ndim != 2:
@@ -218,9 +256,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
         return [
             AnalogWaveform(
-                _data=np.asarray(array[i], dtype, copy=copy),
+                raw_data=np.asarray(array[i], dtype, copy=copy),
                 start_index=start_index,
                 sample_count=sample_count,
+                extended_properties=extended_properties,
+                timing=timing,
+                scale_mode=scale_mode,
             )
             for i in range(len(array))
         ]
@@ -251,9 +292,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         sample_count: SupportsIndex | None = ...,
         dtype: None = ...,
         *,
+        raw_data: None = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
-        _data: None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
     ) -> None: ...
 
     @overload
@@ -262,9 +306,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         sample_count: SupportsIndex | None = ...,
         dtype: type[_ScalarType_co] | np.dtype[_ScalarType_co] = ...,
         *,
+        raw_data: None = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
-        _data: None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
     ) -> None: ...
 
     @overload
@@ -273,9 +320,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         sample_count: SupportsIndex | None = ...,
         dtype: None = ...,
         *,
+        raw_data: npt.NDArray[_ScalarType_co] | None = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
-        _data: npt.NDArray[_ScalarType_co] | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
     ) -> None: ...
 
     @overload
@@ -284,9 +334,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         sample_count: SupportsIndex | None = ...,
         dtype: npt.DTypeLike = ...,
         *,
+        raw_data: npt.NDArray[Any] | None = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
-        _data: npt.NDArray[Any] | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
     ) -> None: ...
 
     def __init__(
@@ -294,9 +347,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         sample_count: SupportsIndex | None = None,
         dtype: npt.DTypeLike = None,
         *,
+        raw_data: npt.NDArray[_ScalarType_co] | None = None,
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
-        _data: npt.NDArray[_ScalarType_co] | None = None,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        timing: Timing | PrecisionTiming | None = None,
+        scale_mode: ScaleMode | None = None,
     ) -> None:
         """Construct an analog waveform.
 
@@ -304,25 +360,45 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             sample_count: The number of samples in the analog waveform.
             dtype: The NumPy data type for the analog waveform data. If not specified, the data
                 type defaults to np.float64.
+            raw_data: A NumPy ndarray to use for sample storage. The analog waveform takes ownership
+                of this array. If not specified, an ndarray is created based on the specified dtype,
+                start index, sample count, and capacity.
             start_index: The sample index at which the analog waveform data begins.
             sample_count: The number of samples in the analog waveform.
             capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
                 appending samples to the waveform.
+            extended_properties: The extended properties of the analog waveform.
+            timing: The timing information of the analog waveform.
+            scale_mode: The scale mode of the analog waveform.
 
         Returns:
             An analog waveform.
-
-        Arguments that are prefixed with an underscore are internal implementation details and are
-        subject to change.
         """
-        if _data is None:
+        if raw_data is None:
             self._init_with_new_array(
                 sample_count, dtype, start_index=start_index, capacity=capacity
             )
-        else:
+        elif isinstance(raw_data, np.ndarray):
             self._init_with_provided_array(
-                _data, dtype, start_index=start_index, sample_count=sample_count, capacity=capacity
+                raw_data,
+                dtype,
+                start_index=start_index,
+                sample_count=sample_count,
+                capacity=capacity,
             )
+        else:
+            raise invalid_arg_type("raw data", "NumPy ndarray", raw_data)
+
+        self._extended_properties = ExtendedPropertyDictionary(extended_properties)
+
+        if timing is None:
+            timing = Timing.empty
+        self._timing = timing
+        self._converted_timing_cache = {}
+
+        if scale_mode is None:
+            scale_mode = NO_SCALING
+        self._scale_mode = scale_mode
 
     def _init_with_new_array(
         self,
@@ -357,10 +433,6 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._data = np.zeros(capacity, dtype)
         self._start_index = start_index
         self._sample_count = sample_count
-        self._extended_properties = ExtendedPropertyDictionary()
-        self._timing = Timing.empty
-        self._converted_timing_cache = {}
-        self._scale_mode = NO_SCALING
 
     def _init_with_provided_array(
         self,
@@ -414,10 +486,6 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._data = data
         self._start_index = start_index
         self._sample_count = sample_count
-        self._extended_properties = ExtendedPropertyDictionary()
-        self._timing = Timing.empty
-        self._converted_timing_cache = {}
-        self._scale_mode = NO_SCALING
 
     @property
     def raw_data(self) -> npt.NDArray[_ScalarType_co]:
@@ -785,13 +853,31 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         if new_capacity > self.capacity:
             self.capacity = new_capacity
 
-    def __eq__(self, other: object) -> bool:  # noqa: D105 - Missing docstring in magic method
-        if not isinstance(other, self.__class__):
+    def __eq__(self, value: object, /) -> bool:
+        """Return self==value."""
+        if not isinstance(value, self.__class__):
             return NotImplemented
         return (
-            self.dtype == other.dtype
-            and np.array_equal(self.raw_data, other.raw_data)
-            and self._extended_properties == other._extended_properties
-            and self._base_timing == other._base_timing
-            and self._scale_mode == other._scale_mode
+            self.dtype == value.dtype
+            and np.array_equal(self.raw_data, value.raw_data)
+            and self._extended_properties == value._extended_properties
+            and self._timing == value._timing
+            and self._scale_mode == value._scale_mode
         )
+
+    def __repr__(self) -> str:
+        """Return repr(self)."""
+        args = [f"{self._sample_count}"]
+        if self.dtype != np.float64:
+            args.append(f"{self.dtype.name}")
+        # start_index and capacity are not shown because they are allocation details. raw_data hides
+        # the unused data before start_index and after start_index+sample_count.
+        if self._sample_count > 0:
+            args.append(f"raw_data={self.raw_data!r}")
+        if self._extended_properties:
+            args.append(f"extended_properties={self._extended_properties._properties!r}")
+        if self._timing is not Timing.empty and self._timing is not PrecisionTiming.empty:
+            args.append(f"timing={self._timing!r}")
+        if self._scale_mode is not NO_SCALING:
+            args.append(f"scale_mode={self._scale_mode}")
+        return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
