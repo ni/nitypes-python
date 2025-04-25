@@ -8,7 +8,7 @@ import numpy as np
 import numpy.typing as npt
 
 from nitypes._arguments import arg_to_uint, validate_dtype
-from nitypes._exceptions import invalid_arg_type
+from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     UNIT_DESCRIPTION,
@@ -125,9 +125,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         """
         if isinstance(array, np.ndarray):
             if array.ndim != 1:
-                raise ValueError(
-                    "The input array must be a one-dimensional array or sequence.\n\n"
-                    f"Number of dimensions: {array.ndim}"
+                raise invalid_array_ndim(
+                    "input array", "one-dimensional array or sequence", array.ndim
                 )
         elif isinstance(array, Sequence) or (
             sys.version_info < (3, 10) and isinstance(array, std_array.array)
@@ -135,10 +134,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
-            raise TypeError(
-                "The input array must be a one-dimensional array or sequence.\n\n"
-                f"Type: {type(array)}"
-            )
+            raise invalid_arg_type("input array", "one-dimensional array or sequence", array)
 
         return AnalogWaveform(
             _data=np.asarray(array, dtype, copy=copy),
@@ -203,9 +199,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         """
         if isinstance(array, np.ndarray):
             if array.ndim != 2:
-                raise ValueError(
-                    "The input array must be a two-dimensional array or nested sequence.\n\n"
-                    f"Number of dimensions: {array.ndim}"
+                raise invalid_array_ndim(
+                    "input array", "two-dimensional array or nested sequence", array.ndim
                 )
         elif isinstance(array, Sequence) or (
             sys.version_info < (3, 10) and isinstance(array, std_array.array)
@@ -213,10 +208,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
-            raise TypeError(
-                "The input array must be a two-dimensional array or nested sequence.\n\n"
-                f"Type: {type(array)}"
-            )
+            raise invalid_arg_type("input array", "two-dimensional array or nested sequence", array)
 
         return [
             AnalogWaveform(
@@ -374,16 +366,18 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         capacity: SupportsIndex | None = None,
     ) -> None:
         if not isinstance(data, np.ndarray):
-            raise TypeError("The input array must be a one-dimensional array.")
+            raise invalid_arg_type("input array", "one-dimensional array", data)
         if data.ndim != 1:
-            raise ValueError("The input array must be a one-dimensional array.")
+            raise invalid_array_ndim("input array", "one-dimensional array", data.ndim)
 
         if dtype is None:
             dtype = data.dtype
         if dtype != data.dtype:
-            # from_array_1d() converts the input array to the requested dtype, so this error may be
-            # unreachable.
-            raise TypeError("The data type of the input array must match the requested data type.")
+            raise TypeError(
+                "The data type of the input array must match the requested data type.\n\n"
+                f"Array data type: {data.dtype}\n"
+                f"Requested data type: {np.dtype(dtype)}"
+            )
         validate_dtype(dtype, _ANALOG_DTYPES)
 
         capacity = arg_to_uint("capacity", capacity, len(data))
