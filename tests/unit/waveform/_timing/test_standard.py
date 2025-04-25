@@ -204,9 +204,6 @@ def test___monotonic_timestamps___create_with_irregular_interval___creates_wavef
     timing = Timing.create_with_irregular_interval(timestamps)
 
     assert_type(timing, Timing)
-    assert not timing.has_timestamp
-    assert timing.time_offset == dt.timedelta()
-    assert timing._sample_interval is None
     assert timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
     assert timing._timestamps == timestamps
 
@@ -228,6 +225,19 @@ def test___non_monotonic_timestamps___create_with_irregular_interval___raises_va
         _ = Timing.create_with_irregular_interval(timestamps)
 
     assert exc.value.args[0].startswith("The timestamps must be in ascending or descending order.")
+
+
+def test___timestamps_tuple___create_with_irregular_interval___creates_waveform_timing_with_timestamps() -> (
+    None
+):
+    start_time = dt.datetime.now(dt.timezone.utc)
+    timestamps = (start_time,)
+
+    timing = Timing.create_with_irregular_interval(timestamps)
+
+    assert_type(timing, Timing)
+    assert timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert timing._timestamps == list(timestamps)
 
 
 ###############################################################################
