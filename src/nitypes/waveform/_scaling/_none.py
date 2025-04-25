@@ -13,6 +13,11 @@ class NoneScaleMode(ScaleMode):
     def _transform_data(self, data: npt.NDArray[_ScalarType]) -> npt.NDArray[_ScalarType]:
         return data
 
+    def __eq__(self, other: object) -> bool:  # noqa: D105 - Missing docstring in magic method
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return True
+
     def __repr__(  # noqa: D105 - Missing docstring in magic method (auto-generated noqa)
         self,
     ) -> str:

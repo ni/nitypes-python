@@ -784,3 +784,14 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         new_capacity = self._start_index + self._sample_count + amount
         if new_capacity > self.capacity:
             self.capacity = new_capacity
+
+    def __eq__(self, other: object) -> bool:  # noqa: D105 - Missing docstring in magic method
+        if not isinstance(other, self.__class__):
+            return NotImplemented
+        return (
+            self.dtype == other.dtype
+            and np.array_equal(self.raw_data, other.raw_data)
+            and self._extended_properties == other._extended_properties
+            and self._base_timing == other._base_timing
+            and self._scale_mode == other._scale_mode
+        )
