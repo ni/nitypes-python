@@ -8,6 +8,8 @@ from typing import Any, TypeVar, Union, cast
 
 import hightime as ht
 
+from nitypes._exceptions import invalid_arg_type, invalid_requested_type
+
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
@@ -24,15 +26,13 @@ def convert_datetime(requested_type: type[_TDateTime], value: _AnyDateTime, /) -
     """Convert a datetime object to the specified type."""
     convert_func = _CONVERT_DATETIME_FOR_TYPE.get(requested_type)
     if convert_func is None:
-        raise TypeError(
-            "The requested type must be a datetime type.\n\n" f"Requested type: {requested_type}"
-        )
+        raise invalid_requested_type("datetime", requested_type)
     return cast(_TDateTime, convert_func(value))
 
 
 @singledispatch
 def _convert_to_dt_datetime(value: object, /) -> dt.datetime:
-    raise TypeError("The value must be a datetime.\n\n" f"Provided value: {value!r}")
+    raise invalid_arg_type("value", "datetime", value)
 
 
 @_convert_to_dt_datetime.register
@@ -57,7 +57,7 @@ def _(value: ht.datetime, /) -> dt.datetime:
 
 @singledispatch
 def _convert_to_ht_datetime(value: object, /) -> ht.datetime:
-    raise TypeError("The value must be a datetime.\n\n" f"Provided value: {value!r}")
+    raise invalid_arg_type("value", "datetime", value)
 
 
 @_convert_to_ht_datetime.register
@@ -90,15 +90,13 @@ def convert_timedelta(requested_type: type[_TTimeDelta], value: _AnyTimeDelta, /
     """Convert a timedelta object to the specified type."""
     convert_func = _CONVERT_TIMEDELTA_FOR_TYPE.get(requested_type)
     if convert_func is None:
-        raise TypeError(
-            "The requested type must be a timedelta type.\n\n" f"Requested type: {requested_type}"
-        )
+        raise invalid_requested_type("timedelta", requested_type)
     return cast(_TTimeDelta, convert_func(value))
 
 
 @singledispatch
 def _convert_to_dt_timedelta(value: object, /) -> dt.timedelta:
-    raise TypeError("The value must be a timedelta.\n\n" f"Provided value: {value!r}")
+    raise invalid_arg_type("value", "timedelta", value)
 
 
 @_convert_to_dt_timedelta.register
@@ -113,7 +111,7 @@ def _(value: ht.timedelta, /) -> dt.timedelta:
 
 @singledispatch
 def _convert_to_ht_timedelta(value: object, /) -> ht.timedelta:
-    raise TypeError("The value must be a timedelta.\n\n" f"Provided value: {value!r}")
+    raise invalid_arg_type("value", "timedelta", value)
 
 
 @_convert_to_ht_timedelta.register

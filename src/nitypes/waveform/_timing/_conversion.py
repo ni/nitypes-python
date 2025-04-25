@@ -8,6 +8,7 @@ from typing import Any, TypeVar, Union, cast
 
 import hightime as ht
 
+from nitypes._exceptions import invalid_arg_type, invalid_requested_type
 from nitypes.time._conversion import convert_datetime, convert_timedelta
 from nitypes.waveform._timing._precision import PrecisionTiming
 from nitypes.waveform._timing._standard import Timing
@@ -25,16 +26,13 @@ def convert_timing(requested_type: type[_TTiming], value: _AnyTiming, /) -> _TTi
     """Convert a waveform timing object to the specified type."""
     convert_func = _CONVERT_TIMING_FOR_TYPE.get(requested_type)
     if convert_func is None:
-        raise TypeError(
-            "The requested type must be a waveform timing type.\n\n"
-            f"Requested type: {requested_type}"
-        )
+        raise invalid_requested_type("waveform timing", requested_type)
     return cast(_TTiming, convert_func(value))
 
 
 @singledispatch
 def _convert_to_standard_timing(value: object, /) -> Timing:
-    raise TypeError("The value must be a waveform timing object.\n\n" f"Provided value: {value!r}")
+    raise invalid_arg_type("value", "waveform timing object", value)
 
 
 @_convert_to_standard_timing.register
@@ -67,7 +65,7 @@ def _(value: PrecisionTiming, /) -> Timing:
 
 @singledispatch
 def _convert_to_precision_timing(value: object, /) -> PrecisionTiming:
-    raise TypeError("The value must be a waveform timing object.\n\n" f"Provided value: {value!r}")
+    raise invalid_arg_type("value", "waveform timing object", value)
 
 
 @_convert_to_precision_timing.register

@@ -7,7 +7,8 @@ from collections.abc import Generator, Iterable, Sequence
 from enum import Enum
 from typing import Generic, SupportsIndex, TypeVar
 
-from nitypes._exceptions import add_note
+from nitypes._arguments import validate_unsupported_arg
+from nitypes._exceptions import add_note, invalid_arg_type
 
 
 class SampleIntervalMode(Enum):
@@ -26,13 +27,6 @@ class SampleIntervalMode(Enum):
 # TODO: should these be constrained types? I guess we'll find out when we add NI-BTF types.
 _TDateTime_co = TypeVar("_TDateTime_co", bound=dt.datetime)
 _TTimeDelta_co = TypeVar("_TTimeDelta_co", bound=dt.timedelta)
-
-
-def _validate_unsupported_arg(arg_description: str, value: object) -> None:
-    if value is not None:
-        raise ValueError(
-            f"The {arg_description} argument is not supported.\n\n" f"Provided value: {value!r}"
-        )
 
 
 class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
@@ -118,16 +112,11 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         datetime_type = self.__class__._get_datetime_type()
         timedelta_type = self.__class__._get_timedelta_type()
         if not isinstance(timestamp, (datetime_type, type(None))):
-            raise TypeError(
-                "The timestamp must be a datetime or None.\n\n" f"Provided value: {timestamp!r}"
-            )
+            raise invalid_arg_type("timestamp", "datetime or None", timestamp)
         if not isinstance(time_offset, (timedelta_type, type(None))):
-            raise TypeError(
-                f"The time offset must be a timedelta or None.\n\n"
-                f"Provided value: {time_offset!r}"
-            )
-        _validate_unsupported_arg("sample interval", sample_interval)
-        _validate_unsupported_arg("timestamps", timestamps)
+            raise invalid_arg_type("time offset", "timedelta or None", time_offset)
+        validate_unsupported_arg("sample interval", sample_interval)
+        validate_unsupported_arg("timestamps", timestamps)
 
     def _validate_init_args_regular(
         self,
@@ -139,20 +128,12 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         datetime_type = self.__class__._get_datetime_type()
         timedelta_type = self.__class__._get_timedelta_type()
         if not isinstance(timestamp, (datetime_type, type(None))):
-            raise TypeError(
-                "The timestamp must be a datetime or None.\n\n" f"Provided value: {timestamp!r}"
-            )
+            raise invalid_arg_type("timestamp", "datetime or None", timestamp)
         if not isinstance(time_offset, (timedelta_type, type(None))):
-            raise TypeError(
-                f"The time offset must be a timedelta or None.\n\n"
-                f"Provided value: {time_offset!r}"
-            )
+            raise invalid_arg_type("time offset", "timedelta or None", time_offset)
         if not isinstance(sample_interval, timedelta_type):
-            raise TypeError(
-                "The sample interval must be a timedelta.\n\n"
-                f"Provided value: {sample_interval!r}"
-            )
-        _validate_unsupported_arg("timestamps", timestamps)
+            raise invalid_arg_type("sample interval", "timedelta", sample_interval)
+        validate_unsupported_arg("timestamps", timestamps)
 
     def _validate_init_args_irregular(
         self,
@@ -162,16 +143,13 @@ class BaseTiming(ABC, Generic[_TDateTime_co, _TTimeDelta_co]):
         timestamps: Sequence[_TDateTime_co] | None,
     ) -> None:
         datetime_type = self.__class__._get_datetime_type()
-        _validate_unsupported_arg("timestamp", timestamp)
-        _validate_unsupported_arg("time offset", time_offset)
-        _validate_unsupported_arg("sample interval", sample_interval)
+        validate_unsupported_arg("timestamp", timestamp)
+        validate_unsupported_arg("time offset", time_offset)
+        validate_unsupported_arg("sample interval", sample_interval)
         if not isinstance(timestamps, Sequence) or not all(
             isinstance(ts, datetime_type) for ts in timestamps
         ):
-            raise TypeError(
-                "The timestamps must be a sequence of datetime objects.\n\n"
-                f"Provided value: {timestamps!r}"
-            )
+            raise invalid_arg_type("timestamps", "sequence of datetime objects", timestamps)
 
     _VALIDATE_INIT_ARGS_FOR_MODE = {
         SampleIntervalMode.NONE: _validate_init_args_none,
