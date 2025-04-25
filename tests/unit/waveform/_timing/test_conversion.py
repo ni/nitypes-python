@@ -6,7 +6,7 @@ import sys
 import hightime as ht
 
 from nitypes.waveform import PrecisionTiming, SampleIntervalMode, Timing
-from nitypes.waveform._timing._conversion import convert_timing
+from nitypes.waveform._timing import convert_timing
 
 if sys.version_info >= (3, 11):
     from typing import assert_type

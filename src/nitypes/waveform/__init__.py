@@ -11,9 +11,7 @@ from nitypes.waveform._scaling import (
     NoneScaleMode,
     ScaleMode,
 )
-from nitypes.waveform._timing._base import BaseTiming, SampleIntervalMode
-from nitypes.waveform._timing._precision import PrecisionTiming
-from nitypes.waveform._timing._standard import Timing
+from nitypes.waveform._timing import BaseTiming, PrecisionTiming, SampleIntervalMode, Timing
 
 __all__ = [
     "AnalogWaveform",
