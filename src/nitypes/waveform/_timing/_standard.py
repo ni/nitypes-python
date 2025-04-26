@@ -5,7 +5,8 @@ from collections.abc import Sequence
 from typing import ClassVar
 
 from nitypes._typing import override
-from nitypes.waveform._timing._base import BaseTiming, SampleIntervalMode
+from nitypes.waveform._timing._base import BaseTiming
+from nitypes.waveform._timing._sample_interval import SampleIntervalMode
 
 
 class Timing(BaseTiming[dt.datetime, dt.timedelta]):

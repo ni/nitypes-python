@@ -44,7 +44,7 @@ def invalid_arg_type(arg_description: str, type_description: str, value: object)
 
 def invalid_array_ndim(arg_description: str, valid_value_description: str, ndim: int) -> ValueError:
     """Create a ValueError for an array with an invalid number of dimensions."""
-    raise ValueError(
+    return ValueError(
         f"The {arg_description} must be {_a(valid_value_description)}.\n\n"
         f"Number of dimensions: {ndim}"
     )
@@ -52,15 +52,31 @@ def invalid_array_ndim(arg_description: str, valid_value_description: str, ndim:
 
 def invalid_requested_type(type_description: str, requested_type: type) -> TypeError:
     """Create a TypeError for an invalid requested type."""
-    raise TypeError(
+    return TypeError(
         f"The requested type must be {_a(type_description)} type.\n\n"
         f"Requested type: {requested_type}"
     )
 
 
+def no_timestamp_information() -> RuntimeError:
+    """Create a RuntimeError for waveform timing with no timestamp information."""
+    return RuntimeError(
+        "The waveform timing does not have valid timestamp information. "
+        "To obtain timestamps, the waveform must be irregular or must be initialized "
+        "with a valid time stamp and sample interval."
+    )
+
+
+def sample_interval_mode_mismatch() -> RuntimeError:
+    """Create a RuntimeError about mixing none/regular with irregular timing."""
+    return RuntimeError(
+        "The timing of one or more waveforms does not match the timing of the current waveform."
+    )
+
+
 def unsupported_arg(arg_description: str, value: object) -> ValueError:
     """Create a ValueError for an unsupported argument."""
-    raise ValueError(
+    return ValueError(
         f"The {arg_description} argument is not supported.\n\n"
         f"Provided value: {reprlib.repr(value)}"
     )

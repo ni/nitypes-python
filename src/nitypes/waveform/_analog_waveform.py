@@ -3,7 +3,15 @@ from __future__ import annotations
 import datetime as dt
 import sys
 from collections.abc import Sequence
-from typing import Any, Generic, SupportsIndex, TypeVar, Union, cast, overload
+from typing import (
+    Any,
+    Generic,
+    SupportsIndex,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 import hightime as ht
 import numpy as np
