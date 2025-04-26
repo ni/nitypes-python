@@ -25,6 +25,12 @@ class SampleIntervalMode(Enum):
     """Irregular sample interval."""
 
 
+class _Direction(Enum):
+    INCREASING = -1
+    UNKNOWN = 0
+    DECREASING = 1
+
+
 # TODO: should these be constrained types? I guess we'll find out when we add NI-BTF types.
 _TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
 _TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
@@ -262,25 +268,25 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
 
 
 def _are_timestamps_monotonic(timestamps: Sequence[_TDateTime]) -> bool:
-    direction = 0
+    direction = _Direction.UNKNOWN
     for i in range(1, len(timestamps)):
         comparison = _get_direction(timestamps[i - 1], timestamps[i])
-        if comparison == 0:
+        if comparison == _Direction.UNKNOWN:
             continue
 
-        if direction == 0:
+        if direction == _Direction.UNKNOWN:
             direction = comparison
         elif comparison != direction:
             return False
     return True
 
 
-def _get_direction(left: _TDateTime, right: _TDateTime) -> int:
+def _get_direction(left: _TDateTime, right: _TDateTime) -> _Direction:
     if left < right:
-        return -1
+        return _Direction.INCREASING
     if right < left:
-        return 1
-    return 0
+        return _Direction.DECREASING
+    return _Direction.UNKNOWN
 
 
 class _SampleIntervalStrategy(ABC):
