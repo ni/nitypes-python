@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime as dt
-import sys
 from collections.abc import Callable
 from functools import singledispatch
 from typing import Any, TypeVar, Union, cast
@@ -9,11 +8,7 @@ from typing import Any, TypeVar, Union, cast
 import hightime as ht
 
 from nitypes._exceptions import invalid_arg_type, invalid_requested_type
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
+from nitypes._typing import TypeAlias
 
 _AnyDateTime: TypeAlias = Union[dt.datetime, ht.datetime]
 _TDateTime = TypeVar("_TDateTime", dt.datetime, ht.datetime)

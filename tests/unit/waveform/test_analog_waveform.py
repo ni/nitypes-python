@@ -3,7 +3,6 @@ from __future__ import annotations
 import array
 import datetime as dt
 import itertools
-import sys
 import weakref
 from typing import Any, SupportsIndex
 
@@ -12,6 +11,7 @@ import numpy as np
 import numpy.typing as npt
 import pytest
 
+from nitypes._typing import assert_type
 from nitypes.waveform import (
     NO_SCALING,
     AnalogWaveform,
@@ -21,11 +21,6 @@ from nitypes.waveform import (
     ScaleMode,
     Timing,
 )
-
-if sys.version_info >= (3, 11):
-    from typing import assert_type
-else:
-    from typing_extensions import assert_type
 
 
 ###############################################################################

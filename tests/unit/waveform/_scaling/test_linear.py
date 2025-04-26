@@ -1,18 +1,13 @@
 from __future__ import annotations
 
-import sys
 from typing import SupportsFloat
 
 import numpy as np
 import numpy.typing as npt
 import pytest
 
+from nitypes._typing import assert_type
 from nitypes.waveform import LinearScaleMode
-
-if sys.version_info >= (3, 11):
-    from typing import assert_type
-else:
-    from typing_extensions import assert_type
 
 
 @pytest.mark.parametrize(

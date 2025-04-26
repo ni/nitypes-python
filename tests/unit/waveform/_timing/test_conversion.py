@@ -1,17 +1,12 @@
 from __future__ import annotations
 
 import datetime as dt
-import sys
 
 import hightime as ht
 
+from nitypes._typing import assert_type
 from nitypes.waveform import PrecisionTiming, SampleIntervalMode, Timing
 from nitypes.waveform._timing import convert_timing
-
-if sys.version_info >= (3, 11):
-    from typing import assert_type
-else:
-    from typing_extensions import assert_type
 
 
 def test___standard_to_standard___convert_timing___returns_original_object() -> None:

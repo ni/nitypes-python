@@ -1,18 +1,13 @@
 from __future__ import annotations
 
 import datetime as dt
-import sys
 from copy import deepcopy
 
 import hightime as ht
 import pytest
 
+from nitypes._typing import assert_type
 from nitypes.waveform import PrecisionTiming, SampleIntervalMode
-
-if sys.version_info >= (3, 11):
-    from typing import assert_type
-else:
-    from typing_extensions import assert_type
 
 
 ###############################################################################

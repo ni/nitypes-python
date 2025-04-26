@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime as dt
-import sys
 from collections.abc import Callable
 from functools import singledispatch
 from typing import Any, TypeVar, Union, cast
@@ -9,14 +8,10 @@ from typing import Any, TypeVar, Union, cast
 import hightime as ht
 
 from nitypes._exceptions import invalid_arg_type, invalid_requested_type
+from nitypes._typing import TypeAlias
 from nitypes.time._conversion import convert_datetime, convert_timedelta
 from nitypes.waveform._timing._precision import PrecisionTiming
 from nitypes.waveform._timing._standard import Timing
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
 
 _AnyTiming: TypeAlias = Union[Timing, PrecisionTiming]
 _TTiming = TypeVar("_TTiming", Timing, PrecisionTiming)
