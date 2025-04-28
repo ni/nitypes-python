@@ -9,12 +9,15 @@ if sys.version_info >= (3, 10):
     from typing import TypeAlias
 elif TYPE_CHECKING:
     from typing_extensions import TypeAlias
+else:
+    TypeAlias = None
 
 if sys.version_info >= (3, 11):
     from typing import Self, assert_type
 elif TYPE_CHECKING:
     from typing_extensions import Self, assert_type
 else:
+    Self = None
 
     def assert_type(val, typ, /):  # noqa: D103 - Missing docstring in public function
         pass
