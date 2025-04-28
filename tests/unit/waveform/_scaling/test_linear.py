@@ -116,7 +116,7 @@ def test___scale_mode___repr___looks_ok() -> None:
     assert repr(scale_mode) == "nitypes.waveform.LinearScaleMode(1.2345, 0.006789)"
 
 
-def test___scale_mode___copy___new_scale_mode_with_same_value() -> None:
+def test___scale_mode___copy___makes_shallow_copy() -> None:
     scale_mode = LinearScaleMode(1.2345, 0.006789)
 
     new_scale_mode = copy.copy(scale_mode)
@@ -125,7 +125,16 @@ def test___scale_mode___copy___new_scale_mode_with_same_value() -> None:
     assert new_scale_mode is not scale_mode
 
 
-def test___scale_mode___pickle_unpickle___new_scale_mode_with_same_value() -> None:
+def test___scale_mode___deepcopy___makes_deep_copy() -> None:
+    scale_mode = LinearScaleMode(1.2345, 0.006789)
+
+    new_scale_mode = copy.deepcopy(scale_mode)
+
+    assert new_scale_mode == scale_mode
+    assert new_scale_mode is not scale_mode
+
+
+def test___scale_mode___pickle_unpickle___makes_deep_copy() -> None:
     scale_mode = LinearScaleMode(1.2345, 0.006789)
 
     new_scale_mode = pickle.loads(pickle.dumps(scale_mode))
