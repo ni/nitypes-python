@@ -20,7 +20,10 @@ _TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
 
 
 class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
-    """Base class for waveform timing information."""
+    """Base class for waveform timing information.
+
+    Waveform timing objects are immutable.
+    """
 
     @classmethod
     @abstractmethod
@@ -118,6 +121,8 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
         time_offset: _TTimeDelta | None,
         sample_interval: _TTimeDelta | None,
         timestamps: Sequence[_TDateTime] | None,
+        *,
+        copy_timestamps: bool = True,
     ) -> None:
         """Construct a base waveform timing object."""
         sample_interval_strategy = create_sample_interval_strategy(sample_interval_mode)
@@ -129,7 +134,7 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
             add_note(e, f"Sample interval mode: {sample_interval_mode}")
             raise
 
-        if timestamps is not None and not isinstance(timestamps, list):
+        if timestamps is not None and (copy_timestamps or not isinstance(timestamps, list)):
             timestamps = list(timestamps)
 
         self._sample_interval_strategy = sample_interval_strategy
@@ -221,7 +226,14 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
             self._sample_interval,
             self._timestamps,
         )
-        return (self.__class__, ctor_args)
+        ctor_kwargs: dict[str, Any] = {}
+        if self._timestamps is not None:
+            ctor_kwargs["copy_timestamps"] = False
+        return (self.__class__._unpickle, (ctor_args, ctor_kwargs))
+
+    @classmethod
+    def _unpickle(cls, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Self:
+        return cls(*args, **kwargs)
 
     def __repr__(self) -> str:
         """Return repr(self)."""

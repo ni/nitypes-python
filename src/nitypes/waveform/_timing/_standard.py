@@ -14,6 +14,8 @@ class Timing(BaseTiming[dt.datetime, dt.timedelta]):
 
     The standard datetime module has up to microsecond precision. For higher precision, use
     PrecisionTiming.
+
+    Waveform timing objects are immutable.
     """
 
     _DEFAULT_TIME_OFFSET = dt.timedelta()
@@ -66,6 +68,8 @@ class Timing(BaseTiming[dt.datetime, dt.timedelta]):
         time_offset: dt.timedelta | None = None,
         sample_interval: dt.timedelta | None = None,
         timestamps: Sequence[dt.datetime] | None = None,
+        *,
+        copy_timestamps: bool = True,
     ) -> None:
         """Construct a waveform timing object.
 
@@ -74,7 +78,14 @@ class Timing(BaseTiming[dt.datetime, dt.timedelta]):
         - Timing.create_with_regular_interval
         - Timing.create_with_irregular_interval
         """
-        super().__init__(sample_interval_mode, timestamp, time_offset, sample_interval, timestamps)
+        super().__init__(
+            sample_interval_mode,
+            timestamp,
+            time_offset,
+            sample_interval,
+            timestamps,
+            copy_timestamps=copy_timestamps,
+        )
 
 
 Timing.empty = Timing.create_with_no_interval()
