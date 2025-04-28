@@ -956,6 +956,41 @@ def test___waveform_with_precision_timing___get_timing___converts_timing() -> No
     )
 
 
+def test___waveform_with_cached_timing___get_timing___returns_cached_timing() -> None:
+    waveform = AnalogWaveform()
+    waveform.timing = Timing.create_with_regular_interval(
+        dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+    )
+    precision_timing_before = waveform.precision_timing
+
+    precision_timing = waveform.precision_timing
+
+    assert precision_timing is precision_timing_before
+    assert precision_timing == PrecisionTiming.create_with_regular_interval(
+        ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+    )
+
+
+def test___waveform_with_cached_timing___set_timing___clears_cached_timing() -> None:
+    waveform = AnalogWaveform()
+    waveform.timing = Timing.create_with_regular_interval(
+        dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+    )
+    precision_timing_before = waveform.precision_timing
+
+    waveform.timing = Timing.create_with_regular_interval(
+        dt.timedelta(milliseconds=2), dt.datetime(2025, 1, 2), dt.timedelta(seconds=2)
+    )
+
+    precision_timing_after = waveform.precision_timing
+    assert precision_timing_before == PrecisionTiming.create_with_regular_interval(
+        ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+    )
+    assert precision_timing_after == PrecisionTiming.create_with_regular_interval(
+        ht.timedelta(milliseconds=2), ht.datetime(2025, 1, 2), ht.timedelta(seconds=2)
+    )
+
+
 ###############################################################################
 # scale_mode
 ###############################################################################
