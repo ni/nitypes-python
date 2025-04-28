@@ -27,6 +27,11 @@ if sys.version_info < (3, 10):
     import array as std_array
 
 
+    if sys.version_info >= (3, 11):
+        from typing import Self
+    else:
+        from typing_extensions import Self
+
 _ScalarType = TypeVar("_ScalarType", bound=np.generic)
 _ScalarType_co = TypeVar("_ScalarType_co", bound=np.generic, covariant=True)
 
@@ -876,7 +881,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         return (self.__class__._unpickle, (ctor_args, ctor_kwargs))
 
     @classmethod
-    def _unpickle(cls, args: tuple[Any, ...], kwargs: dict[str, Any]) -> AnalogWaveform[Any]:
+    def _unpickle(cls, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Self:
         return cls(*args, **kwargs)
 
     def __repr__(self) -> str:
