@@ -1,18 +1,13 @@
 from __future__ import annotations
 
 import datetime as dt
-import sys
 from typing import Any
 
 import hightime as ht
 import pytest
 
+from nitypes._typing import assert_type
 from nitypes.time import convert_datetime, convert_timedelta
-
-if sys.version_info >= (3, 11):
-    from typing import assert_type
-else:
-    from typing_extensions import assert_type
 
 
 ###############################################################################

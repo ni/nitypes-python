@@ -1,14 +1,9 @@
 from __future__ import annotations
 
 import operator
-import sys
-from typing import MutableMapping, Iterator
+from typing import Iterator, MutableMapping, Union
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing import Union
-    from typing_extensions import TypeAlias
+from nitypes._typing import TypeAlias
 
 # Extended property keys
 CHANNEL_NAME = "NI_ChannelName"
@@ -16,12 +11,8 @@ LINE_NAMES = "NI_LineNames"
 UNIT_DESCRIPTION = "NI_UnitDescription"
 
 
-if sys.version_info >= (3, 10):
-    ExtendedPropertyValue: TypeAlias = bool | float | int | str
-    """An ExtendedPropertyDictionary value."""
-else:
-    ExtendedPropertyValue: TypeAlias = Union[bool, float, int, str]
-    """An ExtendedPropertyDictionary value."""
+ExtendedPropertyValue: TypeAlias = Union[bool, float, int, str]
+"""An ExtendedPropertyDictionary value."""
 
 
 class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):

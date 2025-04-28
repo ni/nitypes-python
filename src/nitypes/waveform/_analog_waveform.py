@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import sys
 from collections.abc import Sequence
-from typing import Any, Generic, SupportsIndex, TypeVar, overload
+from typing import (
+    Any,
+    Generic,
+    SupportsIndex,
+    TypeVar,
+    overload,
+)
 
 import numpy as np
 import numpy.typing as npt

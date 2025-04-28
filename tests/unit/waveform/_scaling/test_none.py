@@ -1,16 +1,10 @@
 from __future__ import annotations
 
-import sys
-
 import numpy as np
 import numpy.typing as npt
 
+from nitypes._typing import assert_type
 from nitypes.waveform import NO_SCALING, NoneScaleMode
-
-if sys.version_info >= (3, 11):
-    from typing import assert_type
-else:
-    from typing_extensions import assert_type
 
 
 def test___no_scaling___type_is_none_scale_mode() -> None:
