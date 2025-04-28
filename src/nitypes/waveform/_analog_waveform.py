@@ -12,7 +12,7 @@ import numpy.typing as npt
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
-from nitypes._typing import TypeAlias
+from nitypes._typing import Self, TypeAlias
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     UNIT_DESCRIPTION,
@@ -26,11 +26,6 @@ from nitypes.waveform._warnings import scale_mode_mismatch
 if sys.version_info < (3, 10):
     import array as std_array
 
-
-    if sys.version_info >= (3, 11):
-        from typing import Self
-    else:
-        from typing_extensions import Self
 
 _ScalarType = TypeVar("_ScalarType", bound=np.generic)
 _ScalarType_co = TypeVar("_ScalarType_co", bound=np.generic, covariant=True)
