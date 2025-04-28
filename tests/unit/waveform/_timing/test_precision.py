@@ -9,6 +9,7 @@ import pytest
 
 from nitypes._typing import assert_type
 from nitypes.waveform import PrecisionTiming, SampleIntervalMode
+from tests.unit.waveform._timing._utils import assert_deep_copy, assert_shallow_copy
 
 
 ###############################################################################
@@ -485,12 +486,41 @@ def test___various_values___repr___looks_ok(value: PrecisionTiming, expected_rep
         ),
     ],
 )
-def test___various_values___copy___new_timing_with_same_value(value: PrecisionTiming) -> None:
+def test___various_values___copy___makes_shallow_copy(value: PrecisionTiming) -> None:
     new_value = copy.copy(value)
 
-    assert new_value == value
-    assert new_value is not value
-    assert new_value._timestamps is value._timestamps
+    assert_shallow_copy(new_value, value)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        (PrecisionTiming.create_with_no_interval()),
+        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1))),
+        (PrecisionTiming.create_with_no_interval(None, ht.timedelta(seconds=1))),
+        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1), ht.timedelta(seconds=1))),
+        (PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))),
+        (
+            PrecisionTiming.create_with_regular_interval(
+                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1)
+            )
+        ),
+        (
+            PrecisionTiming.create_with_regular_interval(
+                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+            )
+        ),
+        (
+            PrecisionTiming.create_with_irregular_interval(
+                [ht.datetime(2025, 1, 1), ht.datetime(2025, 1, 2)]
+            )
+        ),
+    ],
+)
+def test___various_values___deepcopy___makes_deep_copy(value: PrecisionTiming) -> None:
+    new_value = copy.deepcopy(value)
+
+    assert_deep_copy(new_value, value)
 
 
 @pytest.mark.parametrize(
@@ -525,7 +555,8 @@ def test___various_values___pickle_unpickle___new_timing_with_same_value(
 
     assert new_value == value
     assert new_value is not value
-    assert new_value._timestamps is value._timestamps
+    if value._timestamps is not None:
+        assert new_value._timestamps is not value._timestamps
 
 
 def test___timing___pickle___references_public_modules() -> None:

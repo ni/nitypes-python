@@ -8,6 +8,7 @@ import pytest
 
 from nitypes._typing import assert_type
 from nitypes.waveform import SampleIntervalMode, Timing
+from tests.unit.waveform._timing._utils import assert_deep_copy, assert_shallow_copy
 
 
 ###############################################################################
@@ -463,12 +464,10 @@ def test___various_values___repr___looks_ok(value: Timing, expected_repr: str) -
         (Timing.create_with_irregular_interval([dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)])),
     ],
 )
-def test___various_values___copy___new_timing_with_same_value(value: Timing) -> None:
+def test___various_values___copy___makes_shallow_copy(value: Timing) -> None:
     new_value = copy.copy(value)
 
-    assert new_value == value
-    assert new_value is not value
-    assert new_value._timestamps is value._timestamps
+    assert_shallow_copy(new_value, value)
 
 
 @pytest.mark.parametrize(
@@ -492,14 +491,39 @@ def test___various_values___copy___new_timing_with_same_value(value: Timing) -> 
         (Timing.create_with_irregular_interval([dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)])),
     ],
 )
-def test___various_values___pickle_unpickle___new_timing_with_same_value(
+def test___various_values___deepcopy___makes_deep_copy(value: Timing) -> None:
+    new_value = copy.deepcopy(value)
+
+    assert_deep_copy(new_value, value)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        (Timing.create_with_no_interval()),
+        (Timing.create_with_no_interval(dt.datetime(2025, 1, 1))),
+        (Timing.create_with_no_interval(None, dt.timedelta(seconds=1))),
+        (Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta(seconds=1))),
+        (Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))),
+        (
+            Timing.create_with_regular_interval(
+                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1)
+            )
+        ),
+        (
+            Timing.create_with_regular_interval(
+                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+            )
+        ),
+        (Timing.create_with_irregular_interval([dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)])),
+    ],
+)
+def test___various_values___pickle_unpickle___makes_deep_copy(
     value: Timing,
 ) -> None:
     new_value = pickle.loads(pickle.dumps(value))
 
-    assert new_value == value
-    assert new_value is not value
-    assert new_value._timestamps is value._timestamps
+    assert_deep_copy(new_value, value)
 
 
 def test___timing___pickle___references_public_modules() -> None:

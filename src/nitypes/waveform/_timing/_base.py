@@ -4,7 +4,7 @@ import datetime as dt
 import operator
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
-from typing import Generic, SupportsIndex, TypeVar
+from typing import Any, Generic, SupportsIndex, TypeVar
 
 from nitypes._exceptions import add_note
 from nitypes._typing import Self
@@ -211,6 +211,17 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
             and self._sample_interval_mode == value._sample_interval_mode
             and self._timestamps == value._timestamps
         )
+
+    def __reduce__(self) -> tuple[Any, ...]:
+        """Return object state for pickling."""
+        ctor_args = (
+            self._sample_interval_mode,
+            self._timestamp,
+            self._time_offset,
+            self._sample_interval,
+            self._timestamps,
+        )
+        return (self.__class__, ctor_args)
 
     def __repr__(self) -> str:
         """Return repr(self)."""
