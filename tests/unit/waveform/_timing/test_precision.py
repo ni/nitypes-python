@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import copy
 import datetime as dt
-from copy import deepcopy
+import pickle
 
 import hightime as ht
 import pytest
@@ -290,35 +291,63 @@ def test___irregular_interval_subset___get_timestamps___gets_timestamps() -> Non
 ###############################################################################
 # magic methods
 ###############################################################################
-@pytest.mark.xfail(raises=TypeError, reason="https://github.com/ni/hightime/issues/49")
 @pytest.mark.parametrize(
-    "value",
+    "left, right",
     [
-        PrecisionTiming.create_with_no_interval(),
-        PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1)),
-        PrecisionTiming.create_with_no_interval(None, ht.timedelta(seconds=1)),
-        PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)),
-        PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1)),
-        PrecisionTiming.create_with_regular_interval(
-            ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1)
+        (PrecisionTiming.create_with_no_interval(), PrecisionTiming.create_with_no_interval()),
+        (
+            PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1)),
+            PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1)),
         ),
-        PrecisionTiming.create_with_regular_interval(
-            ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+        (
+            PrecisionTiming.create_with_no_interval(None, ht.timedelta(seconds=1)),
+            PrecisionTiming.create_with_no_interval(None, ht.timedelta(seconds=1)),
         ),
-        PrecisionTiming.create_with_irregular_interval(
-            [ht.datetime(2025, 1, 1), ht.datetime(2025, 1, 2)]
+        (
+            PrecisionTiming.create_with_no_interval(
+                ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+            ),
+            PrecisionTiming.create_with_no_interval(
+                ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+            ),
+        ),
+        (
+            PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1)),
+            PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1)),
+        ),
+        (
+            PrecisionTiming.create_with_regular_interval(
+                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1)
+            ),
+            PrecisionTiming.create_with_regular_interval(
+                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1)
+            ),
+        ),
+        (
+            PrecisionTiming.create_with_regular_interval(
+                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+            ),
+            PrecisionTiming.create_with_regular_interval(
+                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+            ),
+        ),
+        (
+            PrecisionTiming.create_with_irregular_interval(
+                [ht.datetime(2025, 1, 1), ht.datetime(2025, 1, 2)]
+            ),
+            PrecisionTiming.create_with_irregular_interval(
+                [ht.datetime(2025, 1, 1), ht.datetime(2025, 1, 2)]
+            ),
         ),
     ],
 )
-def test___deep_copy___equality___equal(value: PrecisionTiming) -> None:
-    other = deepcopy(value)
-
-    assert value == other
-    assert not (value != other)
+def test___same_value___equality___equal(left: PrecisionTiming, right: PrecisionTiming) -> None:
+    assert left == right
+    assert not (left != right)
 
 
 @pytest.mark.parametrize(
-    "lhs, rhs",
+    "left, right",
     [
         (
             PrecisionTiming.create_with_no_interval(
@@ -371,11 +400,11 @@ def test___deep_copy___equality___equal(value: PrecisionTiming) -> None:
     ],
 )
 def test___different_value___equality___not_equal(
-    lhs: PrecisionTiming,
-    rhs: PrecisionTiming,
+    left: PrecisionTiming,
+    right: PrecisionTiming,
 ) -> None:
-    assert not (lhs == rhs)
-    assert lhs != rhs
+    assert not (left == right)
+    assert left != right
 
 
 @pytest.mark.parametrize(
@@ -429,6 +458,83 @@ def test___different_value___equality___not_equal(
 )
 def test___various_values___repr___looks_ok(value: PrecisionTiming, expected_repr: str) -> None:
     assert repr(value) == expected_repr
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        (PrecisionTiming.create_with_no_interval()),
+        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1))),
+        (PrecisionTiming.create_with_no_interval(None, ht.timedelta(seconds=1))),
+        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1), ht.timedelta(seconds=1))),
+        (PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))),
+        (
+            PrecisionTiming.create_with_regular_interval(
+                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1)
+            )
+        ),
+        (
+            PrecisionTiming.create_with_regular_interval(
+                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+            )
+        ),
+        (
+            PrecisionTiming.create_with_irregular_interval(
+                [ht.datetime(2025, 1, 1), ht.datetime(2025, 1, 2)]
+            )
+        ),
+    ],
+)
+def test___various_values___copy___new_timing_with_same_value(value: PrecisionTiming) -> None:
+    new_value = copy.copy(value)
+
+    assert new_value == value
+    assert new_value is not value
+    assert new_value._timestamps is value._timestamps
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        (PrecisionTiming.create_with_no_interval()),
+        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1))),
+        (PrecisionTiming.create_with_no_interval(None, ht.timedelta(seconds=1))),
+        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1), ht.timedelta(seconds=1))),
+        (PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))),
+        (
+            PrecisionTiming.create_with_regular_interval(
+                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1)
+            )
+        ),
+        (
+            PrecisionTiming.create_with_regular_interval(
+                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+            )
+        ),
+        (
+            PrecisionTiming.create_with_irregular_interval(
+                [ht.datetime(2025, 1, 1), ht.datetime(2025, 1, 2)]
+            )
+        ),
+    ],
+)
+def test___various_values___pickle_unpickle___new_timing_with_same_value(
+    value: PrecisionTiming,
+) -> None:
+    new_value = pickle.loads(pickle.dumps(value))
+
+    assert new_value == value
+    assert new_value is not value
+    assert new_value._timestamps is value._timestamps
+
+
+def test___timing___pickle___references_public_modules() -> None:
+    value = PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+
+    value_bytes = pickle.dumps(value)
+
+    assert b"nitypes.waveform" in value_bytes
+    assert b"nitypes.waveform._timing" not in value_bytes
 
 
 ###############################################################################

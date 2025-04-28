@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import array
+import copy
 import datetime as dt
 import itertools
+import pickle
 import weakref
 from typing import Any, SupportsIndex
 
@@ -1642,3 +1644,97 @@ def test___different_value___equality___not_equal(
 )
 def test___various_values___repr___looks_ok(value: AnalogWaveform[Any], expected_repr: str) -> None:
     assert repr(value) == expected_repr
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        (AnalogWaveform()),
+        (AnalogWaveform(10)),
+        (AnalogWaveform(10, np.float64)),
+        (AnalogWaveform(10, np.int32)),
+        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
+        (AnalogWaveform.from_array_1d([1, 2, 3], np.float64)),
+        (AnalogWaveform.from_array_1d([1, 2, 3], np.int32)),
+        (AnalogWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)))),
+        (
+            AnalogWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            )
+        ),
+        (
+            AnalogWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            )
+        ),
+        (AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0))),
+        # start_index and capacity may differ as long as raw_data and sample_count are the same.
+        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
+        (
+            AnalogWaveform.from_array_1d(
+                [0, 0, 1, 2, 3, 4, 5, 0], np.int32, start_index=2, sample_count=5
+            )
+        ),
+    ],
+)
+def test___various_values___copy___new_waveform_with_same_value(value: AnalogWaveform[Any]) -> None:
+    new_value = copy.copy(value)
+
+    assert new_value == value
+    assert new_value is not value
+    assert new_value._data is not value._data
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        (AnalogWaveform()),
+        (AnalogWaveform(10)),
+        (AnalogWaveform(10, np.float64)),
+        (AnalogWaveform(10, np.int32)),
+        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
+        (AnalogWaveform.from_array_1d([1, 2, 3], np.float64)),
+        (AnalogWaveform.from_array_1d([1, 2, 3], np.int32)),
+        (AnalogWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)))),
+        (
+            AnalogWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            )
+        ),
+        (
+            AnalogWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            )
+        ),
+        (AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0))),
+        # start_index and capacity may differ as long as raw_data and sample_count are the same.
+        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
+        (
+            AnalogWaveform.from_array_1d(
+                [0, 0, 1, 2, 3, 4, 5, 0], np.int32, start_index=2, sample_count=5
+            )
+        ),
+    ],
+)
+def test___various_values___pickle_unpickle___new_waveform_with_same_value(
+    value: AnalogWaveform[Any],
+) -> None:
+    new_value = pickle.loads(pickle.dumps(value))
+
+    assert new_value == value
+    assert new_value is not value
+    assert new_value._data is not value._data
+
+
+def test___waveform___pickle___references_public_modules() -> None:
+    value = AnalogWaveform(
+        timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+        scale_mode=LinearScaleMode(1.0, 0.0),
+    )
+
+    value_bytes = pickle.dumps(value)
+
+    assert b"nitypes.waveform" in value_bytes
+    assert b"nitypes.waveform._analog_waveform" not in value_bytes
+    assert b"nitypes.waveform._timing" not in value_bytes
+    assert b"nitypes.waveform._scaling" not in value_bytes
