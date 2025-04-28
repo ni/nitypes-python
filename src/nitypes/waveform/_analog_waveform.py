@@ -864,6 +864,21 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             and self._scale_mode == value._scale_mode
         )
 
+    def __reduce__(self) -> tuple[Any, ...]:
+        """Return object state for pickling."""
+        ctor_args = (self._sample_count, self.dtype)
+        ctor_kwargs = {
+            "raw_data": self.raw_data,
+            "extended_properties": self._extended_properties._properties,
+            "timing": self._timing,
+            "scale_mode": self._scale_mode,
+        }
+        return (self.__class__._unpickle, (ctor_args, ctor_kwargs))
+
+    @classmethod
+    def _unpickle(cls, args: tuple[Any, ...], kwargs: dict[str, Any]) -> AnalogWaveform[Any]:
+        return cls(*args, **kwargs)
+
     def __repr__(self) -> str:
         """Return repr(self)."""
         args = [f"{self._sample_count}"]

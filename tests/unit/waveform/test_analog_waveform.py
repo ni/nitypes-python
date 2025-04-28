@@ -1668,7 +1668,6 @@ def test___various_values___repr___looks_ok(value: AnalogWaveform[Any], expected
             )
         ),
         (AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0))),
-        # start_index and capacity may differ as long as raw_data and sample_count are the same.
         (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
         (
             AnalogWaveform.from_array_1d(
@@ -1677,12 +1676,66 @@ def test___various_values___repr___looks_ok(value: AnalogWaveform[Any], expected
         ),
     ],
 )
-def test___various_values___copy___new_waveform_with_same_value(value: AnalogWaveform[Any]) -> None:
+def test___various_values___copy___makes_shallow_copy(value: AnalogWaveform[Any]) -> None:
     new_value = copy.copy(value)
 
-    assert new_value == value
-    assert new_value is not value
-    assert new_value._data is not value._data
+    _assert_shallow_copy(new_value, value)
+
+
+def _assert_shallow_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any]) -> None:
+    assert value == other
+    assert value is not other
+    # _data may be a view of the original array.
+    assert value._data is other._data or value._data.base is other._data
+    # We always copy _extended_properties.
+    assert value._extended_properties is not other._extended_properties
+    assert value._timing is other._timing
+    assert value._scale_mode is other._scale_mode
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        (AnalogWaveform()),
+        (AnalogWaveform(10)),
+        (AnalogWaveform(10, np.float64)),
+        (AnalogWaveform(10, np.int32)),
+        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
+        (AnalogWaveform.from_array_1d([1, 2, 3], np.float64)),
+        (AnalogWaveform.from_array_1d([1, 2, 3], np.int32)),
+        (AnalogWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)))),
+        (
+            AnalogWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            )
+        ),
+        (
+            AnalogWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            )
+        ),
+        (AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0))),
+        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
+        (
+            AnalogWaveform.from_array_1d(
+                [0, 0, 1, 2, 3, 4, 5, 0], np.int32, start_index=2, sample_count=5
+            )
+        ),
+    ],
+)
+def test___various_values___deepcopy___makes_shallow_copy(value: AnalogWaveform[Any]) -> None:
+    new_value = copy.deepcopy(value)
+
+    _assert_deep_copy(new_value, value)
+
+
+def _assert_deep_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any]) -> None:
+    assert value == other
+    assert value is not other
+    assert value._data is not other._data and value._data.base is not other._data
+    assert value._extended_properties is not other._extended_properties
+    assert value._timing is not other._timing
+    assert value._scale_mode is not other._scale_mode
 
 
 @pytest.mark.parametrize(
@@ -1716,14 +1769,12 @@ def test___various_values___copy___new_waveform_with_same_value(value: AnalogWav
         ),
     ],
 )
-def test___various_values___pickle_unpickle___new_waveform_with_same_value(
+def test___various_values___pickle_unpickle___makes_deep_copy(
     value: AnalogWaveform[Any],
 ) -> None:
     new_value = pickle.loads(pickle.dumps(value))
 
-    assert new_value == value
-    assert new_value is not value
-    assert new_value._data is not value._data
+    _assert_deep_copy(new_value, value)
 
 
 def test___waveform___pickle___references_public_modules() -> None:
