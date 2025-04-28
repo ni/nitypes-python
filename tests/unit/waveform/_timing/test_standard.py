@@ -443,81 +443,35 @@ def test___various_values___repr___looks_ok(value: Timing, expected_repr: str) -
     assert repr(value) == expected_repr
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        (Timing.create_with_no_interval()),
-        (Timing.create_with_no_interval(dt.datetime(2025, 1, 1))),
-        (Timing.create_with_no_interval(None, dt.timedelta(seconds=1))),
-        (Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta(seconds=1))),
-        (Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))),
-        (
-            Timing.create_with_regular_interval(
-                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1)
-            )
-        ),
-        (
-            Timing.create_with_regular_interval(
-                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
-            )
-        ),
-        (Timing.create_with_irregular_interval([dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)])),
-    ],
-)
+_VARIOUS_VALUES = [
+    Timing.create_with_no_interval(),
+    Timing.create_with_no_interval(dt.datetime(2025, 1, 1)),
+    Timing.create_with_no_interval(None, dt.timedelta(seconds=1)),
+    Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)),
+    Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+    Timing.create_with_regular_interval(dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1)),
+    Timing.create_with_regular_interval(
+        dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+    ),
+    Timing.create_with_irregular_interval([dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)]),
+]
+
+
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___copy___makes_shallow_copy(value: Timing) -> None:
     new_value = copy.copy(value)
 
     assert_shallow_copy(new_value, value)
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        (Timing.create_with_no_interval()),
-        (Timing.create_with_no_interval(dt.datetime(2025, 1, 1))),
-        (Timing.create_with_no_interval(None, dt.timedelta(seconds=1))),
-        (Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta(seconds=1))),
-        (Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))),
-        (
-            Timing.create_with_regular_interval(
-                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1)
-            )
-        ),
-        (
-            Timing.create_with_regular_interval(
-                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
-            )
-        ),
-        (Timing.create_with_irregular_interval([dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)])),
-    ],
-)
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___deepcopy___makes_deep_copy(value: Timing) -> None:
     new_value = copy.deepcopy(value)
 
     assert_deep_copy(new_value, value)
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        (Timing.create_with_no_interval()),
-        (Timing.create_with_no_interval(dt.datetime(2025, 1, 1))),
-        (Timing.create_with_no_interval(None, dt.timedelta(seconds=1))),
-        (Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta(seconds=1))),
-        (Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))),
-        (
-            Timing.create_with_regular_interval(
-                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1)
-            )
-        ),
-        (
-            Timing.create_with_regular_interval(
-                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
-            )
-        ),
-        (Timing.create_with_irregular_interval([dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)])),
-    ],
-)
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___pickle_unpickle___makes_deep_copy(
     value: Timing,
 ) -> None:

@@ -461,94 +461,40 @@ def test___various_values___repr___looks_ok(value: PrecisionTiming, expected_rep
     assert repr(value) == expected_repr
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        (PrecisionTiming.create_with_no_interval()),
-        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1))),
-        (PrecisionTiming.create_with_no_interval(None, ht.timedelta(seconds=1))),
-        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1), ht.timedelta(seconds=1))),
-        (PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))),
-        (
-            PrecisionTiming.create_with_regular_interval(
-                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1)
-            )
-        ),
-        (
-            PrecisionTiming.create_with_regular_interval(
-                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
-            )
-        ),
-        (
-            PrecisionTiming.create_with_irregular_interval(
-                [ht.datetime(2025, 1, 1), ht.datetime(2025, 1, 2)]
-            )
-        ),
-    ],
-)
+_VARIOUS_VALUES = [
+    PrecisionTiming.create_with_no_interval(),
+    PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1)),
+    PrecisionTiming.create_with_no_interval(None, ht.timedelta(seconds=1)),
+    PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)),
+    PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1)),
+    PrecisionTiming.create_with_regular_interval(
+        ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1)
+    ),
+    PrecisionTiming.create_with_regular_interval(
+        ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+    ),
+    PrecisionTiming.create_with_irregular_interval(
+        [ht.datetime(2025, 1, 1), ht.datetime(2025, 1, 2)]
+    ),
+]
+
+
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___copy___makes_shallow_copy(value: PrecisionTiming) -> None:
     new_value = copy.copy(value)
 
     assert_shallow_copy(new_value, value)
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        (PrecisionTiming.create_with_no_interval()),
-        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1))),
-        (PrecisionTiming.create_with_no_interval(None, ht.timedelta(seconds=1))),
-        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1), ht.timedelta(seconds=1))),
-        (PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))),
-        (
-            PrecisionTiming.create_with_regular_interval(
-                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1)
-            )
-        ),
-        (
-            PrecisionTiming.create_with_regular_interval(
-                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
-            )
-        ),
-        (
-            PrecisionTiming.create_with_irregular_interval(
-                [ht.datetime(2025, 1, 1), ht.datetime(2025, 1, 2)]
-            )
-        ),
-    ],
-)
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___deepcopy___makes_deep_copy(value: PrecisionTiming) -> None:
     new_value = copy.deepcopy(value)
 
     assert_deep_copy(new_value, value)
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        (PrecisionTiming.create_with_no_interval()),
-        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1))),
-        (PrecisionTiming.create_with_no_interval(None, ht.timedelta(seconds=1))),
-        (PrecisionTiming.create_with_no_interval(ht.datetime(2025, 1, 1), ht.timedelta(seconds=1))),
-        (PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))),
-        (
-            PrecisionTiming.create_with_regular_interval(
-                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1)
-            )
-        ),
-        (
-            PrecisionTiming.create_with_regular_interval(
-                ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
-            )
-        ),
-        (
-            PrecisionTiming.create_with_irregular_interval(
-                [ht.datetime(2025, 1, 1), ht.datetime(2025, 1, 2)]
-            )
-        ),
-    ],
-)
-def test___various_values___pickle_unpickle___new_timing_with_same_value(
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
+def test___various_values___pickle_unpickle___makes_deep_copy(
     value: PrecisionTiming,
 ) -> None:
     new_value = pickle.loads(pickle.dumps(value))

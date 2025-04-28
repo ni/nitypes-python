@@ -1646,36 +1646,28 @@ def test___various_values___repr___looks_ok(value: AnalogWaveform[Any], expected
     assert repr(value) == expected_repr
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        (AnalogWaveform()),
-        (AnalogWaveform(10)),
-        (AnalogWaveform(10, np.float64)),
-        (AnalogWaveform(10, np.int32)),
-        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
-        (AnalogWaveform.from_array_1d([1, 2, 3], np.float64)),
-        (AnalogWaveform.from_array_1d([1, 2, 3], np.int32)),
-        (AnalogWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)))),
-        (
-            AnalogWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
-            )
-        ),
-        (
-            AnalogWaveform(
-                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
-            )
-        ),
-        (AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0))),
-        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
-        (
-            AnalogWaveform.from_array_1d(
-                [0, 0, 1, 2, 3, 4, 5, 0], np.int32, start_index=2, sample_count=5
-            )
-        ),
-    ],
-)
+_VARIOUS_VALUES = [
+    AnalogWaveform(),
+    AnalogWaveform(10),
+    AnalogWaveform(10, np.float64),
+    AnalogWaveform(10, np.int32),
+    AnalogWaveform(10, np.int32, start_index=5, capacity=20),
+    AnalogWaveform.from_array_1d([1, 2, 3], np.float64),
+    AnalogWaveform.from_array_1d([1, 2, 3], np.int32),
+    AnalogWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))),
+    AnalogWaveform(
+        timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+    ),
+    AnalogWaveform(
+        extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+    ),
+    AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
+    AnalogWaveform(10, np.int32, start_index=5, capacity=20),
+    AnalogWaveform.from_array_1d([0, 0, 1, 2, 3, 4, 5, 0], np.int32, start_index=2, sample_count=5),
+]
+
+
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___copy___makes_shallow_copy(value: AnalogWaveform[Any]) -> None:
     new_value = copy.copy(value)
 
@@ -1693,36 +1685,7 @@ def _assert_shallow_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any])
     assert value._scale_mode is other._scale_mode
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        (AnalogWaveform()),
-        (AnalogWaveform(10)),
-        (AnalogWaveform(10, np.float64)),
-        (AnalogWaveform(10, np.int32)),
-        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
-        (AnalogWaveform.from_array_1d([1, 2, 3], np.float64)),
-        (AnalogWaveform.from_array_1d([1, 2, 3], np.int32)),
-        (AnalogWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)))),
-        (
-            AnalogWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
-            )
-        ),
-        (
-            AnalogWaveform(
-                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
-            )
-        ),
-        (AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0))),
-        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
-        (
-            AnalogWaveform.from_array_1d(
-                [0, 0, 1, 2, 3, 4, 5, 0], np.int32, start_index=2, sample_count=5
-            )
-        ),
-    ],
-)
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___deepcopy___makes_shallow_copy(value: AnalogWaveform[Any]) -> None:
     new_value = copy.deepcopy(value)
 
@@ -1738,37 +1701,7 @@ def _assert_deep_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any]) ->
     assert value._scale_mode is not other._scale_mode
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        (AnalogWaveform()),
-        (AnalogWaveform(10)),
-        (AnalogWaveform(10, np.float64)),
-        (AnalogWaveform(10, np.int32)),
-        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
-        (AnalogWaveform.from_array_1d([1, 2, 3], np.float64)),
-        (AnalogWaveform.from_array_1d([1, 2, 3], np.int32)),
-        (AnalogWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)))),
-        (
-            AnalogWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
-            )
-        ),
-        (
-            AnalogWaveform(
-                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
-            )
-        ),
-        (AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0))),
-        # start_index and capacity may differ as long as raw_data and sample_count are the same.
-        (AnalogWaveform(10, np.int32, start_index=5, capacity=20)),
-        (
-            AnalogWaveform.from_array_1d(
-                [0, 0, 1, 2, 3, 4, 5, 0], np.int32, start_index=2, sample_count=5
-            )
-        ),
-    ],
-)
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___pickle_unpickle___makes_deep_copy(
     value: AnalogWaveform[Any],
 ) -> None:
