@@ -10,11 +10,13 @@ import hightime as ht
 from nitypes._exceptions import invalid_arg_type, invalid_requested_type
 from nitypes._typing import TypeAlias
 from nitypes.time._conversion import convert_datetime, convert_timedelta
+from nitypes.waveform._timing._base import BaseTiming
 from nitypes.waveform._timing._precision import PrecisionTiming
 from nitypes.waveform._timing._standard import Timing
 
-_AnyTiming: TypeAlias = Union[Timing, PrecisionTiming]
-_TTiming = TypeVar("_TTiming", Timing, PrecisionTiming)
+
+_AnyTiming: TypeAlias = Union[BaseTiming[Any, Any], Timing, PrecisionTiming]
+_TTiming = TypeVar("_TTiming", bound=BaseTiming[Any, Any])
 
 
 def convert_timing(requested_type: type[_TTiming], value: _AnyTiming, /) -> _TTiming:
@@ -37,6 +39,8 @@ def _(value: Timing, /) -> Timing:
 
 @_convert_to_standard_timing.register
 def _(value: PrecisionTiming, /) -> Timing:
+    if value is PrecisionTiming.empty:
+        return Timing.empty
     return Timing(
         value._sample_interval_mode,
         None if value._timestamp is None else convert_datetime(dt.datetime, value._timestamp),
@@ -65,6 +69,8 @@ def _convert_to_precision_timing(value: object, /) -> PrecisionTiming:
 
 @_convert_to_precision_timing.register
 def _(value: Timing, /) -> PrecisionTiming:
+    if value is Timing.empty:
+        return PrecisionTiming.empty
     return PrecisionTiming(
         value._sample_interval_mode,
         None if value._timestamp is None else convert_datetime(ht.datetime, value._timestamp),

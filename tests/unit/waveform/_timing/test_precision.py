@@ -166,25 +166,79 @@ def test___sample_interval_and_time_offset___create_with_regular_interval___crea
 ###############################################################################
 # create_with_irregular_interval
 ###############################################################################
-def test___timestamps___create_with_irregular_interval___creates_waveform_timing_with_timestamps() -> (
-    None
-):
+@pytest.mark.parametrize(
+    "time_offsets",
+    [
+        [],
+        [ht.timedelta(0)],
+        [ht.timedelta(0), ht.timedelta(0)],
+        [ht.timedelta(0), ht.timedelta(1)],
+        [ht.timedelta(0), ht.timedelta(1), ht.timedelta(2)],
+        [
+            ht.timedelta(0),
+            ht.timedelta(1),
+            ht.timedelta(2),
+            ht.timedelta(3),
+        ],
+        [
+            ht.timedelta(3),
+            ht.timedelta(2),
+            ht.timedelta(1),
+            ht.timedelta(0),
+        ],
+        [ht.timedelta(0, 0, 1), ht.timedelta(0, 1, 0), ht.timedelta(1, 0, 0)],
+        [ht.timedelta(1, 0, 0), ht.timedelta(0, 1, 0), ht.timedelta(0, 0, 1)],
+        [
+            ht.timedelta(0),
+            ht.timedelta(1),
+            ht.timedelta(1),
+            ht.timedelta(2),
+        ],
+    ],
+)
+def test___monotonic_timestamps___create_with_irregular_interval___creates_waveform_timing_with_timestamps(
+    time_offsets: list[ht.timedelta],
+) -> None:
     start_time = ht.datetime.now(dt.timezone.utc)
-    timestamps = [
-        start_time,
-        start_time + ht.timedelta(seconds=1),
-        start_time + ht.timedelta(seconds=2.3),
-        start_time + ht.timedelta(seconds=2.5),
-    ]
+    timestamps = [start_time + offset for offset in time_offsets]
 
     timing = PrecisionTiming.create_with_irregular_interval(timestamps)
 
     assert_type(timing, PrecisionTiming)
-    assert not timing.has_timestamp
-    assert timing.time_offset == ht.timedelta()
-    assert timing._sample_interval is None
     assert timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
     assert timing._timestamps == timestamps
+
+
+@pytest.mark.parametrize(
+    "time_offsets",
+    [
+        [ht.timedelta(0), ht.timedelta(1), ht.timedelta(0)],
+        [ht.timedelta(1), ht.timedelta(0), ht.timedelta(1)],
+    ],
+)
+def test___non_monotonic_timestamps___create_with_irregular_interval___raises_value_error(
+    time_offsets: list[ht.timedelta],
+) -> None:
+    start_time = ht.datetime.now(dt.timezone.utc)
+    timestamps = [start_time + offset for offset in time_offsets]
+
+    with pytest.raises(ValueError) as exc:
+        _ = PrecisionTiming.create_with_irregular_interval(timestamps)
+
+    assert exc.value.args[0].startswith("The timestamps must be in ascending or descending order.")
+
+
+def test___timestamps_tuple___create_with_irregular_interval___creates_waveform_timing_with_timestamps() -> (
+    None
+):
+    start_time = ht.datetime.now(dt.timezone.utc)
+    timestamps = (start_time,)
+
+    timing = PrecisionTiming.create_with_irregular_interval(timestamps)
+
+    assert_type(timing, PrecisionTiming)
+    assert timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert timing._timestamps == list(timestamps)
 
 
 ###############################################################################
@@ -375,3 +429,76 @@ def test___different_value___equality___not_equal(
 )
 def test___various_values___repr___looks_ok(value: PrecisionTiming, expected_repr: str) -> None:
     assert repr(value) == expected_repr
+
+
+###############################################################################
+# _append_timing
+###############################################################################
+@pytest.mark.parametrize(
+    "left_offsets, right_offsets",
+    [
+        ([], []),
+        ([ht.timedelta(0)], []),
+        ([ht.timedelta(0), ht.timedelta(1)], []),
+        ([ht.timedelta(0), ht.timedelta(1), ht.timedelta(2)], []),
+        ([ht.timedelta(0)], [ht.timedelta(1)]),
+        ([ht.timedelta(0)], [ht.timedelta(1), ht.timedelta(2)]),
+        (
+            [ht.timedelta(0), ht.timedelta(1)],
+            [ht.timedelta(2), ht.timedelta(3)],
+        ),
+        (
+            [ht.timedelta(3), ht.timedelta(2)],
+            [ht.timedelta(1), ht.timedelta(0)],
+        ),
+        (
+            [ht.timedelta(0), ht.timedelta(1)],
+            [ht.timedelta(1), ht.timedelta(2)],
+        ),
+        (
+            [ht.timedelta(2), ht.timedelta(1)],
+            [ht.timedelta(1), ht.timedelta(0)],
+        ),
+    ],
+)
+def test___monotonic_timestamps___append_timing___appends_timestamps(
+    left_offsets: list[ht.timedelta],
+    right_offsets: list[ht.timedelta],
+) -> None:
+    start_time = ht.datetime.now(dt.timezone.utc)
+    left_timestamps = [start_time + offset for offset in left_offsets]
+    right_timestamps = [start_time + offset for offset in right_offsets]
+    left_timing = PrecisionTiming.create_with_irregular_interval(left_timestamps)
+    right_timing = PrecisionTiming.create_with_irregular_interval(right_timestamps)
+
+    new_timing = left_timing._append_timing(right_timing)
+
+    assert_type(new_timing, PrecisionTiming)
+    assert isinstance(new_timing, PrecisionTiming)
+    assert new_timing._timestamps == left_timestamps + right_timestamps
+
+
+@pytest.mark.parametrize(
+    "left_offsets, right_offsets",
+    [
+        ([ht.timedelta(0)], [ht.timedelta(1), ht.timedelta(0)]),
+        ([ht.timedelta(1)], [ht.timedelta(0), ht.timedelta(2)]),
+        ([ht.timedelta(0), ht.timedelta(1)], [ht.timedelta(0)]),
+        ([ht.timedelta(1), ht.timedelta(0)], [ht.timedelta(1)]),
+        ([ht.timedelta(0), ht.timedelta(1)], [ht.timedelta(2), ht.timedelta(0)]),
+    ],
+)
+def test___non_monotonic_timestamps___append_timing___raises_value_error(
+    left_offsets: list[ht.timedelta],
+    right_offsets: list[ht.timedelta],
+) -> None:
+    start_time = ht.datetime.now(dt.timezone.utc)
+    left_timestamps = [start_time + offset for offset in left_offsets]
+    right_timestamps = [start_time + offset for offset in right_offsets]
+    left_timing = PrecisionTiming.create_with_irregular_interval(left_timestamps)
+    right_timing = PrecisionTiming.create_with_irregular_interval(right_timestamps)
+
+    with pytest.raises(ValueError) as exc:
+        _ = left_timing._append_timing(right_timing)
+
+    assert exc.value.args[0].startswith("The timestamps must be in ascending or descending order.")
