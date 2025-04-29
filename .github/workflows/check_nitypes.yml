@@ -41,3 +41,29 @@ jobs:
         run:  poetry run mypy --platform win32
       - name: Bandit security checks
         run:  poetry run bandit -c pyproject.toml -r src/nitypes
+  check_docs:
+    name: Check docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        id: setup-python
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Set up Poetry
+        uses: Gr1N/setup-poetry@v9
+        with:
+          poetry-version: ${{ env.POETRY_VERSION }}
+      - name: Check for lock changes
+        run: poetry check --lock
+      - name: Cache virtualenv (with docs)
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: nitypes-with-docs-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+      - name: Install nitypes (with docs)
+        run: poetry install -v --with docs
+      - name: Generate docs
+        run:  poetry run sphinx-build docs docs/_build -b html -W --keep-going
