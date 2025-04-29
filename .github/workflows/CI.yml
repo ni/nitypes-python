@@ -10,8 +10,11 @@ on:
 
 jobs:
   check_nitypes:
-    name: Check
+    name: Check nitypes
     uses: ./.github/workflows/check_nitypes.yml
+  check_docs:
+    name: Check docs
+    uses: ./.github/workflows/check_docs.yml
   run_unit_tests:
     name: Run unit tests
     uses: ./.github/workflows/run_unit_tests.yml

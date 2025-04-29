@@ -1,4 +1,4 @@
-name: Check nitypes
+name: Check docs
 
 on:
   workflow_call:
@@ -9,8 +9,8 @@ env:
   PYTHON_VERSION: 3.11.9
 
 jobs:
-  check_nitypes:
-    name: Check nitypes
+  check_docs:
+    name: Check docs
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
@@ -26,18 +26,17 @@ jobs:
           poetry-version: ${{ env.POETRY_VERSION }}
       - name: Check for lock changes
         run: poetry check --lock
-      - name: Cache virtualenv
+      - name: Cache virtualenv (with docs)
         uses: actions/cache@v4
         with:
           path: .venv
-          key: nitypes-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
-      - name: Install nitypes
-        run: poetry install -v
-      - name: Lint
-        run: poetry run ni-python-styleguide lint
-      - name: Mypy static analysis (Linux)
-        run:  poetry run mypy
-      - name: Mypy static analysis (Windows)
-        run:  poetry run mypy --platform win32
-      - name: Bandit security checks
-        run:  poetry run bandit -c pyproject.toml -r src/nitypes
+          key: nitypes-with-docs-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+      - name: Install nitypes (with docs)
+        run: poetry install -v --with docs
+      - name: Generate docs
+        run:  poetry run sphinx-build docs docs/_build -b html -W --keep-going
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nitypes-docs
+          path: docs/_build/
