@@ -1272,7 +1272,6 @@ def test___regular_waveform_and_regular_waveform_with_different_extended_propert
     assert waveform.extended_properties == {"A": 1, "B": 2, "C": 4}
 
 
-@pytest.mark.xfail(reason="Needs __eq__ from https://github.com/ni/nitypes-python/pull/11")
 def test___regular_waveform_and_regular_waveform_with_different_scale_mode___append___appends_waveform_with_scaling_mismatch_warning() -> (
     None
 ):
