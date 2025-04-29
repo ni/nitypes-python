@@ -14,9 +14,7 @@ numpy = [
   { version = ">=1.26", python = ">=3.12,<3.13" },
   { version = ">=2.1", python = "^3.13" },
 ]
-# hightime = "^0.2.2"
-# hightime = { git = "https://github.com/ni/hightime.git" }
-hightime = { git = "https://github.com/ni/hightime.git", branch = "users/bkeryan/fix-copy-pickle" }
+hightime = "^0.2.2"
 
 [tool.poetry.group.lint.dependencies]
 bandit = { version = ">=1.7", extras = ["toml"] }
@@ -27,6 +25,8 @@ mypy = ">=1.0"
 pytest = ">=7.2"
 pytest-cov = ">=4.0"
 pytest-mock = ">=3.0"
+# Use an unreleased version of hightime for testing.
+hightime = { git = "https://github.com/ni/hightime.git", branch = "users/bkeryan/fix-copy-pickle" }
 
 [tool.poetry.group.docs]
 optional = true
