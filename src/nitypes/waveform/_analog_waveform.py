@@ -527,8 +527,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         """The total capacity available for analog waveform data.
 
         Setting the capacity resizes the underlying NumPy array in-place.
-        - Other Python objects with references to the array will see the array size change.
-        - If the array has a reference to an external buffer (such as an array.array), attempting
+
+        * Other Python objects with references to the array will see the array size change.
+        * If the array has a reference to an external buffer (such as an array.array), attempting
           to resize it raises ValueError.
         """
         return len(self._data)
