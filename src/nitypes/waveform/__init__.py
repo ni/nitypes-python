@@ -11,7 +11,13 @@ from nitypes.waveform._scaling import (
     NoneScaleMode,
     ScaleMode,
 )
-from nitypes.waveform._timing import BaseTiming, PrecisionTiming, SampleIntervalMode, Timing
+from nitypes.waveform._timing import (
+    BaseTiming,
+    PrecisionTiming,
+    SampleIntervalMode,
+    Timing,
+    TimingMismatchWarning,
+)
 
 __all__ = [
     "AnalogWaveform",
@@ -19,6 +25,7 @@ __all__ = [
     "ExtendedPropertyDictionary",
     "ExtendedPropertyValue",
     "LinearScaleMode",
+    "TimingMismatchWarning",
     "NO_SCALING",
     "NoneScaleMode",
     "PrecisionTiming",
@@ -33,6 +40,8 @@ BaseTiming.__module__ = __name__
 ExtendedPropertyDictionary.__module__ = __name__
 # ExtendedPropertyValue is a TypeAlias
 LinearScaleMode.__module__ = __name__
+TimingMismatchWarning.__module__ = __name__
+# NO_SCALING is a constant
 NoneScaleMode.__module__ = __name__
 PrecisionTiming.__module__ = __name__
 SampleIntervalMode.__module__ = __name__

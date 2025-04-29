@@ -1,19 +1,19 @@
 from __future__ import annotations
 
 import datetime as dt
+import warnings
 from collections.abc import Generator, Iterable, Sequence
-from typing import TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 from nitypes._arguments import validate_unsupported_arg
-from nitypes._exceptions import (
-    add_note,
-    invalid_arg_type,
+from nitypes._exceptions import add_note, invalid_arg_type
+from nitypes.waveform._timing._exceptions import (
     no_timestamp_information,
     sample_interval_mode_mismatch,
 )
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
-
+from nitypes.waveform._timing._warnings import sample_interval_mismatch
 
 if TYPE_CHECKING:
     from nitypes.waveform._timing._base import BaseTiming  # circular import
@@ -80,4 +80,6 @@ class RegularSampleIntervalStrategy(SampleIntervalStrategy[_TDateTime, _TTimeDel
     ) -> BaseTiming[_TDateTime, _TTimeDelta]:
         if other._sample_interval_mode not in (SampleIntervalMode.NONE, SampleIntervalMode.REGULAR):
             raise sample_interval_mode_mismatch()
+        if timing._sample_interval != other._sample_interval:
+            warnings.warn(sample_interval_mismatch())
         return timing

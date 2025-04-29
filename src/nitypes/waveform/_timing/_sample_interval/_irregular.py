@@ -3,10 +3,14 @@ from __future__ import annotations
 import datetime as dt
 from collections.abc import Iterable, Sequence
 from enum import Enum
-from typing import TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 from nitypes._arguments import validate_unsupported_arg
-from nitypes._exceptions import invalid_arg_type, sample_interval_mode_mismatch
+from nitypes._exceptions import invalid_arg_type
+from nitypes.waveform._timing._exceptions import (
+    TimingMismatchError,
+    sample_interval_mode_mismatch,
+)
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
 
@@ -84,7 +88,7 @@ class IrregularSampleIntervalStrategy(SampleIntervalStrategy[_TDateTime, _TTimeD
         assert timing._timestamps is not None
 
         if timestamps is None:
-            raise RuntimeError(
+            raise TimingMismatchError(
                 "The timestamps argument is required when appending to a waveform with irregular timing."
             )
 
