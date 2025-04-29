@@ -2,16 +2,9 @@ from __future__ import annotations
 
 import datetime as dt
 import sys
+import warnings
 from collections.abc import Sequence
-from typing import (
-    Any,
-    Generic,
-    SupportsIndex,
-    TypeVar,
-    Union,
-    cast,
-    overload,
-)
+from typing import Any, Generic, SupportsIndex, TypeVar, Union, cast, overload
 
 import hightime as ht
 import numpy as np
@@ -26,12 +19,8 @@ from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
 )
 from nitypes.waveform._scaling import NO_SCALING, ScaleMode
-from nitypes.waveform._timing import (
-    BaseTiming,
-    PrecisionTiming,
-    Timing,
-    convert_timing,
-)
+from nitypes.waveform._timing import BaseTiming, PrecisionTiming, Timing, convert_timing
+from nitypes.waveform._warnings import scale_mode_mismatch
 
 if sys.version_info < (3, 10):
     import array as std_array
@@ -684,7 +673,41 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
         Args:
             other: The array or waveform(s) to append.
-            timestamps: A sequence of timestamps for irregular timing.
+            timestamps: A sequence of timestamps. When the current waveform has
+                SampleIntervalMode.IRREGULAR, you must provide a sequence of timestamps with the
+                same length as the array.
+
+        Raises:
+            TimingMismatchError: The current and other waveforms have incompatible timing.
+            ValueError: The other array has the wrong number of dimensions or the length of the
+                timestamps argument does not match the length of the other array.
+            TypeError: The data types of the current waveform and other array or waveform(s) do not
+                match, or an argument has the wrong data type.
+
+        Warnings:
+            TimingMismatchWarning: The sample intervals of the waveform(s) do not match.
+            ScalingMismatchWarning: The scale modes of the waveform(s) do not match.
+
+        When appending waveforms:
+
+        * Timing information is merged based on the sample interval mode of the current
+          waveform:
+
+          * SampleIntervalMode.NONE or SampleIntervalMode.REGULAR: The other waveform(s) must also
+            have SampleIntervalMode.NONE or SampleIntervalMode.REGULAR. If the sample interval does
+            not match, a TimingMismatchWarning is generated. Otherwise, the timing information of
+            the other waveform(s) is discarded.
+
+          * SampleIntervalMode.IRREGULAR: The other waveforms(s) must also have
+            SampleIntervalMode.IRREGULAR. The timestamps of the other waveforms(s) are appended to
+            the current waveform's timing information.
+
+        * Extended properties of the other waveform(s) are merged into the current waveform if they
+          are not already set in the current waveform.
+
+        * If the scale mode of other waveform(s) does not match the scale mode of the current
+          waveform, a ScalingMismatchWarning is generated. Otherwise, the scaling information of the
+          other waveform(s) is discarded.
         """
         if isinstance(other, np.ndarray):
             self._append_array(other, timestamps)
@@ -740,6 +763,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
                     f"Input waveform data type: {waveform.dtype}\n"
                     f"Waveform data type: {self.dtype}"
                 )
+            if waveform._scale_mode != self._scale_mode:
+                warnings.warn(scale_mode_mismatch())
 
         new_timing = self._timing
         for waveform in waveforms:
@@ -753,6 +778,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             self._data[offset : offset + waveform.sample_count] = waveform.raw_data
             offset += waveform.sample_count
             self._sample_count += waveform.sample_count
+            self._extended_properties._merge(waveform._extended_properties)
 
     def _increase_capacity(self, amount: int) -> None:
         new_capacity = self._start_index + self._sample_count + amount

@@ -51,3 +51,7 @@ class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
         self, key: str, /
     ) -> None:
         operator.delitem(self._properties, key)
+
+    def _merge(self, other: ExtendedPropertyDictionary) -> None:
+        for key, value in other.items():
+            self._properties.setdefault(key, value)

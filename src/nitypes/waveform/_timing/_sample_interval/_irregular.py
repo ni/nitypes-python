@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, TypeVar
 
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type
-from nitypes.waveform._timing._exceptions import (
+from nitypes.waveform._exceptions import (
     TimingMismatchError,
     sample_interval_mode_mismatch,
 )

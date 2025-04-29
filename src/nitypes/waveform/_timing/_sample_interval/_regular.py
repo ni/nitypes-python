@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING, TypeVar
 
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import add_note, invalid_arg_type
-from nitypes.waveform._timing._exceptions import (
+from nitypes.waveform._exceptions import (
     no_timestamp_information,
     sample_interval_mode_mismatch,
 )
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
-from nitypes.waveform._timing._warnings import sample_interval_mismatch
+from nitypes.waveform._warnings import sample_interval_mismatch
 
 if TYPE_CHECKING:
     from nitypes.waveform._timing._base import BaseTiming  # circular import

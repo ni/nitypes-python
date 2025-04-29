@@ -20,10 +20,11 @@ from nitypes.waveform import (
     PrecisionTiming,
     SampleIntervalMode,
     ScaleMode,
+    ScalingMismatchWarning,
     Timing,
+    TimingMismatchError,
     TimingMismatchWarning,
 )
-from nitypes.waveform._timing import TimingMismatchError
 
 
 ###############################################################################
@@ -1253,6 +1254,38 @@ def test___regular_waveform_and_regular_waveform_with_different_sample_interval_
     assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
     assert waveform.timing.sample_interval_mode == SampleIntervalMode.REGULAR
     assert waveform.timing.sample_interval == dt.timedelta(milliseconds=1)
+
+
+def test___regular_waveform_and_regular_waveform_with_different_extended_properties___append___merges_extended_properties() -> (
+    None
+):
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.extended_properties["A"] = 1
+    waveform.extended_properties["B"] = 2
+    other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+    other.extended_properties["B"] = 3
+    other.extended_properties["C"] = 4
+
+    waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
+    assert waveform.extended_properties == {"A": 1, "B": 2, "C": 4}
+
+
+@pytest.mark.xfail(reason="Needs __eq__ from https://github.com/ni/nitypes-python/pull/11")
+def test___regular_waveform_and_regular_waveform_with_different_scale_mode___append___appends_waveform_with_scaling_mismatch_warning() -> (
+    None
+):
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.scale_mode = LinearScaleMode(1.0, 0.0)
+    other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
+    other.scale_mode = LinearScaleMode(2.0, 0.0)
+
+    with pytest.warns(ScalingMismatchWarning):
+        waveform.append(other)
+
+    assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
+    assert waveform.scale_mode == LinearScaleMode(1.0, 0.0)
 
 
 ###############################################################################
