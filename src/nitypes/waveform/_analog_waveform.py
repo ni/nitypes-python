@@ -351,6 +351,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        copy_extended_properties: bool = True,
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> None:
@@ -368,6 +369,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
                 appending samples to the waveform.
             extended_properties: The extended properties of the analog waveform.
+            copy_extended_properties: Specifies whether to copy the extended properties or take
+                ownership.
             timing: The timing information of the analog waveform.
             scale_mode: The scale mode of the analog waveform.
 
@@ -389,7 +392,11 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         else:
             raise invalid_arg_type("raw data", "NumPy ndarray", raw_data)
 
-        self._extended_properties = ExtendedPropertyDictionary(extended_properties)
+        if copy_extended_properties or not isinstance(
+            extended_properties, ExtendedPropertyDictionary
+        ):
+            extended_properties = ExtendedPropertyDictionary(extended_properties)
+        self._extended_properties = extended_properties
 
         if timing is None:
             timing = Timing.empty
@@ -867,9 +874,10 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
         ctor_args = (self._sample_count, self.dtype)
-        ctor_kwargs = {
+        ctor_kwargs: dict[str, Any] = {
             "raw_data": self.raw_data,
-            "extended_properties": self._extended_properties._properties,
+            "extended_properties": self._extended_properties,
+            "copy_extended_properties": False,
             "timing": self._timing,
             "scale_mode": self._scale_mode,
         }

@@ -1679,8 +1679,7 @@ def _assert_shallow_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any])
     assert value is not other
     # _data may be a view of the original array.
     assert value._data is other._data or value._data.base is other._data
-    # We always copy _extended_properties.
-    assert value._extended_properties is not other._extended_properties
+    assert value._extended_properties is other._extended_properties
     assert value._timing is other._timing
     assert value._scale_mode is other._scale_mode
 
@@ -1697,8 +1696,10 @@ def _assert_deep_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any]) ->
     assert value is not other
     assert value._data is not other._data and value._data.base is not other._data
     assert value._extended_properties is not other._extended_properties
-    assert value._timing is not other._timing
-    assert value._scale_mode is not other._scale_mode
+    if other._timing is not Timing.empty and other._timing is not PrecisionTiming.empty:
+        assert value._timing is not other._timing
+    if other._scale_mode is not NO_SCALING:
+        assert value._scale_mode is not other._scale_mode
 
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
@@ -1712,13 +1713,16 @@ def test___various_values___pickle_unpickle___makes_deep_copy(
 
 def test___waveform___pickle___references_public_modules() -> None:
     value = AnalogWaveform(
+        raw_data=np.array([1, 2, 3], np.float64),
+        extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
         timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
-        scale_mode=LinearScaleMode(1.0, 0.0),
+        scale_mode=LinearScaleMode(2.0, 1.0),
     )
 
     value_bytes = pickle.dumps(value)
 
     assert b"nitypes.waveform" in value_bytes
     assert b"nitypes.waveform._analog_waveform" not in value_bytes
+    assert b"nitypes.waveform._extended_properties" not in value_bytes
     assert b"nitypes.waveform._timing" not in value_bytes
     assert b"nitypes.waveform._scaling" not in value_bytes

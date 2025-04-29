@@ -14,7 +14,6 @@ from nitypes.waveform._timing._sample_interval import (
     create_sample_interval_strategy,
 )
 
-
 _TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
 _TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
 
@@ -124,7 +123,23 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
         *,
         copy_timestamps: bool = True,
     ) -> None:
-        """Construct a base waveform timing object."""
+        """Construct a waveform timing object.
+
+        Args:
+            sample_interval_mode: The sample interval mode of the waveform timing.
+            timestamp: The timestamp of the waveform timing. This argument is optional for
+                SampleIntervalMode.NONE and SampleIntervalMode.REGULAR and unsupported for
+                SampleIntervalMode.IRREGULAR.
+            time_offset: The time difference between the timestamp and the first sample. This
+                argument is optional for SampleIntervalMode.NONE and SampleIntervalMode.REGULAR and
+                unsupported for SampleIntervalMode.IRREGULAR.
+            sample_interval: The time interval between samples. This argument is required for
+                SampleIntervalMode.REGULAR and unsupported otherwise.
+            timestamps: A sequence containing a timestamp for each sample in the waveform,
+                specifying the time that the sample was acquired. This argument is required for
+                SampleIntervalMode.IRREGULAR and unsupported otherwise.
+            copy_timestamps: Specifies whether to copy the timestamps or take ownership.
+        """
         sample_interval_strategy = create_sample_interval_strategy(sample_interval_mode)
         try:
             sample_interval_strategy.validate_init_args(
