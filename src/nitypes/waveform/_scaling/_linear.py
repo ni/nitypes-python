@@ -44,7 +44,14 @@ class LinearScaleMode(ScaleMode):
         # npt.NDArray[np.float32] with a float promotes dtype to Any or np.float64
         return data * self._gain + self._offset  # type: ignore[operator,no-any-return]
 
-    def __repr__(  # noqa: D105 - Missing docstring in magic method (auto-generated noqa)
+    def __eq__(self, value: object, /) -> bool:
+        """Return self==value."""
+        if not isinstance(value, self.__class__):
+            return NotImplemented
+        return self._gain == value._gain and self._offset == value._offset
+
+    def __repr__(
         self,
     ) -> str:
+        """Return repr(self)."""
         return f"{self.__class__.__module__}.{self.__class__.__name__}({self.gain}, {self.offset})"
