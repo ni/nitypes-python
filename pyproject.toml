@@ -10,9 +10,9 @@ packages = [{ include = "nitypes", from = "src" }]
 [tool.poetry.dependencies]
 python = "^3.9"
 numpy = [
-  {version = ">=1.22", python = ">=3.9,<3.12"},
-  {version = ">=1.26", python = ">=3.12,<3.13"},
-  {version = ">=2.1", python = "^3.13"},
+  { version = ">=1.22", python = ">=3.9,<3.12" },
+  { version = ">=1.26", python = ">=3.12,<3.13" },
+  { version = ">=2.1", python = "^3.13" },
 ]
 # hightime = "^0.2.2"
 hightime = { git = "https://github.com/ni/hightime.git" }
@@ -26,6 +26,18 @@ mypy = ">=1.0"
 pytest = ">=7.2"
 pytest-cov = ">=4.0"
 pytest-mock = ">=3.0"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+# The latest Sphinx requires a recent Python version.
+Sphinx = { version = ">=8.2", python = "^3.11" }
+sphinx-rtd-theme = ">=1.0.0"
+sphinx-autoapi = ">=1.8.4"
+m2r2 = ">=0.3.2"
+toml = ">=0.10.2"
+tomlkit = ">=0.11.0"
 
 [tool.black]
 line-length = 100

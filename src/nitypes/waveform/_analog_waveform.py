@@ -595,8 +595,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         """The total capacity available for analog waveform data.
 
         Setting the capacity resizes the underlying NumPy array in-place.
-        - Other Python objects with references to the array will see the array size change.
-        - If the array has a reference to an external buffer (such as an array.array), attempting
+
+        * Other Python objects with references to the array will see the array size change.
+        * If the array has a reference to an external buffer (such as an array.array), attempting
           to resize it raises ValueError.
         """
         return len(self._data)
@@ -747,14 +748,12 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
         Raises:
             TimingMismatchError: The current and other waveforms have incompatible timing.
+            TimingMismatchWarning: The sample intervals of the waveform(s) do not match.
+            ScalingMismatchWarning: The scale modes of the waveform(s) do not match.
             ValueError: The other array has the wrong number of dimensions or the length of the
                 timestamps argument does not match the length of the other array.
             TypeError: The data types of the current waveform and other array or waveform(s) do not
                 match, or an argument has the wrong data type.
-
-        Warnings:
-            TimingMismatchWarning: The sample intervals of the waveform(s) do not match.
-            ScalingMismatchWarning: The scale modes of the waveform(s) do not match.
 
         When appending waveforms:
 
