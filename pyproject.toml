@@ -26,7 +26,7 @@ pytest = ">=7.2"
 pytest-cov = ">=4.0"
 pytest-mock = ">=3.0"
 # Use an unreleased version of hightime for testing.
-hightime = { git = "https://github.com/ni/hightime.git", branch = "users/bkeryan/fix-copy-pickle" }
+hightime = { git = "https://github.com/ni/hightime.git" }
 
 [tool.poetry.group.docs]
 optional = true
