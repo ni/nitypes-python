@@ -14,6 +14,8 @@ class PrecisionTiming(BaseTiming[ht.datetime, ht.timedelta]):
     """High-precision waveform timing using the hightime package.
 
     The hightime package has up to yoctosecond precision.
+
+    Waveform timing objects are immutable.
     """
 
     _DEFAULT_TIME_OFFSET = ht.timedelta()
@@ -66,6 +68,8 @@ class PrecisionTiming(BaseTiming[ht.datetime, ht.timedelta]):
         time_offset: ht.timedelta | None = None,
         sample_interval: ht.timedelta | None = None,
         timestamps: Sequence[ht.datetime] | None = None,
+        *,
+        copy_timestamps: bool = True,
     ) -> None:
         """Construct a high-precision waveform timing object.
 
@@ -74,7 +78,14 @@ class PrecisionTiming(BaseTiming[ht.datetime, ht.timedelta]):
         - PrecisionTiming.create_with_regular_interval
         - PrecisionTiming.create_with_irregular_interval
         """
-        super().__init__(sample_interval_mode, timestamp, time_offset, sample_interval, timestamps)
+        super().__init__(
+            sample_interval_mode,
+            timestamp,
+            time_offset,
+            sample_interval,
+            timestamps,
+            copy_timestamps=copy_timestamps,
+        )
 
 
 PrecisionTiming.empty = PrecisionTiming.create_with_no_interval()

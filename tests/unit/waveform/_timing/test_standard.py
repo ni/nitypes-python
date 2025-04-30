@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import copy
 import datetime as dt
-from copy import deepcopy
+import pickle
 
 import pytest
 
 from nitypes._typing import assert_type
 from nitypes.waveform import SampleIntervalMode, Timing
+from tests.unit.waveform._timing._utils import assert_deep_copy, assert_shallow_copy
 
 
 ###############################################################################
@@ -290,29 +292,58 @@ def test___irregular_interval_subset___get_timestamps___gets_timestamps() -> Non
 # magic methods
 ###############################################################################
 @pytest.mark.parametrize(
-    "value",
+    "left, right",
     [
-        Timing.create_with_no_interval(),
-        Timing.create_with_no_interval(dt.datetime(2025, 1, 1)),
-        Timing.create_with_no_interval(None, dt.timedelta(seconds=1)),
-        Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)),
-        Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
-        Timing.create_with_regular_interval(dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1)),
-        Timing.create_with_regular_interval(
-            dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+        (Timing.create_with_no_interval(), Timing.create_with_no_interval()),
+        (
+            Timing.create_with_no_interval(dt.datetime(2025, 1, 1)),
+            Timing.create_with_no_interval(dt.datetime(2025, 1, 1)),
         ),
-        Timing.create_with_irregular_interval([dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)]),
+        (
+            Timing.create_with_no_interval(None, dt.timedelta(seconds=1)),
+            Timing.create_with_no_interval(None, dt.timedelta(seconds=1)),
+        ),
+        (
+            Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)),
+            Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)),
+        ),
+        (
+            Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+            Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+        ),
+        (
+            Timing.create_with_regular_interval(
+                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1)
+            ),
+            Timing.create_with_regular_interval(
+                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1)
+            ),
+        ),
+        (
+            Timing.create_with_regular_interval(
+                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+            ),
+            Timing.create_with_regular_interval(
+                dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+            ),
+        ),
+        (
+            Timing.create_with_irregular_interval(
+                [dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)]
+            ),
+            Timing.create_with_irregular_interval(
+                [dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)]
+            ),
+        ),
     ],
 )
-def test___deep_copy___equality___equal(value: Timing) -> None:
-    other = deepcopy(value)
-
-    assert value == other
-    assert not (value != other)
+def test___same_value___equality___equal(left: Timing, right: Timing) -> None:
+    assert left == right
+    assert not (left != right)
 
 
 @pytest.mark.parametrize(
-    "lhs, rhs",
+    "left, right",
     [
         (
             Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)),
@@ -356,12 +387,9 @@ def test___deep_copy___equality___equal(value: Timing) -> None:
         ),
     ],
 )
-def test___different_value___equality___not_equal(
-    lhs: Timing,
-    rhs: Timing,
-) -> None:
-    assert not (lhs == rhs)
-    assert lhs != rhs
+def test___different_value___equality___not_equal(left: Timing, right: Timing) -> None:
+    assert not (left == right)
+    assert left != right
 
 
 @pytest.mark.parametrize(
@@ -413,6 +441,52 @@ def test___different_value___equality___not_equal(
 )
 def test___various_values___repr___looks_ok(value: Timing, expected_repr: str) -> None:
     assert repr(value) == expected_repr
+
+
+_VARIOUS_VALUES = [
+    Timing.create_with_no_interval(),
+    Timing.create_with_no_interval(dt.datetime(2025, 1, 1)),
+    Timing.create_with_no_interval(None, dt.timedelta(seconds=1)),
+    Timing.create_with_no_interval(dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)),
+    Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+    Timing.create_with_regular_interval(dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1)),
+    Timing.create_with_regular_interval(
+        dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+    ),
+    Timing.create_with_irregular_interval([dt.datetime(2025, 1, 1), dt.datetime(2025, 1, 2)]),
+]
+
+
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
+def test___various_values___copy___makes_shallow_copy(value: Timing) -> None:
+    new_value = copy.copy(value)
+
+    assert_shallow_copy(new_value, value)
+
+
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
+def test___various_values___deepcopy___makes_deep_copy(value: Timing) -> None:
+    new_value = copy.deepcopy(value)
+
+    assert_deep_copy(new_value, value)
+
+
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
+def test___various_values___pickle_unpickle___makes_deep_copy(
+    value: Timing,
+) -> None:
+    new_value = pickle.loads(pickle.dumps(value))
+
+    assert_deep_copy(new_value, value)
+
+
+def test___timing___pickle___references_public_modules() -> None:
+    value = Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+
+    value_bytes = pickle.dumps(value)
+
+    assert b"nitypes.waveform" in value_bytes
+    assert b"nitypes.waveform._timing" not in value_bytes
 
 
 ###############################################################################

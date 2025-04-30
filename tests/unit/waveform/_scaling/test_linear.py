@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import copy
+import pickle
 from typing import SupportsFloat
 
 import numpy as np
@@ -7,7 +9,7 @@ import numpy.typing as npt
 import pytest
 
 from nitypes._typing import assert_type
-from nitypes.waveform import LinearScaleMode
+from nitypes.waveform import NO_SCALING, LinearScaleMode, ScaleMode
 
 
 @pytest.mark.parametrize(
@@ -80,7 +82,71 @@ def test___float64_ndarray___transform_data___returns_float64_scaled_data() -> N
     assert list(scaled_data) == [4.0, 7.0, 10.0, 13.0]
 
 
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (LinearScaleMode(1.0, 0.0), LinearScaleMode(1.0, 0.0)),
+        (LinearScaleMode(1.2345, 0.006789), LinearScaleMode(1.2345, 0.006789)),
+    ],
+)
+def test___same_value___equality___equal(left: LinearScaleMode, right: LinearScaleMode) -> None:
+    assert left == right
+    assert not (left != right)
+
+
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (LinearScaleMode(1.0, 0.0), LinearScaleMode(1.0, 0.1)),
+        (LinearScaleMode(1.0, 0.0), LinearScaleMode(1.1, 0.0)),
+        (LinearScaleMode(1.2345, 0.006789), LinearScaleMode(1.23456, 0.006789)),
+        (LinearScaleMode(1.2345, 0.006789), LinearScaleMode(1.2345, 0.00678)),
+        (LinearScaleMode(1.0, 0.0), NO_SCALING),
+        (NO_SCALING, LinearScaleMode(1.0, 0.0)),
+    ],
+)
+def test___different_value___equality___not_equal(left: ScaleMode, right: ScaleMode) -> None:
+    assert not (left == right)
+    assert left != right
+
+
 def test___scale_mode___repr___looks_ok() -> None:
     scale_mode = LinearScaleMode(1.2345, 0.006789)
 
     assert repr(scale_mode) == "nitypes.waveform.LinearScaleMode(1.2345, 0.006789)"
+
+
+def test___scale_mode___copy___makes_shallow_copy() -> None:
+    scale_mode = LinearScaleMode(1.2345, 0.006789)
+
+    new_scale_mode = copy.copy(scale_mode)
+
+    assert new_scale_mode == scale_mode
+    assert new_scale_mode is not scale_mode
+
+
+def test___scale_mode___deepcopy___makes_deep_copy() -> None:
+    scale_mode = LinearScaleMode(1.2345, 0.006789)
+
+    new_scale_mode = copy.deepcopy(scale_mode)
+
+    assert new_scale_mode == scale_mode
+    assert new_scale_mode is not scale_mode
+
+
+def test___scale_mode___pickle_unpickle___makes_deep_copy() -> None:
+    scale_mode = LinearScaleMode(1.2345, 0.006789)
+
+    new_scale_mode = pickle.loads(pickle.dumps(scale_mode))
+
+    assert new_scale_mode == scale_mode
+    assert new_scale_mode is not scale_mode
+
+
+def test___scale_mode___pickle___references_public_modules() -> None:
+    scale_mode = LinearScaleMode(1.2345, 0.006789)
+
+    scale_mode_bytes = pickle.dumps(scale_mode)
+
+    assert b"nitypes.waveform" in scale_mode_bytes
+    assert b"nitypes.waveform._scaling" not in scale_mode_bytes

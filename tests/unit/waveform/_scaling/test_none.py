@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import copy
+import pickle
+
 import numpy as np
 import numpy.typing as npt
 
@@ -44,3 +47,31 @@ def test___float64_ndarray___transform_data___returns_float64_scaled_data() -> N
 
 def test___scale_mode___repr___looks_ok() -> None:
     assert repr(NO_SCALING) == "nitypes.waveform.NoneScaleMode()"
+
+
+def test___scale_mode___copy___makes_shallow_copy() -> None:
+    new_scale_mode = copy.copy(NO_SCALING)
+
+    assert new_scale_mode == NO_SCALING
+    assert new_scale_mode is not NO_SCALING
+
+
+def test___scale_mode___deepcopy___makes_deep_copy() -> None:
+    new_scale_mode = copy.deepcopy(NO_SCALING)
+
+    assert new_scale_mode == NO_SCALING
+    assert new_scale_mode is not NO_SCALING
+
+
+def test___scale_mode___pickle_unpickle___makes_deep_copy() -> None:
+    new_scale_mode = pickle.loads(pickle.dumps(NO_SCALING))
+
+    assert new_scale_mode == NO_SCALING
+    assert new_scale_mode is not NO_SCALING
+
+
+def test___scale_mode___pickle___references_public_modules() -> None:
+    scale_mode_bytes = pickle.dumps(NO_SCALING)
+
+    assert b"nitypes.waveform" in scale_mode_bytes
+    assert b"nitypes.waveform._scaling" not in scale_mode_bytes

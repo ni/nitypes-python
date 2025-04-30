@@ -4,7 +4,7 @@ import datetime as dt
 import operator
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
-from typing import Generic, SupportsIndex, TypeVar
+from typing import Any, Generic, SupportsIndex, TypeVar
 
 from nitypes._exceptions import add_note
 from nitypes._typing import Self
@@ -14,13 +14,15 @@ from nitypes.waveform._timing._sample_interval import (
     create_sample_interval_strategy,
 )
 
-
 _TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
 _TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
 
 
 class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
-    """Base class for waveform timing information."""
+    """Base class for waveform timing information.
+
+    Waveform timing objects are immutable.
+    """
 
     @classmethod
     @abstractmethod
@@ -118,8 +120,26 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
         time_offset: _TTimeDelta | None,
         sample_interval: _TTimeDelta | None,
         timestamps: Sequence[_TDateTime] | None,
+        *,
+        copy_timestamps: bool = True,
     ) -> None:
-        """Construct a base waveform timing object."""
+        """Construct a waveform timing object.
+
+        Args:
+            sample_interval_mode: The sample interval mode of the waveform timing.
+            timestamp: The timestamp of the waveform timing. This argument is optional for
+                SampleIntervalMode.NONE and SampleIntervalMode.REGULAR and unsupported for
+                SampleIntervalMode.IRREGULAR.
+            time_offset: The time difference between the timestamp and the first sample. This
+                argument is optional for SampleIntervalMode.NONE and SampleIntervalMode.REGULAR and
+                unsupported for SampleIntervalMode.IRREGULAR.
+            sample_interval: The time interval between samples. This argument is required for
+                SampleIntervalMode.REGULAR and unsupported otherwise.
+            timestamps: A sequence containing a timestamp for each sample in the waveform,
+                specifying the time that the sample was acquired. This argument is required for
+                SampleIntervalMode.IRREGULAR and unsupported otherwise.
+            copy_timestamps: Specifies whether to copy the timestamps or take ownership.
+        """
         sample_interval_strategy = create_sample_interval_strategy(sample_interval_mode)
         try:
             sample_interval_strategy.validate_init_args(
@@ -129,7 +149,7 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
             add_note(e, f"Sample interval mode: {sample_interval_mode}")
             raise
 
-        if timestamps is not None and not isinstance(timestamps, list):
+        if timestamps is not None and (copy_timestamps or not isinstance(timestamps, list)):
             timestamps = list(timestamps)
 
         self._sample_interval_strategy = sample_interval_strategy
@@ -211,6 +231,24 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
             and self._sample_interval_mode == value._sample_interval_mode
             and self._timestamps == value._timestamps
         )
+
+    def __reduce__(self) -> tuple[Any, ...]:
+        """Return object state for pickling."""
+        ctor_args = (
+            self._sample_interval_mode,
+            self._timestamp,
+            self._time_offset,
+            self._sample_interval,
+            self._timestamps,
+        )
+        ctor_kwargs: dict[str, Any] = {}
+        if self._timestamps is not None:
+            ctor_kwargs["copy_timestamps"] = False
+        return (self.__class__._unpickle, (ctor_args, ctor_kwargs))
+
+    @classmethod
+    def _unpickle(cls, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Self:
+        return cls(*args, **kwargs)
 
     def __repr__(self) -> str:
         """Return repr(self)."""

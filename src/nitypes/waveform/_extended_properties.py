@@ -19,6 +19,8 @@ ExtendedPropertyValue: TypeAlias = Union[bool, float, int, str]
 class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
     """A dictionary of extended properties."""
 
+    __slots__ = ["_properties"]
+
     def __init__(self, properties: Mapping[str, ExtendedPropertyValue] | None = None, /) -> None:
         """Construct an ExtendedPropertyDictionary."""
         self._properties: dict[str, ExtendedPropertyValue] = {}

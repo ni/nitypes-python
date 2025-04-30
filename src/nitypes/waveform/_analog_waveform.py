@@ -12,7 +12,7 @@ import numpy.typing as npt
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
-from nitypes._typing import TypeAlias
+from nitypes._typing import Self, TypeAlias
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     UNIT_DESCRIPTION,
@@ -351,6 +351,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        copy_extended_properties: bool = True,
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> None:
@@ -368,6 +369,8 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
                 appending samples to the waveform.
             extended_properties: The extended properties of the analog waveform.
+            copy_extended_properties: Specifies whether to copy the extended properties or take
+                ownership.
             timing: The timing information of the analog waveform.
             scale_mode: The scale mode of the analog waveform.
 
@@ -389,7 +392,11 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         else:
             raise invalid_arg_type("raw data", "NumPy ndarray", raw_data)
 
-        self._extended_properties = ExtendedPropertyDictionary(extended_properties)
+        if copy_extended_properties or not isinstance(
+            extended_properties, ExtendedPropertyDictionary
+        ):
+            extended_properties = ExtendedPropertyDictionary(extended_properties)
+        self._extended_properties = extended_properties
 
         if timing is None:
             timing = Timing.empty
@@ -863,6 +870,22 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             and self._timing == value._timing
             and self._scale_mode == value._scale_mode
         )
+
+    def __reduce__(self) -> tuple[Any, ...]:
+        """Return object state for pickling."""
+        ctor_args = (self._sample_count, self.dtype)
+        ctor_kwargs: dict[str, Any] = {
+            "raw_data": self.raw_data,
+            "extended_properties": self._extended_properties,
+            "copy_extended_properties": False,
+            "timing": self._timing,
+            "scale_mode": self._scale_mode,
+        }
+        return (self.__class__._unpickle, (ctor_args, ctor_kwargs))
+
+    @classmethod
+    def _unpickle(cls, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Self:
+        return cls(*args, **kwargs)
 
     def __repr__(self) -> str:
         """Return repr(self)."""

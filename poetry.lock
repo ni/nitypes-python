@@ -444,7 +444,7 @@ develop = false
 type = "git"
 url = "https://github.com/ni/hightime.git"
 reference = "HEAD"
-resolved_reference = "2cde13a89c443dcfbdbf3d00b483b62d7a3e9fc8"
+resolved_reference = "a356e63dff8cbdd9928aad02a5f636063058ad83"
 
 [[package]]
 name = "idna"
@@ -1538,4 +1538,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "e8b71c7de30019b3bc981c2bf7801703c8257be2d2dc621e09d425c0eb6a8768"
+content-hash = "185016cfabf31a4bff914b2efc10be4a53f2d9507ea364f7ee8e0f0936c6302c"
