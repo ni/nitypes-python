@@ -499,10 +499,7 @@ def test___various_values___pickle_unpickle___makes_deep_copy(
 ) -> None:
     new_value = pickle.loads(pickle.dumps(value))
 
-    assert new_value == value
-    assert new_value is not value
-    if value._timestamps is not None:
-        assert new_value._timestamps is not value._timestamps
+    assert_deep_copy(new_value, value)
 
 
 def test___timing___pickle___references_public_modules() -> None:
