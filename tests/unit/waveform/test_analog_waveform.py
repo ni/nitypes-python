@@ -1422,6 +1422,170 @@ def test___regular_waveform_and_irregular_waveform_list___append___raises_runtim
 
 
 ###############################################################################
+# load data
+###############################################################################
+def test___empty_ndarray___load_data___clears_data() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    array = np.array([], np.int32)
+
+    waveform.load_data(array)
+
+    assert list(waveform.raw_data) == []
+
+
+def test___int32_ndarray___load_data___overwrites_data() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    array = np.array([3, 4, 5], np.int32)
+
+    waveform.load_data(array)
+
+    assert list(waveform.raw_data) == [3, 4, 5]
+
+
+def test___float64_ndarray___load_data___overwrites_data() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
+    array = np.array([3, 4, 5], np.float64)
+
+    waveform.load_data(array)
+
+    assert list(waveform.raw_data) == [3, 4, 5]
+
+
+def test___ndarray_with_mismatched_dtype___load_data___raises_type_error() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
+    array = np.array([3, 4, 5], np.int32)
+
+    with pytest.raises(TypeError) as exc:
+        waveform.load_data(array)  # type: ignore[arg-type]
+
+    assert exc.value.args[0].startswith(
+        "The data type of the input array must match the waveform data type."
+    )
+
+
+def test___ndarray_2d___load_data___raises_value_error() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
+    array = np.array([[3, 4, 5], [6, 7, 8]], np.float64)
+
+    with pytest.raises(ValueError) as exc:
+        waveform.load_data(array)
+
+    assert exc.value.args[0].startswith("The input array must be a one-dimensional array.")
+
+
+def test___smaller_ndarray___load_data___preserves_capacity() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    array = np.array([3], np.int32)
+
+    waveform.load_data(array)
+
+    assert list(waveform.raw_data) == [3]
+    assert waveform.capacity == 3
+
+
+def test___larger_ndarray___load_data___grows_capacity() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    array = np.array([3, 4, 5, 6], np.int32)
+
+    waveform.load_data(array)
+
+    assert list(waveform.raw_data) == [3, 4, 5, 6]
+    assert waveform.capacity == 4
+
+
+def test___waveform_with_start_index___load_data___clears_start_index() -> None:
+    waveform = AnalogWaveform.from_array_1d(
+        np.array([0, 1, 2], np.int32), np.int32, copy=False, start_index=1, sample_count=1
+    )
+    assert waveform._start_index == 1
+    array = np.array([3], np.int32)
+
+    waveform.load_data(array)
+
+    assert list(waveform.raw_data) == [3]
+    assert waveform._start_index == 0
+
+
+def test___ndarray_subset___load_data___overwrites_data() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    array = np.array([3, 4, 5], np.int32)
+
+    waveform.load_data(array, start_index=1, sample_count=1)
+
+    assert list(waveform.raw_data) == [4]
+    assert waveform._start_index == 0
+    assert waveform.capacity == 3
+
+
+def test___smaller_ndarray_no_copy___load_data___takes_ownership_of_array() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    array = np.array([3], np.int32)
+
+    waveform.load_data(array, copy=False)
+
+    assert list(waveform.raw_data) == [3]
+    assert waveform._data is array
+
+
+def test___larger_ndarray_no_copy___load_data___takes_ownership_of_array() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    array = np.array([3, 4, 5, 6], np.int32)
+
+    waveform.load_data(array, copy=False)
+
+    assert list(waveform.raw_data) == [3, 4, 5, 6]
+    assert waveform._data is array
+
+
+def test___ndarray_subset_no_copy___load_data___takes_ownership_of_array_subset() -> None:
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    array = np.array([3, 4, 5, 6], np.int32)
+
+    waveform.load_data(array, copy=False, start_index=1, sample_count=2)
+
+    assert list(waveform.raw_data) == [4, 5]
+    assert waveform._data is array
+
+
+def test___irregular_waveform_and_int32_ndarray_with_timestamps___load_data___overwrites_data_but_not_timestamps() -> (
+    None
+):
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform_offsets = [dt.timedelta(0), dt.timedelta(1), dt.timedelta(2)]
+    waveform_timestamps = [start_time + offset for offset in waveform_offsets]
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
+    array = np.array([3, 4, 5], np.int32)
+
+    waveform.load_data(array)
+
+    assert list(waveform.raw_data) == [3, 4, 5]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert waveform.timing._timestamps == waveform_timestamps
+
+
+def test___irregular_waveform_and_int32_ndarray_with_wrong_sample_count___load_data___raises_value_error_and_does_not_overwrite_data() -> (
+    None
+):
+    start_time = dt.datetime.now(dt.timezone.utc)
+    waveform_offsets = [dt.timedelta(0), dt.timedelta(1), dt.timedelta(2)]
+    waveform_timestamps = [start_time + offset for offset in waveform_offsets]
+    waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
+    waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
+    array = np.array([3, 4], np.int32)
+
+    with pytest.raises(ValueError) as exc:
+        waveform.load_data(array)
+
+    assert exc.value.args[0].startswith(
+        "The input array length must be equal to the number of irregular timestamps."
+    )
+    assert list(waveform.raw_data) == [0, 1, 2]
+    assert waveform.timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
+    assert waveform.timing._timestamps == waveform_timestamps
+
+
+###############################################################################
 # magic methods
 ###############################################################################
 @pytest.mark.parametrize(

@@ -7,6 +7,24 @@ class TimingMismatchError(RuntimeError):
     pass
 
 
+def input_array_data_type_mismatch(input_dtype: object, waveform_dtype: object) -> TypeError:
+    """Create a TypeError for an input array data type mismatch."""
+    return TypeError(
+        "The data type of the input array must match the waveform data type.\n\n"
+        f"Input array data type: {input_dtype}\n"
+        f"Waveform data type: {waveform_dtype}"
+    )
+
+
+def input_waveform_data_type_mismatch(input_dtype: object, waveform_dtype: object) -> TypeError:
+    """Create a TypeError for an input waveform data type mismatch."""
+    return TypeError(
+        "The data type of the input waveform must match the waveform data type.\n\n"
+        f"Input waveform data type: {input_dtype}\n"
+        f"Waveform data type: {waveform_dtype}"
+    )
+
+
 def no_timestamp_information() -> RuntimeError:
     """Create a RuntimeError for waveform timing with no timestamp information."""
     return RuntimeError(
