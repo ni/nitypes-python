@@ -13,6 +13,10 @@ import numpy.typing as npt
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._typing import Self, TypeAlias
+from nitypes.waveform._exceptions import (
+    input_array_data_type_mismatch,
+    input_waveform_data_type_mismatch,
+)
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     UNIT_DESCRIPTION,
@@ -800,16 +804,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
     ) -> None:
         if array.dtype != self.dtype:
-            raise TypeError(
-                "The data type of the input array must match the waveform data type.\n\n"
-                f"Input array data type: {array.dtype}\n"
-                f"Waveform data type: {self.dtype}"
-            )
+            raise input_array_data_type_mismatch(array.dtype, self.dtype)
         if array.ndim != 1:
-            raise ValueError(
-                "The input array must be a one-dimensional array.\n\n"
-                f"Number of dimensions: {array.ndim}"
-            )
+            raise invalid_array_ndim("input array", "one-dimensional array", array.ndim)
         if timestamps is not None and len(array) != len(timestamps):
             raise ValueError(
                 "The number of irregular timestamps must be equal to the input array length.\n\n"
@@ -832,11 +829,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     def _append_waveforms(self, waveforms: Sequence[AnalogWaveform[_ScalarType_co]]) -> None:
         for waveform in waveforms:
             if waveform.dtype != self.dtype:
-                raise TypeError(
-                    "The data type of the input waveform must match the waveform data type.\n\n"
-                    f"Input waveform data type: {waveform.dtype}\n"
-                    f"Waveform data type: {self.dtype}"
-                )
+                raise input_waveform_data_type_mismatch(waveform.dtype, self.dtype)
             if waveform._scale_mode != self._scale_mode:
                 warnings.warn(scale_mode_mismatch())
 
@@ -858,6 +851,60 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         new_capacity = self._start_index + self._sample_count + amount
         if new_capacity > self.capacity:
             self.capacity = new_capacity
+
+    def load_data(
+        self,
+        array: npt.NDArray[_ScalarType_co],
+        *,
+        copy: bool = True,
+        start_index: SupportsIndex | None = 0,
+        sample_count: SupportsIndex | None = None,
+    ) -> None:
+        """Load new data into an existing waveform.
+
+        Args:
+            array: A NumPy array containing the data to load.
+            copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the analog waveform data begins.
+            sample_count: The number of samples in the analog waveform.
+        """
+        if isinstance(array, np.ndarray):
+            self._load_array(array, copy=copy, start_index=start_index, sample_count=sample_count)
+        else:
+            raise invalid_arg_type("input array", "array", array)
+
+    def _load_array(
+        self,
+        array: npt.NDArray[_ScalarType_co],
+        *,
+        copy: bool = True,
+        start_index: SupportsIndex | None = 0,
+        sample_count: SupportsIndex | None = None,
+    ) -> None:
+        if array.dtype != self.dtype:
+            raise input_array_data_type_mismatch(array.dtype, self.dtype)
+        if array.ndim != 1:
+            raise invalid_array_ndim("input array", "one-dimensional array", array.ndim)
+        if self._timing._timestamps is not None and len(array) != len(self._timing._timestamps):
+            raise ValueError(
+                "The input array length must be equal to the number of irregular timestamps.\n\n"
+                f"Array length: {len(array)}\n"
+                f"Number of timestamps: {len(self._timing._timestamps)}"
+            )
+
+        start_index = arg_to_uint("start index", start_index, 0)
+        sample_count = arg_to_uint("sample count", sample_count, len(array) - start_index)
+
+        if copy:
+            if sample_count > len(self._data):
+                self.capacity = sample_count
+            self._data[0:sample_count] = array[start_index : start_index + sample_count]
+            self._start_index = 0
+            self._sample_count = sample_count
+        else:
+            self._data = array
+            self._start_index = start_index
+            self._sample_count = sample_count
 
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
