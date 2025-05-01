@@ -1,48 +1,55 @@
 from __future__ import annotations
 
 import operator
-from collections.abc import Iterator, Sequence
 from math import sqrt
 from numbers import Complex
 from typing import SupportsIndex
 
 from nitypes._typing import Self
 
+# This subclasses tuple so that it can be used to initialize NumPy structured arrays. Unfortunately,
+# tuple and Complex have different ideas about how __add__ and __mul__ should be typed.
+#
+# Why not NamedTuple? Because Complex is a subclass of Generic, and NamedTuple and Generic have
+# different metaclasses.
+#
+# TODO: can __array__ convert to a structured array?
 
-# Implementing Sequence allows conversion to NumPy arrays.
-class ComplexInt(Complex, Sequence[int]):
+
+class ComplexInt(tuple[int, int], Complex):
     """A complex number composed of two integers."""
 
-    __slots__ = ["_real", "_imag"]
+    __slots__ = ()
 
-    def __init__(self, real: SupportsIndex = 0, imag: SupportsIndex = 0) -> None:
+    def __new__(cls, real: SupportsIndex = 0, imag: SupportsIndex = 0) -> Self:
         """Construct a ComplexInt."""
-        self._real = operator.index(real)
-        self._imag = operator.index(imag)
+        real = operator.index(real)
+        imag = operator.index(imag)
+        return super().__new__(cls, (real, imag))
 
     def __complex__(self) -> complex:
         """Return self as a floating-point complex number."""
-        return complex(self._real, self._imag)
+        return complex(self.real, self.imag)
 
     @property
     def real(self) -> int:
         """The real part of the complex number."""
-        return self._real
+        return self[0]
 
     @property
     def imag(self) -> int:
         """The imaginary part of the complex number."""
-        return self._imag
+        return self[1]
 
-    def __add__(self, other: Self, /) -> Self:
+    def __add__(self, other: Self, /) -> Self:  # type: ignore[override]
         """Return self + other."""
-        return self.__class__(self._real + other._real, self._imag + other._imag)
+        return self.__class__(self.real + other.real, self.imag + other.imag)
 
     __radd__ = __add__
 
     def __neg__(self) -> Self:
         """Return -self."""
-        return self.__class__(-self._real, -self._imag)
+        return self.__class__(-self.real, -self.imag)
 
     def __pos__(self) -> Self:
         """Return +self."""
@@ -50,19 +57,19 @@ class ComplexInt(Complex, Sequence[int]):
 
     def __sub__(self, other: Self, /) -> Self:
         """Return self - other."""
-        return self.__class__(self._real - other._real, self._imag - other._imag)
+        return self.__class__(self.real - other.real, self.imag - other.imag)
 
     def __rsub__(self, other: Self, /) -> Self:
         """Return other - self."""
-        return self.__class__(other._real - self._real, other._imag - self._imag)
+        return self.__class__(other.real - self.real, other.imag - self.imag)
 
-    def __mul__(self, other: Self, /) -> Self:
+    def __mul__(self, other: Self, /) -> Self:  # type: ignore[override]
         """Return self * other."""
-        real = self._real * other._real - self._imag * other._imag
-        imag = self._real * other._imag + self._imag * other._real
+        real = self.real * other.real - self.imag * other.imag
+        imag = self.real * other.imag + self.imag * other.real
         return self.__class__(real, imag)
 
-    __rmul__ = __mul__
+    __rmul__ = __mul__  # type: ignore[assignment]
 
     def __truediv__(self, other: Self, /) -> complex:
         """Return self / other."""
@@ -97,45 +104,26 @@ class ComplexInt(Complex, Sequence[int]):
 
     def __abs__(self) -> float:
         """Return abs(self)."""
-        return sqrt(self._real * self._real + self._imag * self._imag)
+        return sqrt(self.real * self.real + self.imag * self.imag)
 
     def conjugate(self) -> Self:
         """Return the complex conjugate."""
-        return self.__class__(self._real, -self._imag)
+        return self.__class__(self.real, -self.imag)
 
     def __eq__(self, other: object, /) -> bool:
         """Return self == other."""
         if not isinstance(other, self.__class__):
             return NotImplemented
-        return self._real == other._real and self._imag == other._imag
+        return self.real == other.real and self.imag == other.imag
 
     def __str__(self) -> str:
         """Return str(self)."""
-        return f"{self._real}+{self._imag}j"
+        return f"{self.real}+{self.imag}j"
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        return f"{self.__class__.__module__}.{self.__class__.__name__}({self._real}, {self._imag})"
+        return f"{self.__class__.__module__}.{self.__class__.__name__}({self.real}, {self.imag})"
 
     def __hash__(self) -> int:  # type: ignore[override]
         """Return hash(self)."""
-        return hash(self._as_tuple())
-
-    def __len__(self) -> int:
-        """Return len(self)."""
-        return 2
-
-    def __iter__(self) -> Iterator[int]:
-        """Return iter(self)."""
-        return iter(self._as_tuple())
-
-    def __contains__(self, value: int) -> bool:
-        """Return value in self."""
-        return value in self._as_tuple()
-
-    def __getitem__(self, index: int) -> int:
-        """Return self[index]."""
-        return self._as_tuple()[index]
-
-    def _as_tuple(self) -> tuple[int, int]:
-        return (self._real, self._imag)
+        return super().__hash__()
