@@ -49,6 +49,10 @@ autoapi_dirs = [root_path / "src" / "nitypes"]
 autoapi_type = "python"
 autodoc_typehints = "description"
 
+# Work around https://github.com/readthedocs/sphinx-autoapi/issues/264 - "Problem conditionally
+# defined/generated objects?" for _typing.py
+suppress_warnings = ["autoapi.python_import_resolution"]
+
 
 # TODO: https://github.com/ni/nitypes-python/issues/16 - Update nitypes-python docs to use
 # :canonical: to resolve aliases (once supported by sphinx-autoapi)
