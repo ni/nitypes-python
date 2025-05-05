@@ -12,6 +12,7 @@ try:
 except ImportError:
     from nitypes._typing import override
 
+
 class Timing(BaseTiming[dt.datetime, dt.timedelta]):
     """Waveform timing using the standard datetime module.
 

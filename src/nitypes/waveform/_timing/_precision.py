@@ -13,6 +13,7 @@ try:
 except ImportError:
     from nitypes._typing import override
 
+
 class PrecisionTiming(BaseTiming[ht.datetime, ht.timedelta]):
     """High-precision waveform timing using the hightime package.
 
