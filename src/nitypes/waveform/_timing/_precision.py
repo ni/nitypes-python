@@ -5,10 +5,13 @@ from typing import ClassVar
 
 import hightime as ht
 
-from nitypes._typing import override
 from nitypes.waveform._timing._base import BaseTiming
 from nitypes.waveform._timing._sample_interval import SampleIntervalMode
 
+try:
+    from typing import override
+except ImportError:
+    from nitypes._typing import override
 
 class PrecisionTiming(BaseTiming[ht.datetime, ht.timedelta]):
     """High-precision waveform timing using the hightime package.

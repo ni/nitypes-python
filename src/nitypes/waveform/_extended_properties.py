@@ -4,7 +4,10 @@ import operator
 from collections.abc import Mapping
 from typing import Iterator, MutableMapping, Union
 
-from nitypes._typing import TypeAlias
+try:
+    from typing import TypeAlias
+except ImportError:
+    from nitypes._typing import TypeAlias
 
 # Extended property keys
 CHANNEL_NAME = "NI_ChannelName"

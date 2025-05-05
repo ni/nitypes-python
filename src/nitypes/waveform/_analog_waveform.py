@@ -12,7 +12,6 @@ import numpy.typing as npt
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
-from nitypes._typing import Self, TypeAlias
 from nitypes.waveform._exceptions import (
     input_array_data_type_mismatch,
     input_waveform_data_type_mismatch,
@@ -26,6 +25,11 @@ from nitypes.waveform._extended_properties import (
 from nitypes.waveform._scaling import NO_SCALING, ScaleMode
 from nitypes.waveform._timing import BaseTiming, PrecisionTiming, Timing, convert_timing
 from nitypes.waveform._warnings import scale_mode_mismatch
+
+try:
+    from typing import Self, TypeAlias
+except ImportError:
+    from nitypes._typing import Self, TypeAlias
 
 if sys.version_info < (3, 10):
     import array as std_array

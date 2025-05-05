@@ -7,12 +7,17 @@ from collections.abc import Iterable, Sequence
 from typing import Any, Generic, SupportsIndex, TypeVar
 
 from nitypes._exceptions import add_note
-from nitypes._typing import Self
 from nitypes.waveform._timing._sample_interval import (
     SampleIntervalMode,
     SampleIntervalStrategy,
     create_sample_interval_strategy,
 )
+
+try:
+    from typing import Self
+except ImportError:
+    from nitypes._typing import Self
+
 
 _TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
 _TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
