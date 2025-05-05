@@ -15,6 +15,7 @@ numpy = [
   { version = ">=2.1", python = "^3.13" },
 ]
 hightime = "^0.2.2"
+typing-extensions = ">=4.13.2"
 
 [tool.poetry.group.lint.dependencies]
 bandit = { version = ">=1.7", extras = ["toml"] }
