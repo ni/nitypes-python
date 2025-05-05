@@ -6,9 +6,9 @@ from functools import singledispatch
 from typing import Any, TypeVar, Union, cast
 
 import hightime as ht
+from typing_extensions import TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_requested_type
-from nitypes._typing import TypeAlias
 
 _AnyDateTime: TypeAlias = Union[dt.datetime, ht.datetime]
 _TDateTime = TypeVar("_TDateTime", dt.datetime, ht.datetime)

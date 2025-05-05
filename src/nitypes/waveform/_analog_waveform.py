@@ -9,10 +9,10 @@ from typing import Any, Generic, SupportsIndex, TypeVar, Union, cast, overload
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
+from typing_extensions import Self, TypeAlias
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
-from nitypes._typing import Self, TypeAlias
 from nitypes.waveform._exceptions import (
     input_array_data_type_mismatch,
     input_waveform_data_type_mismatch,

@@ -6,8 +6,9 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
 from typing import Any, Generic, SupportsIndex, TypeVar
 
+from typing_extensions import Self
+
 from nitypes._exceptions import add_note
-from nitypes._typing import Self
 from nitypes.waveform._timing._sample_interval import (
     SampleIntervalMode,
     SampleIntervalStrategy,

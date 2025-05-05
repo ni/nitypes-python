@@ -6,14 +6,13 @@ from functools import singledispatch
 from typing import Any, TypeVar, Union, cast
 
 import hightime as ht
+from typing_extensions import TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_requested_type
-from nitypes._typing import TypeAlias
 from nitypes.time._conversion import convert_datetime, convert_timedelta
 from nitypes.waveform._timing._base import BaseTiming
 from nitypes.waveform._timing._precision import PrecisionTiming
 from nitypes.waveform._timing._standard import Timing
-
 
 _AnyTiming: TypeAlias = Union[BaseTiming[Any, Any], Timing, PrecisionTiming]
 _TTiming = TypeVar("_TTiming", bound=BaseTiming[Any, Any])

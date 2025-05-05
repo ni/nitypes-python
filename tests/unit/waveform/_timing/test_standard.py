@@ -5,8 +5,8 @@ import datetime as dt
 import pickle
 
 import pytest
+from typing_extensions import assert_type
 
-from nitypes._typing import assert_type
 from nitypes.waveform import SampleIntervalMode, Timing
 from tests.unit.waveform._timing._utils import assert_deep_copy, assert_shallow_copy
 
