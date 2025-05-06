@@ -4,8 +4,8 @@ from collections.abc import Sequence
 from typing import ClassVar
 
 import hightime as ht
+from typing_extensions import override
 
-from nitypes._typing import override
 from nitypes.waveform._timing._base import BaseTiming
 from nitypes.waveform._timing._sample_interval import SampleIntervalMode
 

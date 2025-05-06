@@ -12,8 +12,8 @@ import hightime as ht
 import numpy as np
 import numpy.typing as npt
 import pytest
+from typing_extensions import assert_type
 
-from nitypes._typing import assert_type
 from nitypes.waveform import (
     NO_SCALING,
     AnalogWaveform,

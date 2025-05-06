@@ -3,8 +3,8 @@ from __future__ import annotations
 import datetime as dt
 
 import hightime as ht
+from typing_extensions import assert_type
 
-from nitypes._typing import assert_type
 from nitypes.waveform import PrecisionTiming, SampleIntervalMode, Timing
 from nitypes.waveform._timing import convert_timing
 

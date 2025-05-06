@@ -6,8 +6,8 @@ import pickle
 
 import hightime as ht
 import pytest
+from typing_extensions import assert_type
 
-from nitypes._typing import assert_type
 from nitypes.waveform import PrecisionTiming, SampleIntervalMode
 from tests.unit.waveform._timing._utils import assert_deep_copy, assert_shallow_copy
 
