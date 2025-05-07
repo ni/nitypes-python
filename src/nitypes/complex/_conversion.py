@@ -59,11 +59,15 @@ def convert_complex(
 def convert_complex(
     requested_dtype: npt.DTypeLike, value: np.ndarray[_Shape, Any] | np.generic[Any]
 ) -> np.ndarray[_Shape, Any]:
-    """Convert a NumPy array of complex numbers to the specified dtype.
+    """Convert a NumPy array or scalar of complex numbers to the specified dtype.
 
     Args:
-        requested_dtype: The NumPy data type to convert to. This must be a complex number data type.
+        requested_dtype: The NumPy data type to convert to. Supported data types:
+            :any:`numpy.complex64`, :any:`numpy.complex128`, :any:`ComplexInt32DType`.
         value: The NumPy array or scalar to convert.
+
+    Returns:
+        The value converted to the specified dtype.
     """
     validate_dtype(requested_dtype, _COMPLEX_DTYPES)
     if requested_dtype == value.dtype:

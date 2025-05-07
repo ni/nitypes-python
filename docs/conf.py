@@ -56,7 +56,11 @@ def skip_aliases(app, what, name, obj, skip, options):
     """Skip documentation for classes that are exported from multiple modules."""
     # For names that are defined in a private sub-module and aliased into a
     # public package, hide the definition.
-    if name.startswith("nitypes.time._") or name.startswith("nitypes.waveform._"):
+    if (
+        name.startswith("nitypes.complex._")
+        or name.startswith("nitypes.time._")
+        or name.startswith("nitypes.waveform._")
+    ):
         skip = True
 
     return skip
