@@ -32,7 +32,7 @@ def test___complexint32_array___index___returns_complexint32_scalar() -> None:
     value = array[1]
 
     assert_type(value, Any)  # ¯\_(ツ)_/¯
-    assert isinstance(value, np.void)  # _ComplexInt32Base only exists for typing
+    assert isinstance(value, ComplexInt32Base)  # alias for np.void
     assert value["real"] == 3
     assert value["imag"] == -4
 
