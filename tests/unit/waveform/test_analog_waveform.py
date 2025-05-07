@@ -90,7 +90,7 @@ def test___sample_count_dtype_and_capacity___create___creates_waveform_with_samp
 
 def test___sample_count_and_unsupported_dtype___create___raises_type_error() -> None:
     with pytest.raises(TypeError) as exc:
-        _ = AnalogWaveform(10, np.complex128)
+        _ = AnalogWaveform(10, np.str_)
 
     assert exc.value.args[0].startswith("The requested data type is not supported.")
 
@@ -205,7 +205,7 @@ def test___iterable___from_array_1d___raises_type_error() -> None:
 
 
 def test___ndarray_with_unsupported_dtype___from_array_1d___raises_type_error() -> None:
-    data = np.zeros(3, np.complex128)
+    data = np.zeros(3, np.str_)
 
     with pytest.raises(TypeError) as exc:
         _ = AnalogWaveform.from_array_1d(data)
@@ -456,7 +456,7 @@ def test___iterable_list___from_array_2d___raises_type_error() -> None:
 
 
 def test___ndarray_with_unsupported_dtype___from_array_2d___raises_type_error() -> None:
-    data = np.zeros((2, 3), np.complex128)
+    data = np.zeros((2, 3), np.str_)
 
     with pytest.raises(TypeError) as exc:
         _ = AnalogWaveform.from_array_2d(data)

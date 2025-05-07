@@ -13,7 +13,7 @@ from typing_extensions import Self, TypeAlias
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
-from nitypes.complex import ComplexInt32Base, ComplexInt32DType
+from nitypes.complex import ComplexInt32Base, ComplexInt32DType, convert_complex
 from nitypes.waveform._exceptions import (
     input_array_data_type_mismatch,
     input_waveform_data_type_mismatch,
@@ -38,15 +38,19 @@ _TRaw_co = TypeVar("_TRaw_co", bound=np.generic, covariant=True)
 _TScaled = TypeVar("_TScaled", bound=np.generic)
 _TScaled_co = TypeVar("_TScaled_co", bound=np.generic, covariant=True)
 
-_TComplexRaw = TypeVar("_TComplexRaw", bound=np.complexfloating)
-_TComplexRaw_co = TypeVar("_TComplexRaw_co", bound=np.complexfloating, covariant=True)
+# Note: ComplexInt32Base is currently an alias for np.void, so this currently matches any NumPy
+# structured data type based on np.void.
+_TComplexRaw = TypeVar("_TComplexRaw", bound=Union[np.complexfloating, ComplexInt32Base])
+_TComplexRaw_co = TypeVar(
+    "_TComplexRaw_co", bound=Union[np.complexfloating, ComplexInt32Base], covariant=True
+)
 
 _AnyTiming: TypeAlias = Union[BaseTiming[Any, Any], Timing, PrecisionTiming]
 _TTiming = TypeVar("_TTiming", bound=BaseTiming[Any, Any])
 
 # Use the C types here because np.isdtype() considers some of them to be distinct types, even when
 # they have the same size (e.g. np.intc vs. np.int_ vs. np.long).
-_ANALOG_DTYPES = (
+_RAW_DTYPES = (
     # Floating point
     np.single,
     np.double,
@@ -64,12 +68,34 @@ _ANALOG_DTYPES = (
     np.uint,
     np.ulong,
     np.ulonglong,
+    # Complex floating point
+    np.csingle,
+    np.cdouble,
+    # Complex integers
+    ComplexInt32DType,
 )
 
 _SCALED_DTYPES = (
     # Floating point
     np.single,
     np.double,
+    # Complex floating point
+    np.csingle,
+    np.cdouble,
+)
+
+_COMPLEX_RAW_DTYPES = (
+    # Complex floating point
+    np.csingle,
+    np.cdouble,
+    # Complex integers
+    ComplexInt32DType,
+)
+
+_COMPLEX_SCALED_DTYPES = (
+    # Complex floating point
+    np.csingle,
+    np.cdouble,
 )
 
 # Note about NumPy type hints:
@@ -516,7 +542,7 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
 
         if dtype is None:
             dtype = np.float64
-        validate_dtype(dtype, _ANALOG_DTYPES)
+        validate_dtype(dtype, _RAW_DTYPES)
 
         if start_index > capacity:
             raise ValueError(
@@ -558,7 +584,7 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
                 f"Array data type: {data.dtype}\n"
                 f"Requested data type: {np.dtype(dtype)}"
             )
-        validate_dtype(dtype, _ANALOG_DTYPES)
+        validate_dtype(dtype, _RAW_DTYPES)
 
         capacity = arg_to_uint("capacity", capacity, len(data))
         if capacity != len(data):
@@ -626,7 +652,7 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
         return self.raw_data[start_index : start_index + sample_count]
 
     @property
-    def scaled_data(self) -> npt.NDArray[np.float64]:
+    def scaled_data(self) -> npt.NDArray[_TScaled_co]:
         """The scaled analog waveform data.
 
         This property converts all of the waveform samples to float64 and scales them. To scale a
@@ -634,7 +660,7 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
         """
         return self.get_scaled_data()
 
-    # If dtype is not specified, _ScaledDataType defaults to np.float64.
+    # If dtype is not specified, _ScaledDataType defaults to _TScaled_co.
     @overload
     def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self,
@@ -642,16 +668,16 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-    ) -> npt.NDArray[np.float64]: ...
+    ) -> npt.NDArray[_TScaled_co]: ...
 
     @overload
     def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self,
-        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
+        dtype: type[_TScaled] | np.dtype[_TScaled] = ...,
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-    ) -> npt.NDArray[_TRaw]: ...
+    ) -> npt.NDArray[_TScaled]: ...
 
     @overload
     def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
@@ -679,13 +705,22 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
         Returns:
             A subset of the scaled analog waveform data.
         """
-        if dtype is None:
-            dtype = np.float64
-        validate_dtype(dtype, _SCALED_DTYPES)
+        if np.isdtype(self.dtype, _COMPLEX_RAW_DTYPES):
+            if dtype is None:
+                dtype = np.complex128
+            validate_dtype(dtype, _COMPLEX_SCALED_DTYPES)
 
-        raw_data = self.get_raw_data(start_index, sample_count)
-        converted_data = raw_data.astype(dtype)
-        return self._scale_mode._transform_data(converted_data)
+            raw_data = self.get_raw_data(start_index, sample_count)
+            converted_data = convert_complex(dtype, raw_data)
+            return self._scale_mode._transform_data(converted_data)
+        else:
+            if dtype is None:
+                dtype = np.float64
+            validate_dtype(dtype, _SCALED_DTYPES)
+
+            raw_data = self.get_raw_data(start_index, sample_count)
+            converted_data = raw_data.astype(dtype)
+            return self._scale_mode._transform_data(converted_data)
 
     @property
     def sample_count(self) -> int:
