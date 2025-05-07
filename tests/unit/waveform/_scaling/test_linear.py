@@ -82,6 +82,28 @@ def test___float64_ndarray___transform_data___returns_float64_scaled_data() -> N
     assert list(scaled_data) == [4.0, 7.0, 10.0, 13.0]
 
 
+def test___complex64_ndarray___transform_data___returns_complex64_scaled_data() -> None:
+    raw_data = np.array([1 + 2j, 3 - 4j], np.complex64)
+    scale_mode = LinearScaleMode(3.0, 4.0)
+
+    scaled_data = scale_mode._transform_data(raw_data)
+
+    assert_type(scaled_data, npt.NDArray[np.complex64])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.complex64
+    assert list(scaled_data) == [7 + 6j, 13 - 12j]
+
+
+def test___complex128_ndarray___transform_data___returns_complex128_scaled_data() -> None:
+    raw_data = np.array([1 + 2j, 3 - 4j], np.complex128)
+    scale_mode = LinearScaleMode(3.0, 4.0)
+
+    scaled_data = scale_mode._transform_data(raw_data)
+
+    assert_type(scaled_data, npt.NDArray[np.complex128])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.complex128
+    assert list(scaled_data) == [7 + 6j, 13 - 12j]
+
+
 @pytest.mark.parametrize(
     "left, right",
     [
