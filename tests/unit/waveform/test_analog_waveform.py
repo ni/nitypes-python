@@ -37,7 +37,7 @@ def test___no_args___create___creates_empty_waveform_with_default_dtype() -> Non
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 0
     assert waveform.dtype == np.float64
-    assert_type(waveform, AnalogWaveform[np.float64])
+    assert_type(waveform, AnalogWaveform[np.float64, np.float64])
 
 
 def test___sample_count___create___creates_waveform_with_sample_count_and_default_dtype() -> None:
@@ -45,7 +45,7 @@ def test___sample_count___create___creates_waveform_with_sample_count_and_defaul
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.float64
-    assert_type(waveform, AnalogWaveform[np.float64])
+    assert_type(waveform, AnalogWaveform[np.float64, np.float64])
 
 
 def test___sample_count_and_dtype___create___creates_waveform_with_sample_count_and_dtype() -> None:
@@ -53,7 +53,7 @@ def test___sample_count_and_dtype___create___creates_waveform_with_sample_count_
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.int32
-    assert_type(waveform, AnalogWaveform[np.int32])
+    assert_type(waveform, AnalogWaveform[np.int32, np.float64])
 
 
 def test___sample_count_and_dtype_str___create___creates_waveform_with_sample_count_and_dtype() -> (
@@ -63,7 +63,7 @@ def test___sample_count_and_dtype_str___create___creates_waveform_with_sample_co
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.int32
-    assert_type(waveform, AnalogWaveform[Any])  # dtype not inferred from string
+    assert_type(waveform, AnalogWaveform[Any, Any])  # dtype not inferred from string
 
 
 def test___sample_count_and_dtype_any___create___creates_waveform_with_sample_count_and_dtype() -> (
@@ -74,7 +74,7 @@ def test___sample_count_and_dtype_any___create___creates_waveform_with_sample_co
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.int32
-    assert_type(waveform, AnalogWaveform[Any])  # dtype not inferred from np.dtype[Any]
+    assert_type(waveform, AnalogWaveform[Any, Any])  # dtype not inferred from np.dtype[Any]
 
 
 def test___sample_count_dtype_and_capacity___create___creates_waveform_with_sample_count_dtype_and_capacity() -> (
@@ -85,7 +85,7 @@ def test___sample_count_dtype_and_capacity___create___creates_waveform_with_samp
     assert waveform.sample_count == len(waveform.raw_data) == 10
     assert waveform.capacity == 20
     assert waveform.dtype == np.int32
-    assert_type(waveform, AnalogWaveform[np.int32])
+    assert_type(waveform, AnalogWaveform[np.int32, np.float64])
 
 
 def test___sample_count_and_unsupported_dtype___create___raises_type_error() -> None:
@@ -105,7 +105,7 @@ def test___float64_ndarray___from_array_1d___creates_waveform_with_float64_dtype
 
     assert waveform.raw_data.tolist() == data.tolist()
     assert waveform.dtype == np.float64
-    assert_type(waveform, AnalogWaveform[np.float64])
+    assert_type(waveform, AnalogWaveform[np.float64, np.float64])
 
 
 def test___int32_ndarray___from_array_1d___creates_waveform_with_int32_dtype() -> None:
@@ -115,7 +115,7 @@ def test___int32_ndarray___from_array_1d___creates_waveform_with_int32_dtype() -
 
     assert waveform.raw_data.tolist() == data.tolist()
     assert waveform.dtype == np.int32
-    assert_type(waveform, AnalogWaveform[np.int32])
+    assert_type(waveform, AnalogWaveform[np.int32, np.float64])
 
 
 def test___int32_array_with_dtype___from_array_1d___creates_waveform_with_specified_dtype() -> None:
@@ -125,7 +125,7 @@ def test___int32_array_with_dtype___from_array_1d___creates_waveform_with_specif
 
     assert waveform.raw_data.tolist() == data.tolist()
     assert waveform.dtype == np.int32
-    assert_type(waveform, AnalogWaveform[np.int32])
+    assert_type(waveform, AnalogWaveform[np.int32, np.float64])
 
 
 def test___int16_ndarray_with_mismatched_dtype___from_array_1d___creates_waveform_with_specified_dtype() -> (
@@ -137,7 +137,7 @@ def test___int16_ndarray_with_mismatched_dtype___from_array_1d___creates_wavefor
 
     assert waveform.raw_data.tolist() == data.tolist()
     assert waveform.dtype == np.int32
-    assert_type(waveform, AnalogWaveform[np.int32])
+    assert_type(waveform, AnalogWaveform[np.int32, np.float64])
 
 
 def test___int_list_with_dtype___from_array_1d___creates_waveform_with_specified_dtype() -> None:
@@ -147,7 +147,7 @@ def test___int_list_with_dtype___from_array_1d___creates_waveform_with_specified
 
     assert waveform.raw_data.tolist() == data
     assert waveform.dtype == np.int32
-    assert_type(waveform, AnalogWaveform[np.int32])
+    assert_type(waveform, AnalogWaveform[np.int32, np.float64])
 
 
 def test___int_list_with_dtype_str___from_array_1d___creates_waveform_with_specified_dtype() -> (
@@ -159,7 +159,7 @@ def test___int_list_with_dtype_str___from_array_1d___creates_waveform_with_speci
 
     assert waveform.raw_data.tolist() == data
     assert waveform.dtype == np.int32
-    assert_type(waveform, AnalogWaveform[Any])  # dtype not inferred from string
+    assert_type(waveform, AnalogWaveform[Any, Any])  # dtype not inferred from string
 
 
 def test___int32_ndarray_2d___from_array_1d___raises_value_error() -> None:
@@ -330,7 +330,7 @@ def test___float64_ndarray___from_array_2d___creates_waveform_with_float64_dtype
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
         assert waveforms[i].dtype == np.float64
-        assert_type(waveforms[i], AnalogWaveform[np.float64])
+        assert_type(waveforms[i], AnalogWaveform[np.float64, np.float64])
 
 
 def test___int32_ndarray___from_array_2d___creates_waveform_with_int32_dtype() -> None:
@@ -342,7 +342,7 @@ def test___int32_ndarray___from_array_2d___creates_waveform_with_int32_dtype() -
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
         assert waveforms[i].dtype == np.int32
-        assert_type(waveforms[i], AnalogWaveform[np.int32])
+        assert_type(waveforms[i], AnalogWaveform[np.int32, np.float64])
 
 
 def test___int16_ndarray_with_mismatched_dtype___from_array_2d___creates_waveform_with_specified_dtype() -> (
@@ -356,7 +356,7 @@ def test___int16_ndarray_with_mismatched_dtype___from_array_2d___creates_wavefor
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
         assert waveforms[i].dtype == np.int32
-        assert_type(waveforms[i], AnalogWaveform[np.int32])
+        assert_type(waveforms[i], AnalogWaveform[np.int32, np.float64])
 
 
 def test___int32_array_list_with_dtype___from_array_2d___creates_waveform_with_specified_dtype() -> (
@@ -370,7 +370,7 @@ def test___int32_array_list_with_dtype___from_array_2d___creates_waveform_with_s
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
         assert waveforms[i].dtype == np.int32
-        assert_type(waveforms[i], AnalogWaveform[np.int32])
+        assert_type(waveforms[i], AnalogWaveform[np.int32, np.float64])
 
 
 def test___int_list_list_with_dtype___from_array_2d___creates_waveform_with_specified_dtype() -> (
@@ -384,7 +384,7 @@ def test___int_list_list_with_dtype___from_array_2d___creates_waveform_with_spec
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i]
         assert waveforms[i].dtype == np.int32
-        assert_type(waveforms[i], AnalogWaveform[np.int32])
+        assert_type(waveforms[i], AnalogWaveform[np.int32, np.float64])
 
 
 def test___int_list_list_with_dtype_str___from_array_2d___creates_waveform_with_specified_dtype() -> (
@@ -398,7 +398,7 @@ def test___int_list_list_with_dtype_str___from_array_2d___creates_waveform_with_
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i]
         assert waveforms[i].dtype == np.int32
-        assert_type(waveforms[i], AnalogWaveform[Any])  # dtype not inferred from string
+        assert_type(waveforms[i], AnalogWaveform[Any, Any])  # dtype not inferred from string
 
 
 def test___int32_ndarray_1d___from_array_2d___raises_value_error() -> None:
@@ -1294,7 +1294,7 @@ def test___regular_waveform_and_regular_waveform_with_different_scale_mode___app
 ###############################################################################
 def test___empty_waveform_list___append___no_effect() -> None:
     waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
-    other: list[AnalogWaveform[np.int32]] = []
+    other: list[AnalogWaveform[np.int32, np.float64]] = []
 
     waveform.append(other)
 
@@ -1651,7 +1651,7 @@ def test___irregular_waveform_and_int32_ndarray_with_wrong_sample_count___load_d
     ],
 )
 def test___same_value___equality___equal(
-    left: AnalogWaveform[Any], right: AnalogWaveform[Any]
+    left: AnalogWaveform[Any, Any], right: AnalogWaveform[Any, Any]
 ) -> None:
     assert left == right
     assert not (left != right)
@@ -1727,7 +1727,7 @@ def test___same_value___equality___equal(
     ],
 )
 def test___different_value___equality___not_equal(
-    left: AnalogWaveform[Any], right: AnalogWaveform[Any]
+    left: AnalogWaveform[Any, Any], right: AnalogWaveform[Any, Any]
 ) -> None:
     assert not (left == right)
     assert left != right
@@ -1806,7 +1806,9 @@ def test___different_value___equality___not_equal(
         ),
     ],
 )
-def test___various_values___repr___looks_ok(value: AnalogWaveform[Any], expected_repr: str) -> None:
+def test___various_values___repr___looks_ok(
+    value: AnalogWaveform[Any, Any], expected_repr: str
+) -> None:
     assert repr(value) == expected_repr
 
 
@@ -1832,13 +1834,13 @@ _VARIOUS_VALUES = [
 
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
-def test___various_values___copy___makes_shallow_copy(value: AnalogWaveform[Any]) -> None:
+def test___various_values___copy___makes_shallow_copy(value: AnalogWaveform[Any, Any]) -> None:
     new_value = copy.copy(value)
 
     _assert_shallow_copy(new_value, value)
 
 
-def _assert_shallow_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any]) -> None:
+def _assert_shallow_copy(value: AnalogWaveform[Any, Any], other: AnalogWaveform[Any, Any]) -> None:
     assert value == other
     assert value is not other
     # _data may be a view of the original array.
@@ -1849,13 +1851,13 @@ def _assert_shallow_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any])
 
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
-def test___various_values___deepcopy___makes_shallow_copy(value: AnalogWaveform[Any]) -> None:
+def test___various_values___deepcopy___makes_shallow_copy(value: AnalogWaveform[Any, Any]) -> None:
     new_value = copy.deepcopy(value)
 
     _assert_deep_copy(new_value, value)
 
 
-def _assert_deep_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any]) -> None:
+def _assert_deep_copy(value: AnalogWaveform[Any, Any], other: AnalogWaveform[Any, Any]) -> None:
     assert value == other
     assert value is not other
     assert value._data is not other._data and value._data.base is not other._data
@@ -1868,7 +1870,7 @@ def _assert_deep_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any]) ->
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___pickle_unpickle___makes_deep_copy(
-    value: AnalogWaveform[Any],
+    value: AnalogWaveform[Any, Any],
 ) -> None:
     new_value = pickle.loads(pickle.dumps(value))
 

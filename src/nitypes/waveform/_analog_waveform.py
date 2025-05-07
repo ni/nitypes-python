@@ -13,6 +13,7 @@ from typing_extensions import Self, TypeAlias
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
+from nitypes.complex import ComplexInt32Base, ComplexInt32DType
 from nitypes.waveform._exceptions import (
     input_array_data_type_mismatch,
     input_waveform_data_type_mismatch,
@@ -31,8 +32,14 @@ if sys.version_info < (3, 10):
     import array as std_array
 
 
-_ScalarType = TypeVar("_ScalarType", bound=np.generic)
-_ScalarType_co = TypeVar("_ScalarType_co", bound=np.generic, covariant=True)
+_TRaw = TypeVar("_TRaw", bound=np.generic)
+_TRaw_co = TypeVar("_TRaw_co", bound=np.generic, covariant=True)
+
+_TScaled = TypeVar("_TScaled", bound=np.generic)
+_TScaled_co = TypeVar("_TScaled_co", bound=np.generic, covariant=True)
+
+_TComplexRaw = TypeVar("_TComplexRaw", bound=np.complexfloating)
+_TComplexRaw_co = TypeVar("_TComplexRaw_co", bound=np.complexfloating, covariant=True)
 
 _AnyTiming: TypeAlias = Union[BaseTiming[Any, Any], Timing, PrecisionTiming]
 _TTiming = TypeVar("_TTiming", bound=BaseTiming[Any, Any])
@@ -76,13 +83,13 @@ _SCALED_DTYPES = (
 #   specified as a str.
 
 
-class AnalogWaveform(Generic[_ScalarType_co]):
+class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
     """An analog waveform, which encapsulates analog data and timing information."""
 
     @overload
     @staticmethod
     def from_array_1d(
-        array: npt.NDArray[_ScalarType],
+        array: npt.NDArray[_TComplexRaw],
         dtype: None = ...,
         *,
         copy: bool = ...,
@@ -91,13 +98,13 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> AnalogWaveform[_ScalarType]: ...
+    ) -> AnalogWaveform[_TComplexRaw, np.complex128]: ...
 
     @overload
     @staticmethod
     def from_array_1d(
-        array: npt.NDArray[Any] | Sequence[Any],
-        dtype: type[_ScalarType] | np.dtype[_ScalarType] = ...,
+        array: npt.NDArray[_TRaw],
+        dtype: None = ...,
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -105,7 +112,35 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> AnalogWaveform[_ScalarType]: ...
+    ) -> AnalogWaveform[_TRaw, np.float64]: ...
+
+    @overload
+    @staticmethod
+    def from_array_1d(
+        array: npt.NDArray[Any] | Sequence[Any],
+        dtype: type[_TComplexRaw] | np.dtype[_TComplexRaw] = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> AnalogWaveform[_TComplexRaw, np.complex128]: ...
+
+    @overload
+    @staticmethod
+    def from_array_1d(
+        array: npt.NDArray[Any] | Sequence[Any],
+        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> AnalogWaveform[_TRaw, np.float64]: ...
 
     @overload
     @staticmethod
@@ -119,7 +154,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> AnalogWaveform[Any]: ...
+    ) -> AnalogWaveform[Any, Any]: ...
 
     @staticmethod
     def from_array_1d(
@@ -132,7 +167,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
-    ) -> AnalogWaveform[_ScalarType]:
+    ) -> AnalogWaveform[Any, Any]:
         """Construct an analog waveform from a one-dimensional array or sequence.
 
         Args:
@@ -174,7 +209,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @overload
     @staticmethod
     def from_array_2d(
-        array: npt.NDArray[_ScalarType],
+        array: npt.NDArray[_TComplexRaw],
         dtype: None = ...,
         *,
         copy: bool = ...,
@@ -183,13 +218,13 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[AnalogWaveform[_ScalarType]]: ...
+    ) -> list[AnalogWaveform[_TComplexRaw, np.complex128]]: ...
 
     @overload
     @staticmethod
     def from_array_2d(
-        array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: type[_ScalarType] | np.dtype[_ScalarType] = ...,
+        array: npt.NDArray[_TRaw],
+        dtype: None = ...,
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -197,7 +232,35 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[AnalogWaveform[_ScalarType]]: ...
+    ) -> list[AnalogWaveform[_TRaw, np.float64]]: ...
+
+    @overload
+    @staticmethod
+    def from_array_2d(
+        array: npt.NDArray[Any] | Sequence[Sequence[Any]],
+        dtype: type[_TComplexRaw] | np.dtype[_TComplexRaw] = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> list[AnalogWaveform[_TComplexRaw, np.complex128]]: ...
+
+    @overload
+    @staticmethod
+    def from_array_2d(
+        array: npt.NDArray[Any] | Sequence[Sequence[Any]],
+        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> list[AnalogWaveform[_TRaw, np.float64]]: ...
 
     @overload
     @staticmethod
@@ -211,7 +274,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[AnalogWaveform[Any]]: ...
+    ) -> list[AnalogWaveform[Any, Any]]: ...
 
     @staticmethod
     def from_array_2d(
@@ -224,7 +287,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
-    ) -> list[AnalogWaveform[_ScalarType]]:
+    ) -> list[AnalogWaveform[Any, Any]]:
         """Construct a list of analog waveforms from a two-dimensional array or nested sequence.
 
         Args:
@@ -281,7 +344,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         "__weakref__",
     ]
 
-    _data: npt.NDArray[_ScalarType_co]
+    _data: npt.NDArray[_TRaw_co]
     _start_index: int
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
@@ -289,10 +352,10 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     _converted_timing_cache: dict[type[_AnyTiming], _AnyTiming]
     _scale_mode: ScaleMode
 
-    # If neither dtype nor _data is specified, the type parameter defaults to np.float64.
+    # If neither dtype nor raw_data is specified, the type parameters default to np.float64.
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: AnalogWaveform[np.float64],
+        self: AnalogWaveform[np.float64, np.float64],
         sample_count: SupportsIndex | None = ...,
         dtype: None = ...,
         *,
@@ -306,9 +369,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: AnalogWaveform[_ScalarType_co],
+        self: AnalogWaveform[_TComplexRaw_co, np.complex128],
         sample_count: SupportsIndex | None = ...,
-        dtype: type[_ScalarType_co] | np.dtype[_ScalarType_co] = ...,
+        dtype: type[_TComplexRaw_co] | np.dtype[_TComplexRaw_co] = ...,
         *,
         raw_data: None = ...,
         start_index: SupportsIndex | None = ...,
@@ -320,11 +383,11 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: AnalogWaveform[_ScalarType_co],
+        self: AnalogWaveform[_TComplexRaw_co, np.complex128],
         sample_count: SupportsIndex | None = ...,
         dtype: None = ...,
         *,
-        raw_data: npt.NDArray[_ScalarType_co] | None = ...,
+        raw_data: npt.NDArray[_TComplexRaw_co] = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
@@ -334,7 +397,35 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: AnalogWaveform[Any],
+        self: AnalogWaveform[_TRaw_co, np.float64],
+        sample_count: SupportsIndex | None = ...,
+        dtype: type[_TRaw_co] | np.dtype[_TRaw_co] = ...,
+        *,
+        raw_data: None = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[_TRaw_co, np.float64],
+        sample_count: SupportsIndex | None = ...,
+        dtype: None = ...,
+        *,
+        raw_data: npt.NDArray[_TRaw_co] = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[Any, Any],
         sample_count: SupportsIndex | None = ...,
         dtype: npt.DTypeLike = ...,
         *,
@@ -351,7 +442,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         sample_count: SupportsIndex | None = None,
         dtype: npt.DTypeLike = None,
         *,
-        raw_data: npt.NDArray[_ScalarType_co] | None = None,
+        raw_data: npt.NDArray[Any] | None = None,
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
@@ -447,7 +538,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     def _init_with_provided_array(
         self,
-        data: npt.NDArray[_ScalarType_co],
+        data: npt.NDArray[_TRaw_co],
         dtype: npt.DTypeLike = None,
         *,
         start_index: SupportsIndex | None = None,
@@ -499,13 +590,13 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._sample_count = sample_count
 
     @property
-    def raw_data(self) -> npt.NDArray[_ScalarType_co]:
+    def raw_data(self) -> npt.NDArray[_TRaw_co]:
         """The raw analog waveform data."""
         return self._data[self._start_index : self._start_index + self._sample_count]
 
     def get_raw_data(
         self, start_index: SupportsIndex | None = 0, sample_count: SupportsIndex | None = None
-    ) -> npt.NDArray[_ScalarType_co]:
+    ) -> npt.NDArray[_TRaw_co]:
         """Get a subset of the raw analog waveform data.
 
         Args:
@@ -556,11 +647,11 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     @overload
     def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self,
-        dtype: type[_ScalarType] | np.dtype[_ScalarType] = ...,
+        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-    ) -> npt.NDArray[_ScalarType]: ...
+    ) -> npt.NDArray[_TRaw]: ...
 
     @overload
     def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
@@ -626,7 +717,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
             self._data.resize(value, refcheck=False)
 
     @property
-    def dtype(self) -> np.dtype[_ScalarType_co]:
+    def dtype(self) -> np.dtype[_TRaw_co]:
         """The NumPy dtype for the analog waveform data."""
         return self._data.dtype
 
@@ -742,9 +833,9 @@ class AnalogWaveform(Generic[_ScalarType_co]):
     def append(
         self,
         other: (
-            npt.NDArray[_ScalarType_co]
-            | AnalogWaveform[_ScalarType_co]
-            | Sequence[AnalogWaveform[_ScalarType_co]]
+            npt.NDArray[_TRaw_co]
+            | AnalogWaveform[_TRaw_co, _TScaled_co]
+            | Sequence[AnalogWaveform[_TRaw_co, _TScaled_co]]
         ),
         /,
         timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
@@ -800,7 +891,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     def _append_array(
         self,
-        array: npt.NDArray[_ScalarType_co],
+        array: npt.NDArray[_TRaw_co],
         timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
     ) -> None:
         if array.dtype != self.dtype:
@@ -823,10 +914,10 @@ class AnalogWaveform(Generic[_ScalarType_co]):
         self._data[offset : offset + len(array)] = array
         self._sample_count += len(array)
 
-    def _append_waveform(self, waveform: AnalogWaveform[_ScalarType_co]) -> None:
+    def _append_waveform(self, waveform: AnalogWaveform[_TRaw_co, _TScaled_co]) -> None:
         self._append_waveforms([waveform])
 
-    def _append_waveforms(self, waveforms: Sequence[AnalogWaveform[_ScalarType_co]]) -> None:
+    def _append_waveforms(self, waveforms: Sequence[AnalogWaveform[_TRaw_co, _TScaled_co]]) -> None:
         for waveform in waveforms:
             if waveform.dtype != self.dtype:
                 raise input_waveform_data_type_mismatch(waveform.dtype, self.dtype)
@@ -854,7 +945,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     def load_data(
         self,
-        array: npt.NDArray[_ScalarType_co],
+        array: npt.NDArray[_TRaw_co],
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
@@ -875,7 +966,7 @@ class AnalogWaveform(Generic[_ScalarType_co]):
 
     def _load_array(
         self,
-        array: npt.NDArray[_ScalarType_co],
+        array: npt.NDArray[_TRaw_co],
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
