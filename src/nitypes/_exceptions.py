@@ -3,6 +3,9 @@ from __future__ import annotations
 import reprlib
 import sys
 
+import numpy as np
+import numpy.typing as npt
+
 
 def add_note(exception: Exception, note: str) -> None:
     """Add a note to an exception.
@@ -63,6 +66,20 @@ def unsupported_arg(arg_description: str, value: object) -> ValueError:
     return ValueError(
         f"The {arg_description} argument is not supported.\n\n"
         f"Provided value: {reprlib.repr(value)}"
+    )
+
+
+def unsupported_dtype(
+    arg_description: str, dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]
+) -> TypeError:
+    """Create a TypeError for an unsupported dtype."""
+    # Remove duplicate names because distinct types (e.g. int vs. long) may have the same name
+    # ("int32").
+    supported_dtype_names = {np.dtype(d).name: None for d in supported_dtypes}.keys()
+    return TypeError(
+        f"The {arg_description} is not supported.\n\n"
+        f"Data type: {np.dtype(dtype)}\n"
+        f"Supported data types: {', '.join(supported_dtype_names)}"
     )
 
 

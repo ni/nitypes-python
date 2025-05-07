@@ -6,7 +6,12 @@ from typing import SupportsFloat, SupportsIndex
 import numpy as np
 import numpy.typing as npt
 
-from nitypes._exceptions import invalid_arg_type, invalid_arg_value, unsupported_arg
+from nitypes._exceptions import (
+    invalid_arg_type,
+    invalid_arg_value,
+    unsupported_arg,
+    unsupported_dtype,
+)
 
 
 def arg_to_float(
@@ -144,14 +149,7 @@ def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, 
     if not isinstance(dtype, (type, np.dtype)):
         dtype = np.dtype(dtype)
     if not np.isdtype(dtype, supported_dtypes):
-        # Remove duplicate names because distinct types (e.g. int vs. long) may have the same name
-        # ("int32").
-        supported_dtype_names = {np.dtype(d).name: None for d in supported_dtypes}.keys()
-        raise TypeError(
-            "The requested data type is not supported.\n\n"
-            f"Data type: {np.dtype(dtype)}\n"
-            f"Supported data types: {', '.join(supported_dtype_names)}"
-        )
+        raise unsupported_dtype("requested data type", dtype, supported_dtypes)
 
 
 def validate_unsupported_arg(arg_description: str, value: object) -> None:
