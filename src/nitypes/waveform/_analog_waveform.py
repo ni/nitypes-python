@@ -4,12 +4,12 @@ import datetime as dt
 import sys
 import warnings
 from collections.abc import Mapping, Sequence
-from typing import Any, Generic, SupportsIndex, TypeVar, Union, cast, overload
+from typing import Any, Generic, SupportsIndex, Union, cast, overload
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self, TypeAlias
+from typing_extensions import Self, TypeAlias, TypeVar
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
@@ -35,11 +35,13 @@ if sys.version_info < (3, 10):
 _TRaw = TypeVar("_TRaw", bound=np.generic)
 _TRaw_co = TypeVar("_TRaw_co", bound=np.generic, covariant=True)
 
-_TScaled = TypeVar("_TScaled", bound=np.generic)
-_TScaled_co = TypeVar("_TScaled_co", bound=np.generic, covariant=True)
+# default requires Python 3.13+ or typing_extensions.
+_TScaled = TypeVar("_TScaled", bound=np.generic, default=np.float64)
+_TScaled_co = TypeVar("_TScaled_co", bound=np.generic, default=np.float64, covariant=True)
 
 # Note: ComplexInt32Base is currently an alias for np.void, so this currently matches any NumPy
-# structured data type based on np.void.
+# structured data type based on np.void. However, constructing with a different structured data
+# type will fail at run time.
 _TComplexRaw = TypeVar("_TComplexRaw", bound=Union[np.complexfloating, ComplexInt32Base])
 _TComplexRaw_co = TypeVar(
     "_TComplexRaw_co", bound=Union[np.complexfloating, ComplexInt32Base], covariant=True

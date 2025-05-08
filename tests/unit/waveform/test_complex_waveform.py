@@ -8,7 +8,7 @@ import pytest
 from typing_extensions import assert_type
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType
-from nitypes.waveform import AnalogWaveform, LinearScaleMode
+from nitypes.waveform import AnalogWaveform, ComplexWaveform, LinearScaleMode
 
 
 ###############################################################################
@@ -21,7 +21,7 @@ def test___sample_count_and_complexint32_dtype___create___creates_waveform_with_
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == ComplexInt32DType
-    assert_type(waveform, AnalogWaveform[ComplexInt32Base, np.complex128])
+    assert_type(waveform, ComplexWaveform[ComplexInt32Base])
 
 
 def test___sample_count_and_complex64_dtype___create___creates_waveform_with_sample_count_and_dtype() -> (
@@ -31,7 +31,7 @@ def test___sample_count_and_complex64_dtype___create___creates_waveform_with_sam
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.complex64
-    assert_type(waveform, AnalogWaveform[np.complex64, np.complex128])
+    assert_type(waveform, ComplexWaveform[np.complex64])
 
 
 def test___sample_count_and_complex128_dtype___create___creates_waveform_with_sample_count_and_dtype() -> (
@@ -41,7 +41,7 @@ def test___sample_count_and_complex128_dtype___create___creates_waveform_with_sa
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.complex128
-    assert_type(waveform, AnalogWaveform[np.complex128, np.complex128])
+    assert_type(waveform, ComplexWaveform[np.complex128])
 
 
 ###############################################################################
@@ -56,7 +56,7 @@ def test___complexint32_ndarray___from_array_1d___creates_waveform_with_complexi
 
     assert waveform.raw_data.tolist() == data.tolist()
     assert waveform.dtype == ComplexInt32DType
-    assert_type(waveform, AnalogWaveform[ComplexInt32Base, np.complex128])
+    assert_type(waveform, ComplexWaveform[ComplexInt32Base])
 
 
 def test___complex64_ndarray___from_array_1d___creates_waveform_with_complex64_dtype() -> None:
@@ -66,7 +66,7 @@ def test___complex64_ndarray___from_array_1d___creates_waveform_with_complex64_d
 
     assert waveform.raw_data.tolist() == data.tolist()
     assert waveform.dtype == np.complex64
-    assert_type(waveform, AnalogWaveform[np.complex64, np.complex128])
+    assert_type(waveform, ComplexWaveform[np.complex64])
 
 
 def test___complex128_ndarray___from_array_1d___creates_waveform_with_complex128_dtype() -> None:
@@ -76,7 +76,7 @@ def test___complex128_ndarray___from_array_1d___creates_waveform_with_complex128
 
     assert waveform.raw_data.tolist() == data.tolist()
     assert waveform.dtype == np.complex128
-    assert_type(waveform, AnalogWaveform[np.complex128, np.complex128])
+    assert_type(waveform, ComplexWaveform[np.complex128])
 
 
 def test___complex_list_with_dtype___from_array_1d___creates_waveform_with_specified_dtype() -> (
@@ -88,7 +88,7 @@ def test___complex_list_with_dtype___from_array_1d___creates_waveform_with_speci
 
     assert waveform.raw_data.tolist() == pytest.approx(data)
     assert waveform.dtype == np.complex64
-    assert_type(waveform, AnalogWaveform[np.complex64, np.complex128])
+    assert_type(waveform, ComplexWaveform[np.complex64])
 
 
 def test___complex_list_with_dtype_str___from_array_1d___creates_waveform_with_specified_dtype() -> (
@@ -117,7 +117,7 @@ def test___complexint32_ndarray___from_array_2d___creates_waveform_with_complexi
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
         assert waveforms[i].dtype == ComplexInt32DType
-        assert_type(waveforms[i], AnalogWaveform[ComplexInt32Base, np.complex128])
+        assert_type(waveforms[i], ComplexWaveform[ComplexInt32Base])
 
 
 def test___complex64_ndarray___from_array_2d___creates_waveform_with_complex64_dtype() -> None:
@@ -129,7 +129,7 @@ def test___complex64_ndarray___from_array_2d___creates_waveform_with_complex64_d
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
         assert waveforms[i].dtype == np.complex64
-        assert_type(waveforms[i], AnalogWaveform[np.complex64, np.complex128])
+        assert_type(waveforms[i], ComplexWaveform[np.complex64])
 
 
 def test___complex128_ndarray___from_array_2d___creates_waveform_with_complex128_dtype() -> None:
@@ -141,7 +141,7 @@ def test___complex128_ndarray___from_array_2d___creates_waveform_with_complex128
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
         assert waveforms[i].dtype == np.complex128
-        assert_type(waveforms[i], AnalogWaveform[np.complex128, np.complex128])
+        assert_type(waveforms[i], ComplexWaveform[np.complex128])
 
 
 def test___complex_list_list_with_dtype___from_array_2d___creates_waveform_with_specified_dtype() -> (
@@ -155,7 +155,7 @@ def test___complex_list_list_with_dtype___from_array_2d___creates_waveform_with_
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i]
         assert waveforms[i].dtype == np.complex64
-        assert_type(waveforms[i], AnalogWaveform[np.complex64, np.complex128])
+        assert_type(waveforms[i], ComplexWaveform[np.complex64])
 
 
 def test___int_list_list_with_dtype_str___from_array_2d___creates_waveform_with_specified_dtype() -> (
