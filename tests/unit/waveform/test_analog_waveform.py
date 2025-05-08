@@ -787,6 +787,7 @@ def test___unsupported_dtype___get_scaled_data___raises_type_error() -> None:
         _ = waveform.get_scaled_data(np.int32)
 
     assert exc.value.args[0].startswith("The requested data type is not supported.")
+    assert "Data type: int32" in exc.value.args[0]
     assert "Supported data types: float32, float64" in exc.value.args[0]
 
 

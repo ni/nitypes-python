@@ -222,7 +222,7 @@ def test___complexint32_waveform___scaled_data___converts_to_complex128() -> Non
     assert list(scaled_data) == [1 + 2j, 3 - 4j]
 
 
-def test___complex64_waveform___raw_data___converts_to_complex128() -> None:
+def test___complex64_waveform___scaled_data___converts_to_complex128() -> None:
     waveform = AnalogWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
 
     scaled_data = waveform.scaled_data
@@ -243,7 +243,7 @@ def test___complexint32_waveform_with_linear_scale___scaled_data___converts_to_c
     assert list(scaled_data) == [2.5 + 4j, 6.5 - 8j]
 
 
-def test___complex64_waveform_with_linear_scale___raw_data___converts_to_complex128() -> None:
+def test___complex64_waveform_with_linear_scale___scaled_data___converts_to_complex128() -> None:
     waveform = AnalogWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
     waveform.scale_mode = LinearScaleMode(2.0, 0.5)
 
@@ -252,3 +252,42 @@ def test___complex64_waveform_with_linear_scale___raw_data___converts_to_complex
     assert_type(scaled_data, npt.NDArray[np.complex128])
     assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.complex128
     assert list(scaled_data) == [2.5 + 4j, 6.5 - 8j]
+
+
+###############################################################################
+# get_scaled_data
+###############################################################################
+def test___complexint32_waveform_with_complex64_dtype___get_scaled_data___converts_to_complex64() -> (
+    None
+):
+    waveform = AnalogWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
+
+    scaled_data = waveform.get_scaled_data(np.complex64)
+
+    assert_type(scaled_data, npt.NDArray[np.complex64])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.complex64
+    assert list(scaled_data) == [1 + 2j, 3 - 4j]
+
+
+def test___complex64_waveform_with_complex64_dtype___get_scaled_data___does_not_convert() -> None:
+    waveform = AnalogWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
+
+    scaled_data = waveform.get_scaled_data(np.complex64)
+
+    assert_type(scaled_data, npt.NDArray[np.complex64])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.complex64
+    assert list(scaled_data) == [1 + 2j, 3 - 4j]
+
+
+def test___complexint32_waveform_with_unknown_structured_dtype___get_scaled_data___raises_type_error() -> (
+    None
+):
+    waveform = AnalogWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
+    dtype = np.dtype([("a", np.int16), ("b", np.int16)])
+
+    with pytest.raises(TypeError) as exc:
+        _ = waveform.get_scaled_data(dtype)
+
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
+    assert "Data type: [('a', '<i2'), ('b', '<i2')]" in exc.value.args[0]
+    assert "Supported data types: complex64, complex128" in exc.value.args[0]

@@ -57,3 +57,9 @@ def test___unknown_structured_dtype___equality___not_equal() -> None:
     dtype = np.dtype([("a", np.int16), ("b", np.int16)])
 
     assert dtype != ComplexInt32DType
+
+
+def test___duplicate_structured_dtype___equality___equal() -> None:
+    dtype = np.dtype([("real", np.int16), ("imag", np.int16)])
+
+    assert dtype == ComplexInt32DType
