@@ -137,12 +137,32 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
     """Check a dtype-like object against a tuple of supported dtype-like objects.
 
     Unlike :any:`numpy.isdtype`, this function supports structured data types.
+
+    >>> is_dtype(np.float64, (np.float64, np.intc, np.long,))
+    True
+    >>> is_dtype("float64", (np.float64, np.intc, np.long,))
+    True
+    >>> is_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.long, np.longlong))
+    False
+    >>> a_type = np.dtype([('a', np.int32)])
+    >>> b_type = np.dtype([('b', np.int32)])
+    >>> is_dtype(a_type, (np.float64, np.intc, a_type,))
+    True
+    >>> is_dtype(b_type, (np.float64, np.intc, a_type,))
+    False
+    >>> is_dtype("i2, i2", (np.float64, np.intc, a_type,))
+    False
+    >>> is_dtype("i4", (np.float64, np.intc, a_type,))
+    False
+    >>> is_dtype("i4", (np.float64, np.intc, a_type, np.dtype("i4"),))
+    True
     """
+    if not isinstance(dtype, (type, np.dtype)):
+        dtype = np.dtype(dtype)
+
     if isinstance(dtype, np.dtype) and dtype.fields:
         return dtype in supported_dtypes
 
-    if not isinstance(dtype, (type, np.dtype)):
-        dtype = np.dtype(dtype)
     return np.isdtype(dtype, supported_dtypes)
 
 
