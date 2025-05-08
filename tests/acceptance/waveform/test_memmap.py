@@ -31,7 +31,6 @@ def test___memmap_array_2d___create_waveforms_from_array___waveforms_contains_me
     memmap_array = np.memmap(memmap_path, np.float64, shape=(2, 3))
 
     waveforms = AnalogWaveform.from_array_2d(memmap_array, copy=copy)
-    assert memmap_array.shape == (2, 3)
 
     assert len(waveforms) == 2
     assert list(waveforms[0].raw_data) == [1.23, -4.56, 7e89]
