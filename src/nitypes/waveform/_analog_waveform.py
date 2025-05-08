@@ -11,7 +11,12 @@ import numpy as np
 import numpy.typing as npt
 from typing_extensions import Self, TypeAlias, TypeVar
 
-from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
+from nitypes._arguments import (
+    arg_to_uint,
+    is_dtype,
+    validate_dtype,
+    validate_unsupported_arg,
+)
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType, convert_complex
 from nitypes.waveform._exceptions import (
@@ -707,7 +712,7 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
         Returns:
             A subset of the scaled analog waveform data.
         """
-        if np.isdtype(self.dtype, _COMPLEX_RAW_DTYPES):
+        if is_dtype(self.dtype, _COMPLEX_RAW_DTYPES):
             if dtype is None:
                 dtype = np.complex128
             validate_dtype(dtype, _COMPLEX_SCALED_DTYPES)

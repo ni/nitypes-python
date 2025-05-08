@@ -133,6 +133,19 @@ def arg_to_uint(
     return value
 
 
+def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) -> bool:
+    """Check a dtype-like object against a tuple of supported dtype-like objects.
+
+    Unlike :any:`numpy.isdtype`, this function supports structured data types.
+    """
+    if isinstance(dtype, np.dtype) and dtype.fields:
+        return dtype in supported_dtypes
+
+    if not isinstance(dtype, (type, np.dtype)):
+        dtype = np.dtype(dtype)
+    return np.isdtype(dtype, supported_dtypes)
+
+
 def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) -> None:
     """Validate a dtype-like object against a tuple of supported dtype-like objects.
 
@@ -156,15 +169,9 @@ def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, 
     Data type: [('b', '<i4')]
     Supported data types: float64, int32, void32
     """
-    if not isinstance(dtype, (type, np.dtype)):
-        dtype = np.dtype(dtype)
-    # As of NumPy 2.2, np.isdtype only supports NumPy's built-in data types. If the dtype has
-    # fields, it is a structured data type and must be validated without using np.isdtype.
-    if isinstance(dtype, np.dtype) and dtype.fields:
-        valid = dtype in supported_dtypes
-    else:
-        valid = np.isdtype(dtype, supported_dtypes)
-    if not valid:
+    if not is_dtype(dtype, supported_dtypes):
+        if not isinstance(dtype, (type, np.dtype)):
+            dtype = np.dtype(dtype)
         raise unsupported_dtype("requested data type", dtype, supported_dtypes)
 
 
