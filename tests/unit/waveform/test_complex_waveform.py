@@ -58,6 +58,25 @@ def test___sample_count_and_unknown_structured_dtype___create___raises_type_erro
     assert "Data type: [('a', '<i2'), ('b', '<i4')]" in exc.value.args[0]
 
 
+def test___sample_count_and_structured_dtype_str___create___raises_type_error() -> None:
+    with pytest.raises(TypeError) as exc:
+        _ = AnalogWaveform(10, "i2, i2")
+
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
+    assert "Data type: [('f0', '<i2'), ('f1', '<i2')]" in exc.value.args[0]
+
+
+def test___dtype_str_with_traw_hint___create___narrows_traw_and_tscaled() -> None:
+    waveform: ComplexWaveform[np.complex64] = AnalogWaveform(dtype="complex64")
+
+    assert_type(waveform, AnalogWaveform[np.complex64, np.complex128])
+
+
+def test___dtype_str_with_unsupported_tscaled_hint___create___mypy_returns_error() -> None:
+    waveform: AnalogWaveform[np.complex64, np.complex64] = AnalogWaveform(dtype="complex64")  # type: ignore[type-var]
+    _ = waveform
+
+
 ###############################################################################
 # from_array_1d
 ###############################################################################

@@ -36,21 +36,31 @@ from nitypes.waveform._warnings import scale_mode_mismatch
 if sys.version_info < (3, 10):
     import array as std_array
 
-
+# _TRaw and _TRaw_co specify the type of the raw_data array. They are not limited to supported
+# types. Requesting an unsupported type raises TypeError at run time.
 _TRaw = TypeVar("_TRaw", bound=np.generic)
 _TRaw_co = TypeVar("_TRaw_co", bound=np.generic, covariant=True)
 
-# default requires Python 3.13+ or typing_extensions.
-_TScaled = TypeVar("_TScaled", bound=np.generic, default=np.float64)
-_TScaled_co = TypeVar("_TScaled_co", bound=np.generic, default=np.float64, covariant=True)
-
-# Note: ComplexInt32Base is currently an alias for np.void, so this currently matches any NumPy
-# structured data type based on np.void. However, constructing with a different structured data
-# type will fail at run time.
-_TComplexRaw = TypeVar("_TComplexRaw", bound=Union[np.complexfloating, ComplexInt32Base])
-_TComplexRaw_co = TypeVar(
-    "_TComplexRaw_co", bound=Union[np.complexfloating, ComplexInt32Base], covariant=True
+# _TScaled_co specifies the type of the scaled_data property, which is a double precision
+# floating-point number or complex number. This type variable has a default so that clients can
+# omit it and write type hints like AnalogWaveform[np.int32]. Default requires Python 3.13+ or
+# typing_extensions.
+_TScaled_co = TypeVar(
+    "_TScaled_co", bound=Union[np.float64, np.complex128], default=np.float64, covariant=True
 )
+
+# _TOtherScaled is for the get_scaled_data() method, which supports both single and
+# double precision.
+_TOtherScaled = TypeVar(
+    "_TOtherScaled", bound=Union[np.float32, np.float64, np.complex64, np.complex128]
+)
+
+# _TComplexRaw is for constructor overloads that only match complex numbers. These overloads enable
+# the type checker to infer that _TScaled_co should also be a complex type.
+#
+# Note: ComplexInt32Base is currently an alias for np.void, so this type variables matches any NumPy
+# structured data type that is based on np.void. Mismatches raise TypeError at run time.
+_TComplexRaw = TypeVar("_TComplexRaw", bound=Union[np.complex64, np.complex128, ComplexInt32Base])
 
 _AnyTiming: TypeAlias = Union[BaseTiming[Any, Any], Timing, PrecisionTiming]
 _TTiming = TypeVar("_TTiming", bound=BaseTiming[Any, Any])
@@ -402,9 +412,9 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: AnalogWaveform[_TComplexRaw_co, np.complex128],
+        self: AnalogWaveform[_TComplexRaw, np.complex128],
         sample_count: SupportsIndex | None = ...,
-        dtype: type[_TComplexRaw_co] | np.dtype[_TComplexRaw_co] = ...,
+        dtype: type[_TComplexRaw] | np.dtype[_TComplexRaw] = ...,
         *,
         raw_data: None = ...,
         start_index: SupportsIndex | None = ...,
@@ -416,23 +426,9 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: AnalogWaveform[_TComplexRaw_co, np.complex128],
+        self: AnalogWaveform[_TRaw, np.float64],
         sample_count: SupportsIndex | None = ...,
-        dtype: None = ...,
-        *,
-        raw_data: npt.NDArray[_TComplexRaw_co] = ...,
-        start_index: SupportsIndex | None = ...,
-        capacity: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing | PrecisionTiming | None = ...,
-        scale_mode: ScaleMode | None = ...,
-    ) -> None: ...
-
-    @overload
-    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: AnalogWaveform[_TRaw_co, np.float64],
-        sample_count: SupportsIndex | None = ...,
-        dtype: type[_TRaw_co] | np.dtype[_TRaw_co] = ...,
+        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
         *,
         raw_data: None = ...,
         start_index: SupportsIndex | None = ...,
@@ -444,11 +440,25 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: AnalogWaveform[_TRaw_co, np.float64],
+        self: AnalogWaveform[_TComplexRaw, np.complex128],
         sample_count: SupportsIndex | None = ...,
         dtype: None = ...,
         *,
-        raw_data: npt.NDArray[_TRaw_co] = ...,
+        raw_data: npt.NDArray[_TComplexRaw] = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[_TRaw, np.float64],
+        sample_count: SupportsIndex | None = ...,
+        dtype: None = ...,
+        *,
+        raw_data: npt.NDArray[_TRaw] = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
@@ -680,11 +690,11 @@ class AnalogWaveform(Generic[_TRaw_co, _TScaled_co]):
     @overload
     def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self,
-        dtype: type[_TScaled] | np.dtype[_TScaled] = ...,
+        dtype: type[_TOtherScaled] | np.dtype[_TOtherScaled] = ...,
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-    ) -> npt.NDArray[_TScaled]: ...
+    ) -> npt.NDArray[_TOtherScaled]: ...
 
     @overload
     def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)

@@ -95,6 +95,17 @@ def test___sample_count_and_unsupported_dtype___create___raises_type_error() -> 
     assert exc.value.args[0].startswith("The requested data type is not supported.")
 
 
+def test___dtype_str_with_traw_hint___create___narrows_traw_and_tscaled() -> None:
+    waveform: AnalogWaveform[np.int32] = AnalogWaveform(dtype="int32")
+
+    assert_type(waveform, AnalogWaveform[np.int32, np.float64])
+
+
+def test___dtype_str_with_unsupported_tscaled_hint___create___mypy_returns_error() -> None:
+    waveform: AnalogWaveform[np.int32, np.float32] = AnalogWaveform(dtype="int32")  # type: ignore[type-var]
+    _ = waveform
+
+
 ###############################################################################
 # from_array_1d
 ###############################################################################

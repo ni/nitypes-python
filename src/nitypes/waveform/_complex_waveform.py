@@ -3,9 +3,9 @@ from __future__ import annotations
 import numpy as np
 from typing_extensions import TypeAlias
 
-from nitypes.waveform._analog_waveform import AnalogWaveform, _TComplexRaw_co
+from nitypes.waveform._analog_waveform import AnalogWaveform, _TComplexRaw
 
-ComplexWaveform: TypeAlias = AnalogWaveform[_TComplexRaw_co, np.complex128]
+ComplexWaveform: TypeAlias = AnalogWaveform[_TComplexRaw, np.complex128]
 """An analog waveform containing complex-number data.
 
 .. note::
