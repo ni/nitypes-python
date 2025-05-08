@@ -157,7 +157,7 @@ def test___int_list_with_dtype_str___from_array_1d___creates_waveform_with_speci
 
     waveform = AnalogWaveform.from_array_1d(data, "int32")
 
-    assert waveform.raw_data.tolist() == data  # type: ignore[comparison-overlap]
+    assert waveform.raw_data.tolist() == data
     assert waveform.dtype == np.int32
     assert_type(waveform, AnalogWaveform[Any])  # dtype not inferred from string
 
@@ -396,7 +396,7 @@ def test___int_list_list_with_dtype_str___from_array_2d___creates_waveform_with_
 
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
-        assert waveforms[i].raw_data.tolist() == data[i]  # type: ignore[comparison-overlap]
+        assert waveforms[i].raw_data.tolist() == data[i]
         assert waveforms[i].dtype == np.int32
         assert_type(waveforms[i], AnalogWaveform[Any])  # dtype not inferred from string
 
