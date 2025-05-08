@@ -44,6 +44,20 @@ def test___sample_count_and_complex128_dtype___create___creates_waveform_with_sa
     assert_type(waveform, ComplexWaveform[np.complex128])
 
 
+def test___sample_count_and_unknown_structured_dtype___create___raises_type_error() -> None:
+    dtype = np.dtype([("a", np.int16), ("b", np.int32)])
+
+    with pytest.raises(TypeError) as exc:
+        waveform = AnalogWaveform(10, dtype)
+
+        # AnalogWaveform currently cannot distinguish between ComplexInt32DType and other structured
+        # data types at type-checking time.
+        assert_type(waveform, ComplexWaveform[ComplexInt32Base])
+
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
+    assert "Data type: [('a', '<i2'), ('b', '<i4')]" in exc.value.args[0]
+
+
 ###############################################################################
 # from_array_1d
 ###############################################################################

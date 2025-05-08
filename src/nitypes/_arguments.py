@@ -145,10 +145,26 @@ def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, 
     <BLANKLINE>
     Data type: float64
     Supported data types: int8, int16, int32, int64
+    >>> a_type = np.dtype([('a', np.int32)])
+    >>> b_type = np.dtype([('b', np.int32)])
+    >>> validate_dtype(a_type, (np.float64, np.intc, a_type,))
+    >>> validate_dtype(b_type, (np.float64, np.intc, a_type,))
+    Traceback (most recent call last):
+    ...
+    TypeError: The requested data type is not supported.
+    <BLANKLINE>
+    Data type: [('b', '<i4')]
+    Supported data types: float64, int32, void32
     """
     if not isinstance(dtype, (type, np.dtype)):
         dtype = np.dtype(dtype)
-    if not np.isdtype(dtype, supported_dtypes):
+    # As of NumPy 2.2, np.isdtype only supports NumPy's built-in data types. If the dtype has
+    # fields, it is a structured data type and must be validated without using np.isdtype.
+    if isinstance(dtype, np.dtype) and dtype.fields:
+        valid = dtype in supported_dtypes
+    else:
+        valid = np.isdtype(dtype, supported_dtypes)
+    if not valid:
         raise unsupported_dtype("requested data type", dtype, supported_dtypes)
 
 

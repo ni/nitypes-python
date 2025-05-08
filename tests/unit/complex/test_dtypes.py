@@ -51,3 +51,9 @@ def test___complexint32_array_and_int16_array___add___raises_type_error() -> Non
 
     with pytest.raises(TypeError):
         _ = left + right  # type: ignore[operator]
+
+
+def test___unknown_structured_dtype___equality___not_equal() -> None:
+    dtype = np.dtype([("a", np.int16), ("b", np.int16)])
+
+    assert dtype != ComplexInt32DType
