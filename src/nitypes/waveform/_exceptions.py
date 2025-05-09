@@ -16,6 +16,17 @@ def input_array_data_type_mismatch(input_dtype: object, waveform_dtype: object) 
     )
 
 
+def input_array_spectrum_data_type_mismatch(
+    input_dtype: object, spectrum_dtype: object
+) -> TypeError:
+    """Create a TypeError for an input array data type mismatch."""
+    return TypeError(
+        "The data type of the input array must match the spectrum data type.\n\n"
+        f"Input array data type: {input_dtype}\n"
+        f"Spectrum data type: {spectrum_dtype}"
+    )
+
+
 def input_spectrum_data_type_mismatch(input_dtype: object, spectrum_dtype: object) -> TypeError:
     """Create a TypeError for an input spectrum data type mismatch."""
     return TypeError(

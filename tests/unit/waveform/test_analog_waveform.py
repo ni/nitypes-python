@@ -1903,7 +1903,8 @@ def test___waveform___pickle___references_public_modules() -> None:
     value_bytes = pickle.dumps(value)
 
     assert b"nitypes.waveform" in value_bytes
-    assert b"nitypes.waveform._analog_waveform" not in value_bytes
+    assert b"nitypes.waveform._analog" not in value_bytes
     assert b"nitypes.waveform._extended_properties" not in value_bytes
+    assert b"nitypes.waveform._numeric" not in value_bytes
     assert b"nitypes.waveform._timing" not in value_bytes
     assert b"nitypes.waveform._scaling" not in value_bytes

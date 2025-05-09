@@ -11,7 +11,7 @@ from typing_extensions import Self, TypeVar
 from nitypes._arguments import arg_to_float, arg_to_uint, validate_dtype
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes.waveform._exceptions import (
-    input_array_data_type_mismatch,
+    input_array_spectrum_data_type_mismatch,
     input_spectrum_data_type_mismatch,
 )
 from nitypes.waveform._extended_properties import (
@@ -169,7 +169,7 @@ class Spectrum(Generic[_TData_co]):
     @classmethod
     def from_array_2d(
         cls,
-        array: npt.NDArray[Any] | Sequence[Any],
+        array: npt.NDArray[Any] | Sequence[Sequence[Any]],
         dtype: type[_TData] | np.dtype[_TData] = ...,
         *,
         copy: bool = ...,
@@ -184,7 +184,7 @@ class Spectrum(Generic[_TData_co]):
     @classmethod
     def from_array_2d(
         cls,
-        array: npt.NDArray[Any] | Sequence[Any],
+        array: npt.NDArray[Any] | Sequence[Sequence[Any]],
         dtype: npt.DTypeLike = ...,
         *,
         copy: bool = ...,
@@ -633,7 +633,7 @@ class Spectrum(Generic[_TData_co]):
         array: npt.NDArray[_TData_co],
     ) -> None:
         if array.dtype != self.dtype:
-            raise input_array_data_type_mismatch(array.dtype, self.dtype)
+            raise input_array_spectrum_data_type_mismatch(array.dtype, self.dtype)
         if array.ndim != 1:
             raise invalid_array_ndim("input array", "one-dimensional array", array.ndim)
 
@@ -695,7 +695,7 @@ class Spectrum(Generic[_TData_co]):
         sample_count: SupportsIndex | None = None,
     ) -> None:
         if array.dtype != self.dtype:
-            raise input_array_data_type_mismatch(array.dtype, self.dtype)
+            raise input_array_spectrum_data_type_mismatch(array.dtype, self.dtype)
         if array.ndim != 1:
             raise invalid_array_ndim("input array", "one-dimensional array", array.ndim)
 
