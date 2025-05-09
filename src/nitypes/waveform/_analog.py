@@ -265,6 +265,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
@@ -279,6 +280,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
@@ -293,6 +295,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
@@ -307,6 +310,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...

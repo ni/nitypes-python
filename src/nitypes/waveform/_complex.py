@@ -253,6 +253,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
@@ -267,6 +268,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
@@ -281,6 +283,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
@@ -295,6 +298,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
         timing: Timing | PrecisionTiming | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
