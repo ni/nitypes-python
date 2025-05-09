@@ -1,0 +1,331 @@
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
+from typing import Any, SupportsIndex, overload
+
+import numpy as np
+import numpy.typing as npt
+from typing_extensions import TypeVar, final, override
+
+from nitypes.waveform._extended_properties import ExtendedPropertyValue
+from nitypes.waveform._numeric import NumericWaveform
+from nitypes.waveform._scaling import ScaleMode
+from nitypes.waveform._timing import PrecisionTiming, Timing
+
+# _TRaw and _TRaw_co specify the type of the raw_data array. They are not limited to supported
+# types. Requesting an unsupported type raises TypeError at run time.
+_TRaw = TypeVar("_TRaw", bound=np.generic)
+_TRaw_co = TypeVar("_TRaw_co", bound=np.generic, covariant=True)
+
+# _TOtherScaled is for the get_scaled_data() method, which supports both single and
+# double precision.
+_TOtherScaled = TypeVar("_TOtherScaled", bound=np.generic)
+
+# Use the C types here because np.isdtype() considers some of them to be distinct types, even when
+# they have the same size (e.g. np.intc vs. np.int_ vs. np.long).
+_RAW_DTYPES = (
+    # Floating point
+    np.single,
+    np.double,
+    # Signed integers
+    np.byte,
+    np.short,
+    np.intc,
+    np.int_,
+    np.long,
+    np.longlong,
+    # Unsigned integers
+    np.ubyte,
+    np.ushort,
+    np.uintc,
+    np.uint,
+    np.ulong,
+    np.ulonglong,
+)
+
+_SCALED_DTYPES = (
+    # Floating point
+    np.single,
+    np.double,
+)
+
+
+@final
+class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
+    """An analog waveform, which encapsulates analog data and timing information."""
+
+    @override
+    @staticmethod
+    def _get_default_raw_dtype() -> type[np.generic] | np.dtype[np.generic]:
+        return np.float64
+
+    @override
+    @staticmethod
+    def _get_default_scaled_dtype() -> type[np.generic] | np.dtype[np.generic]:
+        return np.float64
+
+    @override
+    @staticmethod
+    def _get_supported_raw_dtypes() -> tuple[npt.DTypeLike, ...]:
+        return _RAW_DTYPES
+
+    @override
+    @staticmethod
+    def _get_supported_scaled_dtypes() -> tuple[npt.DTypeLike, ...]:
+        return _SCALED_DTYPES
+
+    # Override from_array_1d, from_array_2d, and __init__ in order to use overloads to control type
+    # inference.
+    @overload
+    @classmethod
+    def from_array_1d(
+        cls,
+        array: npt.NDArray[_TRaw],
+        dtype: None = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> AnalogWaveform[_TRaw]: ...
+
+    @overload
+    @classmethod
+    def from_array_1d(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> AnalogWaveform[_TRaw]: ...
+
+    @overload
+    @classmethod
+    def from_array_1d(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        dtype: npt.DTypeLike = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> AnalogWaveform[Any]: ...
+
+    @override
+    @classmethod
+    def from_array_1d(  # noqa: D102 - Missing docstring in public method - override
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        dtype: npt.DTypeLike = None,
+        *,
+        copy: bool = True,
+        start_index: SupportsIndex | None = 0,
+        sample_count: SupportsIndex | None = None,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        timing: Timing | PrecisionTiming | None = None,
+        scale_mode: ScaleMode | None = None,
+    ) -> AnalogWaveform[Any]:
+        return super(AnalogWaveform, cls).from_array_1d(
+            array,
+            dtype,
+            copy=copy,
+            start_index=start_index,
+            sample_count=sample_count,
+            extended_properties=extended_properties,
+            timing=timing,
+            scale_mode=scale_mode,
+        )
+
+    @overload
+    @classmethod
+    def from_array_2d(
+        cls,
+        array: npt.NDArray[_TRaw],
+        dtype: None = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> list[AnalogWaveform[_TRaw]]: ...
+
+    @overload
+    @classmethod
+    def from_array_2d(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Sequence[Any]],
+        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> list[AnalogWaveform[_TRaw]]: ...
+
+    @overload
+    @classmethod
+    def from_array_2d(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Sequence[Any]],
+        dtype: npt.DTypeLike = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> list[AnalogWaveform[Any]]: ...
+
+    @override
+    @classmethod
+    def from_array_2d(  # noqa: D102 - Missing docstring in public method - override
+        cls,
+        array: npt.NDArray[Any] | Sequence[Sequence[Any]],
+        dtype: npt.DTypeLike = None,
+        *,
+        copy: bool = True,
+        start_index: SupportsIndex | None = 0,
+        sample_count: SupportsIndex | None = None,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        timing: Timing | PrecisionTiming | None = None,
+        scale_mode: ScaleMode | None = None,
+    ) -> list[AnalogWaveform[Any]]:
+        return super(AnalogWaveform, cls).from_array_2d(
+            array,
+            dtype,
+            copy=copy,
+            start_index=start_index,
+            sample_count=sample_count,
+            extended_properties=extended_properties,
+            timing=timing,
+            scale_mode=scale_mode,
+        )
+
+    __slots__ = ()
+
+    # If neither dtype nor raw_data is specified, _TRaw_co defaults to np.float64.
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[np.float64],
+        sample_count: SupportsIndex | None = ...,
+        dtype: None = ...,
+        *,
+        raw_data: None = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[_TRaw],
+        sample_count: SupportsIndex | None = ...,
+        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
+        *,
+        raw_data: None = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[_TRaw],
+        sample_count: SupportsIndex | None = ...,
+        dtype: None = ...,
+        *,
+        raw_data: npt.NDArray[_TRaw] = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: AnalogWaveform[Any],
+        sample_count: SupportsIndex | None = ...,
+        dtype: npt.DTypeLike = ...,
+        *,
+        raw_data: npt.NDArray[Any] | None = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing | PrecisionTiming | None = ...,
+        scale_mode: ScaleMode | None = ...,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        sample_count: SupportsIndex | None = None,
+        dtype: npt.DTypeLike = None,
+        *,
+        raw_data: npt.NDArray[Any] | None = None,
+        start_index: SupportsIndex | None = None,
+        capacity: SupportsIndex | None = None,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        copy_extended_properties: bool = True,
+        timing: Timing | PrecisionTiming | None = None,
+        scale_mode: ScaleMode | None = None,
+    ) -> None:
+        """Construct an analog waveform.
+
+        Args:
+            sample_count: The number of samples in the analog waveform.
+            dtype: The NumPy data type for the analog waveform data. If not specified, the data
+                type defaults to np.float64.
+            raw_data: A NumPy ndarray to use for sample storage. The analog waveform takes ownership
+                of this array. If not specified, an ndarray is created based on the specified dtype,
+                start index, sample count, and capacity.
+            start_index: The sample index at which the analog waveform data begins.
+            sample_count: The number of samples in the analog waveform.
+            capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
+                appending samples to the waveform.
+            extended_properties: The extended properties of the analog waveform.
+            copy_extended_properties: Specifies whether to copy the extended properties or take
+                ownership.
+            timing: The timing information of the analog waveform.
+            scale_mode: The scale mode of the analog waveform.
+
+        Returns:
+            An analog waveform.
+        """
+        return super().__init__(
+            sample_count,
+            dtype,
+            raw_data=raw_data,
+            start_index=start_index,
+            capacity=capacity,
+            extended_properties=extended_properties,
+            copy_extended_properties=copy_extended_properties,
+            timing=timing,
+            scale_mode=scale_mode,
+        )
+
+    @override
+    def _convert_data(
+        self,
+        dtype: npt.DTypeLike | type[_TOtherScaled] | np.dtype[_TOtherScaled],
+        raw_data: npt.NDArray[_TRaw_co],
+    ) -> npt.NDArray[_TOtherScaled]:
+        return raw_data.astype(dtype)

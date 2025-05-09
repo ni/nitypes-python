@@ -8,7 +8,7 @@ import pytest
 from typing_extensions import assert_type
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType
-from nitypes.waveform import AnalogWaveform, ComplexWaveform, LinearScaleMode
+from nitypes.waveform import ComplexWaveform, LinearScaleMode
 
 
 ###############################################################################
@@ -17,7 +17,7 @@ from nitypes.waveform import AnalogWaveform, ComplexWaveform, LinearScaleMode
 def test___sample_count_and_complexint32_dtype___create___creates_waveform_with_sample_count_and_dtype() -> (
     None
 ):
-    waveform = AnalogWaveform(10, ComplexInt32DType)
+    waveform = ComplexWaveform(10, ComplexInt32DType)
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == ComplexInt32DType
@@ -27,7 +27,7 @@ def test___sample_count_and_complexint32_dtype___create___creates_waveform_with_
 def test___sample_count_and_complex64_dtype___create___creates_waveform_with_sample_count_and_dtype() -> (
     None
 ):
-    waveform = AnalogWaveform(10, np.complex64)
+    waveform = ComplexWaveform(10, np.complex64)
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.complex64
@@ -37,7 +37,7 @@ def test___sample_count_and_complex64_dtype___create___creates_waveform_with_sam
 def test___sample_count_and_complex128_dtype___create___creates_waveform_with_sample_count_and_dtype() -> (
     None
 ):
-    waveform = AnalogWaveform(10, np.complex128)
+    waveform = ComplexWaveform(10, np.complex128)
 
     assert waveform.sample_count == waveform.capacity == len(waveform.raw_data) == 10
     assert waveform.dtype == np.complex128
@@ -48,10 +48,10 @@ def test___sample_count_and_unknown_structured_dtype___create___raises_type_erro
     dtype = np.dtype([("a", np.int16), ("b", np.int32)])
 
     with pytest.raises(TypeError) as exc:
-        waveform = AnalogWaveform(10, dtype)
+        waveform = ComplexWaveform(10, dtype)
 
-        # AnalogWaveform currently cannot distinguish between ComplexInt32DType and other structured
-        # data types at type-checking time.
+        # ComplexWaveform currently cannot distinguish between ComplexInt32DType and other
+        # structured data types at type-checking time.
         assert_type(waveform, ComplexWaveform[ComplexInt32Base])
 
     assert exc.value.args[0].startswith("The requested data type is not supported.")
@@ -60,21 +60,16 @@ def test___sample_count_and_unknown_structured_dtype___create___raises_type_erro
 
 def test___sample_count_and_structured_dtype_str___create___raises_type_error() -> None:
     with pytest.raises(TypeError) as exc:
-        _ = AnalogWaveform(10, "i2, i2")
+        _ = ComplexWaveform(10, "i2, i2")
 
     assert exc.value.args[0].startswith("The requested data type is not supported.")
     assert "Data type: [('f0', '<i2'), ('f1', '<i2')]" in exc.value.args[0]
 
 
-def test___dtype_str_with_traw_hint___create___narrows_traw_and_tscaled() -> None:
-    waveform: ComplexWaveform[np.complex64] = AnalogWaveform(dtype="complex64")
+def test___dtype_str_with_traw_hint___create___narrows_traw() -> None:
+    waveform: ComplexWaveform[np.complex64] = ComplexWaveform(dtype="complex64")
 
-    assert_type(waveform, AnalogWaveform[np.complex64, np.complex128])
-
-
-def test___dtype_str_with_unsupported_tscaled_hint___create___mypy_returns_error() -> None:
-    waveform: AnalogWaveform[np.complex64, np.complex64] = AnalogWaveform(dtype="complex64")  # type: ignore[type-var]
-    _ = waveform
+    assert_type(waveform, ComplexWaveform[np.complex64])
 
 
 ###############################################################################
@@ -85,7 +80,7 @@ def test___complexint32_ndarray___from_array_1d___creates_waveform_with_complexi
 ):
     data = np.array([(1, 2), (3, -4)], ComplexInt32DType)
 
-    waveform = AnalogWaveform.from_array_1d(data)
+    waveform = ComplexWaveform.from_array_1d(data)
 
     assert waveform.raw_data.tolist() == data.tolist()
     assert waveform.dtype == ComplexInt32DType
@@ -95,7 +90,7 @@ def test___complexint32_ndarray___from_array_1d___creates_waveform_with_complexi
 def test___complex64_ndarray___from_array_1d___creates_waveform_with_complex64_dtype() -> None:
     data = np.array([1.1 + 2.2j, 3.3 - 4.4j], np.complex64)
 
-    waveform = AnalogWaveform.from_array_1d(data)
+    waveform = ComplexWaveform.from_array_1d(data)
 
     assert waveform.raw_data.tolist() == data.tolist()
     assert waveform.dtype == np.complex64
@@ -105,7 +100,7 @@ def test___complex64_ndarray___from_array_1d___creates_waveform_with_complex64_d
 def test___complex128_ndarray___from_array_1d___creates_waveform_with_complex128_dtype() -> None:
     data = np.array([1.1 + 2.2j, 3.3 - 4.4j], np.complex128)
 
-    waveform = AnalogWaveform.from_array_1d(data)
+    waveform = ComplexWaveform.from_array_1d(data)
 
     assert waveform.raw_data.tolist() == data.tolist()
     assert waveform.dtype == np.complex128
@@ -117,7 +112,7 @@ def test___complex_list_with_dtype___from_array_1d___creates_waveform_with_speci
 ):
     data = [1.1 + 2.2j, 3.3 - 4.4j]
 
-    waveform = AnalogWaveform.from_array_1d(data, np.complex64)
+    waveform = ComplexWaveform.from_array_1d(data, np.complex64)
 
     assert waveform.raw_data.tolist() == pytest.approx(data)
     assert waveform.dtype == np.complex64
@@ -129,11 +124,11 @@ def test___complex_list_with_dtype_str___from_array_1d___creates_waveform_with_s
 ):
     data = [1.1 + 2.2j, 3.3 - 4.4j]
 
-    waveform = AnalogWaveform.from_array_1d(data, "complex64")
+    waveform = ComplexWaveform.from_array_1d(data, "complex64")
 
     assert waveform.raw_data.tolist() == pytest.approx(data)
     assert waveform.dtype == np.complex64
-    assert_type(waveform, AnalogWaveform[Any, Any])  # dtype not inferred from string
+    assert_type(waveform, ComplexWaveform[Any])  # dtype not inferred from string
 
 
 ###############################################################################
@@ -144,7 +139,7 @@ def test___complexint32_ndarray___from_array_2d___creates_waveform_with_complexi
 ):
     data = np.array([[(1, 2), (3, -4), (-5, 6)], [(-7 - 8), (9, 10), (11, 12)]], ComplexInt32DType)
 
-    waveforms = AnalogWaveform.from_array_2d(data)
+    waveforms = ComplexWaveform.from_array_2d(data)
 
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
@@ -156,7 +151,7 @@ def test___complexint32_ndarray___from_array_2d___creates_waveform_with_complexi
 def test___complex64_ndarray___from_array_2d___creates_waveform_with_complex64_dtype() -> None:
     data = np.array([[1 + 2j, 3 - 4j, -5 + 6j], [-7 - 8j, 9 + 10j, 11 + 12j]], np.complex64)
 
-    waveforms = AnalogWaveform.from_array_2d(data)
+    waveforms = ComplexWaveform.from_array_2d(data)
 
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
@@ -168,7 +163,7 @@ def test___complex64_ndarray___from_array_2d___creates_waveform_with_complex64_d
 def test___complex128_ndarray___from_array_2d___creates_waveform_with_complex128_dtype() -> None:
     data = np.array([[1 + 2j, 3 - 4j, -5 + 6j], [-7 - 8j, 9 + 10j, 11 + 12j]], np.complex128)
 
-    waveforms = AnalogWaveform.from_array_2d(data)
+    waveforms = ComplexWaveform.from_array_2d(data)
 
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
@@ -182,7 +177,7 @@ def test___complex_list_list_with_dtype___from_array_2d___creates_waveform_with_
 ):
     data = [[1 + 2j, 3 - 4j, -5 + 6j], [-7 - 8j, 9 + 10j, 11 + 12j]]
 
-    waveforms = AnalogWaveform.from_array_2d(data, np.complex64)
+    waveforms = ComplexWaveform.from_array_2d(data, np.complex64)
 
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
@@ -196,20 +191,20 @@ def test___int_list_list_with_dtype_str___from_array_2d___creates_waveform_with_
 ):
     data = [[1 + 2j, 3 - 4j, -5 + 6j], [-7 - 8j, 9 + 10j, 11 + 12j]]
 
-    waveforms = AnalogWaveform.from_array_2d(data, "complex64")
+    waveforms = ComplexWaveform.from_array_2d(data, "complex64")
 
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i]
         assert waveforms[i].dtype == np.complex64
-        assert_type(waveforms[i], AnalogWaveform[Any, Any])  # dtype not inferred from string
+        assert_type(waveforms[i], ComplexWaveform[Any])  # dtype not inferred from string
 
 
 ###############################################################################
 # raw_data
 ###############################################################################
 def test___complexint32_waveform___raw_data___returns_complexint32_data() -> None:
-    waveform = AnalogWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
+    waveform = ComplexWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
 
     raw_data = waveform.raw_data
 
@@ -219,7 +214,7 @@ def test___complexint32_waveform___raw_data___returns_complexint32_data() -> Non
 
 
 def test___complex64_waveform___raw_data___returns_complex64_data() -> None:
-    waveform = AnalogWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
+    waveform = ComplexWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
 
     raw_data = waveform.raw_data
 
@@ -232,7 +227,7 @@ def test___complex64_waveform___raw_data___returns_complex64_data() -> None:
 # scaled_data
 ###############################################################################
 def test___complexint32_waveform___scaled_data___converts_to_complex128() -> None:
-    waveform = AnalogWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
+    waveform = ComplexWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
 
     scaled_data = waveform.scaled_data
 
@@ -242,7 +237,7 @@ def test___complexint32_waveform___scaled_data___converts_to_complex128() -> Non
 
 
 def test___complex64_waveform___scaled_data___converts_to_complex128() -> None:
-    waveform = AnalogWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
+    waveform = ComplexWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
 
     scaled_data = waveform.scaled_data
 
@@ -252,7 +247,7 @@ def test___complex64_waveform___scaled_data___converts_to_complex128() -> None:
 
 
 def test___complexint32_waveform_with_linear_scale___scaled_data___converts_to_complex128() -> None:
-    waveform = AnalogWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
+    waveform = ComplexWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
     waveform.scale_mode = LinearScaleMode(2.0, 0.5)
 
     scaled_data = waveform.scaled_data
@@ -263,7 +258,7 @@ def test___complexint32_waveform_with_linear_scale___scaled_data___converts_to_c
 
 
 def test___complex64_waveform_with_linear_scale___scaled_data___converts_to_complex128() -> None:
-    waveform = AnalogWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
+    waveform = ComplexWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
     waveform.scale_mode = LinearScaleMode(2.0, 0.5)
 
     scaled_data = waveform.scaled_data
@@ -279,7 +274,7 @@ def test___complex64_waveform_with_linear_scale___scaled_data___converts_to_comp
 def test___complexint32_waveform_with_complex64_dtype___get_scaled_data___converts_to_complex64() -> (
     None
 ):
-    waveform = AnalogWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
+    waveform = ComplexWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
 
     scaled_data = waveform.get_scaled_data(np.complex64)
 
@@ -289,7 +284,7 @@ def test___complexint32_waveform_with_complex64_dtype___get_scaled_data___conver
 
 
 def test___complex64_waveform_with_complex64_dtype___get_scaled_data___does_not_convert() -> None:
-    waveform = AnalogWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
+    waveform = ComplexWaveform.from_array_1d([1 + 2j, 3 - 4j], np.complex64)
 
     scaled_data = waveform.get_scaled_data(np.complex64)
 
@@ -301,7 +296,7 @@ def test___complex64_waveform_with_complex64_dtype___get_scaled_data___does_not_
 def test___complexint32_waveform_with_unknown_structured_dtype___get_scaled_data___raises_type_error() -> (
     None
 ):
-    waveform = AnalogWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
+    waveform = ComplexWaveform.from_array_1d([(1, 2), (3, -4)], ComplexInt32DType)
     dtype = np.dtype([("a", np.int16), ("b", np.int16)])
 
     with pytest.raises(TypeError) as exc:

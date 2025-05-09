@@ -59,16 +59,17 @@ scaled data type. The scaled data type is optional and defaults to :any:`numpy.f
 Complex Waveforms
 =================
 
-Complex waveforms are analog waveforms containing complex-number data.
+A complex waveform represents a single complex-number signal, such as I/Q data, with timing
+information and extended properties such as units.
 
 Constructing complex waveforms
 ------------------------------
 
-To construct a complex waveform, use the :any:`AnalogWaveform` class with complex-number data or
+To construct a complex waveform, use the :any:`ComplexWaveform` class with complex-number data or
 complex NumPy data type objects:
 
->>> AnalogWaveform.from_array_1d([1 + 2j, 3 + 4j], np.complex128)
-nitypes.waveform.AnalogWaveform(2, complex128, raw_data=array([1.+2.j, 3.+4.j]))
+>>> ComplexWaveform.from_array_1d([1 + 2j, 3 + 4j], np.complex128)
+nitypes.waveform.ComplexWaveform(2, complex128, raw_data=array([1.+2.j, 3.+4.j]))
 
 Scaling complex-number data
 ---------------------------
@@ -78,9 +79,9 @@ have native support for complex integers, so this uses the :any:`ComplexInt32DTy
 type.
 
 >>> from nitypes.complex import ComplexInt32DType
->>> wfm = AnalogWaveform.from_array_1d([(1, 2), (3, 4)], ComplexInt32DType, scale_mode=scale_mode)
+>>> wfm = ComplexWaveform.from_array_1d([(1, 2), (3, 4)], ComplexInt32DType, scale_mode=scale_mode)
 >>> wfm  # doctest: +NORMALIZE_WHITESPACE
-nitypes.waveform.AnalogWaveform(2, void32, raw_data=array([(1, 2), (3, 4)],
+nitypes.waveform.ComplexWaveform(2, void32, raw_data=array([(1, 2), (3, 4)],
     dtype=[('real', '<i2'), ('imag', '<i2')]),
     scale_mode=nitypes.waveform.LinearScaleMode(2.0, 0.5))
 >>> wfm.raw_data
@@ -89,13 +90,14 @@ array([(1, 2), (3, 4)], dtype=[('real', '<i2'), ('imag', '<i2')])
 array([2.5+4.j, 6.5+8.j])
 """
 
-from nitypes.waveform._analog_waveform import AnalogWaveform
-from nitypes.waveform._complex_waveform import ComplexWaveform
+from nitypes.waveform._analog import AnalogWaveform
+from nitypes.waveform._complex import ComplexWaveform
 from nitypes.waveform._exceptions import TimingMismatchError
 from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
     ExtendedPropertyValue,
 )
+from nitypes.waveform._numeric import NumericWaveform
 from nitypes.waveform._scaling import (
     NO_SCALING,
     LinearScaleMode,
@@ -119,6 +121,7 @@ __all__ = [
     "LinearScaleMode",
     "NO_SCALING",
     "NoneScaleMode",
+    "NumericWaveform",
     "PrecisionTiming",
     "SampleIntervalMode",
     "ScaleMode",
@@ -131,12 +134,13 @@ __all__ = [
 # Hide that it was defined in a helper file
 AnalogWaveform.__module__ = __name__
 BaseTiming.__module__ = __name__
-# ComplexWaveform is a TypeAlias
+ComplexWaveform.__module__ = __name__
 ExtendedPropertyDictionary.__module__ = __name__
 # ExtendedPropertyValue is a TypeAlias
 LinearScaleMode.__module__ = __name__
 # NO_SCALING is a constant
 NoneScaleMode.__module__ = __name__
+NumericWaveform.__module__ = __name__
 PrecisionTiming.__module__ = __name__
 SampleIntervalMode.__module__ = __name__
 ScaleMode.__module__ = __name__
