@@ -816,7 +816,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
     def __repr__(self) -> str:
         """Return repr(self)."""
         args = [f"{self._sample_count}"]
-        if self.dtype != np.float64:
+        if self.dtype != self.__class__._get_default_raw_dtype():
             args.append(f"{self.dtype.name}")
         # start_index and capacity are not shown because they are allocation details. raw_data hides
         # the unused data before start_index and after start_index+sample_count.

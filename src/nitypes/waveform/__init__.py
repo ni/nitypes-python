@@ -65,7 +65,7 @@ Constructing complex waveforms
 To construct a complex waveform, use the :any:`ComplexWaveform` class:
 
 >>> ComplexWaveform.from_array_1d([1 + 2j, 3 + 4j], np.complex128)
-nitypes.waveform.ComplexWaveform(2, complex128, raw_data=array([1.+2.j, 3.+4.j]))
+nitypes.waveform.ComplexWaveform(2, raw_data=array([1.+2.j, 3.+4.j]))
 
 Scaling complex-number data
 ---------------------------

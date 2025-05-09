@@ -1,14 +1,24 @@
 from __future__ import annotations
 
+import copy
+import datetime as dt
+import pickle
 from typing import Any
 
+import hightime as ht
 import numpy as np
 import numpy.typing as npt
 import pytest
 from typing_extensions import assert_type
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType
-from nitypes.waveform import ComplexWaveform, LinearScaleMode
+from nitypes.waveform import (
+    NO_SCALING,
+    ComplexWaveform,
+    LinearScaleMode,
+    PrecisionTiming,
+    Timing,
+)
 
 
 ###############################################################################
@@ -322,3 +332,322 @@ def test___complexint32_waveform_with_unknown_structured_dtype___get_scaled_data
     assert exc.value.args[0].startswith("The requested data type is not supported.")
     assert "Data type: [('a', '<i2'), ('b', '<i2')]" in exc.value.args[0]
     assert "Supported data types: complex64, complex128" in exc.value.args[0]
+
+
+###############################################################################
+# magic methods
+###############################################################################
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (ComplexWaveform(), ComplexWaveform()),
+        (ComplexWaveform(10), ComplexWaveform(10)),
+        (ComplexWaveform(10, np.complex128), ComplexWaveform(10, np.complex128)),
+        (ComplexWaveform(10, ComplexInt32DType), ComplexWaveform(10, ComplexInt32DType)),
+        (
+            ComplexWaveform(10, ComplexInt32DType, start_index=5, capacity=20),
+            ComplexWaveform(10, ComplexInt32DType, start_index=5, capacity=20),
+        ),
+        (
+            ComplexWaveform.from_array_1d([1 + 2j, 3 + 4j, 5 + 6j], np.complex128),
+            ComplexWaveform.from_array_1d([1 + 2j, 3 + 4j, 5 + 6j], np.complex128),
+        ),
+        (
+            ComplexWaveform.from_array_1d([(1, 2), (3, 4), (5, 6)], ComplexInt32DType),
+            ComplexWaveform.from_array_1d([(1, 2), (3, 4), (5, 6)], ComplexInt32DType),
+        ),
+        (
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            ),
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            ),
+        ),
+        (
+            ComplexWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+            ComplexWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+        ),
+        (
+            ComplexWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            ),
+            ComplexWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            ),
+        ),
+        (
+            ComplexWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
+            ComplexWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
+        ),
+        # start_index and capacity may differ as long as raw_data and sample_count are the same.
+        (
+            ComplexWaveform(10, ComplexInt32DType, start_index=5, capacity=20),
+            ComplexWaveform(10, ComplexInt32DType, start_index=10, capacity=25),
+        ),
+        (
+            ComplexWaveform.from_array_1d(
+                [0, 0, 1, 2, 3, 4, 5, 0], ComplexInt32DType, start_index=2, sample_count=5
+            ),
+            ComplexWaveform.from_array_1d(
+                [0, 1, 2, 3, 4, 5, 0, 0, 0], ComplexInt32DType, start_index=1, sample_count=5
+            ),
+        ),
+    ],
+)
+def test___same_value___equality___equal(
+    left: ComplexWaveform[Any], right: ComplexWaveform[Any]
+) -> None:
+    assert left == right
+    assert not (left != right)
+
+
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (ComplexWaveform(), ComplexWaveform(10)),
+        (ComplexWaveform(10), ComplexWaveform(11)),
+        (ComplexWaveform(10, np.complex128), ComplexWaveform(10, ComplexInt32DType)),
+        (
+            ComplexWaveform(15, ComplexInt32DType, start_index=5, capacity=20),
+            ComplexWaveform(10, ComplexInt32DType, start_index=5, capacity=20),
+        ),
+        (
+            ComplexWaveform.from_array_1d([1 + 2j, 3 + 5j, 5 + 6j], np.complex128),
+            ComplexWaveform.from_array_1d([1 + 2j, 3 + 4j, 5 + 6j], np.complex128),
+        ),
+        (
+            ComplexWaveform.from_array_1d([(1, 2), (3, 4), (5, 6)], ComplexInt32DType),
+            ComplexWaveform.from_array_1d([1 + 2j, 3 + 4j, 5 + 6j], np.complex128),
+        ),
+        (
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            ),
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=2))
+            ),
+        ),
+        (
+            ComplexWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+            ComplexWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=2))
+            ),
+        ),
+        (
+            ComplexWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            ),
+            ComplexWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Amps"}
+            ),
+        ),
+        (
+            ComplexWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
+            ComplexWaveform(scale_mode=LinearScaleMode(2.0, 1.1)),
+        ),
+        (
+            ComplexWaveform(scale_mode=NO_SCALING),
+            ComplexWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
+        ),
+        # __eq__ does not convert timing, even if the values are equivalent.
+        (
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            ),
+            ComplexWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+        ),
+        (
+            ComplexWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            ),
+        ),
+    ],
+)
+def test___different_value___equality___not_equal(
+    left: ComplexWaveform[Any], right: ComplexWaveform[Any]
+) -> None:
+    assert not (left == right)
+    assert left != right
+
+
+@pytest.mark.parametrize(
+    "value, expected_repr",
+    [
+        (ComplexWaveform(), "nitypes.waveform.ComplexWaveform(0)"),
+        (
+            ComplexWaveform(5),
+            "nitypes.waveform.ComplexWaveform(5, raw_data=array([0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]))",
+        ),
+        (
+            ComplexWaveform(5, np.complex128),
+            "nitypes.waveform.ComplexWaveform(5, raw_data=array([0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]))",
+        ),
+        (ComplexWaveform(0, ComplexInt32DType), "nitypes.waveform.ComplexWaveform(0, void32)"),
+        (
+            ComplexWaveform(5, ComplexInt32DType),
+            "nitypes.waveform.ComplexWaveform(5, void32, raw_data=array([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0)],\n"
+            "      dtype=[('real', '<i2'), ('imag', '<i2')]))",
+        ),
+        (
+            ComplexWaveform(5, ComplexInt32DType, start_index=5, capacity=20),
+            "nitypes.waveform.ComplexWaveform(5, void32, raw_data=array([(0, 0), (0, 0), (0, 0), (0, 0), (0, 0)],\n"
+            "      dtype=[('real', '<i2'), ('imag', '<i2')]))",
+        ),
+        (
+            ComplexWaveform.from_array_1d([1.23 + 3.45j, 6.78 - 9.01j], np.complex128),
+            "nitypes.waveform.ComplexWaveform(2, raw_data=array([1.23+3.45j, 6.78-9.01j]))",
+        ),
+        (
+            ComplexWaveform.from_array_1d([(1, 2), (3, 4), (5, 6)], ComplexInt32DType),
+            "nitypes.waveform.ComplexWaveform(3, void32, raw_data=array([(1, 2), (3, 4), (5, 6)], dtype=[('real', '<i2'), ('imag', '<i2')]))",
+        ),
+        (
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            ),
+            "nitypes.waveform.ComplexWaveform(0, timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=datetime.timedelta(microseconds=1000)))",
+        ),
+        (
+            ComplexWaveform(
+                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+            "nitypes.waveform.ComplexWaveform(0, timing=nitypes.waveform.PrecisionTiming(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=hightime.timedelta(microseconds=1000)))",
+        ),
+        (
+            ComplexWaveform(
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+            ),
+            "nitypes.waveform.ComplexWaveform(0, extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
+        ),
+        (
+            ComplexWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
+            "nitypes.waveform.ComplexWaveform(0, scale_mode=nitypes.waveform.LinearScaleMode(2.0, 1.0))",
+        ),
+        (
+            ComplexWaveform.from_array_1d(
+                [(1, 2), (3, 4), (5, 6)],
+                ComplexInt32DType,
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+            ),
+            "nitypes.waveform.ComplexWaveform(3, void32, raw_data=array([(1, 2), (3, 4), (5, 6)], dtype=[('real', '<i2'), ('imag', '<i2')]), timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=datetime.timedelta(microseconds=1000)))",
+        ),
+        (
+            ComplexWaveform.from_array_1d(
+                [(1, 2), (3, 4), (5, 6)],
+                ComplexInt32DType,
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+            ),
+            "nitypes.waveform.ComplexWaveform(3, void32, raw_data=array([(1, 2), (3, 4), (5, 6)], dtype=[('real', '<i2'), ('imag', '<i2')]), extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
+        ),
+        (
+            ComplexWaveform.from_array_1d(
+                [(1, 2), (3, 4), (5, 6)], ComplexInt32DType, scale_mode=LinearScaleMode(2.0, 1.0)
+            ),
+            "nitypes.waveform.ComplexWaveform(3, void32, raw_data=array([(1, 2), (3, 4), (5, 6)], dtype=[('real', '<i2'), ('imag', '<i2')]), scale_mode=nitypes.waveform.LinearScaleMode(2.0, 1.0))",
+        ),
+    ],
+)
+def test___various_values___repr___looks_ok(
+    value: ComplexWaveform[Any], expected_repr: str
+) -> None:
+    assert repr(value) == expected_repr
+
+
+_VARIOUS_VALUES = [
+    ComplexWaveform(),
+    ComplexWaveform(10),
+    ComplexWaveform(10, np.complex128),
+    ComplexWaveform(10, ComplexInt32DType),
+    ComplexWaveform(10, ComplexInt32DType, start_index=5, capacity=20),
+    ComplexWaveform.from_array_1d([123 + 3.45j, 6.78 - 9.01j], np.complex128),
+    ComplexWaveform.from_array_1d([(1, 2), (3, 4), (5, 6)], ComplexInt32DType),
+    ComplexWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))),
+    ComplexWaveform(
+        timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+    ),
+    ComplexWaveform(
+        extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
+    ),
+    ComplexWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
+    ComplexWaveform(10, ComplexInt32DType, start_index=5, capacity=20),
+    ComplexWaveform.from_array_1d(
+        [(0, 0), (0, 0), (1, 1), (2, -2), (3, 33), (4, -44), (5, 50), (0, 0)],
+        ComplexInt32DType,
+        start_index=2,
+        sample_count=5,
+    ),
+]
+
+
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
+def test___various_values___copy___makes_shallow_copy(value: ComplexWaveform[Any]) -> None:
+    new_value = copy.copy(value)
+
+    _assert_shallow_copy(new_value, value)
+
+
+def _assert_shallow_copy(value: ComplexWaveform[Any], other: ComplexWaveform[Any]) -> None:
+    assert value == other
+    assert value is not other
+    # _data may be a view of the original array.
+    assert value._data is other._data or value._data.base is other._data
+    assert value._extended_properties is other._extended_properties
+    assert value._timing is other._timing
+    assert value._scale_mode is other._scale_mode
+
+
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
+def test___various_values___deepcopy___makes_shallow_copy(value: ComplexWaveform[Any]) -> None:
+    new_value = copy.deepcopy(value)
+
+    _assert_deep_copy(new_value, value)
+
+
+def _assert_deep_copy(value: ComplexWaveform[Any], other: ComplexWaveform[Any]) -> None:
+    assert value == other
+    assert value is not other
+    assert value._data is not other._data and value._data.base is not other._data
+    assert value._extended_properties is not other._extended_properties
+    if other._timing is not Timing.empty and other._timing is not PrecisionTiming.empty:
+        assert value._timing is not other._timing
+    if other._scale_mode is not NO_SCALING:
+        assert value._scale_mode is not other._scale_mode
+
+
+@pytest.mark.parametrize("value", _VARIOUS_VALUES)
+def test___various_values___pickle_unpickle___makes_deep_copy(
+    value: ComplexWaveform[Any],
+) -> None:
+    new_value = pickle.loads(pickle.dumps(value))
+
+    _assert_deep_copy(new_value, value)
+
+
+def test___waveform___pickle___references_public_modules() -> None:
+    value = ComplexWaveform(
+        raw_data=np.array([1, 2, 3], np.complex128),
+        extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+        timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+        scale_mode=LinearScaleMode(2.0, 1.0),
+    )
+
+    value_bytes = pickle.dumps(value)
+
+    assert b"nitypes.waveform" in value_bytes
+    assert b"nitypes.waveform._complex" not in value_bytes
+    assert b"nitypes.waveform._extended_properties" not in value_bytes
+    assert b"nitypes.waveform._numeric" not in value_bytes
+    assert b"nitypes.waveform._timing" not in value_bytes
+    assert b"nitypes.waveform._scaling" not in value_bytes
