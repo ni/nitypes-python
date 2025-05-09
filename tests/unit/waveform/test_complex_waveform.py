@@ -66,6 +66,23 @@ def test___sample_count_and_structured_dtype_str___create___raises_type_error() 
     assert "Data type: [('f0', '<i2'), ('f1', '<i2')]" in exc.value.args[0]
 
 
+@pytest.mark.parametrize("dtype", [np.int32, np.float64, np.str_])
+def test___sample_count_and_unsupported_dtype___create___raises_type_error(
+    dtype: npt.DTypeLike,
+) -> None:
+    with pytest.raises(TypeError) as exc:
+        _ = ComplexWaveform(10, dtype)
+
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
+
+
+def test___dtype_str_with_unsupported_traw_hint___create___mypy_type_var_warning() -> None:
+    waveform1: ComplexWaveform[np.int32] = ComplexWaveform(dtype="complex64")  # type: ignore[type-var]
+    waveform2: ComplexWaveform[np.float64] = ComplexWaveform(dtype="complex64")  # type: ignore[type-var]
+    waveform3: ComplexWaveform[np.str_] = ComplexWaveform(dtype="complex64")  # type: ignore[type-var]
+    _ = waveform1, waveform2, waveform3
+
+
 def test___dtype_str_with_traw_hint___create___narrows_traw() -> None:
     waveform: ComplexWaveform[np.complex64] = ComplexWaveform(dtype="complex64")
 

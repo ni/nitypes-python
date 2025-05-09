@@ -1,25 +1,21 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, SupportsIndex, overload
+from typing import Any, SupportsIndex, Union, overload
 
 import numpy as np
 import numpy.typing as npt
 from typing_extensions import TypeVar, final, override
 
 from nitypes.waveform._extended_properties import ExtendedPropertyValue
-from nitypes.waveform._numeric import NumericWaveform
+from nitypes.waveform._numeric import NumericWaveform, _TOtherScaled
 from nitypes.waveform._scaling import ScaleMode
 from nitypes.waveform._timing import PrecisionTiming, Timing
 
-# _TRaw and _TRaw_co specify the type of the raw_data array. They are not limited to supported
-# types. Requesting an unsupported type raises TypeError at run time.
-_TRaw = TypeVar("_TRaw", bound=np.generic)
-_TRaw_co = TypeVar("_TRaw_co", bound=np.generic, covariant=True)
-
-# _TOtherScaled is for the get_scaled_data() method, which supports both single and
-# double precision.
-_TOtherScaled = TypeVar("_TOtherScaled", bound=np.generic)
+# _TRaw and _TRaw_co specify the type of the raw_data array. AnalogWaveform accepts a narrower set
+# of types than NumericWaveform.
+_TRaw = TypeVar("_TRaw", bound=Union[np.floating, np.integer])
+_TRaw_co = TypeVar("_TRaw_co", bound=Union[np.floating, np.integer], covariant=True)
 
 # Use the C types here because np.isdtype() considers some of them to be distinct types, even when
 # they have the same size (e.g. np.intc vs. np.int_ vs. np.long).

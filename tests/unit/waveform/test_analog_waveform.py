@@ -88,11 +88,21 @@ def test___sample_count_dtype_and_capacity___create___creates_waveform_with_samp
     assert_type(waveform, AnalogWaveform[np.int32])
 
 
-def test___sample_count_and_unsupported_dtype___create___raises_type_error() -> None:
+@pytest.mark.parametrize("dtype", [np.complex128, np.str_, np.void, "i2, i2"])
+def test___sample_count_and_unsupported_dtype___create___raises_type_error(
+    dtype: npt.DTypeLike,
+) -> None:
     with pytest.raises(TypeError) as exc:
-        _ = AnalogWaveform(10, np.str_)
+        _ = AnalogWaveform(10, dtype)
 
     assert exc.value.args[0].startswith("The requested data type is not supported.")
+
+
+def test___dtype_str_with_unsupported_traw_hint___create___mypy_type_var_warning() -> None:
+    waveform1: AnalogWaveform[np.complex128] = AnalogWaveform(dtype="int32")  # type: ignore[type-var]
+    waveform2: AnalogWaveform[np.str_] = AnalogWaveform(dtype="int32")  # type: ignore[type-var]
+    waveform3: AnalogWaveform[np.void] = AnalogWaveform(dtype="int32")  # type: ignore[type-var]
+    _ = waveform1, waveform2, waveform3
 
 
 def test___dtype_str_with_traw_hint___create___narrows_traw() -> None:
