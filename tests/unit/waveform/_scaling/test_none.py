@@ -45,6 +45,26 @@ def test___float64_ndarray___transform_data___returns_float64_scaled_data() -> N
     assert list(scaled_data) == [0.0, 1.0, 2.0, 3.0]
 
 
+def test___complex64_ndarray___transform_data___returns_complex64_scaled_data() -> None:
+    raw_data = np.array([1 + 2j, 3 - 4j], np.complex64)
+
+    scaled_data = NO_SCALING._transform_data(raw_data)
+
+    assert_type(scaled_data, npt.NDArray[np.complex64])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.complex64
+    assert list(scaled_data) == [1 + 2j, 3 - 4j]
+
+
+def test___complex128_ndarray___transform_data___returns_complex128_scaled_data() -> None:
+    raw_data = np.array([1 + 2j, 3 - 4j], np.complex128)
+
+    scaled_data = NO_SCALING._transform_data(raw_data)
+
+    assert_type(scaled_data, npt.NDArray[np.complex128])
+    assert isinstance(scaled_data, np.ndarray) and scaled_data.dtype == np.complex128
+    assert list(scaled_data) == [1 + 2j, 3 - 4j]
+
+
 def test___scale_mode___repr___looks_ok() -> None:
     assert repr(NO_SCALING) == "nitypes.waveform.NoneScaleMode()"
 

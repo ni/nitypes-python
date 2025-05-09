@@ -88,11 +88,27 @@ def test___sample_count_dtype_and_capacity___create___creates_waveform_with_samp
     assert_type(waveform, AnalogWaveform[np.int32])
 
 
-def test___sample_count_and_unsupported_dtype___create___raises_type_error() -> None:
+@pytest.mark.parametrize("dtype", [np.complex128, np.str_, np.void, "i2, i2"])
+def test___sample_count_and_unsupported_dtype___create___raises_type_error(
+    dtype: npt.DTypeLike,
+) -> None:
     with pytest.raises(TypeError) as exc:
-        _ = AnalogWaveform(10, np.complex128)
+        _ = AnalogWaveform(10, dtype)
 
     assert exc.value.args[0].startswith("The requested data type is not supported.")
+
+
+def test___dtype_str_with_unsupported_traw_hint___create___mypy_type_var_warning() -> None:
+    waveform1: AnalogWaveform[np.complex128] = AnalogWaveform(dtype="int32")  # type: ignore[type-var]
+    waveform2: AnalogWaveform[np.str_] = AnalogWaveform(dtype="int32")  # type: ignore[type-var]
+    waveform3: AnalogWaveform[np.void] = AnalogWaveform(dtype="int32")  # type: ignore[type-var]
+    _ = waveform1, waveform2, waveform3
+
+
+def test___dtype_str_with_traw_hint___create___narrows_traw() -> None:
+    waveform: AnalogWaveform[np.int32] = AnalogWaveform(dtype="int32")
+
+    assert_type(waveform, AnalogWaveform[np.int32])
 
 
 ###############################################################################
@@ -205,7 +221,7 @@ def test___iterable___from_array_1d___raises_type_error() -> None:
 
 
 def test___ndarray_with_unsupported_dtype___from_array_1d___raises_type_error() -> None:
-    data = np.zeros(3, np.complex128)
+    data = np.zeros(3, np.str_)
 
     with pytest.raises(TypeError) as exc:
         _ = AnalogWaveform.from_array_1d(data)
@@ -456,7 +472,7 @@ def test___iterable_list___from_array_2d___raises_type_error() -> None:
 
 
 def test___ndarray_with_unsupported_dtype___from_array_2d___raises_type_error() -> None:
-    data = np.zeros((2, 3), np.complex128)
+    data = np.zeros((2, 3), np.str_)
 
     with pytest.raises(TypeError) as exc:
         _ = AnalogWaveform.from_array_2d(data)
@@ -787,6 +803,7 @@ def test___unsupported_dtype___get_scaled_data___raises_type_error() -> None:
         _ = waveform.get_scaled_data(np.int32)
 
     assert exc.value.args[0].startswith("The requested data type is not supported.")
+    assert "Data type: int32" in exc.value.args[0]
     assert "Supported data types: float32, float64" in exc.value.args[0]
 
 

@@ -133,6 +133,39 @@ def arg_to_uint(
     return value
 
 
+def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) -> bool:
+    """Check a dtype-like object against a tuple of supported dtype-like objects.
+
+    Unlike :any:`numpy.isdtype`, this function supports structured data types.
+
+    >>> is_dtype(np.float64, (np.float64, np.intc, np.long,))
+    True
+    >>> is_dtype("float64", (np.float64, np.intc, np.long,))
+    True
+    >>> is_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.long, np.longlong))
+    False
+    >>> a_type = np.dtype([('a', np.int32)])
+    >>> b_type = np.dtype([('b', np.int32)])
+    >>> is_dtype(a_type, (np.float64, np.intc, a_type,))
+    True
+    >>> is_dtype(b_type, (np.float64, np.intc, a_type,))
+    False
+    >>> is_dtype("i2, i2", (np.float64, np.intc, a_type,))
+    False
+    >>> is_dtype("i4", (np.float64, np.intc, a_type,))
+    False
+    >>> is_dtype("i4", (np.float64, np.intc, a_type, np.dtype("i4"),))
+    True
+    """
+    if not isinstance(dtype, (type, np.dtype)):
+        dtype = np.dtype(dtype)
+
+    if isinstance(dtype, np.dtype) and dtype.fields:
+        return dtype in supported_dtypes
+
+    return np.isdtype(dtype, supported_dtypes)
+
+
 def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) -> None:
     """Validate a dtype-like object against a tuple of supported dtype-like objects.
 
@@ -145,10 +178,20 @@ def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, 
     <BLANKLINE>
     Data type: float64
     Supported data types: int8, int16, int32, int64
+    >>> a_type = np.dtype([('a', np.int32)])
+    >>> b_type = np.dtype([('b', np.int32)])
+    >>> validate_dtype(a_type, (np.float64, np.intc, a_type,))
+    >>> validate_dtype(b_type, (np.float64, np.intc, a_type,))
+    Traceback (most recent call last):
+    ...
+    TypeError: The requested data type is not supported.
+    <BLANKLINE>
+    Data type: [('b', '<i4')]
+    Supported data types: float64, int32, void32
     """
-    if not isinstance(dtype, (type, np.dtype)):
-        dtype = np.dtype(dtype)
-    if not np.isdtype(dtype, supported_dtypes):
+    if not is_dtype(dtype, supported_dtypes):
+        if not isinstance(dtype, (type, np.dtype)):
+            dtype = np.dtype(dtype)
         raise unsupported_dtype("requested data type", dtype, supported_dtypes)
 
 
