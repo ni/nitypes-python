@@ -107,7 +107,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
 
     @override
     @classmethod
-    def from_array_1d(  # noqa: D102 - Missing docstring in public method - override
+    def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
         dtype: npt.DTypeLike = None,
@@ -119,6 +119,22 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> ComplexWaveform[Any]:
+        """Construct a complex waveform from a one-dimensional array or sequence.
+
+        Args:
+            array: The waveform data as a one-dimensional array or a sequence.
+            dtype: The NumPy data type for the waveform data. This argument is required
+                when array is a sequence.
+            copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the waveform data begins.
+            sample_count: The number of samples in the waveform.
+            extended_properties: The extended properties of the waveform.
+            timing: The timing information of the waveform.
+            scale_mode: The scale mode of the waveform.
+
+        Returns:
+            A complex waveform containing the specified data.
+        """
         return super(ComplexWaveform, cls).from_array_1d(
             array,
             dtype,
@@ -177,7 +193,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
 
     @override
     @classmethod
-    def from_array_2d(  # noqa: D102 - Missing docstring in public method - override
+    def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
         dtype: npt.DTypeLike = None,
@@ -189,6 +205,26 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> list[ComplexWaveform[Any]]:
+        """Construct a list of complex waveforms from a two-dimensional array or nested sequence.
+
+        Args:
+            array: The waveform data as a two-dimensional array or a nested sequence.
+            dtype: The NumPy data type for the waveform data. This argument is required
+                when array is a sequence.
+            copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the waveform data begins.
+            sample_count: The number of samples in the waveform.
+            extended_properties: The extended properties of the waveform.
+            timing: The timing information of the waveform.
+            scale_mode: The scale mode of the waveform.
+
+        Returns:
+            A list containing a complex waveform for each row of the specified data.
+
+        When constructing multiple waveforms, the same extended properties, timing
+        information, and scale mode are applied to all waveforms. Consider assigning
+        these properties after construction.
+        """
         return super(ComplexWaveform, cls).from_array_2d(
             array,
             dtype,

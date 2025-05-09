@@ -119,7 +119,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
 
     @override
     @classmethod
-    def from_array_1d(  # noqa: D102 - Missing docstring in public method - override
+    def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
         dtype: npt.DTypeLike = None,
@@ -131,6 +131,22 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> AnalogWaveform[Any]:
+        """Construct an analog waveform from a one-dimensional array or sequence.
+
+        Args:
+            array: The waveform data as a one-dimensional array or a sequence.
+            dtype: The NumPy data type for the waveform data. This argument is required
+                when array is a sequence.
+            copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the waveform data begins.
+            sample_count: The number of samples in the waveform.
+            extended_properties: The extended properties of the waveform.
+            timing: The timing information of the waveform.
+            scale_mode: The scale mode of the waveform.
+
+        Returns:
+            An analog waveform containing the specified data.
+        """
         return super(AnalogWaveform, cls).from_array_1d(
             array,
             dtype,
@@ -189,7 +205,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
 
     @override
     @classmethod
-    def from_array_2d(  # noqa: D102 - Missing docstring in public method - override
+    def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
         dtype: npt.DTypeLike = None,
@@ -201,6 +217,26 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> list[AnalogWaveform[Any]]:
+        """Construct a list of analog waveforms from a two-dimensional array or nested sequence.
+
+        Args:
+            array: The waveform data as a two-dimensional array or a nested sequence.
+            dtype: The NumPy data type for the waveform data. This argument is required
+                when array is a sequence.
+            copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the waveform data begins.
+            sample_count: The number of samples in the waveform.
+            extended_properties: The extended properties of the waveform.
+            timing: The timing information of the waveform.
+            scale_mode: The scale mode of the waveform.
+
+        Returns:
+            A list containing an analog waveform for each row of the specified data.
+
+        When constructing multiple waveforms, the same extended properties, timing
+        information, and scale mode are applied to all waveforms. Consider assigning
+        these properties after construction.
+        """
         return super(AnalogWaveform, cls).from_array_2d(
             array,
             dtype,

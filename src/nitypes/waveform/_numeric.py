@@ -404,8 +404,9 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
     def scaled_data(self) -> npt.NDArray[_TScaled_co]:
         """The scaled waveform data.
 
-        This property converts all of the waveform samples to :any:`_TScaled_co` and scales them.
-        To scale a subset of the waveform or convert to float32, use the get_scaled_data() method
+        This property converts all of the waveform samples from the raw data type to the scaled
+        data type and scales them using :any:`scale_mode`. To scale a subset of the waveform or
+        scale to single-precision floating point, use the :any:`get_scaled_data` method
         instead.
         """
         return self.get_scaled_data()
@@ -584,16 +585,16 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
         The default value is PrecisionTiming.empty.
 
-        Use NumericWaveform.precision_timing instead of NumericWaveform.timing to obtain timing
-        information with higher precision than NumericWaveform.timing. If the timing information is
-        set using NumericWaveform.precision_timing, then this property returns timing information
+        Use :any:`precision_timing` instead of :any:`timing` to obtain timing
+        information with higher precision than :any:`timing`. If the timing information is
+        set using :any:`precision_timing`, then this property returns timing information
         with up to yoctosecond precision. If the timing information is set using
-        NumericWaveform.timing, then the timing information returned has up to microsecond
+        :any:`timing`, then the timing information returned has up to microsecond
         precision.
 
         Accessing this property can potentially decrease performance if the timing information is
-        set using NumericWaveform.timing. Use NumericWaveform.is_precision_timing_initialized to
-        determine if NumericWaveform.precision_timing has been initialized.
+        set using :any:`timing`. Use :any:`is_precision_timing_initialized` to
+        determine if :any:`precision_timing` has been initialized.
         """
         return self._get_timing(PrecisionTiming)
 

@@ -53,9 +53,6 @@ array([1, 2, 3], dtype=int32)
 >>> wfm.scaled_data
 array([2.5, 4.5, 6.5])
 
-In type hints, the :any:`AnalogWaveform` class has two type parameters: the raw data type and the
-scaled data type. The scaled data type is optional and defaults to :any:`numpy.float64`.
-
 Complex Waveforms
 =================
 
@@ -65,8 +62,7 @@ information and extended properties such as units.
 Constructing complex waveforms
 ------------------------------
 
-To construct a complex waveform, use the :any:`ComplexWaveform` class with complex-number data or
-complex NumPy data type objects:
+To construct a complex waveform, use the :any:`ComplexWaveform` class:
 
 >>> ComplexWaveform.from_array_1d([1 + 2j, 3 + 4j], np.complex128)
 nitypes.waveform.ComplexWaveform(2, complex128, raw_data=array([1.+2.j, 3.+4.j]))
