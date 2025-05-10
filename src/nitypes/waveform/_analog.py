@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, SupportsIndex, Union, overload
+from typing import Any, SupportsIndex, Union, cast, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -92,7 +92,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
     def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
-        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
+        dtype: type[_TRaw] | np.dtype[_TRaw],
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -119,7 +119,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
 
     @override
     @classmethod
-    def from_array_1d(
+    def from_array_1d(  # pyright: ignore[reportIncompatibleMethodOverride]
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
         dtype: npt.DTypeLike = None,
@@ -178,7 +178,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
     def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
+        dtype: type[_TRaw] | np.dtype[_TRaw],
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -205,7 +205,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
 
     @override
     @classmethod
-    def from_array_2d(
+    def from_array_2d(  # pyright: ignore[reportIncompatibleMethodOverride]
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
         dtype: npt.DTypeLike = None,
@@ -237,15 +237,19 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         information, and scale mode are applied to all waveforms. Consider assigning
         these properties after construction.
         """
-        return super(AnalogWaveform, cls).from_array_2d(
-            array,
-            dtype,
-            copy=copy,
-            start_index=start_index,
-            sample_count=sample_count,
-            extended_properties=extended_properties,
-            timing=timing,
-            scale_mode=scale_mode,
+        # list[T] is invariant but we are using it in a covariant way here.
+        return cast(
+            list[AnalogWaveform[Any]],
+            super(AnalogWaveform, cls).from_array_2d(
+                array,
+                dtype,
+                copy=copy,
+                start_index=start_index,
+                sample_count=sample_count,
+                extended_properties=extended_properties,
+                timing=timing,
+                scale_mode=scale_mode,
+            ),
         )
 
     __slots__ = ()
