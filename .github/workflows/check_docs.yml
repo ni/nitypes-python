@@ -5,8 +5,6 @@ on:
   workflow_dispatch:
 
 env:
-  PIPX_BIN_DIR: $HOME/.local/bin
-  PIPX_HOME: $HOME/.local/pipx
   POETRY_VERSION: 1.8.2
   PYTHON_VERSION: 3.11.9
 
@@ -22,6 +20,11 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+      - name: Override pipx paths
+        run: |
+          echo "PIPX_BIN_DIR=$HOME/.local/bin" >> "$GITHUB_ENV"
+          echo "PIPX_HOME=$HOME/.local/pipx" >> "$GITHUB_ENV"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Cache pipx
         uses: actions/cache@v4
         with:
@@ -29,8 +32,6 @@ jobs:
             ${{ env.PIPX_HOME }}
             ${{ env.PIPX_BIN_DIR }}
           key: pipx-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ env.POETRY_VERSION }}
-      - name: Add PIPX_BIN_DIR to the path
-        run: echo "${{ env.PIPX_BIN_DIR }}" >> "$GITHUB_PATH"
       - name: Set up Poetry
         run: pipx install poetry==${{ env.POETRY_VERSION }} --python '${{ steps.setup-python.outputs.python-path }}'
       - name: Check for lock changes
