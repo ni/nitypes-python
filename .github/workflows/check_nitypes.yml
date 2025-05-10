@@ -41,3 +41,15 @@ jobs:
         run:  poetry run mypy --platform win32
       - name: Bandit security checks
         run:  poetry run bandit -c pyproject.toml -r src/nitypes
+      - name: Add virtualenv to the path for pyright-action
+        run: echo "$(poetry env info --path)/bin" >> $GITHUB_PATH
+      - name: Pyright static analysis (Linux)
+        uses: jakebailey/pyright-action@v2
+        with:
+          python-platform: Linux
+          version: PATH
+      - name: Pyright static analysis (Windows)
+        uses: jakebailey/pyright-action@v2
+        with:
+          python-platform: Windows
+          version: PATH
