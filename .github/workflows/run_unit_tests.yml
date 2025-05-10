@@ -35,8 +35,8 @@ jobs:
             ${{ env.PIPX_HOME }}
             ${{ env.PIPX_BIN_DIR }}
           key: pipx-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ env.POETRY_VERSION }}
-      - name: Add pipx to the path
-        run: pipx ensurepath
+      - name: Add PIPX_BIN_DIR to the path
+        run: echo "${{ env.PIPX_BIN_DIR }}" >> "$GITHUB_PATH"
       - name: Set up Poetry
         run: pipx install poetry==${{ env.POETRY_VERSION }} --python '${{ steps.setup-python.outputs.python-path }}'
       - name: Cache virtualenv
