@@ -28,6 +28,7 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           echo "pipx-bin-dir=$HOME/.local/bin" >> "$GITHUB_OUTPUT"
           echo "pipx-home=$HOME/.local/pipx" >> "$GITHUB_OUTPUT"
+        shell: bash
       - name: Cache pipx
         uses: actions/cache@v4
         with:
