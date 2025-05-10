@@ -21,6 +21,7 @@ typing-extensions = ">=4.13.2"
 bandit = { version = ">=1.7", extras = ["toml"] }
 ni-python-styleguide = ">=0.4.1"
 mypy = ">=1.0"
+pyright = { version = ">=1.1.400", extras = ["nodejs"] }
 
 [tool.poetry.group.test.dependencies]
 pytest = ">=7.2"
@@ -40,14 +41,6 @@ sphinx-autoapi = ">=1.8.4"
 m2r2 = ">=0.3.2"
 toml = ">=0.10.2"
 tomlkit = ">=0.11.0"
-
-[tool.poetry.group.pyright]
-# This dependency group is for running Pyright locally.
-# Pyright is a Node.js application, so we deploy it differently in CI.
-optional = true
-
-[tool.poetry.group.pyright.dependencies]
-pyright = { version = ">=1.1.400", extras = ["nodejs"] }
 
 [tool.black]
 line-length = 100
