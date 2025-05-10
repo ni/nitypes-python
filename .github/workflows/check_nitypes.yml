@@ -20,6 +20,13 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+      - name: Cache pipx
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.PIPX_HOME }}
+            ${{ env.PIPX_BIN_DIR }}
+          key: pipx-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ env.POETRY_VERSION }}
       - name: Set up Poetry
         run: pipx install poetry==${{ env.POETRY_VERSION }} --python '${{ steps.setup-python.outputs.python-path }}'
       - name: Check for lock changes
