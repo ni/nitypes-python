@@ -5,6 +5,8 @@ on:
   workflow_dispatch:
 
 env:
+  PIPX_BIN_DIR: ~/.local/bin
+  PIPX_HOME: ~/.local/pipx
   POETRY_VERSION: 1.8.2
 
 jobs:
@@ -26,6 +28,13 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Cache pipx
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.PIPX_HOME }}
+            ${{ env.PIPX_BIN_DIR }}
+          key: pipx-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-poetry${{ env.POETRY_VERSION }}
       - name: Set up Poetry
         run: pipx install poetry==${{ env.POETRY_VERSION }} --python '${{ steps.setup-python.outputs.python-path }}'
       - name: Cache virtualenv
