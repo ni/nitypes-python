@@ -41,6 +41,14 @@ m2r2 = ">=0.3.2"
 toml = ">=0.10.2"
 tomlkit = ">=0.11.0"
 
+[tool.poetry.group.pyright]
+# This dependency group is for running Pyright locally.
+# Pyright is a Node.js application, so we deploy it differently in CI.
+optional = true
+
+[tool.poetry.group.pyright.dependencies]
+pyright = { version = ">=1.1.400", extras = ["nodejs"] }
+
 [tool.black]
 line-length = 100
 
@@ -62,3 +70,6 @@ strict = true
 skips = [
   "B101", # assert_used
 ]
+
+[tool.pyright]
+include = ["src/", "tests/"]
