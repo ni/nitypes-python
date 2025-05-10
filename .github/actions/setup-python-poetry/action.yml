@@ -41,3 +41,4 @@ runs:
     - name: Set up Poetry
       if: steps.cache-pipx.outputs.cache-hit != 'true'
       run: pipx install poetry==${{ inputs.poetry-version }} --python '${{ steps.setup-python.outputs.python-path }}'
+      shell: bash
