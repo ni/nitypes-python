@@ -21,9 +21,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Set up Poetry
-        uses: Gr1N/setup-poetry@v9
-        with:
-          poetry-version: ${{ env.POETRY_VERSION }}
+        run: pipx install poetry==${{ env.POETRY_VERSION }} --python python${{ steps.setup-python.outputs.python-version }}
       - name: Check for lock changes
         run: poetry check --lock
       - name: Cache virtualenv (with docs)
