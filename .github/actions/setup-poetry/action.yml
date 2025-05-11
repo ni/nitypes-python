@@ -19,7 +19,7 @@ runs:
       id: set-paths
       run: |
         echo "POETRY_BIN_DIR=$HOME/.local/poetry/bin" >> "$GITHUB_ENV"
-        echo "POETRY_HOME=$HOME/.local/poetry/venv" >> "$GITHUB_ENV"
+        echo "POETRY_HOME=$HOME/.local/poetry/home" >> "$GITHUB_ENV"
         echo "poetry-bin-dir=$HOME/.local/poetry/bin" >> "$GITHUB_OUTPUT"
         echo "poetry-home=$HOME/.local/poetry/home" >> "$GITHUB_OUTPUT"
         echo "$HOME/.local/poetry/bin" >> "$GITHUB_PATH"
