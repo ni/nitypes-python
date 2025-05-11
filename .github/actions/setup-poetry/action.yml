@@ -15,41 +15,40 @@ runs:
         fi 
         "$pythonLocation/python" -c "import platform; print(f'python-version={platform.python_version()}')" >> "$GITHUB_OUTPUT"
       shell: bash
-    - name: Set paths
-      id: set-paths
+    - name: Set paths (Linux/Mac)
+      if: runner.os != 'Windows'
       run: |
-        echo "LOCAL_BIN_DIR=$HOME/.local/bin" >> "$GITHUB_ENV"
-        echo "local-bin-dir=$HOME/.local/bin" >> "$GITHUB_OUTPUT"
-        echo "POETRY_HOME=$HOME/.local/poetry" >> "$GITHUB_ENV"
-        echo "poetry-home=$HOME/.local/poetry" >> "$GITHUB_OUTPUT"
-        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        echo "POETRY_BIN_DIR=$HOME/.local/poetry/bin" >> "$GITHUB_ENV"
+        echo "POETRY_HOME=$HOME/.local/poetry/home" >> "$GITHUB_ENV"
+        echo "POETRY_HOME_BIN=$HOME/.local/poetry/home/bin" >> "$GITHUB_ENV"
+        echo "$HOME/.local/poetry/bin" >> "$GITHUB_PATH"
+      shell: bash
+    - name: Set paths (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        Add-Content $env:GITHUB_ENV "POETRY_BIN_DIR=$HOME\.local\poetry\bin"
+        Add-Content $env:GITHUB_ENV "POETRY_HOME=$HOME\.local\poetry\home"
+        Add-Content $env:GITHUB_ENV "POETRY_HOME_BIN=$HOME\.local\poetry\home\Scripts"
+        Add-Content $env:GITHUB_PATH "$HOME\.local\poetry\bin"
+      shell: powershell
+    - name: Get paths
+      id: get-paths
+      run: |
+        echo "poetry-paths=$POETRY_EXE $POETRY_HOME" >> "$GITHUB_OUTPUT"
       shell: bash
     - name: Cache poetry
       id: cache-poetry
       uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
-        path: |
-          ${{ steps.set-paths.outputs.local-bin-dir }}/poetry*
-          ${{ steps.set-paths.outputs.poetry-home }}
+        path: ${{ steps.get-paths.outputs.poetry-paths }}
         key: poetry${{ inputs.poetry-version }}-${{ runner.os }}-py${{ steps.get-python-version.outputs.python-version }}
     - name: Install Poetry
       if: steps.cache-poetry.outputs.cache-hit != 'true'
       run: |
         "$pythonLocation/python" -m venv "$POETRY_HOME"
-        if [ -d "$POETRY_HOME/Scripts" ]; then
-          export POETRY_HOME_BIN="$POETRY_HOME/Scripts"
-          export EXE=".exe"
-        else
-          export POETRY_HOME_BIN="$POETRY_HOME/bin"
-          export EXE=""
-        fi
         "$POETRY_HOME_BIN/python" -m pip install poetry==${{ inputs.poetry-version }}
-        mkdir -p "$LOCAL_BIN_DIR"
-        if [ x"$EXE" == x".exe" ]; then
-          cp "$POETRY_HOME_BIN/poetry$EXE" "$LOCAL_BIN_DIR/poetry$EXE"
-        else
-          ln -s "$POETRY_HOME_BIN/poetry$EXE" "$LOCAL_BIN_DIR/poetry$EXE"
-        fi
+        mkdir -p "$POETRY_BIN_DIR"
+        ln -s "$POETRY_HOME_BIN/poetry"* "$POETRY_BIN_DIR/"
       shell: bash
     - name: Print Poetry version
       run: poetry --version
