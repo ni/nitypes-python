@@ -38,14 +38,16 @@ runs:
         "$pythonLocation/python" -m venv "$POETRY_HOME"
         if [ -d "$POETRY_HOME/Scripts" ]; then
           export POETRY_HOME_BIN="$POETRY_HOME/Scripts"
-          export EXE=".exe"
         else
           export POETRY_HOME_BIN="$POETRY_HOME/bin"
-          export EXE=""
         fi
         "$POETRY_HOME_BIN/python" -m pip install poetry==${{ inputs.poetry-version }}
         mkdir -p "$POETRY_BIN_DIR"
-        ln -s "$POETRY_HOME_BIN/poetry$EXE" "$POETRY_BIN_DIR/poetry$EXE"
+        if [ -d "$POETRY_HOME/Scripts" ]; then
+          cp "$POETRY_HOME_BIN/poetry.exe" "$POETRY_BIN_DIR/poetry.exe"
+        else
+          ln -s "$POETRY_HOME_BIN/poetry" "$POETRY_BIN_DIR/poetry"
+        fi
       shell: bash
     - name: Print Poetry version
       run: poetry --version
