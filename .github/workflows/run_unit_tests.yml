@@ -30,6 +30,9 @@ jobs:
         with:
           path: .venv
           key: nitypes-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+      - run: echo $PATH
+        shell: bash
+      - run: echo $env:PATH
       - name: Install nitypes
         run: poetry install -v
       - name: Run unit tests and code coverage
