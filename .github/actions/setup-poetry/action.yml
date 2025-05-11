@@ -31,16 +31,19 @@ runs:
         Add-Content $env:GITHUB_ENV "POETRY_HOME_BIN=$HOME\.local\poetry\home\Scripts"
         Add-Content $env:GITHUB_PATH "$HOME\.local\poetry\bin"
       shell: pwsh
-    - name: Get paths
-      id: get-paths
+    - name: Copy paths from $GITHUB_ENV to $GITHUB_OUTPUT
+      id: copy-paths
       run: |
-        echo "poetry-paths=$POETRY_EXE $POETRY_HOME" >> "$GITHUB_OUTPUT"
+        echo "poetry-bin-dir=$POETRY_BIN_DIR" >> "$GITHUB_OUTPUT"
+        echo "poetry-home=$POETRY_HOME" >> "$GITHUB_OUTPUT"
       shell: bash
     - name: Cache poetry
       id: cache-poetry
       uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
-        path: ${{ steps.get-paths.outputs.poetry-paths }}
+        path: |
+          ${{ steps.copy-paths.outputs.poetry-bin-dir }}/poetry*
+          ${{ steps.copy-paths.outputs.poetry-home }}          
         key: poetry${{ inputs.poetry-version }}-${{ runner.os }}-py${{ steps.get-python-version.outputs.python-version }}
     - name: Install Poetry
       if: steps.cache-poetry.outputs.cache-hit != 'true'
