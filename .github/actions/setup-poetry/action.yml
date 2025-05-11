@@ -1,5 +1,5 @@
 name: Set up Poetry
-description: Set up Poetry using pipx and cache the pipx installation.
+description: Install Poetry and cache its installation.
 inputs:
   poetry-version:
     default: 1.8.2
@@ -15,32 +15,37 @@ runs:
         fi 
         "$pythonLocation/python" -c "import platform; print(f'python-version={platform.python_version()}')" >> "$GITHUB_OUTPUT"
       shell: bash
-    # The default pipx paths on GitHub-hosted runners are locations that actions/cache cannot
-    # write to, like /opt/pipx and "C:\Program Files (x86)\pipx". See
-    # https://github.com/pypa/pipx/discussions/1051 for more info.
-    - name: Set pipx paths
-      id: set-pipx-paths
+    - name: Set paths
+      id: set-paths
       run: |
-        echo "PIPX_BIN_DIR=$HOME/.local/bin" >> "$GITHUB_ENV"
-        echo "PIPX_HOME=$HOME/.local/pipx" >> "$GITHUB_ENV"
+        echo "POETRY_BIN_DIR=$HOME/.local/poetry_bin" >> "$GITHUB_ENV"
+        echo "POETRY_HOME=$HOME/.local/poetry" >> "$GITHUB_ENV"
+        echo "poetry-bin-dir=$HOME/.local/poetry_bin" >> "$GITHUB_OUTPUT"
+        echo "poetry-home=$HOME/.local/poetry" >> "$GITHUB_OUTPUT"
         echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-        echo "pipx-bin-dir=$HOME/.local/bin" >> "$GITHUB_OUTPUT"
-        echo "pipx-home=$HOME/.local/pipx" >> "$GITHUB_OUTPUT"
       # Use bash so that $HOME is evaluated properly.
       shell: bash
-    # This action assumes that pipx is not used to install any packages other than poetry.
-    # If any other packages are installed, the cache key does not take them into account.
-    - name: Cache pipx
-      id: cache-pipx
+    - name: Cache poetry
+      id: cache-poetry
       uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: |
-          ${{ steps.set-pipx-paths.outputs.pipx-bin-dir }}
-          ${{ steps.set-pipx-paths.outputs.pipx-home }}
+          ${{ steps.set-paths.outputs.poetry-bin-dir }}
+          ${{ steps.set-paths.outputs.poetry-home }}
         key: pipx-${{ runner.os }}-py${{ steps.get-python-version.outputs.python-version }}-poetry${{ inputs.poetry-version }}
-    - name: Install Poetry
-      if: steps.cache-pipx.outputs.cache-hit != 'true'
-      run: pipx install poetry==${{ inputs.poetry-version }} --python "$pythonLocation/python"
+    - name: Install Poetry (Linux/Mac)
+      if: runner.os != "Windows" && steps.cache-pipx.outputs.cache-hit != 'true'
+      run: |
+        "$pythonLocation/python" -m venv "$POETRY_HOME"
+        "$POETRY_HOME/bin/python" -m pip install poetry==${{ inputs.poetry-version }}
+        ln -s "$POETRY_HOME/bin/poetry" "$POETRY_BIN_DIR/poetry"
+      shell: bash
+    - name: Install Poetry (Windows)
+      if: runner.os == "Windows" && steps.cache-pipx.outputs.cache-hit != 'true'
+      run: |
+        "$pythonLocation/python" -m venv "$POETRY_HOME"
+        "$POETRY_HOME/Scripts/python" -m pip install poetry==${{ inputs.poetry-version }}
+        ln -s "$POETRY_HOME/bin/poetry.exe" "$POETRY_BIN_DIR/poetry.exe"
       shell: bash
     - name: Print Poetry version
       run: poetry --version
