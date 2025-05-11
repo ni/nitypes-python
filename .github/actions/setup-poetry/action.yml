@@ -33,7 +33,7 @@ runs:
           ${{ steps.set-paths.outputs.poetry-home }}
         key: poetry${{ inputs.poetry-version }}-${{ runner.os }}-py${{ steps.get-python-version.outputs.python-version }}
     - name: Install Poetry
-      if: steps.cache-pipx.outputs.cache-hit != 'true'
+      if: steps.cache-poetry.outputs.cache-hit != 'true'
       run: |
         "$pythonLocation/python" -m venv "$POETRY_HOME"
         if [ -d "$POETRY_HOME/Scripts" ]; then
