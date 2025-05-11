@@ -13,7 +13,7 @@ runs:
           echo "You must use the setup-python action before using this action."
           exit 1
         fi 
-        "$pythonLocation/python" -c "import sys; print(f'python-version={sys.version}')" >> "$GITHUB_OUTPUT"
+        "$pythonLocation/python" -c "import platform; print(f'python-version={platform.python_version()}')" >> "$GITHUB_OUTPUT"
       shell: bash
     # The default pipx paths on GitHub-hosted runners are locations that actions/cache cannot
     # write to, like /opt/pipx and "C:\Program Files (x86)\pipx". See
