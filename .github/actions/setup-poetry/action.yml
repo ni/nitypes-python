@@ -34,14 +34,14 @@ runs:
           ${{ steps.set-paths.outputs.poetry-home }}
         key: pipx-${{ runner.os }}-py${{ steps.get-python-version.outputs.python-version }}-poetry${{ inputs.poetry-version }}
     - name: Install Poetry (Linux/Mac)
-      if: runner.os != "Windows" && steps.cache-pipx.outputs.cache-hit != 'true'
+      if: runner.os != 'Windows' && steps.cache-pipx.outputs.cache-hit != 'true'
       run: |
         "$pythonLocation/python" -m venv "$POETRY_HOME"
         "$POETRY_HOME/bin/python" -m pip install poetry==${{ inputs.poetry-version }}
         ln -s "$POETRY_HOME/bin/poetry" "$POETRY_BIN_DIR/poetry"
       shell: bash
     - name: Install Poetry (Windows)
-      if: runner.os == "Windows" && steps.cache-pipx.outputs.cache-hit != 'true'
+      if: runner.os == 'Windows' && steps.cache-pipx.outputs.cache-hit != 'true'
       run: |
         "$pythonLocation/python" -m venv "$POETRY_HOME"
         "$POETRY_HOME/Scripts/python" -m pip install poetry==${{ inputs.poetry-version }}
