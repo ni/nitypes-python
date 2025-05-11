@@ -18,12 +18,11 @@ runs:
     - name: Set paths
       id: set-paths
       run: |
-        echo "POETRY_BIN_DIR=$HOME/.local/poetry_bin" >> "$GITHUB_ENV"
-        echo "POETRY_HOME=$HOME/.local/poetry" >> "$GITHUB_ENV"
-        echo "poetry-bin-dir=$HOME/.local/poetry_bin" >> "$GITHUB_OUTPUT"
-        echo "poetry-home=$HOME/.local/poetry" >> "$GITHUB_OUTPUT"
-        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-      # Use bash so that $HOME is evaluated properly.
+        echo "POETRY_BIN_DIR=$HOME/.local/poetry/bin" >> "$GITHUB_ENV"
+        echo "POETRY_HOME=$HOME/.local/poetry/venv" >> "$GITHUB_ENV"
+        echo "poetry-bin-dir=$HOME/.local/poetry/bin" >> "$GITHUB_OUTPUT"
+        echo "poetry-home=$HOME/.local/poetry/home" >> "$GITHUB_OUTPUT"
+        echo "$HOME/.local/poetry/bin" >> "$GITHUB_PATH"
       shell: bash
     - name: Cache poetry
       id: cache-poetry
@@ -32,7 +31,7 @@ runs:
         path: |
           ${{ steps.set-paths.outputs.poetry-bin-dir }}
           ${{ steps.set-paths.outputs.poetry-home }}
-        key: pipx-${{ runner.os }}-py${{ steps.get-python-version.outputs.python-version }}-poetry${{ inputs.poetry-version }}
+        key: poetry${{ inputs.poetry-version }}-${{ runner.os }}-py${{ steps.get-python-version.outputs.python-version }}
     - name: Install Poetry
       if: steps.cache-pipx.outputs.cache-hit != 'true'
       run: |
