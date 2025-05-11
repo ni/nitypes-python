@@ -45,7 +45,11 @@ runs:
         fi
         "$POETRY_HOME_BIN/python" -m pip install poetry==${{ inputs.poetry-version }}
         mkdir -p "$LOCAL_BIN_DIR"
-        ln -s "$POETRY_HOME_BIN/poetry$EXE" "$LOCAL_BIN_DIR/poetry$EXE"
+        if [ x"$EXE" == x".exe" ]; then
+          cp "$POETRY_HOME_BIN/poetry$EXE" "$LOCAL_BIN_DIR/poetry$EXE"
+        else
+          ln -s "$POETRY_HOME_BIN/poetry$EXE" "$LOCAL_BIN_DIR/poetry$EXE"
+        fi
       shell: bash
     - name: Print Poetry version
       run: poetry --version
