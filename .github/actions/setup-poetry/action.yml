@@ -18,18 +18,18 @@ runs:
     - name: Set paths
       id: set-paths
       run: |
-        echo "POETRY_BIN_DIR=$HOME/.local/poetry/bin" >> "$GITHUB_ENV"
-        echo "POETRY_HOME=$HOME/.local/poetry/home" >> "$GITHUB_ENV"
-        echo "poetry-bin-dir=$HOME/.local/poetry/bin" >> "$GITHUB_OUTPUT"
-        echo "poetry-home=$HOME/.local/poetry/home" >> "$GITHUB_OUTPUT"
-        echo "$HOME/.local/poetry/bin" >> "$GITHUB_PATH"
+        echo "LOCAL_BIN_DIR=$HOME/.local/bin" >> "$GITHUB_ENV"
+        echo "local-bin-dir=$HOME/.local/bin" >> "$GITHUB_OUTPUT"
+        echo "POETRY_HOME=$HOME/.local/poetry" >> "$GITHUB_ENV"
+        echo "poetry-home=$HOME/.local/poetry" >> "$GITHUB_OUTPUT"
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       shell: bash
     - name: Cache poetry
       id: cache-poetry
       uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
       with:
         path: |
-          ${{ steps.set-paths.outputs.poetry-bin-dir }}
+          ${{ steps.set-paths.outputs.local-bin-dir }}/poetry*
           ${{ steps.set-paths.outputs.poetry-home }}
         key: poetry${{ inputs.poetry-version }}-${{ runner.os }}-py${{ steps.get-python-version.outputs.python-version }}
     - name: Install Poetry
@@ -38,16 +38,14 @@ runs:
         "$pythonLocation/python" -m venv "$POETRY_HOME"
         if [ -d "$POETRY_HOME/Scripts" ]; then
           export POETRY_HOME_BIN="$POETRY_HOME/Scripts"
+          export EXE=".exe"
         else
           export POETRY_HOME_BIN="$POETRY_HOME/bin"
+          export EXE=""
         fi
         "$POETRY_HOME_BIN/python" -m pip install poetry==${{ inputs.poetry-version }}
-        mkdir -p "$POETRY_BIN_DIR"
-        if [ -d "$POETRY_HOME/Scripts" ]; then
-          cp "$POETRY_HOME_BIN/poetry.exe" "$POETRY_BIN_DIR/poetry.exe"
-        else
-          ln -s "$POETRY_HOME_BIN/poetry" "$POETRY_BIN_DIR/poetry"
-        fi
+        mkdir -p "$LOCAL_BIN_DIR"
+        ln -s "$POETRY_HOME_BIN/poetry$EXE" "$LOCAL_BIN_DIR/poetry$EXE"
       shell: bash
     - name: Print Poetry version
       run: poetry --version
