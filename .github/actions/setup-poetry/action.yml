@@ -9,11 +9,11 @@ runs:
     - name: Get Python version
       id: get-python-version
       run: |
-        if [ ! -x "$env.pythonLocation" ]; then
+        if [ ! -x "$pythonLocation" ]; then
           echo "You must use the setup-python action before using this action."
           exit 1
         fi 
-        "$env.pythonLocation" -c "import sys; print(f'python-version={sys.version}')" >> "$GITHUB_OUTPUT"
+        "$pythonLocation" -c "import sys; print(f'python-version={sys.version}')" >> "$GITHUB_OUTPUT"
       shell: bash
     # The default pipx paths on GitHub-hosted runners are locations that actions/cache cannot
     # write to, like /opt/pipx and "C:\Program Files (x86)\pipx". See
@@ -40,7 +40,7 @@ runs:
         key: pipx-${{ runner.os }}-py${{ steps.get-python-version.outputs.python-version }}-poetry${{ inputs.poetry-version }}
     - name: Install Poetry
       if: steps.cache-pipx.outputs.cache-hit != 'true'
-      run: pipx install poetry==${{ inputs.poetry-version }} --python '${{ $env.pythonLocation }}'
+      run: pipx install poetry==${{ inputs.poetry-version }} --python "$env.pythonLocation"
       shell: bash
     - name: Print Poetry version
       run: poetry --version
