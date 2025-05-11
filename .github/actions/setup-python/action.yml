@@ -1,0 +1,18 @@
+name: Set up Python
+description: Set up Python, using an NI-chosen default version.
+inputs:
+  python-version:
+    default: 3.11.9
+outputs:
+  python-path:
+    value: ${{ steps.setup-python.outputs.python-path }}
+  python-version:
+    value: ${{ steps.setup-python.outputs.python-version }}
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      id: setup-python
+      with:
+        python-version: ${{ inputs.python-version }}

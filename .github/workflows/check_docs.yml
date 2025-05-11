@@ -11,16 +11,18 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
-      - name: Set up Python and Poetry
-        id: setup-python-poetry
-        uses: ./.github/actions/setup-python-poetry
+      - name: Set up Python
+        id: setup-python
+        uses: ./.github/actions/setup-python
+      - name: Set up Poetry
+        uses: ./.github/actions/setup-poetry
       - name: Check for lock changes
         run: poetry check --lock
       - name: Cache virtualenv (with docs)
         uses: actions/cache@v4
         with:
           path: .venv
-          key: nitypes-with-docs-${{ runner.os }}-py${{ steps.setup-python-poetry.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+          key: nitypes-with-docs-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
       - name: Install nitypes (with docs)
         run: poetry install -v --only main,docs
       - name: Generate docs

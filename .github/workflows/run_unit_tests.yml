@@ -18,16 +18,18 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
-      - name: Set up Python and Poetry
-        id: setup-python-poetry
-        uses: ./.github/actions/setup-python-poetry
+      - name: Set up Python
+        id: setup-python
+        uses: ./.github/actions/setup-python
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Set up Poetry
+        uses: ./.github/actions/setup-poetry
       - name: Cache virtualenv
         uses: actions/cache@v4
         with:
           path: .venv
-          key: nitypes-${{ runner.os }}-py${{ steps.setup-python-poetry.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
+          key: nitypes-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
       - name: Install nitypes
         run: poetry install -v
       - name: Run unit tests and code coverage

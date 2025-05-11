@@ -1,0 +1,47 @@
+name: Set up Poetry
+description: Set up Poetry using pipx and cache the pipx installation.
+inputs:
+  poetry-version:
+    default: 1.8.2
+runs:
+  using: composite
+  steps:
+    - name: Get Python version
+      id: get-python-version
+      run: |
+        if [ ! -x "$env.pythonLocation" ]; then
+          echo "You must use the setup-python action before using this action."
+          exit 1
+        fi 
+        "$env.pythonLocation" -c "import sys; print(f'python-version={sys.version}')" >> "$GITHUB_OUTPUT"
+      shell: bash
+    # The default pipx paths on GitHub-hosted runners are locations that actions/cache cannot
+    # write to, like /opt/pipx and "C:\Program Files (x86)\pipx". See
+    # https://github.com/pypa/pipx/discussions/1051 for more info.
+    - name: Set pipx paths
+      id: set-pipx-paths
+      run: |
+        echo "PIPX_BIN_DIR=$HOME/.local/bin" >> "$GITHUB_ENV"
+        echo "PIPX_HOME=$HOME/.local/pipx" >> "$GITHUB_ENV"
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+        echo "pipx-bin-dir=$HOME/.local/bin" >> "$GITHUB_OUTPUT"
+        echo "pipx-home=$HOME/.local/pipx" >> "$GITHUB_OUTPUT"
+      # Use bash so that $HOME is evaluated properly.
+      shell: bash
+    # This action assumes that pipx is not used to install any packages other than poetry.
+    # If any other packages are installed, the cache key does not take them into account.
+    - name: Cache pipx
+      id: cache-pipx
+      uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+      with:
+        path: |
+          ${{ steps.set-pipx-paths.outputs.pipx-bin-dir }}
+          ${{ steps.set-pipx-paths.outputs.pipx-home }}
+        key: pipx-${{ runner.os }}-py${{ steps.get-python-version.outputs.python-version }}-poetry${{ inputs.poetry-version }}
+    - name: Install Poetry
+      if: steps.cache-pipx.outputs.cache-hit != 'true'
+      run: pipx install poetry==${{ inputs.poetry-version }} --python '${{ $env.pythonLocation }}'
+      shell: bash
+    - name: Print Poetry version
+      run: poetry --version
+      shell: bash
