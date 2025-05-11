@@ -30,7 +30,7 @@ runs:
         Add-Content $env:GITHUB_ENV "POETRY_HOME=$HOME\.local\poetry\home"
         Add-Content $env:GITHUB_ENV "POETRY_HOME_BIN=$HOME\.local\poetry\home\Scripts"
         Add-Content $env:GITHUB_PATH "$HOME\.local\poetry\bin"
-      shell: powershell
+      shell: pwsh
     - name: Get paths
       id: get-paths
       run: |
