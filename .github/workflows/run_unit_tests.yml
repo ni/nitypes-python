@@ -19,12 +19,12 @@ jobs:
       - name: Check out repo
         uses: actions/checkout@v4
       - name: Set up Python
-        uses: ni/python-actions/setup-python@users/bkeryan/create-python-actions
+        uses: ni/python-actions/setup-python@v0.1.0
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up Poetry
-        uses: ni/python-actions/setup-poetry@users/bkeryan/create-python-actions
+        uses: ni/python-actions/setup-poetry@v0.1.0
       - name: Cache virtualenv
         uses: actions/cache@v4
         with:
