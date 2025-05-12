@@ -65,7 +65,7 @@ Constructing complex waveforms
 To construct a complex waveform, use the :any:`ComplexWaveform` class:
 
 >>> ComplexWaveform.from_array_1d([1 + 2j, 3 + 4j], np.complex128)
-nitypes.waveform.ComplexWaveform(2, complex128, raw_data=array([1.+2.j, 3.+4.j]))
+nitypes.waveform.ComplexWaveform(2, raw_data=array([1.+2.j, 3.+4.j]))
 
 Scaling complex-number data
 ---------------------------
@@ -84,7 +84,22 @@ nitypes.waveform.ComplexWaveform(2, void32, raw_data=array([(1, 2), (3, 4)],
 array([(1, 2), (3, 4)], dtype=[('real', '<i2'), ('imag', '<i2')])
 >>> wfm.scaled_data
 array([2.5+4.j, 6.5+8.j])
-"""
+
+Frequency Spectrums
+===================
+
+A frequency spectrum represents an analog signal with frequency information and extended properties
+such as units.
+
+Constructing spectrums
+----------------------
+
+To construct a spectrum, use the :any:`Spectrum` class:
+
+>>> Spectrum.from_array_1d([1, 2, 3], np.float64, start_frequency=100, frequency_increment=10)  # doctest: +NORMALIZE_WHITESPACE
+nitypes.waveform.Spectrum(3, data=array([1., 2., 3.]), start_frequency=100.0,
+    frequency_increment=10.0)
+"""  # noqa: W505 - doc line too long
 
 from nitypes.waveform._analog import AnalogWaveform
 from nitypes.waveform._complex import ComplexWaveform
@@ -100,6 +115,7 @@ from nitypes.waveform._scaling import (
     NoneScaleMode,
     ScaleMode,
 )
+from nitypes.waveform._spectrum import Spectrum
 from nitypes.waveform._timing import (
     BaseTiming,
     PrecisionTiming,
@@ -122,6 +138,7 @@ __all__ = [
     "SampleIntervalMode",
     "ScaleMode",
     "ScalingMismatchWarning",
+    "Spectrum",
     "Timing",
     "TimingMismatchError",
     "TimingMismatchWarning",
@@ -141,6 +158,7 @@ PrecisionTiming.__module__ = __name__
 SampleIntervalMode.__module__ = __name__
 ScaleMode.__module__ = __name__
 ScalingMismatchWarning.__module__ = __name__
+Spectrum.__module__ = __name__
 Timing.__module__ = __name__
 TimingMismatchError.__module__ = __name__
 TimingMismatchWarning.__module__ = __name__
