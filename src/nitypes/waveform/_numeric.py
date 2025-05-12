@@ -424,7 +424,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
     @overload
     def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self,
-        dtype: type[_TOtherScaled] | np.dtype[_TOtherScaled] = ...,
+        dtype: type[_TOtherScaled] | np.dtype[_TOtherScaled],
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
@@ -546,12 +546,12 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
             self._converted_timing_cache[requested_type] = value
         return value
 
-    def _set_timing(self, value: _TTiming) -> None:
+    def _set_timing(self, value: _AnyTiming) -> None:
         if self._timing is not value:
             self._timing = value
             self._converted_timing_cache.clear()
 
-    def _validate_timing(self, value: _TTiming) -> None:
+    def _validate_timing(self, value: _AnyTiming) -> None:
         if value._timestamps is not None and len(value._timestamps) != self._sample_count:
             raise ValueError(
                 "The number of irregular timestamps is not equal to the number of samples in the waveform.\n\n"

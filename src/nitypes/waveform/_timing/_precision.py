@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import ClassVar
+from typing import ClassVar, final
 
 import hightime as ht
-from typing_extensions import override
+from typing_extensions import Self, override
 
 from nitypes.waveform._timing._base import BaseTiming
 from nitypes.waveform._timing._sample_interval import SampleIntervalMode
 
 
+@final
 class PrecisionTiming(BaseTiming[ht.datetime, ht.timedelta]):
     """High-precision waveform timing using the hightime package.
 
@@ -24,27 +25,29 @@ class PrecisionTiming(BaseTiming[ht.datetime, ht.timedelta]):
     """A waveform timing object with no timestamp, time offset, or sample interval."""
 
     @override
-    @staticmethod
+    @classmethod
     def create_with_no_interval(  # noqa: D102 - Missing docstring in public method - override
-        timestamp: ht.datetime | None = None, time_offset: ht.timedelta | None = None
-    ) -> PrecisionTiming:
-        return PrecisionTiming(SampleIntervalMode.NONE, timestamp, time_offset)
+        cls, timestamp: ht.datetime | None = None, time_offset: ht.timedelta | None = None
+    ) -> Self:
+        return cls(SampleIntervalMode.NONE, timestamp, time_offset)
 
     @override
-    @staticmethod
+    @classmethod
     def create_with_regular_interval(  # noqa: D102 - Missing docstring in public method - override
+        cls,
         sample_interval: ht.timedelta,
         timestamp: ht.datetime | None = None,
         time_offset: ht.timedelta | None = None,
-    ) -> PrecisionTiming:
-        return PrecisionTiming(SampleIntervalMode.REGULAR, timestamp, time_offset, sample_interval)
+    ) -> Self:
+        return cls(SampleIntervalMode.REGULAR, timestamp, time_offset, sample_interval)
 
     @override
-    @staticmethod
+    @classmethod
     def create_with_irregular_interval(  # noqa: D102 - Missing docstring in public method - override
+        cls,
         timestamps: Sequence[ht.datetime],
-    ) -> PrecisionTiming:
-        return PrecisionTiming(SampleIntervalMode.IRREGULAR, timestamps=timestamps)
+    ) -> Self:
+        return cls(SampleIntervalMode.IRREGULAR, timestamps=timestamps)
 
     @override
     @staticmethod

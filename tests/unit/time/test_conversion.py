@@ -76,7 +76,9 @@ def test___variable_requested_type___convert_datetime___static_return_type_unkno
 
     value_out = convert_datetime(requested_type, value_in)
 
-    assert_type(value_out, Any)
+    # Mypy infers Any, which seems right.
+    # Pyright infers dt.datetime, which seems wrong.
+    assert_type(value_out, Any)  # pyright: ignore[reportAssertTypeFailure]
     assert isinstance(value_out, requested_type)
 
 
@@ -161,7 +163,9 @@ def test___variable_requested_type___convert_timedelta___static_return_type_unkn
 
     value_out = convert_timedelta(requested_type, value_in)
 
-    assert_type(value_out, Any)
+    # Mypy infers Any, which seems right.
+    # Pyright infers dt.datetime, which seems wrong.
+    assert_type(value_out, Any)  # pyright: ignore[reportAssertTypeFailure]
     assert isinstance(value_out, requested_type)
 
 

@@ -166,7 +166,9 @@ def test___complexint32_scalar_to_complex128_scalar___convert_complex___converts
 
     value_out = convert_complex(np.complex128, value_in)
 
-    assert_type(value_out, np.ndarray[Any, Any])  # This is less than ideal.
+    # Mypy infers np.ndarray[Any, Any], which seems wrong.
+    # Pyright infers np.ndarray[Any, np.dtype[np.complex128]], which seems right.
+    assert_type(value_out, np.ndarray[Any, np.dtype[np.complex128]])  # type: ignore[assert-type]
     assert isinstance(value_out, np.complex128)
     assert value_out == (1 + 2j)
 
@@ -189,7 +191,9 @@ def test___complexint32_scalar_to_complexint32_scalar___convert_complex___return
 
     value_out = convert_complex(ComplexInt32DType, value_in)
 
-    assert_type(value_out, np.ndarray[Any, Any])  # This is less than ideal.
+    # Mypy infers np.ndarray[Any, Any], which seems wrong.
+    # Pyright infers np.ndarray[Any, np.dtype[np.void]], which seems right.
+    assert_type(value_out, np.ndarray[Any, np.dtype[np.void]])  # type: ignore[assert-type]
     assert value_out is value_in
 
 
