@@ -15,8 +15,12 @@ from typing_extensions import Self, TypeAlias, TypeVar
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes.waveform._exceptions import (
-    input_array_data_type_mismatch,
-    input_waveform_data_type_mismatch,
+    capacity_mismatch,
+    capacity_too_small,
+    data_type_mismatch,
+    irregular_timestamp_count_mismatch,
+    start_index_or_sample_count_too_large,
+    start_index_too_large,
 )
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
@@ -294,17 +298,10 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         validate_dtype(dtype, self.__class__._get_supported_raw_dtypes())
 
         if start_index > capacity:
-            raise ValueError(
-                "The start index must be less than or equal to the capacity.\n\n"
-                f"Start index: {start_index}\n"
-                f"Capacity: {capacity}"
-            )
+            raise start_index_too_large(start_index, "capacity", capacity)
         if start_index + sample_count > capacity:
-            raise ValueError(
-                "The sum of the start index and sample count must be less than or equal to the capacity.\n\n"
-                f"Start index: {start_index}\n"
-                f"Sample count: {sample_count}\n"
-                f"Capacity: {capacity}"
+            raise start_index_or_sample_count_too_large(
+                start_index, sample_count, "capacity", capacity
             )
 
         self._data = np.zeros(capacity, dtype)
@@ -328,36 +325,21 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         if dtype is None:
             dtype = data.dtype
         if dtype != data.dtype:
-            raise TypeError(
-                "The data type of the input array must match the requested data type.\n\n"
-                f"Array data type: {data.dtype}\n"
-                f"Requested data type: {np.dtype(dtype)}"
-            )
+            raise data_type_mismatch("input array", data.dtype, "requested", np.dtype(dtype))
         validate_dtype(dtype, self.__class__._get_supported_raw_dtypes())
 
         capacity = arg_to_uint("capacity", capacity, len(data))
         if capacity != len(data):
-            raise ValueError(
-                "The capacity must match the input array length.\n\n"
-                f"Capacity: {capacity}\n"
-                f"Array length: {len(data)}"
-            )
+            raise capacity_mismatch(capacity, len(data))
 
         start_index = arg_to_uint("start index", start_index, 0)
         if start_index > capacity:
-            raise ValueError(
-                "The start index must be less than or equal to the input array length.\n\n"
-                f"Start index: {start_index}\n"
-                f"Capacity: {capacity}"
-            )
+            raise start_index_too_large(start_index, "input array length", capacity)
 
         sample_count = arg_to_uint("sample count", sample_count, len(data) - start_index)
         if start_index + sample_count > len(data):
-            raise ValueError(
-                "The sum of the start index and sample count must be less than or equal to the input array length.\n\n"
-                f"Start index: {start_index}\n"
-                f"Sample count: {sample_count}\n"
-                f"Array length: {len(data)}"
+            raise start_index_or_sample_count_too_large(
+                start_index, sample_count, "input array length", len(data)
             )
 
         self._data = data
@@ -383,19 +365,14 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         """
         start_index = arg_to_uint("sample index", start_index, 0)
         if start_index > self.sample_count:
-            raise ValueError(
-                "The start index must be less than or equal to the number of samples in the waveform.\n\n"
-                f"Start index: {start_index}\n"
-                f"Number of samples: {self.sample_count}"
+            raise start_index_too_large(
+                start_index, "number of samples in the waveform", self.sample_count
             )
 
         sample_count = arg_to_uint("sample count", sample_count, self.sample_count - start_index)
         if start_index + sample_count > self.sample_count:
-            raise ValueError(
-                "The sum of the start index and sample count must be less than or equal to the number of samples in the waveform.\n\n"
-                f"Start index: {start_index}\n"
-                f"Sample count: {sample_count}\n"
-                f"Number of samples: {self.sample_count}"
+            raise start_index_or_sample_count_too_large(
+                start_index, sample_count, "number of samples in the waveform", self.sample_count
             )
 
         return self.raw_data[start_index : start_index + sample_count]
@@ -492,12 +469,9 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
     @capacity.setter
     def capacity(self, value: int) -> None:
         value = arg_to_uint("capacity", value)
-        if value < self._start_index + self._sample_count:
-            raise ValueError(
-                "The capacity must be equal to or greater than the number of samples in the waveform.\n\n"
-                f"Capacity: {value}\n"
-                f"Number of samples: {self._start_index + self._sample_count}"
-            )
+        min_capacity = self._start_index + self._sample_count
+        if value < min_capacity:
+            raise capacity_too_small(value, min_capacity, "waveform")
         if value != len(self._data):
             self._data.resize(value, refcheck=False)
 
@@ -553,10 +527,8 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
     def _validate_timing(self, value: _AnyTiming) -> None:
         if value._timestamps is not None and len(value._timestamps) != self._sample_count:
-            raise ValueError(
-                "The number of irregular timestamps is not equal to the number of samples in the waveform.\n\n"
-                f"Number of timestamps: {len(value._timestamps)}\n"
-                f"Number of samples in the waveform: {self._sample_count}"
+            raise irregular_timestamp_count_mismatch(
+                len(value._timestamps), "number of samples in the waveform", self._sample_count
             )
 
     @property
@@ -681,14 +653,12 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
     ) -> None:
         if array.dtype != self.dtype:
-            raise input_array_data_type_mismatch(array.dtype, self.dtype)
+            raise data_type_mismatch("input array", array.dtype, "waveform", self.dtype)
         if array.ndim != 1:
             raise invalid_array_ndim("input array", "one-dimensional array", array.ndim)
         if timestamps is not None and len(array) != len(timestamps):
-            raise ValueError(
-                "The number of irregular timestamps must be equal to the input array length.\n\n"
-                f"Number of timestamps: {len(timestamps)}\n"
-                f"Array length: {len(array)}"
+            raise irregular_timestamp_count_mismatch(
+                len(timestamps), "input array length", len(array)
             )
 
         new_timing = self._timing._append_timestamps(timestamps)
@@ -708,7 +678,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
     ) -> None:
         for waveform in waveforms:
             if waveform.dtype != self.dtype:
-                raise input_waveform_data_type_mismatch(waveform.dtype, self.dtype)
+                raise data_type_mismatch("input waveform", waveform.dtype, "waveform", self.dtype)
             if waveform._scale_mode != self._scale_mode:
                 warnings.warn(scale_mode_mismatch())
 
@@ -761,14 +731,12 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         sample_count: SupportsIndex | None = None,
     ) -> None:
         if array.dtype != self.dtype:
-            raise input_array_data_type_mismatch(array.dtype, self.dtype)
+            raise data_type_mismatch("input array", array.dtype, "waveform", self.dtype)
         if array.ndim != 1:
             raise invalid_array_ndim("input array", "one-dimensional array", array.ndim)
         if self._timing._timestamps is not None and len(array) != len(self._timing._timestamps):
-            raise ValueError(
-                "The input array length must be equal to the number of irregular timestamps.\n\n"
-                f"Array length: {len(array)}\n"
-                f"Number of timestamps: {len(self._timing._timestamps)}"
+            raise irregular_timestamp_count_mismatch(
+                len(self._timing._timestamps), "input array length", len(array), reversed=True
             )
 
         start_index = arg_to_uint("start index", start_index, 0)
