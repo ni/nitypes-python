@@ -36,12 +36,12 @@ jobs:
       - name: Add virtualenv to the path for pyright-action
         run: echo "$(poetry env info --path)/bin" >> $GITHUB_PATH
       - name: Pyright static analysis (Linux)
-        uses: jakebailey/pyright-action@b5d50e5cde6547546a5c4ac92e416a8c2c1a1dfe # v2
+        uses: jakebailey/pyright-action@7e7f09e52a331b25d6d2e8ad7af8ed99a46c8d73 # v2.0.2
         with:
           python-platform: Linux
           version: PATH
       - name: Pyright static analysis (Windows)
-        uses: jakebailey/pyright-action@b5d50e5cde6547546a5c4ac92e416a8c2c1a1dfe # v2
+        uses: jakebailey/pyright-action@7e7f09e52a331b25d6d2e8ad7af8ed99a46c8d73 # v2.0.2
         with:
           python-platform: Windows
           version: PATH
