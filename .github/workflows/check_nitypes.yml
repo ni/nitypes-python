@@ -10,16 +10,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       - name: Set up Python
-        uses: ni/python-actions/setup-python@v0.1.0
+        uses: ni/python-actions/setup-python@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
         id: setup-python
       - name: Set up Poetry
-        uses: ni/python-actions/setup-poetry@v0.1.0
+        uses: ni/python-actions/setup-poetry@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
       - name: Check for lock changes
         run: poetry check --lock
       - name: Cache virtualenv
-        uses: actions/cache@v4
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
         with:
           path: .venv
           key: nitypes-${{ runner.os }}-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.lock') }}
@@ -36,12 +36,12 @@ jobs:
       - name: Add virtualenv to the path for pyright-action
         run: echo "$(poetry env info --path)/bin" >> $GITHUB_PATH
       - name: Pyright static analysis (Linux)
-        uses: jakebailey/pyright-action@v2
+        uses: jakebailey/pyright-action@b5d50e5cde6547546a5c4ac92e416a8c2c1a1dfe # v2
         with:
           python-platform: Linux
           version: PATH
       - name: Pyright static analysis (Windows)
-        uses: jakebailey/pyright-action@v2
+        uses: jakebailey/pyright-action@b5d50e5cde6547546a5c4ac92e416a8c2c1a1dfe # v2
         with:
           python-platform: Windows
           version: PATH
