@@ -77,7 +77,7 @@ class Spectrum(Generic[_TData_co]):
     def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
-        dtype: type[_TData] | np.dtype[_TData] = ...,
+        dtype: type[_TData] | np.dtype[_TData],
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -173,7 +173,7 @@ class Spectrum(Generic[_TData_co]):
     def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: type[_TData] | np.dtype[_TData] = ...,
+        dtype: type[_TData] | np.dtype[_TData],
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
