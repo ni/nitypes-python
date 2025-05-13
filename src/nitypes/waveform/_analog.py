@@ -18,7 +18,8 @@ _TRaw = TypeVar("_TRaw", bound=Union[np.floating, np.integer])
 _TRaw_co = TypeVar("_TRaw_co", bound=Union[np.floating, np.integer], covariant=True)
 
 # Use the C types here because np.isdtype() considers some of them to be distinct types, even when
-# they have the same size (e.g. np.intc vs. np.int_ vs. np.long).
+# they have the same size (e.g. np.intc vs. np.int_). Do not include np.long/np.ulong because they
+# are aliases of np.int_/np.uint and are not supported in NumPy 1.2x.
 _RAW_DTYPES = (
     # Floating point
     np.single,
@@ -28,14 +29,12 @@ _RAW_DTYPES = (
     np.short,
     np.intc,
     np.int_,
-    np.long,
     np.longlong,
     # Unsigned integers
     np.ubyte,
     np.ushort,
     np.uintc,
     np.uint,
-    np.ulong,
     np.ulonglong,
 )
 

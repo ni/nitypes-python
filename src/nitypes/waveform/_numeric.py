@@ -14,6 +14,7 @@ from typing_extensions import Self, TypeAlias, TypeVar
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
+from nitypes._version import parse_version
 from nitypes.waveform._exceptions import (
     capacity_mismatch,
     capacity_too_small,
@@ -34,6 +35,11 @@ from nitypes.waveform._warnings import scale_mode_mismatch
 
 if sys.version_info < (3, 10):
     import array as std_array
+
+if parse_version(np.__version__) >= (2, 0, 0):
+    from numpy import asarray as _asarray
+else:
+    from nitypes._numpy1x import asarray as _asarray  # type: ignore
 
 # _TRaw_co specifies the type of the raw_data array. It is not limited to supported
 # types. Requesting an unsupported type raises TypeError at run time.
@@ -132,7 +138,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
             raise invalid_arg_type("input array", "one-dimensional array or sequence", array)
 
         return cls(
-            raw_data=np.asarray(array, dtype, copy=copy),
+            raw_data=_asarray(array, dtype, copy=copy),
             start_index=start_index,
             sample_count=sample_count,
             extended_properties=extended_properties,
@@ -188,7 +194,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
         return [
             cls(
-                raw_data=np.asarray(array[i], dtype, copy=copy),
+                raw_data=_asarray(array[i], dtype, copy=copy),
                 start_index=start_index,
                 sample_count=sample_count,
                 extended_properties=extended_properties,

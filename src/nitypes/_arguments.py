@@ -12,6 +12,12 @@ from nitypes._exceptions import (
     unsupported_arg,
     unsupported_dtype,
 )
+from nitypes._version import parse_version
+
+if parse_version(np.__version__) >= (2, 0, 0):
+    from numpy import isdtype as _np_isdtype
+else:
+    from nitypes._numpy1x import isdtype as _np_isdtype  # type: ignore
 
 
 def arg_to_float(
@@ -138,11 +144,11 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
 
     Unlike :any:`numpy.isdtype`, this function supports structured data types.
 
-    >>> is_dtype(np.float64, (np.float64, np.intc, np.long,))
+    >>> is_dtype(np.float64, (np.float64, np.intc, np.int_,))
     True
-    >>> is_dtype("float64", (np.float64, np.intc, np.long,))
+    >>> is_dtype("float64", (np.float64, np.intc, np.int_,))
     True
-    >>> is_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.long, np.longlong))
+    >>> is_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.longlong))
     False
     >>> a_type = np.dtype([('a', np.int32)])
     >>> b_type = np.dtype([('b', np.int32)])
@@ -163,15 +169,15 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
     if isinstance(dtype, np.dtype) and dtype.fields:
         return dtype in supported_dtypes
 
-    return np.isdtype(dtype, supported_dtypes)
+    return _np_isdtype(dtype, supported_dtypes)
 
 
 def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) -> None:
     """Validate a dtype-like object against a tuple of supported dtype-like objects.
 
-    >>> validate_dtype(np.float64, (np.float64, np.intc, np.long,))
-    >>> validate_dtype("float64", (np.float64, np.intc, np.long,))
-    >>> validate_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.long, np.longlong))
+    >>> validate_dtype(np.float64, (np.float64, np.intc, np.int_,))
+    >>> validate_dtype("float64", (np.float64, np.intc, np.int_,))
+    >>> validate_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.longlong))
     Traceback (most recent call last):
     ...
     TypeError: The requested data type is not supported.
