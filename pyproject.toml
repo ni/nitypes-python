@@ -47,7 +47,7 @@ tomlkit = ">=0.11.0"
 line-length = 100
 
 [tool.pytest.ini_options]
-addopts = "--doctest-modules --strict-markers"
+addopts = "--doctest-modules --doctest-plus --strict-markers"
 testpaths = ["src/nitypes", "tests"]
 
 [build-system]

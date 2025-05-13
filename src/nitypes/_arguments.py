@@ -14,6 +14,8 @@ from nitypes._exceptions import (
 )
 from nitypes._numpy import isdtype as _np_isdtype
 
+__doctest_requires__ = {("arg_to_float", "is_dtype"): "numpy>=2.0"}
+
 
 def arg_to_float(
     arg_description: str, value: SupportsFloat | None, default_value: float | None = None
