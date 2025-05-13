@@ -19,7 +19,7 @@ jobs:
     name: Run unit tests
     uses: ./.github/workflows/run_unit_tests.yml
     needs: [check_nitypes]
-  run_unit_tests:
+  run_unit_tests_oldest_deps:
     name: Run unit tests (oldest deps)
     uses: ./.github/workflows/run_unit_tests_oldest_deps.yml
     needs: [check_nitypes]
