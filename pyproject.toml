@@ -55,7 +55,7 @@ requires = ["poetry>=1.2"]
 build-backend = "poetry.masonry.api"
 
 [tool.mypy]
-files = "examples/,src/,tests/"
+files = "examples/,scripts/,src/,tests/"
 plugins = "numpy.typing.mypy_plugin"
 namespace_packages = true
 strict = true
@@ -66,4 +66,4 @@ skips = [
 ]
 
 [tool.pyright]
-include = ["src/", "tests/"]
+include = ["examples/", "scripts/", "src/", "tests/"]
