@@ -12,7 +12,13 @@ numpy_version_info = parse_version(np.__version__)
 if numpy_version_info >= (2, 0, 0):
     from numpy import asarray, isdtype, long, ulong
 else:
-    from nitypes._numpy1x import asarray, isdtype, long, ulong  # type: ignore[no-redef]
+    # mypy warns about this when checking with --platform win32 on Linux, but not on Windows.
+    from nitypes._numpy1x import (  # type: ignore[assignment,no-redef,unused-ignore]
+        asarray,
+        isdtype,
+        long,
+        ulong,
+    )
 
 
 __all__ = [
