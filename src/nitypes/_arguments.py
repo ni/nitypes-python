@@ -14,7 +14,9 @@ from nitypes._exceptions import (
 )
 from nitypes._numpy import isdtype as _np_isdtype
 
-__doctest_requires__ = {("arg_to_float", "is_dtype"): "numpy>=2.0"}
+# Some of these doctests use types introduced in NumPy 2.0 (np.long and np.ulong) or highlight
+# formatting differences between NumPy 1.x and 2.x (e.g. dtype=int32, 1.23 vs. np.float64(1.23)).
+__doctest_requires__ = {("arg_to_float", "is_dtype", "validate_dtype"): "numpy>=2.0"}
 
 
 def arg_to_float(
@@ -141,11 +143,11 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
 
     Unlike :any:`numpy.isdtype`, this function supports structured data types.
 
-    >>> is_dtype(np.float64, (np.float64, np.intc, np.int_,))
+    >>> is_dtype(np.float64, (np.float64, np.intc, np.long,))
     True
-    >>> is_dtype("float64", (np.float64, np.intc, np.int_,))
+    >>> is_dtype("float64", (np.float64, np.intc, np.long,))
     True
-    >>> is_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.longlong))
+    >>> is_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.long, np.longlong))
     False
     >>> a_type = np.dtype([('a', np.int32)])
     >>> b_type = np.dtype([('b', np.int32)])
@@ -172,9 +174,9 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
 def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) -> None:
     """Validate a dtype-like object against a tuple of supported dtype-like objects.
 
-    >>> validate_dtype(np.float64, (np.float64, np.intc, np.int_,))
-    >>> validate_dtype("float64", (np.float64, np.intc, np.int_,))
-    >>> validate_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.longlong))
+    >>> validate_dtype(np.float64, (np.float64, np.intc, np.long,))
+    >>> validate_dtype("float64", (np.float64, np.intc, np.long,))
+    >>> validate_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.long, np.longlong))
     Traceback (most recent call last):
     ...
     TypeError: The requested data type is not supported.
