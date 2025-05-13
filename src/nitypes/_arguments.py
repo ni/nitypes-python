@@ -12,12 +12,7 @@ from nitypes._exceptions import (
     unsupported_arg,
     unsupported_dtype,
 )
-from nitypes._version import parse_version
-
-if parse_version(np.__version__) >= (2, 0, 0):
-    from numpy import isdtype as _np_isdtype
-else:
-    from nitypes._numpy1x import isdtype as _np_isdtype  # type: ignore
+from nitypes._numpy import isdtype as _np_isdtype
 
 
 def arg_to_float(

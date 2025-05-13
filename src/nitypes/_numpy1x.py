@@ -1,4 +1,4 @@
-"""NumPy 1.x compatibility shims."""
+"""NumPy 1.x compatibility shim implementations."""
 
 from __future__ import annotations
 
