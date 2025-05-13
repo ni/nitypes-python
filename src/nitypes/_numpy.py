@@ -21,7 +21,10 @@ else:
     if sys.platform == "win32":
         # 32-bit Windows has an ILP32 data model and 64-bit Windows has an LLP64 data model, so
         # long is 32-bit.
-        from numpy import int32 as long, uint32 as ulong
+        from numpy import (  # type: ignore[assignment,unused-ignore]
+            int32 as long,
+            uint32 as ulong,
+        )
     else:
         # Assume other 32-bit platforms have an ILP32 data model and other 64-bit platforms have an
         # LP64 data model, so long is pointer-sized.
