@@ -12,8 +12,11 @@ def asarray(  # noqa: D103 - missing docstring in public function
     a: npt.ArrayLike, dtype: npt.DTypeLike = None, *, copy: bool | None = None
 ) -> npt.NDArray[Any]:
     b = np.asarray(a, dtype)
-    if copy:
+    made_copy = b is not a and b.base is None
+    if copy is True and not made_copy:
         b = np.copy(b)
+    if copy is False and made_copy:
+        raise ValueError("Unable to avoid copy while creating an array as requested.")
     return b
 
 

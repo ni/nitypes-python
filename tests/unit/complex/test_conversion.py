@@ -4,6 +4,7 @@ from typing import Any
 
 import numpy as np
 import numpy.typing as npt
+import pytest
 from typing_extensions import assert_type
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType, convert_complex
@@ -69,9 +70,7 @@ def test___complex64_array_to_complex128_array___convert_complex___converts_arra
 
     assert_type(value_out, npt.NDArray[np.complex128])
     assert isinstance(value_out, np.ndarray) and value_out.dtype == np.complex128
-    # complex64 bruises the numbers (e.g. np.complex128(1.2300000190734863+4.559999942779541j)) so
-    # round to 3 decimal places.
-    assert list(np.round(value_out, 3)) == [1.23 + 4.56j, 6.78 - 9.01j]
+    assert list(value_out) == pytest.approx([1.23 + 4.56j, 6.78 - 9.01j])
 
 
 def test___complex128_array_to_complexint32_array___convert_complex___converts_array() -> None:
@@ -91,7 +90,7 @@ def test___complex128_array_to_complex64_array___convert_complex___converts_arra
 
     assert_type(value_out, npt.NDArray[np.complex64])
     assert isinstance(value_out, np.ndarray) and value_out.dtype == np.complex64
-    assert list(value_out) == [1.23 + 4.56j, 6.78 - 9.01j]
+    assert list(value_out) == pytest.approx([1.23 + 4.56j, 6.78 - 9.01j])
 
 
 def test___complex128_array_to_complex128_array___convert_complex___returns_original_array() -> (
@@ -204,6 +203,4 @@ def test___complex64_scalar_to_complex128_scalar___convert_complex___converts_sc
 
     assert_type(value_out, np.ndarray[tuple[()], np.dtype[np.complex128]])
     assert isinstance(value_out, np.complex128)
-    # complex64 bruises the numbers (e.g. np.complex128(1.2300000190734863+4.559999942779541j)) so
-    # round to 3 decimal places.
-    assert np.round(value_out, 3) == (1.23 + 4.56j)
+    assert np.round(value_out, 3) == pytest.approx((1.23 + 4.56j))

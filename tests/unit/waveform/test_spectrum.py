@@ -10,6 +10,7 @@ from typing import Any, SupportsIndex
 import numpy as np
 import numpy.typing as npt
 import pytest
+from packaging.version import Version
 from typing_extensions import assert_type
 
 from nitypes.waveform import Spectrum
@@ -1171,6 +1172,12 @@ def test___different_value___equality___not_equal(
     assert left != right
 
 
+if Version(np.__version__) >= Version("2.0.0"):
+    _NDARRAY_DTYPE_INT32 = ", dtype=int32"
+else:
+    _NDARRAY_DTYPE_INT32 = ""
+
+
 @pytest.mark.parametrize(
     "value, expected_repr",
     [
@@ -1186,11 +1193,11 @@ def test___different_value___equality___not_equal(
         (Spectrum(0, np.int32), "nitypes.waveform.Spectrum(0, int32)"),
         (
             Spectrum(5, np.int32),
-            "nitypes.waveform.Spectrum(5, int32, data=array([0, 0, 0, 0, 0], dtype=int32))",
+            f"nitypes.waveform.Spectrum(5, int32, data=array([0, 0, 0, 0, 0]{_NDARRAY_DTYPE_INT32}))",
         ),
         (
             Spectrum(5, np.int32, start_index=5, capacity=20),
-            "nitypes.waveform.Spectrum(5, int32, data=array([0, 0, 0, 0, 0], dtype=int32))",
+            f"nitypes.waveform.Spectrum(5, int32, data=array([0, 0, 0, 0, 0]{_NDARRAY_DTYPE_INT32}))",
         ),
         (
             Spectrum.from_array_1d([1, 2, 3], np.float64),
@@ -1198,13 +1205,14 @@ def test___different_value___equality___not_equal(
         ),
         (
             Spectrum.from_array_1d([1, 2, 3], np.int32),
-            "nitypes.waveform.Spectrum(3, int32, data=array([1, 2, 3], dtype=int32))",
+            f"nitypes.waveform.Spectrum(3, int32, data=array([1, 2, 3]{_NDARRAY_DTYPE_INT32}))",
         ),
         (
             Spectrum(
                 extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
             ),
-            "nitypes.waveform.Spectrum(0, extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
+            "nitypes.waveform.Spectrum(0, extended_properties={'NI_ChannelName': 'Dev1/ai0', "
+            "'NI_UnitDescription': 'Volts'})",
         ),
         (
             Spectrum.from_array_1d(
@@ -1213,7 +1221,8 @@ def test___different_value___equality___not_equal(
                 start_frequency=123.456,
                 frequency_increment=0.1,
             ),
-            "nitypes.waveform.Spectrum(3, int32, data=array([1, 2, 3], dtype=int32), start_frequency=123.456, frequency_increment=0.1)",
+            f"nitypes.waveform.Spectrum(3, int32, data=array([1, 2, 3]{_NDARRAY_DTYPE_INT32}), "
+            "start_frequency=123.456, frequency_increment=0.1)",
         ),
         (
             Spectrum.from_array_1d(
@@ -1221,7 +1230,8 @@ def test___different_value___equality___not_equal(
                 np.int32,
                 extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
             ),
-            "nitypes.waveform.Spectrum(3, int32, data=array([1, 2, 3], dtype=int32), extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
+            f"nitypes.waveform.Spectrum(3, int32, data=array([1, 2, 3]{_NDARRAY_DTYPE_INT32}), "
+            "extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
         ),
     ],
 )
