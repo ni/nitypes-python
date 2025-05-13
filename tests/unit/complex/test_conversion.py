@@ -203,4 +203,4 @@ def test___complex64_scalar_to_complex128_scalar___convert_complex___converts_sc
 
     assert_type(value_out, np.ndarray[tuple[()], np.dtype[np.complex128]])
     assert isinstance(value_out, np.complex128)
-    assert np.round(value_out, 3) == pytest.approx((1.23 + 4.56j))
+    assert value_out == pytest.approx((1.23 + 4.56j))
