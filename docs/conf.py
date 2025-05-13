@@ -48,6 +48,7 @@ autoapi_options.remove("private-members")  # note: remove this to include "_" me
 autoapi_dirs = [root_path / "src" / "nitypes"]
 autoapi_python_class_content = "both"
 autoapi_type = "python"
+autoapi_ignore = ["_numpy*"]
 autodoc_typehints = "description"
 
 
