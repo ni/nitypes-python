@@ -7,6 +7,7 @@ import numpy as np
 import numpy.typing as npt
 from typing_extensions import TypeVar, final, override
 
+from nitypes._numpy import long as _np_long, ulong as _np_ulong
 from nitypes.waveform._extended_properties import ExtendedPropertyValue
 from nitypes.waveform._numeric import NumericWaveform, _TOtherScaled
 from nitypes.waveform._scaling import ScaleMode
@@ -18,7 +19,7 @@ _TRaw = TypeVar("_TRaw", bound=Union[np.floating, np.integer])
 _TRaw_co = TypeVar("_TRaw_co", bound=Union[np.floating, np.integer], covariant=True)
 
 # Use the C types here because np.isdtype() considers some of them to be distinct types, even when
-# they have the same size (e.g. np.intc vs. np.int_ vs. np.long).
+# they have the same size (e.g. np.intc vs. np.int_).
 _RAW_DTYPES = (
     # Floating point
     np.single,
@@ -28,14 +29,14 @@ _RAW_DTYPES = (
     np.short,
     np.intc,
     np.int_,
-    np.long,
+    _np_long,
     np.longlong,
     # Unsigned integers
     np.ubyte,
     np.ushort,
     np.uintc,
     np.uint,
-    np.ulong,
+    _np_ulong,
     np.ulonglong,
 )
 

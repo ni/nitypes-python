@@ -12,6 +12,7 @@ import hightime as ht
 import numpy as np
 import numpy.typing as npt
 import pytest
+from packaging.version import Version
 from typing_extensions import assert_type
 
 from nitypes.waveform import (
@@ -1750,6 +1751,12 @@ def test___different_value___equality___not_equal(
     assert left != right
 
 
+if Version(np.__version__) >= Version("2.0.0"):
+    _NDARRAY_DTYPE_INT32 = ", dtype=int32"
+else:
+    _NDARRAY_DTYPE_INT32 = ""
+
+
 @pytest.mark.parametrize(
     "value, expected_repr",
     [
@@ -1765,11 +1772,11 @@ def test___different_value___equality___not_equal(
         (AnalogWaveform(0, np.int32), "nitypes.waveform.AnalogWaveform(0, int32)"),
         (
             AnalogWaveform(5, np.int32),
-            "nitypes.waveform.AnalogWaveform(5, int32, raw_data=array([0, 0, 0, 0, 0], dtype=int32))",
+            f"nitypes.waveform.AnalogWaveform(5, int32, raw_data=array([0, 0, 0, 0, 0]{_NDARRAY_DTYPE_INT32}))",
         ),
         (
             AnalogWaveform(5, np.int32, start_index=5, capacity=20),
-            "nitypes.waveform.AnalogWaveform(5, int32, raw_data=array([0, 0, 0, 0, 0], dtype=int32))",
+            f"nitypes.waveform.AnalogWaveform(5, int32, raw_data=array([0, 0, 0, 0, 0]{_NDARRAY_DTYPE_INT32}))",
         ),
         (
             AnalogWaveform.from_array_1d([1, 2, 3], np.float64),
@@ -1777,25 +1784,30 @@ def test___different_value___equality___not_equal(
         ),
         (
             AnalogWaveform.from_array_1d([1, 2, 3], np.int32),
-            "nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3], dtype=int32))",
+            f"nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3]{_NDARRAY_DTYPE_INT32}))",
         ),
         (
             AnalogWaveform(
                 timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
             ),
-            "nitypes.waveform.AnalogWaveform(0, timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=datetime.timedelta(microseconds=1000)))",
+            "nitypes.waveform.AnalogWaveform(0, "
+            "timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, "
+            "sample_interval=datetime.timedelta(microseconds=1000)))",
         ),
         (
             AnalogWaveform(
                 timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
-            "nitypes.waveform.AnalogWaveform(0, timing=nitypes.waveform.PrecisionTiming(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=hightime.timedelta(microseconds=1000)))",
+            "nitypes.waveform.AnalogWaveform(0, "
+            "timing=nitypes.waveform.PrecisionTiming(nitypes.waveform.SampleIntervalMode.REGULAR, "
+            "sample_interval=hightime.timedelta(microseconds=1000)))",
         ),
         (
             AnalogWaveform(
                 extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
             ),
-            "nitypes.waveform.AnalogWaveform(0, extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
+            "nitypes.waveform.AnalogWaveform(0, extended_properties={'NI_ChannelName': 'Dev1/ai0', "
+            "'NI_UnitDescription': 'Volts'})",
         ),
         (
             AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
@@ -1807,7 +1819,9 @@ def test___different_value___equality___not_equal(
                 np.int32,
                 timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
             ),
-            "nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3], dtype=int32), timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=datetime.timedelta(microseconds=1000)))",
+            f"nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3]{_NDARRAY_DTYPE_INT32}), "
+            "timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, "
+            "sample_interval=datetime.timedelta(microseconds=1000)))",
         ),
         (
             AnalogWaveform.from_array_1d(
@@ -1815,11 +1829,13 @@ def test___different_value___equality___not_equal(
                 np.int32,
                 extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
             ),
-            "nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3], dtype=int32), extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
+            f"nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3]{_NDARRAY_DTYPE_INT32}), "
+            "extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
         ),
         (
             AnalogWaveform.from_array_1d([1, 2, 3], np.int32, scale_mode=LinearScaleMode(2.0, 1.0)),
-            "nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3], dtype=int32), scale_mode=nitypes.waveform.LinearScaleMode(2.0, 1.0))",
+            f"nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3]{_NDARRAY_DTYPE_INT32}), "
+            "scale_mode=nitypes.waveform.LinearScaleMode(2.0, 1.0))",
         ),
     ],
 )

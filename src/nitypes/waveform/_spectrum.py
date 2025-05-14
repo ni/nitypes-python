@@ -10,6 +10,7 @@ from typing_extensions import Self, TypeVar
 
 from nitypes._arguments import arg_to_float, arg_to_uint, validate_dtype
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
+from nitypes._numpy import asarray as _np_asarray, long as _np_long, ulong as _np_ulong
 from nitypes.waveform._exceptions import (
     capacity_mismatch,
     capacity_too_small,
@@ -27,11 +28,12 @@ from nitypes.waveform._extended_properties import (
 if sys.version_info < (3, 10):
     import array as std_array
 
+
 _TData = TypeVar("_TData", bound=Union[np.floating, np.integer])
 _TData_co = TypeVar("_TData_co", bound=Union[np.floating, np.integer], covariant=True)
 
 # Use the C types here because np.isdtype() considers some of them to be distinct types, even when
-# they have the same size (e.g. np.intc vs. np.int_ vs. np.long).
+# they have the same size (e.g. np.intc vs. np.int_).
 _DATA_DTYPES = (
     # Floating point
     np.single,
@@ -41,14 +43,14 @@ _DATA_DTYPES = (
     np.short,
     np.intc,
     np.int_,
-    np.long,
+    _np_long,
     np.longlong,
     # Unsigned integers
     np.ubyte,
     np.ushort,
     np.uintc,
     np.uint,
-    np.ulong,
+    _np_ulong,
     np.ulonglong,
 )
 
@@ -145,7 +147,7 @@ class Spectrum(Generic[_TData_co]):
             raise invalid_arg_type("input array", "one-dimensional array or sequence", array)
 
         return cls(
-            data=np.asarray(array, dtype, copy=copy),
+            data=_np_asarray(array, dtype, copy=copy),
             start_index=start_index,
             sample_count=sample_count,
             start_frequency=start_frequency,
@@ -246,7 +248,7 @@ class Spectrum(Generic[_TData_co]):
 
         return [
             cls(
-                data=np.asarray(array[i], dtype, copy=copy),
+                data=_np_asarray(array[i], dtype, copy=copy),
                 start_index=start_index,
                 sample_count=sample_count,
                 start_frequency=start_frequency,

@@ -14,6 +14,7 @@ from typing_extensions import Self, TypeAlias, TypeVar
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
+from nitypes._numpy import asarray as _np_asarray
 from nitypes.waveform._exceptions import (
     capacity_mismatch,
     capacity_too_small,
@@ -132,7 +133,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
             raise invalid_arg_type("input array", "one-dimensional array or sequence", array)
 
         return cls(
-            raw_data=np.asarray(array, dtype, copy=copy),
+            raw_data=_np_asarray(array, dtype, copy=copy),
             start_index=start_index,
             sample_count=sample_count,
             extended_properties=extended_properties,
@@ -188,7 +189,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
         return [
             cls(
-                raw_data=np.asarray(array[i], dtype, copy=copy),
+                raw_data=_np_asarray(array[i], dtype, copy=copy),
                 start_index=start_index,
                 sample_count=sample_count,
                 extended_properties=extended_properties,

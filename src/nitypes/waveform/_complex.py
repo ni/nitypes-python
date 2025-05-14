@@ -19,8 +19,6 @@ from nitypes.waveform._timing import PrecisionTiming, Timing
 _TRaw = TypeVar("_TRaw", bound=Union[np.complexfloating, ComplexInt32Base])
 _TRaw_co = TypeVar("_TRaw_co", bound=Union[np.complexfloating, ComplexInt32Base], covariant=True)
 
-# Use the C types here because np.isdtype() considers some of them to be distinct types, even when
-# they have the same size (e.g. np.intc vs. np.int_ vs. np.long).
 _RAW_DTYPES = (
     # Complex floating point
     np.csingle,

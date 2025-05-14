@@ -143,6 +143,8 @@ __all__ = [
     "TimingMismatchError",
     "TimingMismatchWarning",
 ]
+__doctest_requires__ = {".": "numpy>=2.0"}
+
 
 # Hide that it was defined in a helper file
 AnalogWaveform.__module__ = __name__
