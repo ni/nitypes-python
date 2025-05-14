@@ -55,6 +55,32 @@ To run the `nitypes` regression tests, run the following command in the root of 
 $ poetry run pytest -v
 ```
 
+# Example Development Workflow
+
+```
+# Create a new branch
+git fetch
+git switch --create users/{username}/{branch-purpose} origin/main
+
+# Install the project dependencies
+poetry install --with docs
+
+# ✍ Make source changes
+
+# Run the analyzers -- see files in .github/workflows for details
+poetry run nps lint
+poetry run mypy
+poetry run pyright
+poetry run bandit -c pyproject.toml -r src/nitypes
+
+# Run the tests
+poetry run pytest -v
+
+# Build and inspect the documentation
+poetry run sphinx-build docs docs/_build --builder html --fail-on-warning
+start docs\_build\index.html
+```
+
 # Developer Certificate of Origin (DCO)
 
    Developer's Certificate of Origin 1.1
