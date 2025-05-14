@@ -30,6 +30,7 @@ pytest-doctestplus = ">=1.4"
 pytest-mock = ">=3.0"
 # Use an unreleased version of hightime for testing.
 hightime = { git = "https://github.com/ni/hightime.git" }
+tomlkit = ">=0.11.0"
 
 [tool.poetry.group.docs]
 optional = true
@@ -55,7 +56,7 @@ requires = ["poetry>=1.2"]
 build-backend = "poetry.masonry.api"
 
 [tool.mypy]
-files = "examples/,src/,tests/"
+files = "examples/,scripts/,src/,tests/"
 plugins = "numpy.typing.mypy_plugin"
 namespace_packages = true
 strict = true
@@ -66,4 +67,4 @@ skips = [
 ]
 
 [tool.pyright]
-include = ["src/", "tests/"]
+include = ["examples/", "scripts/", "src/", "tests/"]

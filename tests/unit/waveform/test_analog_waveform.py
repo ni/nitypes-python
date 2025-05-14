@@ -5,6 +5,7 @@ import copy
 import datetime as dt
 import itertools
 import pickle
+import sys
 import weakref
 from typing import Any, SupportsIndex
 
@@ -1751,7 +1752,7 @@ def test___different_value___equality___not_equal(
     assert left != right
 
 
-if Version(np.__version__) >= Version("2.0.0"):
+if Version(np.__version__) >= Version("2.0.0") or sys.platform != "win32":
     _NDARRAY_DTYPE_INT32 = ", dtype=int32"
 else:
     _NDARRAY_DTYPE_INT32 = ""
