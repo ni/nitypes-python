@@ -105,17 +105,19 @@ class TimeValue:
     @_to_ticks.register
     @classmethod
     def _(cls, seconds: Decimal) -> int:
-        whole_seconds, fractional_seconds = divmod(seconds, 1)
-        ticks = int(whole_seconds) * _TICKS_PER_SECOND
-        ticks += int(fractional_seconds * _TICKS_PER_SECOND)
-        return ticks
+        with decimal.localcontext() as ctx:
+            ctx.prec = 64
+            whole_seconds, fractional_seconds = divmod(seconds, 1)
+            ticks = int(whole_seconds) * _TICKS_PER_SECOND
+            ticks += round(fractional_seconds * _TICKS_PER_SECOND)
+            return ticks
 
     @_to_ticks.register
     @classmethod
     def _(cls, seconds: float) -> int:
         fractional_seconds, whole_seconds = math.modf(seconds)
         ticks = int(whole_seconds) * _TICKS_PER_SECOND
-        ticks += int(fractional_seconds * _TICKS_PER_SECOND)
+        ticks += round(fractional_seconds * _TICKS_PER_SECOND)
         return ticks
 
     @_to_ticks.register
@@ -171,10 +173,10 @@ class TimeValue:
     def precision_total_seconds(self) -> Decimal:
         """The precise total seconds in the time value.
 
-        Note: up to 128 significant digits are used in computation.
+        Note: up to 64 significant digits are used in computation.
         """
         with decimal.localcontext() as ctx:
-            ctx.prec = 128
+            ctx.prec = 64
             seconds = Decimal(self._ticks >> _BITS_PER_SECOND)
             seconds += Decimal(self._ticks & _FRACTIONAL_SECONDS_MASK) / Decimal(_TICKS_PER_SECOND)
             return seconds
@@ -228,7 +230,9 @@ class TimeValue:
             # Using floating point math on 128-bit numbers loses precision, so use Decimal math.
             return self * Decimal(value)
         elif isinstance(value, Decimal):
-            return TimeValue(self.precision_total_seconds() * value)
+            with decimal.localcontext() as ctx:
+                ctx.prec = 64
+                return TimeValue(self.precision_total_seconds() * value)
         else:
             return NotImplemented
 
