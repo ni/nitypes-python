@@ -29,12 +29,7 @@ _FRACTIONAL_SECONDS_MASK = _TICKS_PER_SECOND - 1
 
 _SECONDS_PER_DAY = 86400
 
-_MICROSECONDS_PER_SECOND = 1_000_000
-_NANOSECONDS_PER_SECOND = 1_000_000_000
-_PICOSECONDS_PER_SECOND = 1_000_000_000_000
-_FEMTOSECONDS_PER_SECOND = 1_000_000_000_000_000
-_ATTOSECONDS_PER_SECOND = 1_000_000_000_000_000_000
-
+_DECIMAL_DIGITS = 64
 _REPR_TICKS = True
 
 
@@ -106,7 +101,7 @@ class TimeValue:
     @classmethod
     def _(cls, seconds: Decimal) -> int:
         with decimal.localcontext() as ctx:
-            ctx.prec = 64
+            ctx.prec = _DECIMAL_DIGITS
             whole_seconds, fractional_seconds = divmod(seconds, 1)
             ticks = int(whole_seconds) * _TICKS_PER_SECOND
             ticks += round(fractional_seconds * _TICKS_PER_SECOND)
@@ -176,7 +171,7 @@ class TimeValue:
         Note: up to 64 significant digits are used in computation.
         """
         with decimal.localcontext() as ctx:
-            ctx.prec = 64
+            ctx.prec = _DECIMAL_DIGITS
             seconds = Decimal(self._ticks >> _BITS_PER_SECOND)
             seconds += Decimal(self._ticks & _FRACTIONAL_SECONDS_MASK) / Decimal(_TICKS_PER_SECOND)
             return seconds
@@ -231,7 +226,7 @@ class TimeValue:
             return self * Decimal(value)
         elif isinstance(value, Decimal):
             with decimal.localcontext() as ctx:
-                ctx.prec = 64
+                ctx.prec = _DECIMAL_DIGITS
                 return TimeValue(self.precision_total_seconds() * value)
         else:
             return NotImplemented
