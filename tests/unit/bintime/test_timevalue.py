@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import random
 from decimal import Decimal
+from typing import Any, Generator
 
 import pytest
 from typing_extensions import assert_type
 
 from nitypes.bintime import TimeValue
+from nitypes.bintime._timevalue import _INT128_MAX, _INT128_MIN
 
 
 #############
@@ -168,6 +171,10 @@ def test___fractional_decimal_seconds___precision_total_seconds___approximate_ma
         (-1 << 64) + -2,
         (1 << 124) + (2 << 64) + 3,
         (-1 << 124) + (-2 << 64) + -3,
+        0x12345678_12345678_12345678_12345678,
+        -0x12345678_12345678_12345678_12345678,
+        (1 << 126) + 1,
+        (-1 << 126) - 1,
     ],
 )
 def test___round_trip___precision_total_seconds___exact_match(ticks: int) -> None:
@@ -177,6 +184,29 @@ def test___round_trip___precision_total_seconds___exact_match(ticks: int) -> Non
     round_trip_value = TimeValue(total_seconds)
 
     assert round_trip_value._ticks == ticks
+
+
+def test___random_round_trip___precision_total_seconds___exact_match(
+    _random_state: tuple[Any, ...],
+) -> None:
+    random.seed(1)
+    for iteration in range(0, 1000):
+        ticks = random.randint(_INT128_MIN, _INT128_MAX)
+        value = TimeValue.from_ticks(ticks)
+
+        total_seconds = value.precision_total_seconds()
+        round_trip_value = TimeValue(total_seconds)
+
+        assert round_trip_value._ticks == ticks
+
+
+@pytest.fixture
+def _random_state() -> Generator[tuple[Any, ...]]:
+    state = random.getstate()
+    try:
+        yield state
+    finally:
+        random.setstate(state)
 
 
 ##################
