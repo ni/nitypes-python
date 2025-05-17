@@ -104,7 +104,7 @@ def test___unsupported_type___from_ticks___raises_type_error() -> None:
     "seconds",
     [0.0, 1.0, 3.14159, -3.14159, 1.23456789e18, -1.23456789e18, 1.23456789e-18, -1.23456789e-18],
 )
-def test___float_seconds___total_seconds___approximately_matches(seconds: float) -> None:
+def test___float_seconds___total_seconds___approximate_match(seconds: float) -> None:
     value = TimeValue(seconds)
 
     total_seconds = value.total_seconds()
@@ -126,7 +126,7 @@ def test___float_seconds___total_seconds___approximately_matches(seconds: float)
         Decimal("-9223372036854775808"),
     ],
 )
-def test___whole_decimal_seconds___precision_total_seconds___exactly_matches(
+def test___whole_decimal_seconds___precision_total_seconds___exact_match(
     seconds: Decimal,
 ) -> None:
     value = TimeValue(seconds)
@@ -146,7 +146,7 @@ def test___whole_decimal_seconds___precision_total_seconds___exactly_matches(
         Decimal("-1.23456789e-18"),
     ],
 )
-def test___fractional_decimal_seconds___precision_total_seconds___approximately_matches(
+def test___fractional_decimal_seconds___precision_total_seconds___approximate_match(
     seconds: Decimal,
 ) -> None:
     value = TimeValue(seconds)
@@ -154,6 +154,29 @@ def test___fractional_decimal_seconds___precision_total_seconds___approximately_
     total_seconds = value.precision_total_seconds()
 
     assert total_seconds == pytest.approx(seconds)
+
+
+@pytest.mark.parametrize(
+    "ticks",
+    [
+        0,
+        1,
+        -1,
+        1 << 64,
+        -1 << 64,
+        (1 << 64) + 2,
+        (-1 << 64) + -2,
+        (1 << 124) + (2 << 64) + 3,
+        (-1 << 124) + (-2 << 64) + -3,
+    ],
+)
+def test___round_trip___precision_total_seconds___exact_match(ticks: int) -> None:
+    value = TimeValue.from_ticks(ticks)
+
+    total_seconds = value.precision_total_seconds()
+    round_trip_value = TimeValue(total_seconds)
+
+    assert round_trip_value._ticks == ticks
 
 
 ##################
