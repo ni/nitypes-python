@@ -1,0 +1,6 @@
+# MD013/line-length
+MD013:
+  line_length: 100
+
+# MD041/first-line-heading
+MD041: false
