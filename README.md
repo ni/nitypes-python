@@ -45,7 +45,10 @@ See the [API Reference](https://nitypes.readthedocs.io/).
 
 # Installation
 
-TBD
+Installing NI driver Python APIs that support waveforms will automatically install `nitypes`.
+
+You can also directly install the `nitypes` package using `pip` or by listing it as a dependency in
+your project's `pyproject.toml` file.
 
 # Waveforms
 
