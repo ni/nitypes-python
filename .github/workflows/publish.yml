@@ -92,7 +92,7 @@ jobs:
         uses: ni/python-actions/setup-poetry@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
       - name: Get version from pyproject.toml
         id: get-version
-        run: version=`poetry version --short` >> "$GITHUB_OUTPUT"
+        run: echo version=`poetry version --short` >> "$GITHUB_OUTPUT"
       - name: Bump the version number
         id: bump-version
         run: |
