@@ -90,28 +90,35 @@ jobs:
         uses: ni/python-actions/setup-python@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
       - name: Set up Poetry
         uses: ni/python-actions/setup-poetry@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
-      - name: Update version in pyproject.toml
-        id: update-version
+      - name: Get version from pyproject.toml
+        id: get-version
+        run: version=`poetry version --short` >> "$GITHUB_OUTPUT"
+      - name: Bump the version number
+        id: bump-version
         run: |
-          version=`poetry version --short`
-          new_version=`python scripts/increment_version.py $version`
-          if [ x"$version" != x"$new_version" ]; then
-            poetry version $new_version
-            echo "create-pr=true" >> "$GITHUB_OUTPUT"
-            echo "version=$new_version" >> "$GITHUB_OUTPUT"
-          else
-            echo "create-pr=false" >> "$GITHUB_OUTPUT"
-          fi
+          # Workaround for https://github.com/python-poetry/poetry/issues/8718 - "Add 'dev' as
+          # version bump rule for developmental releases."
+          import os, re
+          version = "${{ steps.get-version.outputs.version }}"
+          match = re.match(r"^(.*-dev)(\d+)$", version)
+          if match:
+              version = f"{match.group(1)}{int(match.group(2))+1}"
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              print(f"version={version}", file=f)
+        shell: python
+      - name: Update version in pyproject.toml
+        if: steps.get-version.outputs.version != steps.bump-version.outputs.version
+        run: poetry version ${{ steps.bump-version.outputs.version }}
       - name: Create pull request
-        if: steps.update-version.outputs.create-pr
+        if: steps.get-version.outputs.version != steps.bump-version.outputs.version
         uses: peter-evans/create-pull-request@v7
         with:
-          branch: users/build/update-version-to-${{ steps.update-version.outputs.version }}
-          title: "chore: Update version to ${{ steps.update-version.outputs.version }}"
+          branch: users/build/update-version-to-${{ steps.bump-version.outputs.version }}
+          title: "chore: Update version to ${{ steps.bump-version.outputs.version }}"
           body: |
             ### What does this Pull Request accomplish?
 
-            Update the package version to ${{ steps.update-version.outputs.version }}
+            Update the package version to ${{ steps.bump-version.outputs.version }}
 
             ### Why should this Pull Request be merged?
 
