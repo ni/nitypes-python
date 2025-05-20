@@ -1,10 +1,31 @@
 [tool.poetry]
 name = "nitypes"
-version = "0.0.1"
+version = "0.1.0-dev0"
 license = "MIT"
 description = "Data types for NI Python APIs"
 authors = ["NI <opensource@ni.com>"]
 maintainers = ["Brad Keryan <brad.keryan@ni.com>"]
+readme = "README.md"
+repository = "https://github.com/ni/nitypes-python"
+documentation = "https://nitypes.readthedocs.io/"
+keywords = ["nitypes"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Manufacturing",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
 packages = [{ include = "nitypes", from = "src" }]
 
 [tool.poetry.dependencies]
@@ -14,7 +35,7 @@ numpy = [
   { version = ">=1.26", python = ">=3.12,<3.13" },
   { version = ">=2.1", python = "^3.13" },
 ]
-hightime = "^0.2.2"
+hightime = ">=0.2.2"
 typing-extensions = ">=4.13.2"
 
 [tool.poetry.group.lint.dependencies]
