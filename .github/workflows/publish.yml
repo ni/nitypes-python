@@ -7,7 +7,6 @@ on:
     inputs:
       environment:
         default: 'testpypi'
-  push:
 
 env:
   dist-artifact-name: nitypes-distribution-packages
