@@ -1,4 +1,8 @@
-"""Increment version number."""
+"""Increment version number.
+
+This script is a workaround for https://github.com/python-poetry/poetry/issues/8718 - "Add 'dev' as
+version bump rule for developmental releases."
+"""
 
 import re
 import sys
