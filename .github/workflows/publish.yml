@@ -90,41 +90,5 @@ jobs:
         uses: ni/python-actions/setup-python@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
       - name: Set up Poetry
         uses: ni/python-actions/setup-poetry@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
-      - name: Get version from pyproject.toml
-        id: get-version
-        run: echo version=`poetry version --short` >> "$GITHUB_OUTPUT"
-      - name: Bump the version number
-        id: bump-version
-        run: |
-          # Workaround for https://github.com/python-poetry/poetry/issues/8718 - "Add 'dev' as
-          # version bump rule for developmental releases."
-          import os, re
-          version = "${{ steps.get-version.outputs.version }}"
-          match = re.match(r"^(.*-dev)(\d+)$", version)
-          if match:
-              version = f"{match.group(1)}{int(match.group(2))+1}"
-          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-              print(f"version={version}", file=f)
-        shell: python
-      - name: Update version in pyproject.toml
-        if: steps.get-version.outputs.version != steps.bump-version.outputs.version
-        run: poetry version ${{ steps.bump-version.outputs.version }}
-      - name: Create pull request
-        if: steps.get-version.outputs.version != steps.bump-version.outputs.version
-        uses: peter-evans/create-pull-request@271a8d0340265f705b14b6d32b9829c1cb33d45e # v7.0.8
-        with:
-          branch: users/build/update-version-to-${{ steps.bump-version.outputs.version }}
-          title: "chore: Update version to ${{ steps.bump-version.outputs.version }}"
-          body: |
-            ### What does this Pull Request accomplish?
-
-            Update the package version to ${{ steps.bump-version.outputs.version }}
-
-            ### Why should this Pull Request be merged?
-
-            Prepare for the next release.
-
-            ### What testing has been done?
-
-            N/A
-        
+      - name: Update project version
+        uses: ni/python-actions/update-project-version@users/bkeryan/update-project-version
