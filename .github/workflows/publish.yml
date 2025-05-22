@@ -12,6 +12,17 @@ on:
 
 env:
   dist-artifact-name: nitypes-distribution-packages
+  environment-info: |
+    {
+      "pypi": {
+        "base-url": "https://pypi.org",
+        "upload-url": "https://upload.pypi.org/legacy/"
+      },
+      "testpypi": {
+        "base-url": "https://test.pypi.org",
+        "upload-url": "https://test.pypi.org/legacy/"
+      }
+    }
 
 jobs:
   check_nitypes:
@@ -43,15 +54,12 @@ jobs:
           path: dist/*
   publish_to_pypi:
     name: Publish nitypes to PyPI
-    if: inputs.environment == 'pypi' || inputs.environment == 'testpypi'
+    if: inputs.environment != 'none'
     runs-on: ubuntu-latest
     needs: [build_nitypes]
-    env:
-      base-url: ${{ inputs.environment == 'pypi' && 'https://pypi.org' || 'https://test.pypi.org' }}
-      upload-url: ${{ inputs.environment == 'pypi' && 'https://upload.pypi.org/legacy/' || 'https://test.pypi.org/legacy/' }}
     environment:
       name: ${{ inputs.environment }}
-      url: ${{ env.base-url }}/p/nitypes
+      url: ${{ fromJson(env.environment-info)[inputs.environment].base-url }}/p/nitypes
     permissions:
       id-token: write
     steps:
@@ -64,7 +72,7 @@ jobs:
     - name: Upload to ${{ inputs.environment }}
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        repository-url: ${{ env.upload-url }}
+        repository-url: ${{ fromJson(env.environment-info)[inputs.environment].upload-url }} 
   update_version:
     name: Update nitypes version
     runs-on: ubuntu-latest
