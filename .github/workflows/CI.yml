@@ -8,11 +8,6 @@ on:
   workflow_call:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  checks: write
-  pull-requests: write
-
 jobs:
   check_nitypes:
     name: Check nitypes
@@ -33,3 +28,7 @@ jobs:
     uses: ./.github/workflows/report_test_results.yml
     needs: [run_unit_tests, run_unit_tests_oldest_deps]
     if: always()
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write

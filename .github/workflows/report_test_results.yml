@@ -4,15 +4,14 @@ on:
   workflow_call:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  checks: write
-  pull-requests: write
-
 jobs:
   report_test_results:
     name: Report test results
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     steps:
       - name: Check out repo
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
