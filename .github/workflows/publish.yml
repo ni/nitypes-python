@@ -6,12 +6,18 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: The environment to publish to ("pypi", "testpypi", or "none").
-        default: 'pypi'
+        description: The environment to publish to.
+        default: 'none'
         required: true
+        type: choice
+        options:
+          - none
+          - pypi
+          - testpypi
 
 env:
   dist-artifact-name: nitypes-distribution-packages
+  environment: ${{ github.event_name == 'release' && 'pypi' || inputs.environment }}
   environment-info: |
     {
       "pypi": {
@@ -54,12 +60,13 @@ jobs:
           path: dist/*
   publish_to_pypi:
     name: Publish nitypes to PyPI
-    if: inputs.environment != 'none'
+    if: github.event_name == 'release' || inputs.environment != 'none'
     runs-on: ubuntu-latest
     needs: [build_nitypes]
     environment:
-      name: ${{ inputs.environment }}
-      url: ${{ fromJson(env.environment-info)[inputs.environment].base-url }}/p/nitypes
+      # This logic is duplicated because `name` doesn't support the `env` context.
+      name: ${{ github.event_name == 'release' && 'pypi' || inputs.environment }}
+      url: ${{ fromJson(env.environment-info)[env.environment].base-url }}/p/nitypes
     permissions:
       id-token: write
     steps:
@@ -69,10 +76,10 @@ jobs:
         name: ${{ env.dist-artifact-name }}
         path: dist/
     - run: ls -lR
-    - name: Upload to ${{ inputs.environment }}
+    - name: Upload to ${{ env.environment }}
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        repository-url: ${{ fromJson(env.environment-info)[inputs.environment].upload-url }} 
+        repository-url: ${{ fromJson(env.environment-info)[env.environment].upload-url }} 
   update_version:
     name: Update nitypes version
     runs-on: ubuntu-latest
