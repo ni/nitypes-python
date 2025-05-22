@@ -31,6 +31,17 @@ jobs:
         uses: ni/python-actions/setup-python@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
       - name: Set up Poetry
         uses: ni/python-actions/setup-poetry@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
+      - name: Check project version
+        if: github.event_name == 'release'
+        run: |
+          release_tag="${{ github.ref_name }}" 
+          project_version="$(poetry version --short)"
+          if [ x"$release_tag" != x"$project_version" ]; then
+            echo "Release tag does not match project version in pyproject.toml."
+            echo "Release tag: $release_tag"
+            echo "Project version: $project_version"
+            exit 1
+          fi
       - name: Build distribution packages
         run: poetry build
       - name: Upload build artifacts
