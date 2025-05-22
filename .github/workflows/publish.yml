@@ -6,10 +6,23 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        default: 'testpypi'
+        description: The environment to publish to ("pypi", "testpypi", or "none").
+        default: 'pypi'
+        required: true
 
 env:
   dist-artifact-name: nitypes-distribution-packages
+  environment-info: |
+    {
+      "pypi": {
+        "base-url": "https://pypi.org",
+        "upload-url": "https://upload.pypi.org/legacy/"
+      },
+      "testpypi": {
+        "base-url": "https://test.pypi.org",
+        "upload-url": "https://test.pypi.org/legacy/"
+      }
+    }
 
 jobs:
   check_nitypes:
@@ -29,6 +42,9 @@ jobs:
         uses: ni/python-actions/setup-python@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
       - name: Set up Poetry
         uses: ni/python-actions/setup-poetry@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
+      - name: Check project version
+        if: github.event_name == 'release'
+        uses: ni/python-actions/check-project-version@c09765bfa2f886e2227f6c2525cb006348736349 # users/bkeryan/update-project-version
       - name: Build distribution packages
         run: poetry build
       - name: Upload build artifacts
@@ -36,35 +52,14 @@ jobs:
         with:
           name: ${{ env.dist-artifact-name }}
           path: dist/*
-  publish_to_testpypi:
-    name: Publish nitypes to TestPyPI
-    if: github.event_name == 'workflow_dispatch' && inputs.environment == 'testpypi'
-    runs-on: ubuntu-latest
-    needs: [build_nitypes]
-    environment:
-      name: testpypi
-      url: https://test.pypi.org/p/nitypes
-    permissions:
-      id-token: write
-    steps:
-    - name: Download build artifacts
-      uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-      with:
-        name: ${{ env.dist-artifact-name }}
-        path: dist/
-    - run: ls -lR
-    - name: Upload to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
   publish_to_pypi:
     name: Publish nitypes to PyPI
-    if: github.event_name == 'release' || inputs.environment == 'pypi'
+    if: inputs.environment != 'none'
     runs-on: ubuntu-latest
     needs: [build_nitypes]
     environment:
-      name: pypi
-      url: https://pypi.org/p/nitypes
+      name: ${{ inputs.environment }}
+      url: ${{ fromJson(env.environment-info)[inputs.environment].base-url }}/p/nitypes
     permissions:
       id-token: write
     steps:
@@ -74,8 +69,10 @@ jobs:
         name: ${{ env.dist-artifact-name }}
         path: dist/
     - run: ls -lR
-    - name: Upload to PyPI
+    - name: Upload to ${{ inputs.environment }}
       uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: ${{ fromJson(env.environment-info)[inputs.environment].upload-url }} 
   update_version:
     name: Update nitypes version
     runs-on: ubuntu-latest
@@ -91,4 +88,4 @@ jobs:
       - name: Set up Poetry
         uses: ni/python-actions/setup-poetry@e8f25e9a64426bd431ac124b83df11b76cdf60d5 # v0.1.0
       - name: Update project version
-        uses: ni/python-actions/update-project-version@e183aaeec4ffab2bc331bf47093bccc086bc19d3 # users/bkeryan/update-project-version
+        uses: ni/python-actions/update-project-version@c09765bfa2f886e2227f6c2525cb006348736349 # users/bkeryan/update-project-version
