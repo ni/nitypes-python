@@ -392,6 +392,108 @@ def test___time_values___add___returns_sum(
 @pytest.mark.parametrize(
     "left, right, expected",
     [
+        (TimeValue(0), dt.timedelta(seconds=0), TimeValue(0)),
+        (TimeValue(2), dt.timedelta(seconds=2), TimeValue(4)),
+        (TimeValue(2), dt.timedelta(seconds=-2), TimeValue(0)),
+        (
+            TimeValue(Decimal("1e15")),
+            dt.timedelta(seconds=123),
+            TimeValue(Decimal("1_000_000_000_000_123")),
+        ),
+        (
+            TimeValue(Decimal("1e15")),
+            -dt.timedelta(seconds=1),
+            TimeValue(Decimal("999_999_999_999_999")),
+        ),
+        (
+            TimeValue(Decimal("1e15")),
+            dt.timedelta(microseconds=15625),  # exact binary fraction
+            TimeValue(Decimal("1_000_000_000_000_000.015_625")),
+        ),
+    ],
+)
+def test___dt_timedelta___add___returns_sum(
+    left: TimeValue, right: dt.timedelta, expected: TimeValue
+) -> None:
+    assert left + right == expected
+    assert right + left == expected
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (TimeValue(0), ht.timedelta(seconds=0), TimeValue(0)),
+        (TimeValue(2), ht.timedelta(seconds=2), TimeValue(4)),
+        (TimeValue(2), ht.timedelta(seconds=-2), TimeValue(0)),
+        (
+            TimeValue(Decimal("1e15")),
+            ht.timedelta(seconds=123),
+            TimeValue(Decimal("1_000_000_000_000_123")),
+        ),
+        (
+            TimeValue(Decimal("1e15")),
+            -ht.timedelta(seconds=1),
+            TimeValue(Decimal("999_999_999_999_999")),
+        ),
+        (
+            TimeValue(Decimal("1e15")),
+            ht.timedelta(microseconds=15625),  # exact binary fraction
+            TimeValue(Decimal("1_000_000_000_000_000.015_625")),
+        ),
+    ],
+)
+def test___ht_timedelta___add___returns_sum(
+    left: TimeValue, right: ht.timedelta, expected: TimeValue
+) -> None:
+    assert left + right == expected
+    assert right + left == expected
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (
+            TimeValue(Decimal("1e15")),
+            dt.timedelta(microseconds=314159),
+            TimeValue(Decimal("1_000_000_000_000_000.314_159")),
+        ),
+    ],
+)
+def test___dt_timedelta_inexact_result___add___returns_approximate_sum(
+    left: TimeValue, right: dt.timedelta, expected: TimeValue
+) -> None:
+    assert (left + right).precision_total_seconds() == pytest.approx(
+        expected.precision_total_seconds()
+    )
+    assert (right + left).precision_total_seconds() == pytest.approx(
+        expected.precision_total_seconds()
+    )
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (
+            TimeValue(Decimal("1e15")),
+            ht.timedelta(femtoseconds=314159),
+            TimeValue(Decimal("1_000_000_000_000_000.000_000_000_314_159")),
+        ),
+    ],
+)
+def test___ht_timedelta_inexact_result___add___returns_approximate_sum(
+    left: TimeValue, right: ht.timedelta, expected: TimeValue
+) -> None:
+    assert (left + right).precision_total_seconds() == pytest.approx(
+        expected.precision_total_seconds()
+    )
+    assert (right + left).precision_total_seconds() == pytest.approx(
+        expected.precision_total_seconds()
+    )
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
         (TimeValue(0), TimeValue(0), TimeValue(0)),
         (TimeValue(2), TimeValue(2), TimeValue(0)),
         (TimeValue(2), TimeValue(-2), TimeValue(4)),
@@ -411,6 +513,108 @@ def test___time_values___sub___returns_difference(
     left: TimeValue, right: TimeValue, expected: TimeValue
 ) -> None:
     assert left - right == expected
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (TimeValue(0), dt.timedelta(seconds=0), TimeValue(0)),
+        (TimeValue(2), dt.timedelta(seconds=2), TimeValue(0)),
+        (TimeValue(2), dt.timedelta(seconds=-2), TimeValue(4)),
+        (
+            TimeValue(Decimal("1e15")),
+            dt.timedelta(seconds=123),
+            TimeValue(Decimal("999_999_999_999_877")),
+        ),
+        (
+            TimeValue(Decimal("1e15")),
+            -dt.timedelta(seconds=1),
+            TimeValue(Decimal("1_000_000_000_000_001")),
+        ),
+        (
+            TimeValue(Decimal("1e15")),
+            dt.timedelta(microseconds=15625),  # exact binary fraction
+            TimeValue(Decimal("999_999_999_999_999.984_375")),
+        ),
+    ],
+)
+def test___dt_timedelta___sub___returns_difference(
+    left: TimeValue, right: dt.timedelta, expected: TimeValue
+) -> None:
+    assert left - right == expected
+    assert right - left == -expected
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (TimeValue(0), ht.timedelta(seconds=0), TimeValue(0)),
+        (TimeValue(2), ht.timedelta(seconds=2), TimeValue(0)),
+        (TimeValue(2), ht.timedelta(seconds=-2), TimeValue(4)),
+        (
+            TimeValue(Decimal("1e15")),
+            ht.timedelta(seconds=123),
+            TimeValue(Decimal("999_999_999_999_877")),
+        ),
+        (
+            TimeValue(Decimal("1e15")),
+            -ht.timedelta(seconds=1),
+            TimeValue(Decimal("1_000_000_000_000_001")),
+        ),
+        (
+            TimeValue(Decimal("1e15")),
+            ht.timedelta(microseconds=15625),  # exact binary fraction
+            TimeValue(Decimal("999_999_999_999_999.984_375")),
+        ),
+    ],
+)
+def test___ht_timedelta___sub___returns_difference(
+    left: TimeValue, right: ht.timedelta, expected: TimeValue
+) -> None:
+    assert left - right == expected
+    assert right - left == -expected
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (
+            TimeValue(Decimal("1e15")),
+            dt.timedelta(microseconds=314159),
+            TimeValue(Decimal("999_999_999_999_999.685_841")),
+        ),
+    ],
+)
+def test___dt_timedelta_inexact_result___sub___returns_approximate_difference(
+    left: TimeValue, right: dt.timedelta, expected: TimeValue
+) -> None:
+    assert (left - right).precision_total_seconds() == pytest.approx(
+        expected.precision_total_seconds()
+    )
+    assert (right - left).precision_total_seconds() == pytest.approx(
+        -expected.precision_total_seconds()
+    )
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (
+            TimeValue(Decimal("1e15")),
+            ht.timedelta(femtoseconds=314159),
+            TimeValue(Decimal("999_999_999_999_999.999_999_999_685_800")),
+        ),
+    ],
+)
+def test___ht_timedelta_inexact_result___sub___returns_approximate_difference(
+    left: TimeValue, right: ht.timedelta, expected: TimeValue
+) -> None:
+    assert (left - right).precision_total_seconds() == pytest.approx(
+        expected.precision_total_seconds()
+    )
+    assert (right - left).precision_total_seconds() == pytest.approx(
+        -expected.precision_total_seconds()
+    )
 
 
 @pytest.mark.parametrize(
@@ -638,6 +842,34 @@ def test___time_value___mod___returns_time_value(
 @pytest.mark.parametrize(
     "left, right, expected",
     [
+        (TimeValue(1), dt.timedelta(seconds=1), TimeValue(0)),
+        (TimeValue(20042), dt.timedelta(seconds=200), TimeValue(42)),
+    ],
+)
+def test___dt_timedelta___mod___returns_time_value(
+    left: TimeValue, right: dt.timedelta, expected: TimeValue
+) -> None:
+    assert_type(left % right, TimeValue)
+    assert left % right == expected
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (TimeValue(1), ht.timedelta(seconds=1), TimeValue(0)),
+        (TimeValue(20042), ht.timedelta(seconds=200), TimeValue(42)),
+    ],
+)
+def test___ht_timedelta___mod___returns_time_value(
+    left: TimeValue, right: ht.timedelta, expected: TimeValue
+) -> None:
+    assert_type(left % right, TimeValue)
+    assert left % right == expected
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
         (TimeValue(1), TimeValue(1), (1, TimeValue(0))),
         (TimeValue(20042), TimeValue(200), (100, TimeValue(42))),
         (
@@ -659,6 +891,110 @@ def test___time_value___divmod___returns_int_and_time_value(
     assert divmod(left, right) == expected
 
 
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (TimeValue(1), dt.timedelta(seconds=1), (1, TimeValue(0))),
+        (TimeValue(20042), dt.timedelta(seconds=200), (100, TimeValue(42))),
+    ],
+)
+def test___dt_timedelta___divmod___returns_int_and_time_value(
+    left: TimeValue, right: dt.timedelta, expected: tuple[int, TimeValue]
+) -> None:
+    assert_type(divmod(left, right), tuple[int, TimeValue])
+    assert divmod(left, right) == expected
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (TimeValue(1), dt.timedelta(seconds=1), (1, TimeValue(0))),
+        (TimeValue(20042), dt.timedelta(seconds=200), (100, TimeValue(42))),
+    ],
+)
+def test___ht_timedelta___divmod___returns_int_and_time_value(
+    left: TimeValue, right: ht.timedelta, expected: tuple[int, TimeValue]
+) -> None:
+    assert_type(divmod(left, right), tuple[int, TimeValue])
+    assert divmod(left, right) == expected
+
+
+############
+# Comparison
+############
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (TimeValue(0), TimeValue(0)),
+        (TimeValue(1), TimeValue(1)),
+        (TimeValue(-1), TimeValue(-1)),
+        (
+            TimeValue.from_ticks((1 << 124) + (2 << 64) + 3),
+            TimeValue.from_ticks((1 << 124) + (2 << 64) + 3),
+        ),
+        (
+            -TimeValue.from_ticks((1 << 124) + (2 << 64) + 3),
+            -TimeValue.from_ticks((1 << 124) + (2 << 64) + 3),
+        ),
+        (TimeValue(1), dt.timedelta(seconds=1)),
+        (TimeValue(1), ht.timedelta(seconds=1)),
+        (dt.timedelta(seconds=1), TimeValue(1)),
+        pytest.param(
+            ht.timedelta(seconds=1),
+            TimeValue(1),
+            marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
+        ),
+    ],
+)
+def test___same_value___comparison___equal(
+    left: TimeValue | dt.timedelta | ht.timedelta, right: TimeValue | dt.timedelta | ht.timedelta
+) -> None:
+    assert not (left < right)
+    assert left <= right
+    assert left == right
+    assert not (left != right)
+    assert not (left > right)
+    assert left >= right
+
+
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (TimeValue(0), TimeValue(1)),
+        (TimeValue(1), TimeValue(2)),
+        (TimeValue(-1), TimeValue(0)),
+        (
+            TimeValue.from_ticks((1 << 124) + (2 << 64) + 3),
+            TimeValue.from_ticks((1 << 124) + (2 << 64) + 4),
+        ),
+        (
+            -TimeValue.from_ticks((1 << 124) + (2 << 64) + 3),
+            -TimeValue.from_ticks((1 << 124) + (2 << 64) + 2),
+        ),
+        (TimeValue(1), dt.timedelta(seconds=2)),
+        (TimeValue(1), ht.timedelta(seconds=2)),
+        (dt.timedelta(seconds=1), TimeValue(2)),
+        pytest.param(
+            ht.timedelta(seconds=1),
+            TimeValue(2),
+            marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
+        ),
+    ],
+)
+def test___lesser_value___comparison___lesser(
+    left: TimeValue | dt.timedelta | ht.timedelta, right: TimeValue | dt.timedelta | ht.timedelta
+) -> None:
+    assert left < right
+    assert left <= right
+    assert not (left == right)
+    assert left != right
+    assert not (left > right)
+    assert not (left >= right)
+
+
+###############
+# Miscellaneous
+###############
 @pytest.mark.parametrize(
     "value, expected",
     [
