@@ -368,13 +368,11 @@ class TimeValue:
         seconds = self.seconds
         minutes, seconds = divmod(seconds, 60)
         hours, minutes = divmod(minutes, 60)
-        _, fractional_seconds = divmod(self.precision_total_seconds(), 1)
-        decimal_seconds = round(
-            (Decimal(1) + fractional_seconds if fractional_seconds < 0 else fractional_seconds)
-            * Decimal("1e18")
-        )
+        # Display 18 digits of fractional seconds, rounded to the nearest digit.
+        fractional_seconds = 10**18 * (self._ticks & _FRACTIONAL_SECONDS_MASK)
+        fractional_seconds = (fractional_seconds + _TICKS_PER_SECOND // 2) // _TICKS_PER_SECOND
         s = f"{days} day, " if abs(days) == 1 else f"{days} days, " if days else ""
-        s += f"{hours}:{minutes:02}:{seconds:02}.{decimal_seconds:018}"
+        s += f"{hours}:{minutes:02}:{seconds:02}.{fractional_seconds:018}"
         return s
 
     def __repr__(self) -> str:
