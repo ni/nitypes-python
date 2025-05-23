@@ -142,6 +142,55 @@ def test___unsupported_type___from_ticks___raises_type_error() -> None:
     assert exc.value.args[0].startswith("The ticks must be an integer.")
 
 
+#########################################################
+# days, seconds, microseconds, femtoseconds, yoctoseconds
+#########################################################
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        (TimeValue(0), (0, 0, 0, 0, 0)),
+        (TimeValue(1), (0, 1, 0, 0, 0)),
+        (TimeValue(60), (0, 60, 0, 0, 0)),
+        (TimeValue(3600), (0, 3600, 0, 0, 0)),
+        (TimeValue(86400), (1, 0, 0, 0, 0)),
+        (TimeValue(86400 * 365), (365, 0, 0, 0, 0)),
+        (TimeValue(86400 * 365 * 100), (36500, 0, 0, 0, 0)),
+        (TimeValue(-1), (-1, 86399, 0, 0, 0)),
+        (TimeValue(-60), (-1, 86400 - 60, 0, 0, 0)),
+        (TimeValue(-3600), (-1, 86400 - 3600, 0, 0, 0)),
+        (TimeValue(-86400), (-1, 0, 0, 0, 0)),
+        (TimeValue(-86400 * 365), (-365, 0, 0, 0, 0)),
+        (TimeValue(-86400 * 365 * 100), (-36500, 0, 0, 0, 0)),
+        (TimeValue(Decimal("0.5")), (0, 0, 500_000, 0, 0)),
+        (TimeValue(Decimal("0.005")), (0, 0, 4_999, 999_999_999, 999_995_663)),
+        (TimeValue(Decimal("0.000_005")), (0, 0, 5, 0, 13_114)),
+        (TimeValue(Decimal("0.000_000_000_000_005")), (0, 0, 0, 5, 15_158)),
+        (TimeValue(Decimal("0.000_000_000_000_000_005")), (0, 0, 0, 0, 4_987_329)),
+        (TimeValue(Decimal("-0.5")), (-1, 86399, 500_000, 0, 0)),
+        (TimeValue(Decimal("-0.005")), (-1, 86399, 995_000, 0, 4_336)),
+        (TimeValue(Decimal("-0.000_005")), (-1, 86399, 999_994, 999_999_999, 999_986_885)),
+        (
+            TimeValue(Decimal("-0.000_000_000_000_005")),
+            (-1, 86399, 999_999, 999_999_994, 999_984_841),
+        ),
+        (
+            TimeValue(Decimal("-0.000_000_000_000_000_005")),
+            (-1, 86399, 999_999, 999_999_999, 995_012_670),
+        ),
+    ],
+)
+def test___various_values___unit_properties___return_unit_values(
+    value: TimeValue, expected: tuple[int, ...]
+) -> None:
+    assert (
+        value.days,
+        value.seconds,
+        value.microseconds,
+        value.femtoseconds,
+        value.yoctoseconds,
+    ) == expected
+
+
 ###############
 # total_seconds
 ###############
