@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import copy
+import datetime as dt
 import pickle
 import random
 from decimal import Decimal
 from typing import Any, Generator
 
+import hightime as ht
 import pytest
 from typing_extensions import assert_type
 
@@ -48,6 +50,44 @@ def test___decimal_seconds___construct___returns_time_value() -> None:
     assert isinstance(value, TimeValue)
     assert (value._ticks >> 64) == 123456
     assert (value._ticks & 0xFFFFFFFF_FFFFFFFF) == pytest.approx(Decimal("0.789") * (1 << 64))
+
+
+def test___dt_timedelta___construct___returns_nearest_time_value() -> None:
+    # The microseconds are not exactly representable as a binary fraction, so they are rounded.
+    value = TimeValue(dt.timedelta(days=12345, seconds=23456, microseconds=345_678))
+
+    assert_type(value, TimeValue)
+    assert isinstance(value, TimeValue)
+    assert (
+        value.days,
+        value.seconds,
+        value.microseconds,
+        value.femtoseconds,
+        value.yoctoseconds,
+    ) == (12345, 23456, 345_677, 999_999_999, 999_972_046)
+
+
+def test___ht_timedelta___construct___returns_nearest_time_value() -> None:
+    # The yoctoseconds exceed the precision of NI-BTF, so they are rounded.
+    value = TimeValue(
+        ht.timedelta(
+            days=12345,
+            seconds=23456,
+            microseconds=345_678,
+            femtoseconds=456_789_012,
+            yoctoseconds=567_890_123,
+        )
+    )
+
+    assert_type(value, TimeValue)
+    assert isinstance(value, TimeValue)
+    assert (
+        value.days,
+        value.seconds,
+        value.microseconds,
+        value.femtoseconds,
+        value.yoctoseconds,
+    ) == (12345, 23456, 345_678, 456_789_012, 567_896_592)
 
 
 @pytest.mark.parametrize(

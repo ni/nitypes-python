@@ -1,20 +1,14 @@
 from __future__ import annotations
 
+import datetime as dt
 import decimal
 import math
 import operator
 from decimal import Decimal
 from functools import singledispatchmethod
-from typing import (
-    Any,
-    ClassVar,
-    Protocol,
-    SupportsIndex,
-    Union,
-    overload,
-    runtime_checkable,
-)
+from typing import Any, ClassVar, SupportsIndex, Union, overload
 
+import hightime as ht
 from typing_extensions import Self, TypeAlias
 
 from nitypes._arguments import arg_to_int
@@ -29,34 +23,38 @@ _FRACTIONAL_SECONDS_MASK = _TICKS_PER_SECOND - 1
 
 _SECONDS_PER_DAY = 86400
 
+_MICROSECONDS_PER_SECOND = 10**6
+_FEMTOSECONDS_PER_SECOND = 10**15
+_YOCTOSECONDS_PER_SECOND = 10**24
+
+_FEMTOSECONDS_PER_MICROSECOND = _FEMTOSECONDS_PER_SECOND // _MICROSECONDS_PER_SECOND
+_YOCTOSECONDS_PER_FEMTOSECOND = _YOCTOSECONDS_PER_SECOND // _FEMTOSECONDS_PER_SECOND
+
 _DECIMAL_DIGITS = 64
 _REPR_TICKS = False
 
 
-@runtime_checkable
-class _SupportsTotalSeconds(Protocol):
-    def total_seconds(self) -> float: ...
-
-
-@runtime_checkable
-class _SupportsPrecisionTotalSeconds(Protocol):
-    def precision_total_seconds(self) -> Decimal: ...
+_OtherTimeValue: TypeAlias = Union[dt.timedelta, ht.timedelta]
+_OTHER_TIME_VALUE_TUPLE = (dt.timedelta, ht.timedelta)
 
 
 class TimeValue:
     """A time value in NI Binary Time Format (NI-BTF).
 
-    This class has a similar interface to :any:`datetime.timedelta` and :any:`hightime.timedelta`,
-    implemented using a 128-bit fixed point number with a 64-bit whole seconds and 64-bit
+    TimeValue instances are duck typing compatible with :any:`datetime.timedelta` and
+    :any:`hightime.timedelta`.
+
+    TimeValue represents time as a 128-bit fixed point number with 64-bit whole seconds and 64-bit
     fractional seconds.
+
+    .. warning::
+        The fractional seconds are represented as a binary fraction, which is a sum of inverse
+        powers of 2. Values that are not exactly representable as binary fractions will display
+        rounding error or "bruising" similar to a floating point number.
     """
 
     min: ClassVar[TimeValue]
     max: ClassVar[TimeValue]
-
-    _TimeValueLike: TypeAlias = Union[
-        "TimeValue", _SupportsTotalSeconds, _SupportsPrecisionTotalSeconds
-    ]
 
     __slots__ = ["_ticks"]
 
@@ -64,14 +62,7 @@ class TimeValue:
 
     def __init__(
         self,
-        seconds: (
-            SupportsIndex
-            | Decimal
-            | float
-            | _SupportsTotalSeconds
-            | _SupportsPrecisionTotalSeconds
-            | None
-        ) = None,
+        seconds: SupportsIndex | Decimal | float | _OtherTimeValue | None = None,
     ) -> None:
         """Initialize a TimeValue."""
         if seconds is None:
@@ -117,13 +108,17 @@ class TimeValue:
 
     @_to_ticks.register
     @classmethod
-    def _(cls, seconds: _SupportsPrecisionTotalSeconds) -> int:
+    def _(cls, seconds: ht.timedelta) -> int:
         return cls._to_ticks(seconds.precision_total_seconds())
 
     @_to_ticks.register
     @classmethod
-    def _(cls, seconds: _SupportsTotalSeconds) -> int:
-        return cls._to_ticks(seconds.total_seconds())
+    def _(cls, seconds: dt.timedelta) -> int:
+        # Do not use total_seconds() because it loses precision.
+        ticks = (seconds.days * _SECONDS_PER_DAY) << _BITS_PER_SECOND
+        ticks += seconds.seconds << _BITS_PER_SECOND
+        ticks += (seconds.microseconds << _BITS_PER_SECOND) // _MICROSECONDS_PER_SECOND
+        return ticks
 
     @classmethod
     def from_ticks(cls, ticks: SupportsIndex) -> Self:
@@ -153,7 +148,30 @@ class TimeValue:
     @property
     def microseconds(self) -> int:
         """The number of microseconds in the time value, up to the nearest second."""
-        return (1000 * self._ticks) >> _BITS_PER_SECOND
+        return (
+            _MICROSECONDS_PER_SECOND * (self._ticks & _FRACTIONAL_SECONDS_MASK)
+        ) >> _BITS_PER_SECOND
+
+    @property
+    def femtoseconds(self) -> int:
+        """The number of femtoseconds in the time value, up to the nearest microsecond."""
+        value = (
+            _FEMTOSECONDS_PER_SECOND * (self._ticks & _FRACTIONAL_SECONDS_MASK) >> _BITS_PER_SECOND
+        )
+        return value % _FEMTOSECONDS_PER_MICROSECOND
+
+    @property
+    def yoctoseconds(self) -> int:
+        """The number of yoctoseconds in the time value, up to the nearest femtosecond.
+
+        .. warning::
+            Because this class uses a 64-bit binary fraction, the smallest value it can represent
+            is ``1.0 / (1 << 64)`` seconds, which is about 54210 yoctoseconds.
+        """
+        value = (
+            _YOCTOSECONDS_PER_SECOND * (self._ticks & _FRACTIONAL_SECONDS_MASK)
+        ) >> _BITS_PER_SECOND
+        return value % _YOCTOSECONDS_PER_FEMTOSECOND
 
     def total_seconds(self) -> float:
         """The total seconds in the time value.
@@ -188,31 +206,31 @@ class TimeValue:
         """Return abs(self)."""
         return -self if self._ticks < 0 else self
 
-    def __add__(self, value: _TimeValueLike, /) -> TimeValue:
+    def __add__(self, value: TimeValue | _OtherTimeValue, /) -> TimeValue:
         """Return self+value."""
         if isinstance(value, TimeValue):
             return self.__class__.from_ticks(self._ticks + value._ticks)
-        elif isinstance(value, (_SupportsTotalSeconds, _SupportsPrecisionTotalSeconds)):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return self + TimeValue(value)
         else:
             return NotImplemented
 
     __radd__ = __add__
 
-    def __sub__(self, value: _TimeValueLike, /) -> TimeValue:
+    def __sub__(self, value: TimeValue | _OtherTimeValue, /) -> TimeValue:
         """Return self-value."""
         if isinstance(value, TimeValue):
             return self.__class__.from_ticks(self._ticks - value._ticks)
-        elif isinstance(value, (_SupportsTotalSeconds, _SupportsPrecisionTotalSeconds)):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return self - TimeValue(value)
         else:
             return NotImplemented
 
-    def __rsub__(self, value: _TimeValueLike, /) -> TimeValue:
+    def __rsub__(self, value: TimeValue | _OtherTimeValue, /) -> TimeValue:
         """Return value-self."""
         if isinstance(value, TimeValue):
             return self.__class__.from_ticks(value._ticks - self._ticks)
-        elif isinstance(value, (_SupportsTotalSeconds, _SupportsPrecisionTotalSeconds)):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return TimeValue(value) - self
         else:
             return NotImplemented
@@ -269,38 +287,38 @@ class TimeValue:
         else:
             return NotImplemented
 
-    def __mod__(self, value: _TimeValueLike, /) -> TimeValue:
+    def __mod__(self, value: TimeValue | _OtherTimeValue, /) -> TimeValue:
         """Return self%value."""
         if isinstance(value, TimeValue):
             return self.__class__.from_ticks(self._ticks % value._ticks)
-        elif isinstance(value, (_SupportsTotalSeconds, _SupportsPrecisionTotalSeconds)):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return self % TimeValue(value)
         else:
             return NotImplemented
 
-    def __divmod__(self, value: _TimeValueLike, /) -> tuple[int, TimeValue]:
+    def __divmod__(self, value: TimeValue | _OtherTimeValue, /) -> tuple[int, TimeValue]:
         """Return (self//value, self%value)."""
         if isinstance(value, TimeValue):
             return (self // value, self % value)
-        elif isinstance(value, (_SupportsTotalSeconds, _SupportsPrecisionTotalSeconds)):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return divmod(self, TimeValue(value))
         else:
             return NotImplemented
 
-    def __lt__(self, value: _TimeValueLike, /) -> bool:
+    def __lt__(self, value: TimeValue | _OtherTimeValue, /) -> bool:
         """Return self<value."""
         if isinstance(value, self.__class__):
             return self._ticks < value._ticks
-        elif isinstance(value, (_SupportsTotalSeconds, _SupportsPrecisionTotalSeconds)):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return self < TimeValue(value)
         else:
             return NotImplemented
 
-    def __le__(self, value: _TimeValueLike, /) -> bool:
+    def __le__(self, value: TimeValue | _OtherTimeValue, /) -> bool:
         """Return self<=value."""
         if isinstance(value, self.__class__):
             return self._ticks <= value._ticks
-        elif isinstance(value, (_SupportsTotalSeconds, _SupportsPrecisionTotalSeconds)):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return self <= TimeValue(value)
         else:
             return NotImplemented
@@ -309,25 +327,25 @@ class TimeValue:
         """Return self==value."""
         if isinstance(value, self.__class__):
             return self._ticks == value._ticks
-        elif isinstance(value, (_SupportsTotalSeconds, _SupportsPrecisionTotalSeconds)):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return self == TimeValue(value)
         else:
             return NotImplemented
 
-    def __gt__(self, value: _TimeValueLike, /) -> bool:
+    def __gt__(self, value: TimeValue | _OtherTimeValue, /) -> bool:
         """Return self<value."""
         if isinstance(value, self.__class__):
             return self._ticks > value._ticks
-        elif isinstance(value, (_SupportsTotalSeconds, _SupportsPrecisionTotalSeconds)):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return self > TimeValue(value)
         else:
             return NotImplemented
 
-    def __ge__(self, value: _TimeValueLike, /) -> bool:
+    def __ge__(self, value: TimeValue | _OtherTimeValue, /) -> bool:
         """Return self>=value."""
         if isinstance(value, self.__class__):
             return self._ticks >= value._ticks
-        elif isinstance(value, (_SupportsTotalSeconds, _SupportsPrecisionTotalSeconds)):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return self >= TimeValue(value)
         else:
             return NotImplemented
