@@ -111,7 +111,7 @@ def test___out_of_range___construct___raises_overflow_error(seconds: int | float
 
 def test___invalid_seconds_type___construct___raises_type_error() -> None:
     with pytest.raises(TypeError) as exc:
-        _ = TimeValue("0")  # type: ignore[arg-type]
+        _ = TimeValue("0")  # type: ignore[call-overload]
 
     assert exc.value.args[0].startswith("The seconds must be a number or timedelta.")
 

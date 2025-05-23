@@ -71,6 +71,7 @@ values to/from NI driver APIs.
 
 from __future__ import annotations
 
+from nitypes.bintime._absolutetime import AbsoluteTime
 from nitypes.bintime._dtypes import (
     CVIAbsoluteTimeBase,
     CVIAbsoluteTimeDType,
@@ -84,8 +85,10 @@ __all__ = [
     "CVIAbsoluteTimeDType",
     "CVITimeIntervalBase",
     "CVITimeIntervalDType",
+    "AbsoluteTime",
     "TimeValue",
 ]
 
 # Hide that it was defined in a helper file
+AbsoluteTime.__module__ = __name__
 TimeValue.__module__ = __name__

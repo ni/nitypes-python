@@ -6,7 +6,7 @@ import math
 import operator
 from decimal import Decimal
 from functools import singledispatchmethod
-from typing import Any, ClassVar, SupportsIndex, Union, overload
+from typing import Any, ClassVar, SupportsIndex, Union, final, overload
 
 import hightime as ht
 from typing_extensions import Self, TypeAlias
@@ -38,11 +38,9 @@ _OtherTimeValue: TypeAlias = Union[dt.timedelta, ht.timedelta]
 _OTHER_TIME_VALUE_TUPLE = (dt.timedelta, ht.timedelta)
 
 
+@final
 class TimeValue:
     """A time value in NI Binary Time Format (NI-BTF).
-
-    TimeValue instances are duck typing compatible with :any:`datetime.timedelta` and
-    :any:`hightime.timedelta`.
 
     TimeValue represents time as a 128-bit fixed point number with 64-bit whole seconds and 64-bit
     fractional seconds.
@@ -51,6 +49,9 @@ class TimeValue:
         The fractional seconds are represented as a binary fraction, which is a sum of inverse
         powers of 2. Values that are not exactly representable as binary fractions will display
         rounding error or "bruising" similar to a floating point number.
+
+    TimeValue instances are duck typing compatible with :any:`datetime.timedelta` and
+    :any:`hightime.timedelta`.
     """
 
     min: ClassVar[TimeValue]
@@ -59,6 +60,19 @@ class TimeValue:
     __slots__ = ["_ticks"]
 
     _ticks: int
+
+    @overload
+    def __init__(self) -> None: ...  # noqa: D107 - missing docstring in __init__
+
+    @overload
+    def __init__(  # noqa: D107 - missing docstring in __init__
+        self, value: _OtherTimeValue, /
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - missing docstring in __init__
+        self, seconds: SupportsIndex | Decimal | float
+    ) -> None: ...
 
     def __init__(
         self,
@@ -213,7 +227,7 @@ class TimeValue:
         if isinstance(value, TimeValue):
             return self.__class__.from_ticks(self._ticks + value._ticks)
         elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return self + TimeValue(value)
+            return self + self.__class__(value)
         else:
             return NotImplemented
 
@@ -224,7 +238,7 @@ class TimeValue:
         if isinstance(value, TimeValue):
             return self.__class__.from_ticks(self._ticks - value._ticks)
         elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return self - TimeValue(value)
+            return self - self.__class__(value)
         else:
             return NotImplemented
 
@@ -233,7 +247,7 @@ class TimeValue:
         if isinstance(value, TimeValue):
             return self.__class__.from_ticks(value._ticks - self._ticks)
         elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return TimeValue(value) - self
+            return self.__class__(value) - self
         else:
             return NotImplemented
 
@@ -247,7 +261,7 @@ class TimeValue:
         elif isinstance(value, Decimal):
             with decimal.localcontext() as ctx:
                 ctx.prec = _DECIMAL_DIGITS
-                return TimeValue(self.precision_total_seconds() * value)
+                return self.__class__(self.precision_total_seconds() * value)
         else:
             return NotImplemented
 
@@ -285,7 +299,7 @@ class TimeValue:
         if isinstance(value, TimeValue):
             return self.total_seconds() / value.total_seconds()
         elif isinstance(value, float):
-            return TimeValue(self.total_seconds() / value)
+            return self.__class__(self.total_seconds() / value)
         else:
             return NotImplemented
 
@@ -294,7 +308,7 @@ class TimeValue:
         if isinstance(value, TimeValue):
             return self.__class__.from_ticks(self._ticks % value._ticks)
         elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return self % TimeValue(value)
+            return self % self.__class__(value)
         else:
             return NotImplemented
 
@@ -303,7 +317,7 @@ class TimeValue:
         if isinstance(value, TimeValue):
             return (self // value, self % value)
         elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return divmod(self, TimeValue(value))
+            return divmod(self, self.__class__(value))
         else:
             return NotImplemented
 
@@ -312,7 +326,7 @@ class TimeValue:
         if isinstance(value, self.__class__):
             return self._ticks < value._ticks
         elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return self < TimeValue(value)
+            return self < self.__class__(value)
         else:
             return NotImplemented
 
@@ -321,7 +335,7 @@ class TimeValue:
         if isinstance(value, self.__class__):
             return self._ticks <= value._ticks
         elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return self <= TimeValue(value)
+            return self <= self.__class__(value)
         else:
             return NotImplemented
 
@@ -330,7 +344,7 @@ class TimeValue:
         if isinstance(value, self.__class__):
             return self._ticks == value._ticks
         elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return self == TimeValue(value)
+            return self == self.__class__(value)
         else:
             return NotImplemented
 
@@ -339,7 +353,7 @@ class TimeValue:
         if isinstance(value, self.__class__):
             return self._ticks > value._ticks
         elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return self > TimeValue(value)
+            return self > self.__class__(value)
         else:
             return NotImplemented
 
@@ -348,7 +362,7 @@ class TimeValue:
         if isinstance(value, self.__class__):
             return self._ticks >= value._ticks
         elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return self >= TimeValue(value)
+            return self >= self.__class__(value)
         else:
             return NotImplemented
 
