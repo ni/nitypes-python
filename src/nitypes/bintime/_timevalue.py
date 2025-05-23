@@ -30,7 +30,7 @@ _FRACTIONAL_SECONDS_MASK = _TICKS_PER_SECOND - 1
 _SECONDS_PER_DAY = 86400
 
 _DECIMAL_DIGITS = 64
-_REPR_TICKS = True
+_REPR_TICKS = False
 
 
 @runtime_checkable
@@ -245,7 +245,7 @@ class TimeValue:
     def __floordiv__(self, value: TimeValue | int, /) -> int | TimeValue:
         """Return self//value."""
         if isinstance(value, TimeValue):
-            return self.__class__.from_ticks(self._ticks // value._ticks)
+            return self._ticks // value._ticks
         elif isinstance(value, int):
             return self.__class__.from_ticks(self._ticks // value)
         else:
@@ -265,7 +265,7 @@ class TimeValue:
         if isinstance(value, TimeValue):
             return self.total_seconds() / value.total_seconds()
         elif isinstance(value, float):
-            return self.total_seconds() / value
+            return TimeValue(self.total_seconds() / value)
         else:
             return NotImplemented
 
@@ -351,8 +351,12 @@ class TimeValue:
         minutes, seconds = divmod(seconds, 60)
         hours, minutes = divmod(minutes, 60)
         _, fractional_seconds = divmod(self.precision_total_seconds(), 1)
-        s = f"{days} days, " if days else ""
-        s += f"{hours}:{minutes:02}:{seconds:02}.{fractional_seconds}"
+        decimal_seconds = round(
+            (Decimal(1) + fractional_seconds if fractional_seconds < 0 else fractional_seconds)
+            * Decimal("1e18")
+        )
+        s = f"{days} day, " if abs(days) == 1 else f"{days} days, " if days else ""
+        s += f"{hours}:{minutes:02}:{seconds:02}.{decimal_seconds:018}"
         return s
 
     def __repr__(self) -> str:
