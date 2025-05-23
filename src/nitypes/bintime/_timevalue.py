@@ -65,18 +65,15 @@ class TimeValue:
         seconds: SupportsIndex | Decimal | float | _OtherTimeValue | None = None,
     ) -> None:
         """Initialize a TimeValue."""
-        if seconds is None:
-            self._ticks = 0
-        else:
-            ticks = self.__class__._to_ticks(seconds)
-            if not (_INT128_MIN <= ticks <= _INT128_MAX):
-                raise OverflowError(
-                    "The seconds value is out of range.\n\n"
-                    f"Requested value: {seconds}\n"
-                    f"Minimum value: {self.__class__.min.precision_total_seconds()}\n"
-                    f"Maximum value: {self.__class__.max.precision_total_seconds()}"
-                )
-            self._ticks = ticks
+        ticks = self.__class__._to_ticks(seconds)
+        if not (_INT128_MIN <= ticks <= _INT128_MAX):
+            raise OverflowError(
+                "The seconds value is out of range.\n\n"
+                f"Requested value: {seconds}\n"
+                f"Minimum value: {self.__class__.min.precision_total_seconds()}\n"
+                f"Maximum value: {self.__class__.max.precision_total_seconds()}"
+            )
+        self._ticks = ticks
 
     @singledispatchmethod
     @classmethod
@@ -120,6 +117,11 @@ class TimeValue:
         ticks += (seconds.microseconds << _BITS_PER_SECOND) // _MICROSECONDS_PER_SECOND
         return ticks
 
+    @_to_ticks.register
+    @classmethod
+    def _(cls, seconds: None) -> int:
+        return 0
+
     @classmethod
     def from_ticks(cls, ticks: SupportsIndex) -> Self:
         """Create a TimeValue from a 128-bit fixed point number expressed as an integer."""
@@ -131,7 +133,7 @@ class TimeValue:
                 f"Minimum value: {_INT128_MIN}\n",
                 f"Maximum value: {_INT128_MAX}",
             )
-        self = cls()
+        self = cls.__new__(cls)
         self._ticks = ticks
         return self
 
