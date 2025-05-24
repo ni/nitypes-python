@@ -12,7 +12,7 @@ import pytest
 from typing_extensions import assert_type
 
 from nitypes.bintime import TimeValue
-from nitypes.bintime._timevalue import _INT128_MAX, _INT128_MIN
+from nitypes.bintime._time_value import _INT128_MAX, _INT128_MIN
 
 
 #############
@@ -1066,7 +1066,7 @@ def test___time_value___pickle___references_public_modules() -> None:
     value_bytes = pickle.dumps(value)
 
     assert b"nitypes.bintime" in value_bytes
-    assert b"nitypes.bintime._timevalue" not in value_bytes
+    assert b"nitypes.bintime._time_value" not in value_bytes
 
 
 @pytest.mark.parametrize(

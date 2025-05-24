@@ -71,21 +71,21 @@ values to/from NI driver APIs.
 
 from __future__ import annotations
 
-from nitypes.bintime._absolutetime import AbsoluteTime
+from nitypes.bintime._absolute_time import AbsoluteTime
 from nitypes.bintime._dtypes import (
     CVIAbsoluteTimeBase,
     CVIAbsoluteTimeDType,
     CVITimeIntervalBase,
     CVITimeIntervalDType,
 )
-from nitypes.bintime._timevalue import TimeValue
+from nitypes.bintime._time_value import TimeValue
 
 __all__ = [
+    "AbsoluteTime",
     "CVIAbsoluteTimeBase",
     "CVIAbsoluteTimeDType",
     "CVITimeIntervalBase",
     "CVITimeIntervalDType",
-    "AbsoluteTime",
     "TimeValue",
 ]
 
