@@ -13,6 +13,7 @@ from nitypes.bintime._timevalue import (
     _FRACTIONAL_SECONDS_MASK,
     _INT128_MAX,
     _INT128_MIN,
+    _MICROSECONDS_PER_SECOND,
     _OTHER_TIME_VALUE_TUPLE,
     _YOCTOSECONDS_PER_SECOND,
     TimeValue,
@@ -62,54 +63,12 @@ class AbsoluteTime:
         self, value: _OtherAbsoluteTime, /
     ) -> None: ...
 
-    @overload
-    def __init__(  # noqa: D107 - missing docstring in __init__
-        self,
-        year: SupportsIndex,
-        month: SupportsIndex,
-        day: SupportsIndex,
-        hour: SupportsIndex = ...,
-        minute: SupportsIndex = ...,
-        second: SupportsIndex = ...,
-        microsecond: SupportsIndex = ...,
-        femtosecond: SupportsIndex = ...,
-        yoctosecond: SupportsIndex = ...,
-        tzinfo: dt.tzinfo | None = ...,
-    ) -> None: ...
-
     def __init__(
         self,
         year: SupportsIndex | _OtherAbsoluteTime | None = None,
-        month: SupportsIndex | None = None,
-        day: SupportsIndex | None = None,
-        hour: SupportsIndex = 0,
-        minute: SupportsIndex = 0,
-        second: SupportsIndex = 0,
-        microsecond: SupportsIndex = 0,
-        femtosecond: SupportsIndex = 0,
-        yoctosecond: SupportsIndex = 0,
-        tzinfo: dt.tzinfo | None = None,
     ) -> None:
         """Initialize an AbsoluteTime."""
-        if month is None and day is None:
-            self._offset = self.__class__._to_offset(year)
-        else:
-            if tzinfo is None or tzinfo != dt.timezone.utc:
-                raise invalid_arg_value("tzinfo", "datetime.timezone.utc", tzinfo)
-            self._offset = self.__class__._to_offset(
-                ht.datetime(
-                    cast(SupportsIndex, year),
-                    cast(SupportsIndex, month),
-                    cast(SupportsIndex, day),
-                    hour,
-                    minute,
-                    second,
-                    microsecond,
-                    femtosecond,
-                    yoctosecond,
-                    tzinfo,
-                )
-            )
+        self._offset = self.__class__._to_offset(year)
 
     @singledispatchmethod
     @classmethod
@@ -149,7 +108,15 @@ class AbsoluteTime:
         self._offset = offset
         return self
 
-    def to_datetime(self) -> ht.datetime:
+    def _to_dt_datetime(self) -> dt.datetime:
+        """Return self as a :any:`datetime.datetime`."""
+        whole_seconds = self._offset._ticks >> _BITS_PER_SECOND
+        microseconds = (
+            _MICROSECONDS_PER_SECOND * (self._offset._ticks & _FRACTIONAL_SECONDS_MASK)
+        ) >> _BITS_PER_SECOND
+        return _DT_EPOCH_1904 + dt.timedelta(seconds=whole_seconds, microseconds=microseconds)
+
+    def _to_ht_datetime(self) -> ht.datetime:
         """Return self as a :any:`hightime.datetime`."""
         whole_seconds = self._offset._ticks >> _BITS_PER_SECOND
         yoctoseconds = (
@@ -157,35 +124,37 @@ class AbsoluteTime:
         ) >> _BITS_PER_SECOND
         return _HT_EPOCH_1904 + ht.timedelta(seconds=whole_seconds, yoctoseconds=yoctoseconds)
 
+    # Calculating the year/month/day requires knowledge of leap years, days per month, etc., so
+    # defer to hightime.datetime.
     @property
     def year(self) -> int:
         """The year."""
-        return self.to_datetime().year
+        return self._to_ht_datetime().year
 
     @property
     def month(self) -> int:
         """The month, between 1 and 12 inclusive."""
-        return self.to_datetime().month
+        return self._to_ht_datetime().month
 
     @property
     def day(self) -> int:
         """The day of the month, between 1 and 31 inclusive."""
-        return self.to_datetime().day
+        return self._to_ht_datetime().day
 
     @property
     def hour(self) -> int:
         """The hour, between 0 and 23 inclusive."""
-        return self.to_datetime().hour
+        return self._offset.seconds // 3600
 
     @property
     def minute(self) -> int:
         """The minute, between 0 and 59 inclusive."""
-        return self.to_datetime().minute
+        return (self._offset.seconds // 60) % 60
 
     @property
     def second(self) -> int:
         """The second, between 0 and 59 inclusive."""
-        return self.to_datetime().second
+        return self._offset.seconds % 60
 
     @property
     def microsecond(self) -> int:
@@ -218,7 +187,7 @@ class AbsoluteTime:
         """Return self+value."""
         if isinstance(value, TimeValue):
             return self.__class__.from_offset(self._offset + value)
-        elif isinstance(value, _OTHER_ABSOLUTE_TIME_TUPLE):
+        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
             return self + TimeValue(value)
         else:
             return NotImplemented
@@ -304,13 +273,11 @@ class AbsoluteTime:
 
     def __str__(self) -> str:
         """Return repr(self)."""
-        return str(self.to_datetime())
+        return str(self._to_ht_datetime())
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        return (
-            f"{self.__class__.__module__}.{self.__class__.__name__}.from_offset({self._offset!r})"
-        )
+        return f"{self.__class__.__module__}.{self.__class__.__name__}({self._to_ht_datetime()!r})"
 
 
 # This is not the same range as dt.datetime.max/min and ht.datetime.max/min (year 0001-9999).
