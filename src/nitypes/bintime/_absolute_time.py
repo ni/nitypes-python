@@ -8,7 +8,7 @@ import hightime as ht
 from typing_extensions import Self, TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
-from nitypes.bintime._timevalue import (
+from nitypes.bintime._time_value import (
     _BITS_PER_SECOND,
     _FRACTIONAL_SECONDS_MASK,
     _INT128_MAX,
