@@ -151,6 +151,22 @@ class TimeValue:
         self._ticks = ticks
         return self
 
+    def _to_datetime_timedelta(self) -> dt.timedelta:
+        """Return self as a :any:`datetime.timedelta`."""
+        whole_seconds = self._ticks >> _BITS_PER_SECOND
+        microseconds = (
+            _MICROSECONDS_PER_SECOND * (self._ticks & _FRACTIONAL_SECONDS_MASK)
+        ) >> _BITS_PER_SECOND
+        return dt.timedelta(seconds=whole_seconds, microseconds=microseconds)
+
+    def _to_hightime_timedelta(self) -> ht.timedelta:
+        """Return self as a :any:`hightime.timedelta`."""
+        whole_seconds = self._ticks >> _BITS_PER_SECOND
+        yoctoseconds = (
+            _YOCTOSECONDS_PER_SECOND * (self._ticks & _FRACTIONAL_SECONDS_MASK)
+        ) >> _BITS_PER_SECOND
+        return ht.timedelta(seconds=whole_seconds, yoctoseconds=yoctoseconds)
+
     @property
     def days(self) -> int:
         """The number of days in the time value."""
