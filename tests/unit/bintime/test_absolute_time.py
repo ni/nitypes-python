@@ -403,7 +403,7 @@ def test___time_value___pickle___references_public_modules() -> None:
     "value, expected",
     [
         (
-            AbsoluteTime(ht.datetime(dt.MINYEAR, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc)),
+            AbsoluteTime.min,
             "0001-01-01 00:00:00+00:00",
         ),
         (
@@ -431,21 +431,8 @@ def test___time_value___pickle___references_public_modules() -> None:
             "2000-01-01 00:00:00+00:00",
         ),
         (
-            AbsoluteTime(
-                ht.datetime(
-                    dt.MAXYEAR,
-                    12,
-                    31,
-                    23,
-                    59,
-                    59,
-                    999_999,
-                    999_999_999,
-                    999_000_000,  # with 999_999_999, binary fraction rounding pushes us to MAXYEAR + 1
-                    dt.timezone.utc,
-                )
-            ),
-            "9999-12-31 23:59:59.999999999999999999024218+00:00",
+            AbsoluteTime.max,
+            "9999-12-31 23:59:59.999999999999999999945789+00:00",
         ),
     ],
 )
@@ -457,7 +444,7 @@ def test___various_values___str___looks_ok(value: TimeValue, expected: str) -> N
     "value, expected",
     [
         (
-            AbsoluteTime(ht.datetime(dt.MINYEAR, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc)),
+            AbsoluteTime.min,
             "nitypes.bintime.AbsoluteTime(hightime.datetime(1, 1, 1, 0, 0, tzinfo=datetime.timezone.utc))",
         ),
         (
@@ -485,21 +472,8 @@ def test___various_values___str___looks_ok(value: TimeValue, expected: str) -> N
             "nitypes.bintime.AbsoluteTime(hightime.datetime(2000, 1, 1, 0, 0, tzinfo=datetime.timezone.utc))",
         ),
         (
-            AbsoluteTime(
-                ht.datetime(
-                    dt.MAXYEAR,
-                    12,
-                    31,
-                    23,
-                    59,
-                    59,
-                    999_999,
-                    999_999_999,
-                    999_000_000,  # with 999_999_999, binary fraction rounding pushes us to MAXYEAR + 1
-                    dt.timezone.utc,
-                )
-            ),
-            "nitypes.bintime.AbsoluteTime(hightime.datetime(9999, 12, 31, 23, 59, 59, 999999, 999999999, 999024218, tzinfo=datetime.timezone.utc))",
+            AbsoluteTime.max,
+            "nitypes.bintime.AbsoluteTime(hightime.datetime(9999, 12, 31, 23, 59, 59, 999999, 999999999, 999945789, tzinfo=datetime.timezone.utc))",
         ),
     ],
 )

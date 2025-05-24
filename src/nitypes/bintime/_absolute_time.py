@@ -9,13 +9,7 @@ from typing_extensions import Self, TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
 from nitypes.bintime._time_value import (
-    _BITS_PER_SECOND,
-    _FRACTIONAL_SECONDS_MASK,
-    _INT128_MAX,
-    _INT128_MIN,
-    _MICROSECONDS_PER_SECOND,
     _OTHER_TIME_VALUE_TUPLE,
-    _YOCTOSECONDS_PER_SECOND,
     TimeValue,
     _OtherTimeValue,
 )
@@ -108,38 +102,30 @@ class AbsoluteTime:
         self._offset = offset
         return self
 
-    def _to_dt_datetime(self) -> dt.datetime:
+    def _to_datetime_datetime(self) -> dt.datetime:
         """Return self as a :any:`datetime.datetime`."""
-        whole_seconds = self._offset._ticks >> _BITS_PER_SECOND
-        microseconds = (
-            _MICROSECONDS_PER_SECOND * (self._offset._ticks & _FRACTIONAL_SECONDS_MASK)
-        ) >> _BITS_PER_SECOND
-        return _DT_EPOCH_1904 + dt.timedelta(seconds=whole_seconds, microseconds=microseconds)
+        return _DT_EPOCH_1904 + self._offset._to_datetime_timedelta()
 
-    def _to_ht_datetime(self) -> ht.datetime:
+    def _to_hightime_datetime(self) -> ht.datetime:
         """Return self as a :any:`hightime.datetime`."""
-        whole_seconds = self._offset._ticks >> _BITS_PER_SECOND
-        yoctoseconds = (
-            _YOCTOSECONDS_PER_SECOND * (self._offset._ticks & _FRACTIONAL_SECONDS_MASK)
-        ) >> _BITS_PER_SECOND
-        return _HT_EPOCH_1904 + ht.timedelta(seconds=whole_seconds, yoctoseconds=yoctoseconds)
+        return _HT_EPOCH_1904 + self._offset._to_hightime_timedelta()
 
     # Calculating the year/month/day requires knowledge of leap years, days per month, etc., so
     # defer to hightime.datetime.
     @property
     def year(self) -> int:
         """The year."""
-        return self._to_ht_datetime().year
+        return self._to_hightime_datetime().year
 
     @property
     def month(self) -> int:
         """The month, between 1 and 12 inclusive."""
-        return self._to_ht_datetime().month
+        return self._to_hightime_datetime().month
 
     @property
     def day(self) -> int:
         """The day of the month, between 1 and 31 inclusive."""
-        return self._to_ht_datetime().day
+        return self._to_hightime_datetime().day
 
     @property
     def hour(self) -> int:
@@ -273,14 +259,25 @@ class AbsoluteTime:
 
     def __str__(self) -> str:
         """Return repr(self)."""
-        return str(self._to_ht_datetime())
+        return str(self._to_hightime_datetime())
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        return f"{self.__class__.__module__}.{self.__class__.__name__}({self._to_ht_datetime()!r})"
+        return f"{self.__class__.__module__}.{self.__class__.__name__}({self._to_hightime_datetime()!r})"
 
 
-# This is not the same range as dt.datetime.max/min and ht.datetime.max/min (year 0001-9999).
-# Constructing AbsoluteTime(ht.datetime.max) fails because it's a naive datetime.
-AbsoluteTime.max = AbsoluteTime.from_ticks(_INT128_MAX)
-AbsoluteTime.min = AbsoluteTime.from_ticks(_INT128_MIN)
+# These have to be within dt.datetime.max/min or else delegating to dt.datetime or ht.datetime for
+# year/month/day, str(), repr(), etc. will fail. Use ticks to specify the maximum fractional second
+# without rounding up to MAXYEAR+1.
+AbsoluteTime.max = AbsoluteTime(
+    dt.datetime(
+        dt.MAXYEAR,
+        12,
+        31,
+        23,
+        59,
+        59,
+        tzinfo=dt.timezone.utc,
+    )
+) + TimeValue.from_ticks(0xFFFF_FFFF_FFFF_FFFF)
+AbsoluteTime.min = AbsoluteTime(dt.datetime(dt.MINYEAR, 1, 1, tzinfo=dt.timezone.utc))
