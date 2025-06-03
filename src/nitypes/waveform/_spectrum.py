@@ -597,7 +597,7 @@ class Spectrum(Generic[_TData_co]):
         if isinstance(other, np.ndarray):
             self._append_array(other)
         elif isinstance(other, Spectrum):
-            self._append_spectrum(other)
+            self._append_spectrum(other)  # type: ignore[arg-type]  # https://github.com/python/mypy/issues/19221
         elif isinstance(other, Sequence) and all(isinstance(x, Spectrum) for x in other):
             self._append_spectrums(other)
         else:
