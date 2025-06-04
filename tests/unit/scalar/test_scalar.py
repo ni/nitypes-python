@@ -4,19 +4,28 @@ from typing import Any
 
 import pytest
 
-from nitypes.scalar import ScalarData
-from nitypes.scalar._scalar_data import _ScalarType
+from nitypes.scalar import Scalar
+from nitypes.scalar._scalar import _ScalarType
 
 
 ###############################################################################
 # create
 ###############################################################################
-@pytest.mark.parametrize("data_value", [True, 10, 20.0, "value"])
+@pytest.mark.parametrize(
+    "data_value, data_type",
+    [
+        (True, bool),
+        (10, int),
+        (20.0, float),
+        ("value", str),
+    ],
+)
 def test___data_value___create___creates_scalar_data_with_data_and_default_units(
-    data_value: Any,
+    data_value: Any, data_type: type
 ) -> None:
-    data = ScalarData(data_value)
+    data = Scalar(data_value)
 
+    assert isinstance(data.value, data_type)
     assert data.value == data_value
     assert data.units == ""
 
@@ -26,7 +35,7 @@ def test___data_value___create___creates_scalar_data_with_data_and_default_units
 def test___data_value_and_units___create___creates_scalar_data_with_data_and_units(
     data_value: Any, units: str
 ) -> None:
-    data = ScalarData(data_value, units)
+    data = Scalar(data_value, units)
 
     assert data.value == data_value
     assert data.units == units
@@ -35,7 +44,7 @@ def test___data_value_and_units___create___creates_scalar_data_with_data_and_uni
 @pytest.mark.parametrize("data_value", [[1.0, 2.0], {"key", "value"}])
 def test___invalid_data_value___create___raises_type_error(data_value: Any) -> None:
     with pytest.raises(TypeError) as exc:
-        _ = ScalarData(data_value)
+        _ = Scalar(data_value)
 
     assert exc.value.args[0].startswith("The scalar input data must be a bool, int, float, or str.")
 
@@ -46,14 +55,14 @@ def test___invalid_data_value___create___raises_type_error(data_value: Any) -> N
 @pytest.mark.parametrize(
     "left, right",
     [
-        (ScalarData(False), ScalarData(False)),
-        (ScalarData(1), ScalarData(1)),
-        (ScalarData(10.0), ScalarData(10.0)),
-        (ScalarData("value"), ScalarData("value")),
+        (Scalar(False), Scalar(False)),
+        (Scalar(1), Scalar(1)),
+        (Scalar(10.0), Scalar(10.0)),
+        (Scalar("value"), Scalar("value")),
     ],
 )
 def test___same_value___comparison___equal(
-    left: ScalarData[_ScalarType], right: ScalarData[_ScalarType]
+    left: Scalar[_ScalarType], right: Scalar[_ScalarType]
 ) -> None:
     assert not (left < right)
     assert left <= right
@@ -66,14 +75,14 @@ def test___same_value___comparison___equal(
 @pytest.mark.parametrize(
     "left, right",
     [
-        (ScalarData(False), ScalarData(True)),
-        (ScalarData(0), ScalarData(1)),
-        (ScalarData(10.0), ScalarData(20.0)),
-        (ScalarData("aaa"), ScalarData("zzz")),
+        (Scalar(False), Scalar(True)),
+        (Scalar(0), Scalar(1)),
+        (Scalar(10.0), Scalar(20.0)),
+        (Scalar("aaa"), Scalar("zzz")),
     ],
 )
 def test___lesser_value___comparison___lesser(
-    left: ScalarData[_ScalarType], right: ScalarData[_ScalarType]
+    left: Scalar[_ScalarType], right: Scalar[_ScalarType]
 ) -> None:
     assert left < right
     assert left <= right
@@ -84,9 +93,9 @@ def test___lesser_value___comparison___lesser(
 
 
 def test___different_units___comparison___throws_exception() -> None:
-    left = ScalarData(0, "volts")
-    right = ScalarData(0, "amps")
-    expected_message = "Comparing ScalarData objects with different units is not permitted."
+    left = Scalar(0, "volts")
+    right = Scalar(0, "amps")
+    expected_message = "Comparing Scalar objects with different units is not permitted."
 
     with pytest.raises(ValueError) as exc:
         _ = left < right
@@ -113,17 +122,17 @@ def test___different_units___comparison___throws_exception() -> None:
 # other operators
 ###############################################################################
 def test___repr___returns_correct_string() -> None:
-    data = ScalarData(10, "volts")
+    data = Scalar(10, "volts")
     repr_str = data.__repr__()
-    expected_str = "nitypes.scalar.ScalarData(value=10, units=volts)"
+    expected_str = "nitypes.scalar.Scalar(value=10, units=volts)"
     assert repr_str == expected_str
 
 
 def test___no_units___str___returns_correct_string() -> None:
-    data = ScalarData(10)
+    data = Scalar(10)
     assert str(data) == "10"
 
 
 def test___with_units___str___returns_correct_string() -> None:
-    data = ScalarData(10, "amps")
+    data = Scalar(10, "amps")
     assert str(data) == "10 amps"

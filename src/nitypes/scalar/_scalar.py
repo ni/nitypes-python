@@ -14,7 +14,7 @@ _ScalarType = TypeVar("_ScalarType", bool, int, float, str)
 
 
 @final
-class ScalarData(Generic[_ScalarType]):
+class Scalar(Generic[_ScalarType]):
     """A scalar data class, which encapsulates scalar data and units information."""
 
     __slots__ = [
@@ -75,7 +75,7 @@ class ScalarData(Generic[_ScalarType]):
             return NotImplemented
 
         if self.units != value.units:
-            raise ValueError("Comparing ScalarData objects with different units is not permitted.")
+            raise ValueError("Comparing Scalar objects with different units is not permitted.")
 
         return self.value > value.value
 
@@ -85,7 +85,7 @@ class ScalarData(Generic[_ScalarType]):
             return NotImplemented
 
         if self.units != value.units:
-            raise ValueError("Comparing ScalarData objects with different units is not permitted.")
+            raise ValueError("Comparing Scalar objects with different units is not permitted.")
 
         return self.value >= value.value
 
@@ -95,7 +95,7 @@ class ScalarData(Generic[_ScalarType]):
             return NotImplemented
 
         if self.units != value.units:
-            raise ValueError("Comparing ScalarData objects with different units is not permitted.")
+            raise ValueError("Comparing Scalar objects with different units is not permitted.")
 
         return self.value < value.value
 
@@ -105,7 +105,7 @@ class ScalarData(Generic[_ScalarType]):
             return NotImplemented
 
         if self.units != value.units:
-            raise ValueError("Comparing ScalarData objects with different units is not permitted.")
+            raise ValueError("Comparing Scalar objects with different units is not permitted.")
 
         return self.value <= value.value
 
