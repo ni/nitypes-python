@@ -34,15 +34,15 @@ _DECIMAL_DIGITS = 64
 _REPR_TICKS = False
 
 
-_OtherTimeValue: TypeAlias = Union[dt.timedelta, ht.timedelta]
-_OTHER_TIME_VALUE_TUPLE = (dt.timedelta, ht.timedelta)
+_OtherTimeDelta: TypeAlias = Union[dt.timedelta, ht.timedelta]
+_OTHER_TIMEDELTA_TUPLE = (dt.timedelta, ht.timedelta)
 
 
 @final
-class TimeValue:
-    """A time value in NI Binary Time Format (NI-BTF).
+class TimeDelta:
+    """A duration, represented in NI Binary Time Format (NI-BTF).
 
-    TimeValue represents time as a 128-bit fixed point number with 64-bit whole seconds and 64-bit
+    TimeDelta represents time as a 128-bit fixed point number with 64-bit whole seconds and 64-bit
     fractional seconds.
 
     .. warning::
@@ -50,12 +50,15 @@ class TimeValue:
         powers of 2. Values that are not exactly representable as binary fractions will display
         rounding error or "bruising" similar to a floating point number.
 
-    TimeValue instances are duck typing compatible with :any:`datetime.timedelta` and
+    TimeDelta instances are duck typing compatible with :any:`datetime.timedelta` and
     :any:`hightime.timedelta`.
     """
 
-    min: ClassVar[TimeValue]
-    max: ClassVar[TimeValue]
+    min: ClassVar[TimeDelta]
+    """The most negative :any:`TimeDelta` object, approximately -292 million years."""
+
+    max: ClassVar[TimeDelta]
+    """The most positive :any:`TimeDelta` object, approximately 292 million years."""
 
     __slots__ = ["_ticks"]
 
@@ -66,7 +69,7 @@ class TimeValue:
 
     @overload
     def __init__(  # noqa: D107 - missing docstring in __init__
-        self, value: _OtherTimeValue, /
+        self, value: _OtherTimeDelta, /
     ) -> None: ...
 
     @overload
@@ -76,9 +79,9 @@ class TimeValue:
 
     def __init__(
         self,
-        seconds: SupportsIndex | Decimal | float | _OtherTimeValue | None = None,
+        seconds: SupportsIndex | Decimal | float | _OtherTimeDelta | None = None,
     ) -> None:
-        """Initialize a TimeValue."""
+        """Initialize a TimeDelta."""
         ticks = self.__class__._to_ticks(seconds)
         if not (_INT128_MIN <= ticks <= _INT128_MAX):
             raise OverflowError(
@@ -138,7 +141,7 @@ class TimeValue:
 
     @classmethod
     def from_ticks(cls, ticks: SupportsIndex) -> Self:
-        """Create a TimeValue from a 128-bit fixed point number expressed as an integer."""
+        """Create a TimeDelta from a 128-bit fixed point number expressed as an integer."""
         ticks = arg_to_int("ticks", ticks)
         if not (_INT128_MIN <= ticks <= _INT128_MAX):
             raise OverflowError(
@@ -169,24 +172,24 @@ class TimeValue:
 
     @property
     def days(self) -> int:
-        """The number of days in the time value."""
+        """The number of days in the time delta."""
         return (self._ticks >> _BITS_PER_SECOND) // _SECONDS_PER_DAY
 
     @property
     def seconds(self) -> int:
-        """The number of seconds in the time value, up to the nearest day."""
+        """The number of seconds in the time delta, up to the nearest day."""
         return (self._ticks >> _BITS_PER_SECOND) % _SECONDS_PER_DAY
 
     @property
     def microseconds(self) -> int:
-        """The number of microseconds in the time value, up to the nearest second."""
+        """The number of microseconds in the time delta, up to the nearest second."""
         return (
             _MICROSECONDS_PER_SECOND * (self._ticks & _FRACTIONAL_SECONDS_MASK)
         ) >> _BITS_PER_SECOND
 
     @property
     def femtoseconds(self) -> int:
-        """The number of femtoseconds in the time value, up to the nearest microsecond."""
+        """The number of femtoseconds in the time delta, up to the nearest microsecond."""
         value = (
             _FEMTOSECONDS_PER_SECOND * (self._ticks & _FRACTIONAL_SECONDS_MASK) >> _BITS_PER_SECOND
         )
@@ -194,7 +197,7 @@ class TimeValue:
 
     @property
     def yoctoseconds(self) -> int:
-        """The number of yoctoseconds in the time value, up to the nearest femtosecond.
+        """The number of yoctoseconds in the time delta, up to the nearest femtosecond.
 
         .. warning::
             Because this class uses a 64-bit binary fraction, the smallest value it can represent
@@ -206,17 +209,18 @@ class TimeValue:
         return value % _YOCTOSECONDS_PER_FEMTOSECOND
 
     def total_seconds(self) -> float:
-        """The total seconds in the time value.
+        """The total seconds in the time delta.
 
         .. warning::
-            Converting a time value to a floating point number loses precision.
+            Converting a time value to a floating point number loses precision. Consider using
+            :any:`precision_total_seconds` instead.
         """
         seconds = float(self._ticks >> _BITS_PER_SECOND)
         seconds += float((self._ticks & _FRACTIONAL_SECONDS_MASK) / _TICKS_PER_SECOND)
         return seconds
 
     def precision_total_seconds(self) -> Decimal:
-        """The precise total seconds in the time value.
+        """The precise total seconds in the time delta.
 
         Note: up to 64 significant digits are used in computation.
         """
@@ -226,48 +230,48 @@ class TimeValue:
             seconds += Decimal(self._ticks & _FRACTIONAL_SECONDS_MASK) / Decimal(_TICKS_PER_SECOND)
             return seconds
 
-    def __neg__(self) -> TimeValue:
+    def __neg__(self) -> TimeDelta:
         """Return -self."""
         return self.__class__.from_ticks(-self._ticks)
 
-    def __pos__(self) -> TimeValue:
+    def __pos__(self) -> TimeDelta:
         """Return +self."""
         return self
 
-    def __abs__(self) -> TimeValue:
+    def __abs__(self) -> TimeDelta:
         """Return abs(self)."""
         return -self if self._ticks < 0 else self
 
-    def __add__(self, value: TimeValue | _OtherTimeValue, /) -> TimeValue:
+    def __add__(self, value: TimeDelta | _OtherTimeDelta, /) -> TimeDelta:
         """Return self+value."""
-        if isinstance(value, TimeValue):
+        if isinstance(value, TimeDelta):
             return self.__class__.from_ticks(self._ticks + value._ticks)
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self + self.__class__(value)
         else:
             return NotImplemented
 
     __radd__ = __add__
 
-    def __sub__(self, value: TimeValue | _OtherTimeValue, /) -> TimeValue:
+    def __sub__(self, value: TimeDelta | _OtherTimeDelta, /) -> TimeDelta:
         """Return self-value."""
-        if isinstance(value, TimeValue):
+        if isinstance(value, TimeDelta):
             return self.__class__.from_ticks(self._ticks - value._ticks)
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self - self.__class__(value)
         else:
             return NotImplemented
 
-    def __rsub__(self, value: TimeValue | _OtherTimeValue, /) -> TimeValue:
+    def __rsub__(self, value: TimeDelta | _OtherTimeDelta, /) -> TimeDelta:
         """Return value-self."""
-        if isinstance(value, TimeValue):
+        if isinstance(value, TimeDelta):
             return self.__class__.from_ticks(value._ticks - self._ticks)
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self.__class__(value) - self
         else:
             return NotImplemented
 
-    def __mul__(self, value: int | float | Decimal, /) -> TimeValue:
+    def __mul__(self, value: int | float | Decimal, /) -> TimeDelta:
         """Return self*value."""
         if isinstance(value, int):
             return self.__class__.from_ticks(self._ticks * value)
@@ -285,16 +289,16 @@ class TimeValue:
 
     @overload
     def __floordiv__(  # noqa: D105 - missing docstring in magic method
-        self, value: TimeValue, /
+        self, value: TimeDelta, /
     ) -> int: ...
     @overload
     def __floordiv__(  # noqa: D105 - missing docstring in magic method
         self, value: int, /
-    ) -> TimeValue: ...
+    ) -> TimeDelta: ...
 
-    def __floordiv__(self, value: TimeValue | int, /) -> int | TimeValue:
+    def __floordiv__(self, value: TimeDelta | int, /) -> int | TimeDelta:
         """Return self//value."""
-        if isinstance(value, TimeValue):
+        if isinstance(value, TimeDelta):
             return self._ticks // value._ticks
         elif isinstance(value, int):
             return self.__class__.from_ticks(self._ticks // value)
@@ -303,54 +307,54 @@ class TimeValue:
 
     @overload
     def __truediv__(  # noqa: D105 - missing docstring in magic method
-        self, value: TimeValue, /
+        self, value: TimeDelta, /
     ) -> float: ...
     @overload
     def __truediv__(  # noqa: D105 - missing docstring in magic method
         self, value: float, /
-    ) -> TimeValue: ...
+    ) -> TimeDelta: ...
 
-    def __truediv__(self, value: TimeValue | float, /) -> float | TimeValue:
+    def __truediv__(self, value: TimeDelta | float, /) -> float | TimeDelta:
         """Return self/value."""
-        if isinstance(value, TimeValue):
+        if isinstance(value, TimeDelta):
             return self.total_seconds() / value.total_seconds()
         elif isinstance(value, float):
             return self.__class__(self.total_seconds() / value)
         else:
             return NotImplemented
 
-    def __mod__(self, value: TimeValue | _OtherTimeValue, /) -> TimeValue:
+    def __mod__(self, value: TimeDelta | _OtherTimeDelta, /) -> TimeDelta:
         """Return self%value."""
-        if isinstance(value, TimeValue):
+        if isinstance(value, TimeDelta):
             return self.__class__.from_ticks(self._ticks % value._ticks)
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self % self.__class__(value)
         else:
             return NotImplemented
 
-    def __divmod__(self, value: TimeValue | _OtherTimeValue, /) -> tuple[int, TimeValue]:
+    def __divmod__(self, value: TimeDelta | _OtherTimeDelta, /) -> tuple[int, TimeDelta]:
         """Return (self//value, self%value)."""
-        if isinstance(value, TimeValue):
+        if isinstance(value, TimeDelta):
             return (self // value, self % value)
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return divmod(self, self.__class__(value))
         else:
             return NotImplemented
 
-    def __lt__(self, value: TimeValue | _OtherTimeValue, /) -> bool:
+    def __lt__(self, value: TimeDelta | _OtherTimeDelta, /) -> bool:
         """Return self<value."""
         if isinstance(value, self.__class__):
             return self._ticks < value._ticks
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self < self.__class__(value)
         else:
             return NotImplemented
 
-    def __le__(self, value: TimeValue | _OtherTimeValue, /) -> bool:
+    def __le__(self, value: TimeDelta | _OtherTimeDelta, /) -> bool:
         """Return self<=value."""
         if isinstance(value, self.__class__):
             return self._ticks <= value._ticks
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self <= self.__class__(value)
         else:
             return NotImplemented
@@ -359,25 +363,25 @@ class TimeValue:
         """Return self==value."""
         if isinstance(value, self.__class__):
             return self._ticks == value._ticks
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self == self.__class__(value)
         else:
             return NotImplemented
 
-    def __gt__(self, value: TimeValue | _OtherTimeValue, /) -> bool:
+    def __gt__(self, value: TimeDelta | _OtherTimeDelta, /) -> bool:
         """Return self<value."""
         if isinstance(value, self.__class__):
             return self._ticks > value._ticks
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self > self.__class__(value)
         else:
             return NotImplemented
 
-    def __ge__(self, value: TimeValue | _OtherTimeValue, /) -> bool:
+    def __ge__(self, value: TimeDelta | _OtherTimeDelta, /) -> bool:
         """Return self>=value."""
         if isinstance(value, self.__class__):
             return self._ticks >= value._ticks
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self >= self.__class__(value)
         else:
             return NotImplemented
@@ -416,5 +420,5 @@ class TimeValue:
         return f"{self.__class__.__module__}.{self.__class__.__name__}({self.precision_total_seconds()!r})"
 
 
-TimeValue.max = TimeValue.from_ticks(_INT128_MAX)
-TimeValue.min = TimeValue.from_ticks(_INT128_MIN)
+TimeDelta.max = TimeDelta.from_ticks(_INT128_MAX)
+TimeDelta.min = TimeDelta.from_ticks(_INT128_MIN)

@@ -8,24 +8,24 @@ import hightime as ht
 from typing_extensions import Self, TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
-from nitypes.bintime._time_value import (
-    _OTHER_TIME_VALUE_TUPLE,
-    TimeValue,
-    _OtherTimeValue,
+from nitypes.bintime._timedelta import (
+    _OTHER_TIMEDELTA_TUPLE,
+    TimeDelta,
+    _OtherTimeDelta,
 )
 
 _DT_EPOCH_1904 = dt.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
 _HT_EPOCH_1904 = ht.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
 
-_OtherAbsoluteTime: TypeAlias = Union[dt.datetime, ht.datetime]
-_OTHER_ABSOLUTE_TIME_TUPLE = (dt.datetime, ht.datetime)
+_OtherDateTime: TypeAlias = Union[dt.datetime, ht.datetime]
+_OTHER_DATETIME_TUPLE = (dt.datetime, ht.datetime)
 
 
 @final
-class AbsoluteTime:
+class DateTime:
     """An absolute time in NI Binary Time Format (NI-BTF).
 
-    AbsoluteTime represents time as a 128-bit fixed point number with 64-bit whole seconds and
+    DateTime represents time as a 128-bit fixed point number with 64-bit whole seconds and
     64-bit fractional seconds.
 
     .. warning::
@@ -33,7 +33,7 @@ class AbsoluteTime:
         powers of 2. Values that are not exactly representable as binary fractions will display
         rounding error or "bruising" similar to a floating point number.
 
-    AbsoluteTime instances are duck typing compatible with a subset of the method and properties
+    DateTime instances are duck typing compatible with a subset of the method and properties
     supported by :any:`datetime.datetime` and :any:`hightime.datetime`.
 
     This class only supports the UTC time zone and does not support timezone-naive times.
@@ -42,62 +42,65 @@ class AbsoluteTime:
     saving time and time zone changes.
     """
 
-    min: ClassVar[AbsoluteTime]
-    max: ClassVar[AbsoluteTime]
+    min: ClassVar[DateTime]
+    """The earliest supported :any:`DateTime` object, midnight on Jan 1, 0001, UTC."""
+
+    max: ClassVar[DateTime]
+    """The latest supported :any:`DateTime` object, 11:59pm on Dec 31, 9999, UTC."""
 
     __slots__ = ["_offset"]
 
-    _offset: TimeValue
+    _offset: TimeDelta
 
     @overload
     def __init__(self) -> None: ...  # noqa: D107 - missing docstring in __init__
 
     @overload
     def __init__(  # noqa: D107 - missing docstring in __init__
-        self, value: _OtherAbsoluteTime, /
+        self, value: _OtherDateTime, /
     ) -> None: ...
 
     def __init__(
         self,
-        year: SupportsIndex | _OtherAbsoluteTime | None = None,
+        year: SupportsIndex | _OtherDateTime | None = None,
     ) -> None:
-        """Initialize an AbsoluteTime."""
+        """Initialize an DateTime."""
         self._offset = self.__class__._to_offset(year)
 
     @singledispatchmethod
     @classmethod
-    def _to_offset(cls, value: object) -> TimeValue:
+    def _to_offset(cls, value: object) -> TimeDelta:
         raise invalid_arg_type("value", "datetime", value)
 
     @_to_offset.register
     @classmethod
-    def _(cls, value: ht.datetime) -> TimeValue:
+    def _(cls, value: ht.datetime) -> TimeDelta:
         if value.tzinfo != dt.timezone.utc:
             raise invalid_arg_value("value.tzinfo", "datetime.timezone.utc", value.tzinfo)
-        return TimeValue(value - _HT_EPOCH_1904)
+        return TimeDelta(value - _HT_EPOCH_1904)
 
     @_to_offset.register
     @classmethod
-    def _(cls, value: dt.datetime) -> TimeValue:
+    def _(cls, value: dt.datetime) -> TimeDelta:
         if value.tzinfo != dt.timezone.utc:
             raise invalid_arg_value("value.tzinfo", "datetime.timezone.utc", value.tzinfo)
-        return TimeValue(value - _DT_EPOCH_1904)
+        return TimeDelta(value - _DT_EPOCH_1904)
 
     @_to_offset.register
     @classmethod
-    def _(cls, value: None) -> TimeValue:
-        return TimeValue()
+    def _(cls, value: None) -> TimeDelta:
+        return TimeDelta()
 
     @classmethod
     def from_ticks(cls, ticks: SupportsIndex) -> Self:
-        """Create an AbsoluteTime from a 128-bit fixed point number expressed as an integer."""
+        """Create an DateTime from a 128-bit fixed point number expressed as an integer."""
         self = cls.__new__(cls)
-        self._offset = TimeValue.from_ticks(ticks)
+        self._offset = TimeDelta.from_ticks(ticks)
         return self
 
     @classmethod
-    def from_offset(cls, offset: TimeValue) -> Self:
-        """Create an AbsoluteTime from a TimeValue offset from the epoch, Jan 1, 1904."""
+    def from_offset(cls, offset: TimeDelta) -> Self:
+        """Create an DateTime from a TimeValue offset from the epoch, Jan 1, 1904."""
         self = cls.__new__(cls)
         self._offset = offset
         return self
@@ -169,12 +172,12 @@ class AbsoluteTime:
             raise invalid_arg_value("tz", "datetime.timezone.utc", tz)
         return cls(ht.datetime.now(tz))
 
-    def __add__(self, value: TimeValue | _OtherTimeValue, /) -> AbsoluteTime:
+    def __add__(self, value: TimeDelta | _OtherTimeDelta, /) -> DateTime:
         """Return self+value."""
-        if isinstance(value, TimeValue):
+        if isinstance(value, TimeDelta):
             return self.__class__.from_offset(self._offset + value)
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return self + TimeValue(value)
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
+            return self + TimeDelta(value)
         else:
             return NotImplemented
 
@@ -182,42 +185,42 @@ class AbsoluteTime:
 
     @overload
     def __sub__(  # noqa: D105 - missing docstring for magic method
-        self, value: AbsoluteTime | _OtherAbsoluteTime, /
-    ) -> TimeValue: ...
+        self, value: DateTime | _OtherDateTime, /
+    ) -> TimeDelta: ...
     @overload
     def __sub__(  # noqa: D105 - missing docstring for magic method
-        self, value: TimeValue | _OtherTimeValue, /
-    ) -> AbsoluteTime: ...
+        self, value: TimeDelta | _OtherTimeDelta, /
+    ) -> DateTime: ...
 
     def __sub__(
-        self, value: AbsoluteTime | _OtherAbsoluteTime | TimeValue | _OtherTimeValue, /
-    ) -> TimeValue | AbsoluteTime:
+        self, value: DateTime | _OtherDateTime | TimeDelta | _OtherTimeDelta, /
+    ) -> TimeDelta | DateTime:
         """Return self-value."""
-        if isinstance(value, AbsoluteTime):
+        if isinstance(value, DateTime):
             return self._offset - value._offset
-        elif isinstance(value, _OTHER_ABSOLUTE_TIME_TUPLE):
+        elif isinstance(value, _OTHER_DATETIME_TUPLE):
             return self - self.__class__(value)
-        elif isinstance(value, TimeValue):
+        elif isinstance(value, TimeDelta):
             return self.__class__.from_offset(self._offset - value)
-        elif isinstance(value, _OTHER_TIME_VALUE_TUPLE):
-            return self - TimeValue(value)
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
+            return self - TimeDelta(value)
         else:
             return NotImplemented
 
-    def __lt__(self, value: AbsoluteTime | _OtherAbsoluteTime, /) -> bool:
+    def __lt__(self, value: DateTime | _OtherDateTime, /) -> bool:
         """Return self<value."""
         if isinstance(value, self.__class__):
             return self._offset < value._offset
-        elif isinstance(value, _OTHER_ABSOLUTE_TIME_TUPLE):
+        elif isinstance(value, _OTHER_DATETIME_TUPLE):
             return self < self.__class__(value)
         else:
             return NotImplemented
 
-    def __le__(self, value: AbsoluteTime | _OtherAbsoluteTime, /) -> bool:
+    def __le__(self, value: DateTime | _OtherDateTime, /) -> bool:
         """Return self<=value."""
         if isinstance(value, self.__class__):
             return self._offset <= value._offset
-        elif isinstance(value, _OTHER_ABSOLUTE_TIME_TUPLE):
+        elif isinstance(value, _OTHER_DATETIME_TUPLE):
             return self <= self.__class__(value)
         else:
             return NotImplemented
@@ -226,25 +229,25 @@ class AbsoluteTime:
         """Return self==value."""
         if isinstance(value, self.__class__):
             return self._offset == value._offset
-        elif isinstance(value, _OTHER_ABSOLUTE_TIME_TUPLE):
+        elif isinstance(value, _OTHER_DATETIME_TUPLE):
             return self == self.__class__(value)
         else:
             return NotImplemented
 
-    def __gt__(self, value: AbsoluteTime | _OtherAbsoluteTime, /) -> bool:
+    def __gt__(self, value: DateTime | _OtherDateTime, /) -> bool:
         """Return self<value."""
         if isinstance(value, self.__class__):
             return self._offset > value._offset
-        elif isinstance(value, _OTHER_ABSOLUTE_TIME_TUPLE):
+        elif isinstance(value, _OTHER_DATETIME_TUPLE):
             return self > self.__class__(value)
         else:
             return NotImplemented
 
-    def __ge__(self, value: AbsoluteTime | _OtherAbsoluteTime, /) -> bool:
+    def __ge__(self, value: DateTime | _OtherDateTime, /) -> bool:
         """Return self>=value."""
         if isinstance(value, self.__class__):
             return self._offset >= value._offset
-        elif isinstance(value, _OTHER_ABSOLUTE_TIME_TUPLE):
+        elif isinstance(value, _OTHER_DATETIME_TUPLE):
             return self >= self.__class__(value)
         else:
             return NotImplemented
@@ -269,7 +272,7 @@ class AbsoluteTime:
 # These have to be within dt.datetime.max/min or else delegating to dt.datetime or ht.datetime for
 # year/month/day, str(), repr(), etc. will fail. Use ticks to specify the maximum fractional second
 # without rounding up to MAXYEAR+1.
-AbsoluteTime.max = AbsoluteTime(
+DateTime.max = DateTime(
     dt.datetime(
         dt.MAXYEAR,
         12,
@@ -279,5 +282,5 @@ AbsoluteTime.max = AbsoluteTime(
         59,
         tzinfo=dt.timezone.utc,
     )
-) + TimeValue.from_ticks(0xFFFF_FFFF_FFFF_FFFF)
-AbsoluteTime.min = AbsoluteTime(dt.datetime(dt.MINYEAR, 1, 1, tzinfo=dt.timezone.utc))
+) + TimeDelta.from_ticks(0xFFFF_FFFF_FFFF_FFFF)
+DateTime.min = DateTime(dt.datetime(dt.MINYEAR, 1, 1, tzinfo=dt.timezone.utc))

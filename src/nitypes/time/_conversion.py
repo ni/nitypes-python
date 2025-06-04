@@ -11,10 +11,10 @@ from typing_extensions import TypeAlias
 import nitypes.bintime as bt
 from nitypes._exceptions import invalid_arg_type, invalid_requested_type
 
-_AnyDateTime: TypeAlias = Union[bt.AbsoluteTime, dt.datetime, ht.datetime]
+_AnyDateTime: TypeAlias = Union[bt.DateTime, dt.datetime, ht.datetime]
 _TDateTime = TypeVar("_TDateTime", bound=_AnyDateTime)
 
-_AnyTimeDelta: TypeAlias = Union[bt.TimeValue, dt.timedelta, ht.timedelta]
+_AnyTimeDelta: TypeAlias = Union[bt.TimeDelta, dt.timedelta, ht.timedelta]
 _TTimeDelta = TypeVar("_TTimeDelta", bound=_AnyTimeDelta)
 
 
@@ -27,23 +27,23 @@ def convert_datetime(requested_type: type[_TDateTime], value: _AnyDateTime, /) -
 
 
 @singledispatch
-def _convert_to_bt_absolute_time(value: object, /) -> bt.AbsoluteTime:
+def _convert_to_bt_absolute_time(value: object, /) -> bt.DateTime:
     raise invalid_arg_type("value", "datetime", value)
 
 
 @_convert_to_bt_absolute_time.register
-def _(value: bt.AbsoluteTime, /) -> bt.AbsoluteTime:
+def _(value: bt.DateTime, /) -> bt.DateTime:
     return value
 
 
 @_convert_to_bt_absolute_time.register
-def _(value: dt.datetime, /) -> bt.AbsoluteTime:
-    return bt.AbsoluteTime(value)
+def _(value: dt.datetime, /) -> bt.DateTime:
+    return bt.DateTime(value)
 
 
 @_convert_to_bt_absolute_time.register
-def _(value: ht.datetime, /) -> bt.AbsoluteTime:
-    return bt.AbsoluteTime(value)
+def _(value: ht.datetime, /) -> bt.DateTime:
+    return bt.DateTime(value)
 
 
 @singledispatch
@@ -52,7 +52,7 @@ def _convert_to_dt_datetime(value: object, /) -> dt.datetime:
 
 
 @_convert_to_dt_datetime.register
-def _(value: bt.AbsoluteTime, /) -> dt.datetime:
+def _(value: bt.DateTime, /) -> dt.datetime:
     return value._to_datetime_datetime()
 
 
@@ -82,7 +82,7 @@ def _convert_to_ht_datetime(value: object, /) -> ht.datetime:
 
 
 @_convert_to_ht_datetime.register
-def _(value: bt.AbsoluteTime, /) -> ht.datetime:
+def _(value: bt.DateTime, /) -> ht.datetime:
     return value._to_hightime_datetime()
 
 
@@ -107,7 +107,7 @@ def _(value: ht.datetime, /) -> ht.datetime:
 
 
 _CONVERT_DATETIME_FOR_TYPE: dict[type[Any], Callable[[object], object]] = {
-    bt.AbsoluteTime: _convert_to_bt_absolute_time,
+    bt.DateTime: _convert_to_bt_absolute_time,
     dt.datetime: _convert_to_dt_datetime,
     ht.datetime: _convert_to_ht_datetime,
 }
@@ -122,23 +122,23 @@ def convert_timedelta(requested_type: type[_TTimeDelta], value: _AnyTimeDelta, /
 
 
 @singledispatch
-def _convert_to_bt_time_value(value: object, /) -> bt.TimeValue:
+def _convert_to_bt_time_value(value: object, /) -> bt.TimeDelta:
     raise invalid_arg_type("value", "timedelta", value)
 
 
 @_convert_to_bt_time_value.register
-def _(value: bt.TimeValue, /) -> bt.TimeValue:
+def _(value: bt.TimeDelta, /) -> bt.TimeDelta:
     return value
 
 
 @_convert_to_bt_time_value.register
-def _(value: dt.timedelta, /) -> bt.TimeValue:
-    return bt.TimeValue(value)
+def _(value: dt.timedelta, /) -> bt.TimeDelta:
+    return bt.TimeDelta(value)
 
 
 @_convert_to_bt_time_value.register
-def _(value: ht.timedelta, /) -> bt.TimeValue:
-    return bt.TimeValue(value)
+def _(value: ht.timedelta, /) -> bt.TimeDelta:
+    return bt.TimeDelta(value)
 
 
 @singledispatch
@@ -147,7 +147,7 @@ def _convert_to_dt_timedelta(value: object, /) -> dt.timedelta:
 
 
 @_convert_to_dt_timedelta.register
-def _(value: bt.TimeValue, /) -> dt.timedelta:
+def _(value: bt.TimeDelta, /) -> dt.timedelta:
     return value._to_datetime_timedelta()
 
 
@@ -167,7 +167,7 @@ def _convert_to_ht_timedelta(value: object, /) -> ht.timedelta:
 
 
 @_convert_to_ht_timedelta.register
-def _(value: bt.TimeValue, /) -> ht.timedelta:
+def _(value: bt.TimeDelta, /) -> ht.timedelta:
     return value._to_hightime_timedelta()
 
 
