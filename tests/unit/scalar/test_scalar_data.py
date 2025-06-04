@@ -107,3 +107,23 @@ def test___different_units___comparison___throws_exception() -> None:
         _ = left >= right
 
     assert exc.value.args[0].startswith(expected_message)
+
+
+###############################################################################
+# other operators
+###############################################################################
+def test___repr___returns_correct_string() -> None:
+    data = ScalarData(10, "volts")
+    repr_str = data.__repr__()
+    expected_str = "nitypes.scalar.ScalarData(value=10, units=volts)"
+    assert repr_str == expected_str
+
+
+def test___no_units___str___returns_correct_string() -> None:
+    data = ScalarData(10)
+    assert str(data) == "10"
+
+
+def test___with_units___str___returns_correct_string() -> None:
+    data = ScalarData(10, "amps")
+    assert str(data) == "10 amps"

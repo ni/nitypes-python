@@ -108,3 +108,16 @@ class ScalarData(Generic[_ScalarType]):
             raise ValueError("Comparing ScalarData objects with different units is not permitted.")
 
         return self.value <= value.value
+
+    def __repr__(self) -> str:
+        """Return repr(self)."""
+        args = [f"value={self.value}", f"units={self.units}"]
+        return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
+
+    def __str__(self) -> str:
+        """Return str(self)."""
+        value_str = str(self.value)
+        if self.units:
+            value_str += f" {self.units}"
+
+        return value_str
