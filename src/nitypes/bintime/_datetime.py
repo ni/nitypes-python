@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 from functools import singledispatchmethod
-from typing import Any, ClassVar, SupportsIndex, Union, cast, final, overload
+from typing import Any, ClassVar, SupportsIndex, Union, final, overload
 
 import hightime as ht
 from typing_extensions import Self, TypeAlias
