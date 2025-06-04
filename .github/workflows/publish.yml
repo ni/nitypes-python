@@ -50,7 +50,7 @@ jobs:
         uses: ni/python-actions/setup-poetry@2c946e7237558ed6d59565787f1edb2150df50ba # v0.2.0
       - name: Check project version
         if: github.event_name == 'release'
-        uses: ni/python-actions/check-project-version@89453df56376aeffcb1e6c69388a5b7413c807f9 # users/bkeryan/update-project-version
+        uses: ni/python-actions/check-project-version@2c946e7237558ed6d59565787f1edb2150df50ba # v0.2.0
       - name: Build distribution packages
         run: poetry build
       - name: Upload build artifacts
@@ -95,4 +95,4 @@ jobs:
       - name: Set up Poetry
         uses: ni/python-actions/setup-poetry@2c946e7237558ed6d59565787f1edb2150df50ba # v0.2.0
       - name: Update project version
-        uses: ni/python-actions/update-project-version@89453df56376aeffcb1e6c69388a5b7413c807f9 # users/bkeryan/update-project-version
+        uses: ni/python-actions/update-project-version@2c946e7237558ed6d59565787f1edb2150df50ba # v0.2.0
