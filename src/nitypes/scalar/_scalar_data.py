@@ -5,6 +5,10 @@ from typing import Generic
 from typing_extensions import final, TypeVar
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
+from nitypes.waveform._extended_properties import (
+    UNIT_DESCRIPTION,
+    ExtendedPropertyDictionary,
+)
 
 _ScalarType = TypeVar("_ScalarType", bool, int, float, str)
 
@@ -15,11 +19,11 @@ class ScalarData(Generic[_ScalarType]):
 
     __slots__ = [
         "_value",
-        "_units",
+        "_extended_properties",
     ]
 
     _value: _ScalarType
-    _units: str
+    _extended_properties: ExtendedPropertyDictionary
 
     def __init__(
         self,
@@ -38,12 +42,14 @@ class ScalarData(Generic[_ScalarType]):
         if not isinstance(value, (bool, int, float, str)):
             raise invalid_arg_type("scalar input data", "bool, int, float, or str", value)
 
+        # The ScalarData proto type only supports 32 bit integers. Make sure we're in range.
         if isinstance(value, int):
             if value <= -0x80000000 or value >= 0x7FFFFFFF:
                 raise invalid_arg_value("integer scalar value", "within the range of Int32", value)
 
         self._value = value
-        self._units = units
+        self._extended_properties = ExtendedPropertyDictionary()
+        self._extended_properties[UNIT_DESCRIPTION] = units
 
     @property
     def value(self) -> _ScalarType:
@@ -52,11 +58,13 @@ class ScalarData(Generic[_ScalarType]):
 
     @property
     def units(self) -> str:
-        """The data units."""
-        return self._units
+        """The unit of measurement, such as volts, of the scalar."""
+        value = self._extended_properties.get(UNIT_DESCRIPTION, "")
+        assert isinstance(value, str)
+        return value
 
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
-        return self._value == value._value and self._units == value._units
+        return self.value == value.value and self.units == value.units
