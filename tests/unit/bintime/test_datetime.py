@@ -61,32 +61,65 @@ def test___ht_datetime___construct___returns_nearest_datetime() -> None:
     ) == (2025, 2, 14, 8, 15, 59, 15625, 123_456_789, 234_569_278)
 
 
+def test___unit_args___construct___returns_nearest_datetime() -> None:
+    # The microseconds are not exactly representable as a binary fraction, so they are rounded.
+    value = DateTime(2025, 2, 14, 8, 15, 59, 15625, 123_456_789, 234_567_890, dt.timezone.utc)
+
+    assert_type(value, DateTime)
+    assert isinstance(value, DateTime)
+    assert (
+        value.year,
+        value.month,
+        value.day,
+        value.hour,
+        value.minute,
+        value.second,
+        value.microsecond,
+        value.femtosecond,
+        value.yoctosecond,
+    ) == (2025, 2, 14, 8, 15, 59, 15625, 123_456_789, 234_569_278)
+
+
 def test___naive_dt_datetime___construct___raises_value_error() -> None:
     with pytest.raises(ValueError) as exc:
         _ = DateTime(dt.datetime(2025, 2, 14, 8, 15, 59, 15625))
 
-    assert exc.value.args[0].startswith("The value.tzinfo must be a datetime.timezone.utc.")
+    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
 
 
 def test___naive_ht_datetime___construct___raises_value_error() -> None:
     with pytest.raises(ValueError) as exc:
         _ = DateTime(ht.datetime(2025, 2, 14, 8, 15, 59, 15625))
 
-    assert exc.value.args[0].startswith("The value.tzinfo must be a datetime.timezone.utc.")
+    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
+
+
+def test___naive_unit_args___construct___raises_value_error() -> None:
+    with pytest.raises(ValueError) as exc:
+        _ = DateTime(2025, 2, 14, 8, 15, 59, 15625, 123_456_789, 234_567_890)
+
+    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
 
 
 def test___local_dt_datetime___construct___raises_value_error() -> None:
     with pytest.raises(ValueError) as exc:
         _ = DateTime(dt.datetime(2025, 2, 14, 8, 15, 59, 15625, get_localzone()))
 
-    assert exc.value.args[0].startswith("The value.tzinfo must be a datetime.timezone.utc.")
+    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
 
 
 def test___local_ht_datetime___construct___raises_value_error() -> None:
     with pytest.raises(ValueError) as exc:
         _ = DateTime(ht.datetime(2025, 2, 14, 8, 15, 59, 15625, tzinfo=get_localzone()))
 
-    assert exc.value.args[0].startswith("The value.tzinfo must be a datetime.timezone.utc.")
+    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
+
+
+def test___local_unit_args___construct___raises_value_error() -> None:
+    with pytest.raises(ValueError) as exc:
+        _ = DateTime(2025, 2, 14, 8, 15, 59, 15625, 123_456_789, 234_567_890, get_localzone())
+
+    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
 
 
 ############
@@ -182,9 +215,9 @@ def test___various_values___unit_properties___return_unit_values(
     "left, right, expected",
     [
         (
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             TimeDelta(8 * 3600 + 15 * 60 + 30),
-            DateTime(dt.datetime(2025, 1, 1, 8, 15, 30, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, 8, 15, 30, tzinfo=dt.timezone.utc),
         ),
     ],
 )
@@ -199,9 +232,9 @@ def test___time_value___add___returns_datetime(
     "left, right, expected",
     [
         (
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             dt.timedelta(hours=8, minutes=15, seconds=30),
-            DateTime(dt.datetime(2025, 1, 1, 8, 15, 30, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, 8, 15, 30, tzinfo=dt.timezone.utc),
         ),
     ],
 )
@@ -216,9 +249,9 @@ def test___dt_timedelta___add___returns_datetime(
     "left, right, expected",
     [
         (
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             ht.timedelta(hours=8, minutes=15, seconds=30),
-            DateTime(dt.datetime(2025, 1, 1, 8, 15, 30, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, 8, 15, 30, tzinfo=dt.timezone.utc),
         ),
     ],
 )
@@ -233,9 +266,9 @@ def test___ht_timedelta___add___returns_datetime(
     "left, right, expected",
     [
         (
-            DateTime(dt.datetime(2025, 1, 1, 8, 15, 30, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, 8, 15, 30, tzinfo=dt.timezone.utc),
             TimeDelta(8 * 3600 + 15 * 60 + 30),
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
         ),
     ],
 )
@@ -249,8 +282,8 @@ def test___time_value___sub___returns_datetime(
     "left, right, expected",
     [
         (
-            DateTime(dt.datetime(2025, 1, 1, 8, 15, 30, tzinfo=dt.timezone.utc)),
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, 8, 15, 30, tzinfo=dt.timezone.utc),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             TimeDelta(8 * 3600 + 15 * 60 + 30),
         ),
     ],
@@ -268,24 +301,24 @@ def test___datetime___sub___returns_time_value(
     "left, right",
     [
         (
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
         ),
         (
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc),
         ),
         (
             dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc),
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
         ),
         (
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             ht.datetime(2025, 1, 1, tzinfo=dt.timezone.utc),
         ),
         pytest.param(
             ht.datetime(2025, 1, 1, tzinfo=dt.timezone.utc),
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
         ),
     ],
@@ -305,24 +338,24 @@ def test___same_value___comparison___equal(
     "left, right",
     [
         (
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
-            DateTime(dt.datetime(2025, 1, 2, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
+            DateTime(2025, 1, 2, tzinfo=dt.timezone.utc),
         ),
         (
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             dt.datetime(2025, 1, 2, tzinfo=dt.timezone.utc),
         ),
         (
             dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc),
-            DateTime(dt.datetime(2025, 1, 2, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 2, tzinfo=dt.timezone.utc),
         ),
         (
-            DateTime(dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             ht.datetime(2025, 1, 2, tzinfo=dt.timezone.utc),
         ),
         pytest.param(
             ht.datetime(2025, 1, 1, tzinfo=dt.timezone.utc),
-            DateTime(dt.datetime(2025, 1, 2, tzinfo=dt.timezone.utc)),
+            DateTime(2025, 1, 2, tzinfo=dt.timezone.utc),
             marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
         ),
     ],
@@ -342,28 +375,22 @@ def test___lesser_value___comparison___lesser(
 # Miscellaneous
 ###############
 _VARIOUS_VALUES = [
-    DateTime(ht.datetime(dt.MINYEAR, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc)),
+    DateTime(dt.MINYEAR, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc),
+    DateTime(1850, 12, 25, 8, 15, 30, 123_456, 234_567_789, 345_567_890, dt.timezone.utc),
+    DateTime(1903, 12, 31, 23, 59, 59, 123_456, 234_567_789, 345_567_890, dt.timezone.utc),
+    DateTime(1904, 1, 1, 0, 30, 0, 0, 0, 1_000_000, dt.timezone.utc),
+    DateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc),
     DateTime(
-        ht.datetime(1850, 12, 25, 8, 15, 30, 123_456, 234_567_789, 345_567_890, dt.timezone.utc)
-    ),
-    DateTime(
-        ht.datetime(1903, 12, 31, 23, 59, 59, 123_456, 234_567_789, 345_567_890, dt.timezone.utc)
-    ),
-    DateTime(ht.datetime(1904, 1, 1, 0, 30, 0, 0, 0, 1_000_000, dt.timezone.utc)),
-    DateTime(ht.datetime(2000, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc)),
-    DateTime(
-        ht.datetime(
-            dt.MAXYEAR,
-            12,
-            31,
-            23,
-            59,
-            59,
-            999_999,
-            999_999_999,
-            999_000_000,  # with 999_999_999, binary fraction rounding pushes us to MAXYEAR + 1
-            dt.timezone.utc,
-        )
+        dt.MAXYEAR,
+        12,
+        31,
+        23,
+        59,
+        59,
+        999_999,
+        999_999_999,
+        999_000_000,  # with 999_999_999, binary fraction rounding pushes us to MAXYEAR + 1
+        dt.timezone.utc,
     ),
 ]
 
@@ -404,27 +431,19 @@ def test___time_value___pickle___references_public_modules() -> None:
             "0001-01-01 00:00:00+00:00",
         ),
         (
-            DateTime(
-                ht.datetime(
-                    1850, 12, 25, 8, 15, 30, 123_456, 234_567_789, 345_567_890, dt.timezone.utc
-                )
-            ),
+            DateTime(1850, 12, 25, 8, 15, 30, 123_456, 234_567_789, 345_567_890, dt.timezone.utc),
             "1850-12-25 08:15:30.123456234567789345578196+00:00",
         ),
         (
-            DateTime(
-                ht.datetime(
-                    1903, 12, 31, 23, 59, 59, 123_456, 234_567_789, 345_567_890, dt.timezone.utc
-                )
-            ),
+            DateTime(1903, 12, 31, 23, 59, 59, 123_456, 234_567_789, 345_567_890, dt.timezone.utc),
             "1903-12-31 23:59:59.123456234567789345578196+00:00",
         ),
         (
-            DateTime(ht.datetime(1904, 1, 1, 0, 30, 0, 0, 0, 1_000_000, dt.timezone.utc)),
+            DateTime(1904, 1, 1, 0, 30, 0, 0, 0, 1_000_000, dt.timezone.utc),
             "1904-01-01 00:30:00.000000000000000000975781+00:00",
         ),
         (
-            DateTime(ht.datetime(2000, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc)),
+            DateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc),
             "2000-01-01 00:00:00+00:00",
         ),
         (
@@ -442,35 +461,27 @@ def test___various_values___str___looks_ok(value: TimeDelta, expected: str) -> N
     [
         (
             DateTime.min,
-            "nitypes.bintime.DateTime(hightime.datetime(1, 1, 1, 0, 0, tzinfo=datetime.timezone.utc))",
+            "nitypes.bintime.DateTime(1, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)",
         ),
         (
-            DateTime(
-                ht.datetime(
-                    1850, 12, 25, 8, 15, 30, 123_456, 234_567_789, 345_567_890, dt.timezone.utc
-                )
-            ),
-            "nitypes.bintime.DateTime(hightime.datetime(1850, 12, 25, 8, 15, 30, 123456, 234567789, 345578196, tzinfo=datetime.timezone.utc))",
+            DateTime(1850, 12, 25, 8, 15, 30, 123_456, 234_567_789, 345_567_890, dt.timezone.utc),
+            "nitypes.bintime.DateTime(1850, 12, 25, 8, 15, 30, 123456, 234567789, 345578196, tzinfo=datetime.timezone.utc)",
         ),
         (
-            DateTime(
-                ht.datetime(
-                    1903, 12, 31, 23, 59, 59, 123_456, 234_567_789, 345_567_890, dt.timezone.utc
-                )
-            ),
-            "nitypes.bintime.DateTime(hightime.datetime(1903, 12, 31, 23, 59, 59, 123456, 234567789, 345578196, tzinfo=datetime.timezone.utc))",
+            DateTime(1903, 12, 31, 23, 59, 59, 123_456, 234_567_789, 345_567_890, dt.timezone.utc),
+            "nitypes.bintime.DateTime(1903, 12, 31, 23, 59, 59, 123456, 234567789, 345578196, tzinfo=datetime.timezone.utc)",
         ),
         (
-            DateTime(ht.datetime(1904, 1, 1, 0, 30, 0, 0, 0, 1_000_000, dt.timezone.utc)),
-            "nitypes.bintime.DateTime(hightime.datetime(1904, 1, 1, 0, 30, 0, 0, 0, 975781, tzinfo=datetime.timezone.utc))",
+            DateTime(1904, 1, 1, 0, 30, 0, 0, 0, 1_000_000, dt.timezone.utc),
+            "nitypes.bintime.DateTime(1904, 1, 1, 0, 30, 0, 0, 0, 975781, tzinfo=datetime.timezone.utc)",
         ),
         (
-            DateTime(ht.datetime(2000, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc)),
-            "nitypes.bintime.DateTime(hightime.datetime(2000, 1, 1, 0, 0, tzinfo=datetime.timezone.utc))",
+            DateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc),
+            "nitypes.bintime.DateTime(2000, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)",
         ),
         (
             DateTime.max,
-            "nitypes.bintime.DateTime(hightime.datetime(9999, 12, 31, 23, 59, 59, 999999, 999999999, 999945789, tzinfo=datetime.timezone.utc))",
+            "nitypes.bintime.DateTime(9999, 12, 31, 23, 59, 59, 999999, 999999999, 999945789, tzinfo=datetime.timezone.utc)",
         ),
     ],
 )

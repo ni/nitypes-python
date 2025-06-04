@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 from functools import singledispatchmethod
-from typing import Any, ClassVar, SupportsIndex, Union, final, overload
+from typing import Any, ClassVar, SupportsIndex, Union, cast, final, overload
 
 import hightime as ht
 from typing_extensions import Self, TypeAlias
@@ -46,11 +46,12 @@ class DateTime:
     """The earliest supported :any:`DateTime` object, midnight on Jan 1, 0001, UTC."""
 
     max: ClassVar[DateTime]
-    """The latest supported :any:`DateTime` object, 11:59pm on Dec 31, 9999, UTC."""
+    """The latest supported :any:`DateTime` object, after 11:59pm on Dec 31, 9999, UTC."""
 
-    __slots__ = ["_offset"]
+    __slots__ = ["_offset", "_hightime_cache"]
 
     _offset: TimeDelta
+    _hightime_cache: ht.datetime | None
 
     @overload
     def __init__(self) -> None: ...  # noqa: D107 - missing docstring in __init__
@@ -60,12 +61,56 @@ class DateTime:
         self, value: _OtherDateTime, /
     ) -> None: ...
 
+    @overload
+    def __init__(  # noqa: D107 - missing docstring in __init__
+        self,
+        year: SupportsIndex,
+        month: SupportsIndex,
+        day: SupportsIndex,
+        hour: SupportsIndex = ...,
+        minute: SupportsIndex = ...,
+        second: SupportsIndex = ...,
+        microsecond: SupportsIndex = ...,
+        femtosecond: SupportsIndex = ...,
+        yoctosecond: SupportsIndex = ...,
+        tzinfo: dt.tzinfo | None = None,
+    ) -> None: ...
+
     def __init__(
         self,
         year: SupportsIndex | _OtherDateTime | None = None,
+        month: SupportsIndex | None = None,
+        day: SupportsIndex | None = None,
+        hour: SupportsIndex = 0,
+        minute: SupportsIndex = 0,
+        second: SupportsIndex = 0,
+        microsecond: SupportsIndex = 0,
+        femtosecond: SupportsIndex = 0,
+        yoctosecond: SupportsIndex = 0,
+        tzinfo: dt.tzinfo | None = None,
     ) -> None:
-        """Initialize an DateTime."""
-        self._offset = self.__class__._to_offset(year)
+        """Initialize a DateTime."""
+        if isinstance(year, SupportsIndex):
+            self._offset = self.__class__._to_offset(
+                ht.datetime(
+                    year,
+                    cast(SupportsIndex, month),
+                    cast(SupportsIndex, day),
+                    hour,
+                    minute,
+                    second,
+                    microsecond,
+                    femtosecond,
+                    yoctosecond,
+                    tzinfo,
+                )
+            )
+        else:
+            self._offset = self.__class__._to_offset(year)
+
+        # Do not cache the passed-in ht.datetime because that would hide the rounding error
+        # caused by using a binary fraction.
+        self._hightime_cache = None
 
     @singledispatchmethod
     @classmethod
@@ -76,14 +121,14 @@ class DateTime:
     @classmethod
     def _(cls, value: ht.datetime) -> TimeDelta:
         if value.tzinfo != dt.timezone.utc:
-            raise invalid_arg_value("value.tzinfo", "datetime.timezone.utc", value.tzinfo)
+            raise ValueError("The tzinfo must be datetime.timezone.utc.")
         return TimeDelta(value - _HT_EPOCH_1904)
 
     @_to_offset.register
     @classmethod
     def _(cls, value: dt.datetime) -> TimeDelta:
         if value.tzinfo != dt.timezone.utc:
-            raise invalid_arg_value("value.tzinfo", "datetime.timezone.utc", value.tzinfo)
+            raise ValueError("The tzinfo must be datetime.timezone.utc.")
         return TimeDelta(value - _DT_EPOCH_1904)
 
     @_to_offset.register
@@ -96,6 +141,7 @@ class DateTime:
         """Create an DateTime from a 128-bit fixed point number expressed as an integer."""
         self = cls.__new__(cls)
         self._offset = TimeDelta.from_ticks(ticks)
+        self._hightime_cache = None
         return self
 
     @classmethod
@@ -103,6 +149,7 @@ class DateTime:
         """Create an DateTime from a TimeValue offset from the epoch, Jan 1, 1904."""
         self = cls.__new__(cls)
         self._offset = offset
+        self._hightime_cache = None
         return self
 
     def _to_datetime_datetime(self) -> dt.datetime:
@@ -111,7 +158,9 @@ class DateTime:
 
     def _to_hightime_datetime(self) -> ht.datetime:
         """Return self as a :any:`hightime.datetime`."""
-        return _HT_EPOCH_1904 + self._offset._to_hightime_timedelta()
+        if self._hightime_cache is None:
+            self._hightime_cache = _HT_EPOCH_1904 + self._offset._to_hightime_timedelta()
+        return self._hightime_cache
 
     # Calculating the year/month/day requires knowledge of leap years, days per month, etc., so
     # defer to hightime.datetime.
@@ -130,6 +179,8 @@ class DateTime:
         """The day of the month, between 1 and 31 inclusive."""
         return self._to_hightime_datetime().day
 
+    # The hour/minute/second properties currently assume that tzinfo.utcoffset() == 0, which is
+    # true because this class only supports UTC.
     @property
     def hour(self) -> int:
         """The hour, between 0 and 23 inclusive."""
@@ -266,21 +317,30 @@ class DateTime:
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        return f"{self.__class__.__module__}.{self.__class__.__name__}({self._to_hightime_datetime()!r})"
+        args: list[int | str] = [self.year, self.month, self.day, self.hour, self.minute]
+        # Only display sub-minute fields if they aren't 0.
+        if self.yoctosecond:
+            args.extend([self.second, self.microsecond, self.femtosecond, self.yoctosecond])
+        elif self.femtosecond:
+            args.extend([self.second, self.microsecond, self.femtosecond])
+        elif self.microsecond:
+            args.extend([self.second, self.microsecond])
+        elif self.second:
+            args.append(self.second)
+        args.append("tzinfo=datetime.timezone.utc")
+        return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(map(str, args))})"
 
 
 # These have to be within dt.datetime.max/min or else delegating to dt.datetime or ht.datetime for
 # year/month/day, str(), repr(), etc. will fail. Use ticks to specify the maximum fractional second
 # without rounding up to MAXYEAR+1.
 DateTime.max = DateTime(
-    dt.datetime(
-        dt.MAXYEAR,
-        12,
-        31,
-        23,
-        59,
-        59,
-        tzinfo=dt.timezone.utc,
-    )
+    dt.MAXYEAR,
+    12,
+    31,
+    23,
+    59,
+    59,
+    tzinfo=dt.timezone.utc,
 ) + TimeDelta.from_ticks(0xFFFF_FFFF_FFFF_FFFF)
-DateTime.min = DateTime(dt.datetime(dt.MINYEAR, 1, 1, tzinfo=dt.timezone.utc))
+DateTime.min = DateTime(dt.MINYEAR, 1, 1, tzinfo=dt.timezone.utc)
