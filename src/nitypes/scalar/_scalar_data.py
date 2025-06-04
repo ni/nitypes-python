@@ -1,37 +1,62 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Generic
 
-from typing_extensions import final
+from typing_extensions import final, TypeVar
 
-from nitypes._exceptions import invalid_arg_value, invalid_arg_type
-from nitypes.scalar._scalar_base import ScalarBase
+from nitypes._exceptions import invalid_arg_type, invalid_arg_value
+
+_ScalarType = TypeVar("_ScalarType", bool, int, float, str)
 
 
 @final
-class ScalarData(ScalarBase):
+class ScalarData(Generic[_ScalarType]):
     """A scalar data class, which encapsulates scalar data and units information."""
 
-    __slots__ = ()
+    __slots__ = [
+        "_value",
+        "_units",
+    ]
+
+    _value: _ScalarType
+    _units: str
 
     def __init__(
         self,
-        data: Any = None,
+        value: _ScalarType,
         units: str = "",
     ) -> None:
         """Construct a scalar data object.
 
         Args:
-            data: The scalar data to store in this object.
+            value: The scalar data to store in this object.
             units: The units string associated with this data.
 
         Returns:
             A scalar data object.
         """
-        if data is None:
-            raise invalid_arg_value("scalar input data", "non-None scalar value", data)
+        if not isinstance(value, (bool, int, float, str)):
+            raise invalid_arg_type("scalar input data", "bool, int, float, or str", value)
 
-        if type(data) not in ScalarBase._get_supported_dtypes():
-            raise invalid_arg_type("scalar input data", "bool, int, float, or str", data)
+        if isinstance(value, int):
+            if value <= -0x80000000 or value >= 0x7FFFFFFF:
+                raise invalid_arg_value("integer scalar value", "within the range of Int32", value)
 
-        return super().__init__(data, units)
+        self._value = value
+        self._units = units
+
+    @property
+    def value(self) -> _ScalarType:
+        """The scalar value."""
+        return self._value
+
+    @property
+    def units(self) -> str:
+        """The data units."""
+        return self._units
+
+    def __eq__(self, value: object, /) -> bool:
+        """Return self==value."""
+        if not isinstance(value, self.__class__):
+            return NotImplemented
+        return self._value == value._value and self._units == value._units

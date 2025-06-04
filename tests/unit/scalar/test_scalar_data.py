@@ -10,20 +10,13 @@ from nitypes.scalar import ScalarData
 ###############################################################################
 # create
 ###############################################################################
-def test___no_args___create___raises_value_error() -> None:
-    with pytest.raises(ValueError) as exc:
-        _ = ScalarData()
-
-    assert exc.value.args[0].startswith("The scalar input data must be a non-None scalar value.")
-
-
 @pytest.mark.parametrize("data_value", [True, 10, 20.0, "value"])
 def test___data_value___create___creates_scalar_data_with_data_and_default_units(
     data_value: Any,
 ) -> None:
     data = ScalarData(data_value)
 
-    assert data.data == data_value
+    assert data.value == data_value
     assert data.units == ""
 
 
@@ -34,7 +27,7 @@ def test___data_value_and_units___create___creates_scalar_data_with_data_and_uni
 ) -> None:
     data = ScalarData(data_value, units)
 
-    assert data.data == data_value
+    assert data.value == data_value
     assert data.units == units
 
 
