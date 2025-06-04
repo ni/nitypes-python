@@ -5,6 +5,7 @@ from typing import Any
 import pytest
 
 from nitypes.scalar import ScalarData
+from nitypes.scalar._scalar_data import _ScalarType
 
 
 ###############################################################################
@@ -42,25 +43,67 @@ def test___invalid_data_value___create___raises_type_error(data_value: Any) -> N
 ###############################################################################
 # compare
 ###############################################################################
-def test__identical_scalar_datas_default_units__compare__returns_equal() -> None:
-    data1 = ScalarData(5)
-    data2 = ScalarData(5)
-    assert data1 == data2
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (ScalarData(False), ScalarData(False)),
+        (ScalarData(1), ScalarData(1)),
+        (ScalarData(10.0), ScalarData(10.0)),
+        (ScalarData("value"), ScalarData("value")),
+    ],
+)
+def test___same_value___comparison___equal(
+    left: ScalarData[_ScalarType], right: ScalarData[_ScalarType]
+) -> None:
+    assert not (left < right)
+    assert left <= right
+    assert left == right
+    assert not (left != right)
+    assert not (left > right)
+    assert left >= right
 
 
-def test__identical_scalar_datas_custom_units__compare__returns_equal() -> None:
-    data1 = ScalarData(5, "amps")
-    data2 = ScalarData(5, "amps")
-    assert data1 == data2
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (ScalarData(False), ScalarData(True)),
+        (ScalarData(0), ScalarData(1)),
+        (ScalarData(10.0), ScalarData(20.0)),
+        (ScalarData("aaa"), ScalarData("zzz")),
+    ],
+)
+def test___lesser_value___comparison___lesser(
+    left: ScalarData[_ScalarType], right: ScalarData[_ScalarType]
+) -> None:
+    assert left < right
+    assert left <= right
+    assert not (left == right)
+    assert left != right
+    assert not (left > right)
+    assert not (left >= right)
 
 
-def test__different_scalar_data_values__compare__returns_not_equal() -> None:
-    data1 = ScalarData(5)
-    data2 = ScalarData(10)
-    assert data1 != data2
+def test___different_units___comparison___throws_exception() -> None:
+    left = ScalarData(0, "volts")
+    right = ScalarData(0, "amps")
+    expected_message = "Comparing ScalarData objects with different units is not permitted."
 
+    with pytest.raises(ValueError) as exc:
+        _ = left < right
 
-def test__different_scalar_data_units__compare__returns_not_equal() -> None:
-    data1 = ScalarData(5, "volts")
-    data2 = ScalarData(5, "amps")
-    assert data1 != data2
+    assert exc.value.args[0].startswith(expected_message)
+
+    with pytest.raises(ValueError) as exc:
+        _ = left <= right
+
+    assert exc.value.args[0].startswith(expected_message)
+
+    with pytest.raises(ValueError) as exc:
+        _ = left > right
+
+    assert exc.value.args[0].startswith(expected_message)
+
+    with pytest.raises(ValueError) as exc:
+        _ = left >= right
+
+    assert exc.value.args[0].startswith(expected_message)

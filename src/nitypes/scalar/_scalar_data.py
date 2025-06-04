@@ -68,3 +68,43 @@ class ScalarData(Generic[_ScalarType]):
         if not isinstance(value, self.__class__):
             return NotImplemented
         return self.value == value.value and self.units == value.units
+
+    def __gt__(self, value: object) -> bool:
+        """Return self > value."""
+        if not isinstance(value, self.__class__):
+            return NotImplemented
+
+        if self.units != value.units:
+            raise ValueError("Comparing ScalarData objects with different units is not permitted.")
+
+        return self.value > value.value
+
+    def __ge__(self, value: object) -> bool:
+        """Return self >= value."""
+        if not isinstance(value, self.__class__):
+            return NotImplemented
+
+        if self.units != value.units:
+            raise ValueError("Comparing ScalarData objects with different units is not permitted.")
+
+        return self.value >= value.value
+
+    def __lt__(self, value: object) -> bool:
+        """Return self < value."""
+        if not isinstance(value, self.__class__):
+            return NotImplemented
+
+        if self.units != value.units:
+            raise ValueError("Comparing ScalarData objects with different units is not permitted.")
+
+        return self.value < value.value
+
+    def __le__(self, value: object) -> bool:
+        """Return self <= value."""
+        if not isinstance(value, self.__class__):
+            return NotImplemented
+
+        if self.units != value.units:
+            raise ValueError("Comparing ScalarData objects with different units is not permitted.")
+
+        return self.value <= value.value
