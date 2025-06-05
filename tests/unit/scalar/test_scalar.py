@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, assert_type
+from typing import Any
 
 import pytest
+from typing_extensions import assert_type
 
 from nitypes.scalar import Scalar
 from nitypes.scalar._scalar import _ScalarType
