@@ -46,7 +46,7 @@ class DateTime:
     """The earliest supported :any:`DateTime` object, midnight on Jan 1, 0001, UTC."""
 
     max: ClassVar[DateTime]
-    """The latest supported :any:`DateTime` object, after 11:59pm on Dec 31, 9999, UTC."""
+    """The latest supported :any:`DateTime` object, before midnight on Dec 31, 9999, UTC."""
 
     __slots__ = ["_offset", "_hightime_cache"]
 
