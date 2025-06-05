@@ -111,42 +111,53 @@ def test___different_units___comparison___throws_exception() -> None:
     right = Scalar(0, "amps")
     expected_message = "Comparing Scalar objects with different units is not permitted."
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(ValueError) as exc1:
         _ = left < right
-
-    assert exc.value.args[0].startswith(expected_message)
-
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(ValueError) as exc2:
         _ = left <= right
-
-    assert exc.value.args[0].startswith(expected_message)
-
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(ValueError) as exc3:
         _ = left > right
-
-    assert exc.value.args[0].startswith(expected_message)
-
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(ValueError) as exc4:
         _ = left >= right
 
-    assert exc.value.args[0].startswith(expected_message)
+    assert exc1.value.args[0].startswith(expected_message)
+    assert exc2.value.args[0].startswith(expected_message)
+    assert exc3.value.args[0].startswith(expected_message)
+    assert exc4.value.args[0].startswith(expected_message)
 
 
 ###############################################################################
 # other operators
 ###############################################################################
-def test___repr___returns_correct_string() -> None:
-    data = Scalar(10, "volts")
-    repr_str = data.__repr__()
-    expected_str = "nitypes.scalar.Scalar(value=10, units=volts)"
-    assert repr_str == expected_str
+@pytest.mark.parametrize(
+    "value, expected_repr",
+    [
+        (Scalar(False), "nitypes.scalar.Scalar(value=False, units='')"),
+        (Scalar(10), "nitypes.scalar.Scalar(value=10, units='')"),
+        (Scalar(20.0), "nitypes.scalar.Scalar(value=20.0, units='')"),
+        (Scalar("value"), "nitypes.scalar.Scalar(value='value', units='')"),
+        (Scalar(False, "amps"), "nitypes.scalar.Scalar(value=False, units='amps')"),
+        (Scalar(10, "volts"), "nitypes.scalar.Scalar(value=10, units='volts')"),
+        (Scalar(20.0, "watts"), "nitypes.scalar.Scalar(value=20.0, units='watts')"),
+        (Scalar("value", ""), "nitypes.scalar.Scalar(value='value', units='')"),
+    ],
+)
+def test___various_values___repr___looks_ok(value: Scalar[Any], expected_repr: str) -> None:
+    assert repr(value) == expected_repr
 
 
-def test___no_units___str___returns_correct_string() -> None:
-    data = Scalar(10)
-    assert str(data) == "10"
-
-
-def test___with_units___str___returns_correct_string() -> None:
-    data = Scalar(10, "amps")
-    assert str(data) == "10 amps"
+@pytest.mark.parametrize(
+    "value, expected_str",
+    [
+        (Scalar(False), "False"),
+        (Scalar(10), "10"),
+        (Scalar(20.0), "20.0"),
+        (Scalar("value"), "value"),
+        (Scalar(False, "amps"), "False amps"),
+        (Scalar(10, "volts"), "10 volts"),
+        (Scalar(20.0, "watts"), "20.0 watts"),
+        (Scalar("value", ""), "value"),
+    ],
+)
+def test___various_values___str___looks_ok(value: Scalar[Any], expected_str: str) -> None:
+    assert str(value) == expected_str

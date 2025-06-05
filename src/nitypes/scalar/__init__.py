@@ -12,20 +12,18 @@ Constructing scalar data objects
 To construct a scalar data object, use the :any:`Scalar` class:
 
 >>> Scalar(False)
-nitypes.scalar.Scalar(False, "")
+nitypes.scalar.Scalar(value=False, units='')
 >>> Scalar(0)
-nitypes.scalar.Scalar(0, "")
->>> Scalar(5.0, "volts")
-nitypes.scalar.Scalar(5.0, "volts")
+nitypes.scalar.Scalar(value=0, units='')
+>>> Scalar(5.0, 'volts')
+nitypes.scalar.Scalar(value=5.0, units='volts')
 >>> Scalar("value", "volts")
-nitypes.scalar.Scalar("value", "volts")
+nitypes.scalar.Scalar(value='value', units='volts')
 """
 
 from nitypes.scalar._scalar import Scalar
 
 __all__ = ["Scalar"]
-__doctest_requires__ = {".": "numpy>=2.0"}
-
 
 # Hide that it was defined in a helper file
 Scalar.__module__ = __name__

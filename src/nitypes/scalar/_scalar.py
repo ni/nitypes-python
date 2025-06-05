@@ -10,9 +10,8 @@ from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
 )
 
-# _ScalarType = TypeVar("_ScalarType", bool, int, float, str)
 _ScalarType_co = TypeVar("_ScalarType_co", bound=Union[bool, int, float, str], covariant=True)
-NUMERIC = (bool, int, float)
+_NUMERIC = (bool, int, float)
 
 
 @final
@@ -79,7 +78,7 @@ class Scalar(Generic[_ScalarType_co]):
         if not isinstance(value, self.__class__):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
-        if isinstance(self.value, NUMERIC) and isinstance(value.value, NUMERIC):
+        if isinstance(self.value, _NUMERIC) and isinstance(value.value, _NUMERIC):
             return self.value > value.value
         elif isinstance(self.value, str) and isinstance(value.value, str):
             return self.value > value.value
@@ -91,7 +90,7 @@ class Scalar(Generic[_ScalarType_co]):
         if not isinstance(value, self.__class__):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
-        if isinstance(self.value, NUMERIC) and isinstance(value.value, NUMERIC):
+        if isinstance(self.value, _NUMERIC) and isinstance(value.value, _NUMERIC):
             return self.value >= value.value
         elif isinstance(self.value, str) and isinstance(value.value, str):
             return self.value >= value.value
@@ -103,7 +102,7 @@ class Scalar(Generic[_ScalarType_co]):
         if not isinstance(value, self.__class__):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
-        if isinstance(self.value, NUMERIC) and isinstance(value.value, NUMERIC):
+        if isinstance(self.value, _NUMERIC) and isinstance(value.value, _NUMERIC):
             return self.value < value.value
         elif isinstance(self.value, str) and isinstance(value.value, str):
             return self.value < value.value
@@ -115,7 +114,7 @@ class Scalar(Generic[_ScalarType_co]):
         if not isinstance(value, self.__class__):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
-        if isinstance(self.value, NUMERIC) and isinstance(value.value, NUMERIC):
+        if isinstance(self.value, _NUMERIC) and isinstance(value.value, _NUMERIC):
             return self.value <= value.value
         elif isinstance(self.value, str) and isinstance(value.value, str):
             return self.value <= value.value
@@ -124,7 +123,7 @@ class Scalar(Generic[_ScalarType_co]):
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        args = [f"value={self.value}", f"units={self.units}"]
+        args = [f"value={self.value!r}", f"units={self.units!r}"]
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
     def __str__(self) -> str:
