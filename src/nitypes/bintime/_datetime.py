@@ -266,6 +266,30 @@ class DateTime:
         else:
             return NotImplemented
 
+    @overload
+    def __rsub__(  # noqa: D105 - missing docstring for magic method
+        self, value: DateTime | _OtherDateTime, /
+    ) -> TimeDelta: ...
+    @overload
+    def __rsub__(  # noqa: D105 - missing docstring for magic method
+        self, value: TimeDelta | _OtherTimeDelta, /
+    ) -> DateTime: ...
+
+    def __rsub__(
+        self, value: DateTime | _OtherDateTime | TimeDelta | _OtherTimeDelta, /
+    ) -> TimeDelta | DateTime:
+        """Return value-self."""
+        if isinstance(value, DateTime):
+            return value._offset - self._offset
+        elif isinstance(value, _OTHER_DATETIME_TUPLE):
+            return self.__class__(value) - self
+        elif isinstance(value, TimeDelta):
+            return self.__class__.from_offset(value - self._offset)
+        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
+            return TimeDelta(value) - self
+        else:
+            return NotImplemented
+
     # In comparison operators, we handle dt.datetime and ht.datetime separately in order to promote
     # to the more precise data type (dt -> bt, bt -> ht).
     def __lt__(self, value: DateTime | _OtherDateTime, /) -> bool:
