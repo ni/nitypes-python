@@ -266,11 +266,15 @@ class DateTime:
         else:
             return NotImplemented
 
+    # In comparison operators, we handle dt.datetime and ht.datetime separately in order to promote
+    # to the more precise data type (dt -> bt, bt -> ht).
     def __lt__(self, value: DateTime | _OtherDateTime, /) -> bool:
         """Return self<value."""
         if isinstance(value, self.__class__):
             return self._offset < value._offset
-        elif isinstance(value, _OTHER_DATETIME_TUPLE):
+        elif isinstance(value, ht.datetime):
+            return self._to_hightime_datetime() < value
+        elif isinstance(value, dt.datetime):
             return self < self.__class__(value)
         else:
             return NotImplemented
@@ -279,7 +283,9 @@ class DateTime:
         """Return self<=value."""
         if isinstance(value, self.__class__):
             return self._offset <= value._offset
-        elif isinstance(value, _OTHER_DATETIME_TUPLE):
+        elif isinstance(value, ht.datetime):
+            return self._to_hightime_datetime() <= value
+        elif isinstance(value, dt.datetime):
             return self <= self.__class__(value)
         else:
             return NotImplemented
@@ -288,7 +294,9 @@ class DateTime:
         """Return self==value."""
         if isinstance(value, self.__class__):
             return self._offset == value._offset
-        elif isinstance(value, _OTHER_DATETIME_TUPLE):
+        elif isinstance(value, ht.datetime):
+            return self._to_hightime_datetime() == value
+        elif isinstance(value, dt.datetime):
             return self == self.__class__(value)
         else:
             return NotImplemented
@@ -297,7 +305,9 @@ class DateTime:
         """Return self<value."""
         if isinstance(value, self.__class__):
             return self._offset > value._offset
-        elif isinstance(value, _OTHER_DATETIME_TUPLE):
+        elif isinstance(value, ht.datetime):
+            return self._to_hightime_datetime() > value
+        elif isinstance(value, dt.datetime):
             return self > self.__class__(value)
         else:
             return NotImplemented
@@ -306,7 +316,9 @@ class DateTime:
         """Return self>=value."""
         if isinstance(value, self.__class__):
             return self._offset >= value._offset
-        elif isinstance(value, _OTHER_DATETIME_TUPLE):
+        elif isinstance(value, ht.datetime):
+            return self._to_hightime_datetime() >= value
+        elif isinstance(value, dt.datetime):
             return self >= self.__class__(value)
         else:
             return NotImplemented

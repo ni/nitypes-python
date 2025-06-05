@@ -353,9 +353,27 @@ def test___same_value___comparison___equal(
             DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             ht.datetime(2025, 1, 2, tzinfo=dt.timezone.utc),
         ),
+        (
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
+            ht.datetime(2025, 1, 1, femtosecond=1, tzinfo=dt.timezone.utc),
+        ),
+        (
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
+            ht.datetime(2025, 1, 1, yoctosecond=1, tzinfo=dt.timezone.utc),
+        ),
         pytest.param(
             ht.datetime(2025, 1, 1, tzinfo=dt.timezone.utc),
             DateTime(2025, 1, 2, tzinfo=dt.timezone.utc),
+            marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
+        ),
+        pytest.param(
+            ht.datetime(2025, 1, 1, tzinfo=dt.timezone.utc) - ht.timedelta(femtoseconds=1),
+            DateTime(2025, 1, 2, tzinfo=dt.timezone.utc),
+            marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
+        ),
+        pytest.param(
+            ht.datetime(2025, 1, 1, tzinfo=dt.timezone.utc) - ht.timedelta(yoctoseconds=1),
+            DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
             marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
         ),
     ],
