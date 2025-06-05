@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, assert_type
 
 import pytest
 
@@ -11,22 +11,35 @@ from nitypes.scalar._scalar import _ScalarType
 ###############################################################################
 # create
 ###############################################################################
-@pytest.mark.parametrize(
-    "data_value, data_type",
-    [
-        (True, bool),
-        (10, int),
-        (20.0, float),
-        ("value", str),
-    ],
-)
-def test___data_value___create___creates_scalar_data_with_data_and_default_units(
-    data_value: Any, data_type: type
-) -> None:
-    data = Scalar(data_value)
+def test___bool_data_value___create___creates_scalar_data_with_data_and_default_units() -> None:
+    data = Scalar(True)
 
-    assert isinstance(data.value, data_type)
-    assert data.value == data_value
+    assert_type(data.value, bool)
+    assert data.value is True
+    assert data.units == ""
+
+
+def test___int_data_value___create___creates_scalar_data_with_data_and_default_units() -> None:
+    data = Scalar(10)
+
+    assert_type(data.value, int)
+    assert data.value == 10
+    assert data.units == ""
+
+
+def test___float_data_value___create___creates_scalar_data_with_data_and_default_units() -> None:
+    data = Scalar(20.0)
+
+    assert_type(data.value, float)
+    assert data.value == 20.0
+    assert data.units == ""
+
+
+def test___str_data_value___create___creates_scalar_data_with_data_and_default_units() -> None:
+    data = Scalar("value")
+
+    assert_type(data.value, str)
+    assert data.value == "value"
     assert data.units == ""
 
 

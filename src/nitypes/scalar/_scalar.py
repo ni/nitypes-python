@@ -42,6 +42,9 @@ class Scalar(Generic[_ScalarType]):
         if not isinstance(value, (bool, int, float, str)):
             raise invalid_arg_type("scalar input data", "bool, int, float, or str", value)
 
+        if not isinstance(units, str):
+            raise invalid_arg_type("units", "str", units)
+
         # The ScalarData proto type only supports 32 bit integers. Make sure we're in range.
         if isinstance(value, int):
             if value <= -0x80000000 or value >= 0x7FFFFFFF:
@@ -73,40 +76,28 @@ class Scalar(Generic[_ScalarType]):
         """Return self > value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
-
-        if self.units != value.units:
-            raise ValueError("Comparing Scalar objects with different units is not permitted.")
-
+        self._check_units_equal_for_comparison(value.units)
         return self.value > value.value
 
     def __ge__(self, value: object) -> bool:
         """Return self >= value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
-
-        if self.units != value.units:
-            raise ValueError("Comparing Scalar objects with different units is not permitted.")
-
+        self._check_units_equal_for_comparison(value.units)
         return self.value >= value.value
 
     def __lt__(self, value: object) -> bool:
         """Return self < value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
-
-        if self.units != value.units:
-            raise ValueError("Comparing Scalar objects with different units is not permitted.")
-
+        self._check_units_equal_for_comparison(value.units)
         return self.value < value.value
 
     def __le__(self, value: object) -> bool:
         """Return self <= value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
-
-        if self.units != value.units:
-            raise ValueError("Comparing Scalar objects with different units is not permitted.")
-
+        self._check_units_equal_for_comparison(value.units)
         return self.value <= value.value
 
     def __repr__(self) -> str:
@@ -121,3 +112,8 @@ class Scalar(Generic[_ScalarType]):
             value_str += f" {self.units}"
 
         return value_str
+
+    def _check_units_equal_for_comparison(self, other_units: str) -> None:
+        """Raise a ValueError if other_units != self.units."""
+        if self.units != other_units:
+            raise ValueError("Comparing Scalar objects with different units is not permitted.")

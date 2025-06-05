@@ -4,10 +4,10 @@ Scalar
 ================
 
 A scalar data object represents a single scalar value with units information.
-Valid types for the scalar value are bool, int32, double, and str
+Valid types for the scalar value are bool, int, float, and str
 
 Constructing scalar data objects
------------------------------
+--------------------------------
 
 To construct a scalar data object, use the :any:`Scalar` class:
 
@@ -19,7 +19,7 @@ nitypes.scalar.Scalar(0, "")
 nitypes.scalar.Scalar(5.0, "volts")
 >>> Scalar("value", "volts")
 nitypes.scalar.Scalar("value", "volts")
-"""  # noqa: W505 - doc line too long
+"""
 
 from nitypes.scalar._scalar import Scalar
 
