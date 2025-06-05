@@ -211,7 +211,12 @@ class DateTime:
 
     @property
     def yoctosecond(self) -> int:
-        """The yoctosecond, between 0 and 999_999_999 inclusive."""
+        """The yoctosecond, between 0 and 999_999_999 inclusive.
+
+        .. warning::
+            Because this class uses a 64-bit binary fraction, the smallest time increment it can
+            represent is ``1.0 / (1 << 64)`` seconds, which is about 54210 yoctoseconds.
+        """
         return self._offset.yoctoseconds
 
     @property
