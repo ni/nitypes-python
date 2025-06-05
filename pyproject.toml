@@ -52,6 +52,7 @@ pytest-mock = ">=3.0"
 # Use an unreleased version of hightime for testing.
 hightime = { git = "https://github.com/ni/hightime.git" }
 tomlkit = ">=0.11.0"
+tzlocal = ">=5.0"
 
 [tool.poetry.group.docs]
 optional = true
