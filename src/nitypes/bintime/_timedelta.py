@@ -97,12 +97,15 @@ class TimeDelta:
     def _to_ticks(cls, seconds: object) -> int:
         raise invalid_arg_type("seconds", "number or timedelta", seconds)
 
-    @_to_ticks.register
+    # Python 3.9: pass the type to register() in order to work around
+    # https://github.com/python/cpython/issues/86153 - singledispatchmethod raises an error when
+    # relying on a forward declaration
+    @_to_ticks.register(SupportsIndex)
     @classmethod
     def _(cls, seconds: SupportsIndex) -> int:
         return operator.index(seconds) << _BITS_PER_SECOND
 
-    @_to_ticks.register
+    @_to_ticks.register(Decimal)
     @classmethod
     def _(cls, seconds: Decimal) -> int:
         with decimal.localcontext() as ctx:
@@ -112,7 +115,7 @@ class TimeDelta:
             ticks += round(fractional_seconds * _TICKS_PER_SECOND)
             return ticks
 
-    @_to_ticks.register
+    @_to_ticks.register(float)
     @classmethod
     def _(cls, seconds: float) -> int:
         fractional_seconds, whole_seconds = math.modf(seconds)
@@ -120,12 +123,12 @@ class TimeDelta:
         ticks += round(fractional_seconds * _TICKS_PER_SECOND)
         return ticks
 
-    @_to_ticks.register
+    @_to_ticks.register(ht.timedelta)
     @classmethod
     def _(cls, seconds: ht.timedelta) -> int:
         return cls._to_ticks(seconds.precision_total_seconds())
 
-    @_to_ticks.register
+    @_to_ticks.register(dt.timedelta)
     @classmethod
     def _(cls, seconds: dt.timedelta) -> int:
         # Do not use total_seconds() because it loses precision.
@@ -134,7 +137,7 @@ class TimeDelta:
         ticks += (seconds.microseconds << _BITS_PER_SECOND) // _MICROSECONDS_PER_SECOND
         return ticks
 
-    @_to_ticks.register
+    @_to_ticks.register(type(None))
     @classmethod
     def _(cls, seconds: None) -> int:
         return 0

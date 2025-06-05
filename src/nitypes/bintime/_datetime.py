@@ -117,21 +117,24 @@ class DateTime:
     def _to_offset(cls, value: object) -> TimeDelta:
         raise invalid_arg_type("value", "datetime", value)
 
-    @_to_offset.register
+    # Python 3.9: pass the type to register() in order to work around
+    # https://github.com/python/cpython/issues/86153 - singledispatchmethod raises an error when
+    # relying on a forward declaration
+    @_to_offset.register(ht.datetime)
     @classmethod
     def _(cls, value: ht.datetime) -> TimeDelta:
         if value.tzinfo != dt.timezone.utc:
             raise ValueError("The tzinfo must be datetime.timezone.utc.")
         return TimeDelta(value - _HT_EPOCH_1904)
 
-    @_to_offset.register
+    @_to_offset.register(dt.datetime)
     @classmethod
     def _(cls, value: dt.datetime) -> TimeDelta:
         if value.tzinfo != dt.timezone.utc:
             raise ValueError("The tzinfo must be datetime.timezone.utc.")
         return TimeDelta(value - _DT_EPOCH_1904)
 
-    @_to_offset.register
+    @_to_offset.register(type(None))
     @classmethod
     def _(cls, value: None) -> TimeDelta:
         return TimeDelta()
