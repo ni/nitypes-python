@@ -75,13 +75,13 @@ Resolution
 NI-BTF is a high-resolution time format, so it has significantly higher resolution than
 :any:`datetime.datetime`. However, :any:`hightime.datetime` has even higher resolution:
 
-==================   =========================
-Class                Smallest Time Increment
-==================   =========================
-:any:`dt.datetime`   1 microsecond (1e-6 sec)
-:any:`DateTime`      54210 yoctoseconds (5.4e-20 sec)
-:any:`ht.datetime`   1 yoctosecond (1e-24 sec)
-==================   =========================
+========================   ================================
+Class                      Smallest Time Increment
+========================   ================================
+:any:`datetime.datetime`   1 microsecond (1e-6 sec)
+:any:`DateTime`            54210 yoctoseconds (5.4e-20 sec)
+:any:`hightime.datetime`   1 yoctosecond (1e-24 sec)
+========================   ================================
 
 As a result, :any:`hightime.datetime` can represent the time down to the exact yoctosecond, but
 :any:`DateTime` rounds the yoctosecond field.
