@@ -275,7 +275,9 @@ class DateTime:
         self, value: TimeDelta | _OtherTimeDelta, /
     ) -> DateTime: ...
 
-    def __rsub__(
+    # AB#3153350 - nitypes.bintime.DateTime signatures of __sub__ and __rsub__ are unsafely
+    # overlapping
+    def __rsub__(  # type: ignore[misc]
         self, value: DateTime | _OtherDateTime | TimeDelta | _OtherTimeDelta, /
     ) -> TimeDelta | DateTime:
         """Return value-self."""

@@ -224,6 +224,8 @@ def test___various_values___unit_properties___return_unit_values(
 def test___time_value___add___returns_datetime(
     left: DateTime, right: TimeDelta, expected: DateTime
 ) -> None:
+    assert_type(left + right, DateTime)
+    assert_type(right + left, DateTime)
     assert left + right == expected
     assert right + left == expected
 
@@ -241,6 +243,8 @@ def test___time_value___add___returns_datetime(
 def test___dt_timedelta___add___returns_datetime(
     left: DateTime, right: dt.timedelta, expected: DateTime
 ) -> None:
+    assert_type(left + right, DateTime)
+    assert_type(right + left, DateTime)
     assert left + right == expected
     assert right + left == expected
 
@@ -258,6 +262,8 @@ def test___dt_timedelta___add___returns_datetime(
 def test___ht_timedelta___add___returns_datetime(
     left: DateTime, right: ht.timedelta, expected: DateTime
 ) -> None:
+    assert_type(left + right, DateTime)
+    assert_type(right + left, DateTime)
     assert left + right == expected
     assert right + left == expected
 
@@ -275,6 +281,7 @@ def test___ht_timedelta___add___returns_datetime(
 def test___time_value___sub___returns_datetime(
     left: DateTime, right: TimeDelta, expected: DateTime
 ) -> None:
+    assert_type(left - right, DateTime)
     assert left - right == expected
 
 
@@ -291,6 +298,7 @@ def test___time_value___sub___returns_datetime(
 def test___datetime___sub___returns_time_value(
     left: DateTime, right: DateTime, expected: TimeDelta
 ) -> None:
+    assert_type(left - right, TimeDelta)
     assert left - right == expected
 
 
