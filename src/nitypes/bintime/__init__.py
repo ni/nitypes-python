@@ -27,10 +27,10 @@ The :any:`DateTime` class represents a NI-BTF absolute time as a Python object.
 Constructing
 ------------
 
-As with other ``datetime`` objects, you can construct a :any:`DateTime` by specifying the year,
+As with :any:`datetime.datetime`, you can construct a :any:`DateTime` by specifying the year,
 month, day, etc.:
 
->>> import datetime, hightime
+>>> import datetime
 >>> DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
 nitypes.bintime.DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
 
@@ -38,10 +38,12 @@ nitypes.bintime.DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
     :any:`DateTime` only supports :any:`datetime.timezone.utc`. It does not support time-zone-naive
     objects or time zones other than UTC.
 
-You can also construct a :any:`DateTime` from another type of ``datetime`` object:
+You can also construct a :any:`DateTime` from a :any:`datetime.datetime` or
+:any:`hightime.datetime`:
 
 >>> DateTime(datetime.datetime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc))
 nitypes.bintime.DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
+>>> import hightime
 >>> DateTime(hightime.datetime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc))
 nitypes.bintime.DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
 
@@ -113,8 +115,8 @@ The :any:`TimeDelta` class represents a NI-BTF time interval as a Python object.
 Constructing
 ------------
 
-You can construct a :any:`TimeDelta` from a number of seconds, expressed as an ``int``, ``float``,
-or :any:`Decimal`.
+You can construct a :any:`TimeDelta` from a number of seconds, expressed as an :any:`int`,
+:any:`float`, or :any:`decimal.Decimal`.
 
 >>> TimeDelta(100)
 nitypes.bintime.TimeDelta(Decimal('100'))
@@ -151,7 +153,8 @@ nitypes.bintime.TimeDelta(Decimal('101'))
 >>> TimeDelta(100.5) - TimeDelta(0.5)
 nitypes.bintime.TimeDelta(Decimal('100'))
 
-Or add/subtract a :any:`DateTime` with a :any:`TimeDelta` or other ``timedelta``:
+Or add/subtract a :any:`DateTime` with a :any:`TimeDelta`, :any:`datetime.timedelta`, or
+:any:`hightime.timedelta`:
 
 >>> DateTime(2025, 1, 1, tzinfo=datetime.timezone.utc) + TimeDelta(86400)
 nitypes.bintime.DateTime(2025, 1, 2, 0, 0, tzinfo=datetime.timezone.utc)
