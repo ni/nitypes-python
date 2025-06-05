@@ -344,11 +344,14 @@ class TimeDelta:
         else:
             return NotImplemented
 
+    # In comparison operators, always promote to the more precise data type (dt -> bt, bt -> ht).
     def __lt__(self, value: TimeDelta | _OtherTimeDelta, /) -> bool:
         """Return self<value."""
         if isinstance(value, self.__class__):
             return self._ticks < value._ticks
-        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
+        elif isinstance(value, ht.timedelta):
+            return self._to_hightime_timedelta() < value
+        elif isinstance(value, dt.timedelta):
             return self < self.__class__(value)
         else:
             return NotImplemented
@@ -357,7 +360,9 @@ class TimeDelta:
         """Return self<=value."""
         if isinstance(value, self.__class__):
             return self._ticks <= value._ticks
-        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
+        elif isinstance(value, ht.timedelta):
+            return self._to_hightime_timedelta() <= value
+        elif isinstance(value, dt.timedelta):
             return self <= self.__class__(value)
         else:
             return NotImplemented
@@ -366,7 +371,9 @@ class TimeDelta:
         """Return self==value."""
         if isinstance(value, self.__class__):
             return self._ticks == value._ticks
-        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
+        elif isinstance(value, ht.timedelta):
+            return self._to_hightime_timedelta() == value
+        elif isinstance(value, dt.timedelta):
             return self == self.__class__(value)
         else:
             return NotImplemented
@@ -375,7 +382,9 @@ class TimeDelta:
         """Return self<value."""
         if isinstance(value, self.__class__):
             return self._ticks > value._ticks
-        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
+        elif isinstance(value, ht.timedelta):
+            return self._to_hightime_timedelta() > value
+        elif isinstance(value, dt.timedelta):
             return self > self.__class__(value)
         else:
             return NotImplemented
@@ -384,7 +393,9 @@ class TimeDelta:
         """Return self>=value."""
         if isinstance(value, self.__class__):
             return self._ticks >= value._ticks
-        elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
+        elif isinstance(value, ht.timedelta):
+            return self._to_hightime_timedelta() >= value
+        elif isinstance(value, dt.timedelta):
             return self >= self.__class__(value)
         else:
             return NotImplemented

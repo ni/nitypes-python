@@ -290,8 +290,7 @@ class DateTime:
         else:
             return NotImplemented
 
-    # In comparison operators, we handle dt.datetime and ht.datetime separately in order to promote
-    # to the more precise data type (dt -> bt, bt -> ht).
+    # In comparison operators, always promote to the more precise data type (dt -> bt, bt -> ht).
     def __lt__(self, value: DateTime | _OtherDateTime, /) -> bool:
         """Return self<value."""
         if isinstance(value, self.__class__):
