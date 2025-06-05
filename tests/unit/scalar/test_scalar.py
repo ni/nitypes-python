@@ -6,7 +6,7 @@ import pytest
 from typing_extensions import assert_type
 
 from nitypes.scalar import Scalar
-from nitypes.scalar._scalar import _ScalarType
+from nitypes.scalar._scalar import _ScalarType_co
 
 
 ###############################################################################
@@ -76,7 +76,7 @@ def test___invalid_data_value___create___raises_type_error(data_value: Any) -> N
     ],
 )
 def test___same_value___comparison___equal(
-    left: Scalar[_ScalarType], right: Scalar[_ScalarType]
+    left: Scalar[_ScalarType_co], right: Scalar[_ScalarType_co]
 ) -> None:
     assert not (left < right)
     assert left <= right
@@ -96,7 +96,7 @@ def test___same_value___comparison___equal(
     ],
 )
 def test___lesser_value___comparison___lesser(
-    left: Scalar[_ScalarType], right: Scalar[_ScalarType]
+    left: Scalar[_ScalarType_co], right: Scalar[_ScalarType_co]
 ) -> None:
     assert left < right
     assert left <= right

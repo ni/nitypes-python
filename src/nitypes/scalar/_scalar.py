@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generic
+from typing import Generic, Union
 
 from typing_extensions import final, TypeVar
 
@@ -10,11 +10,13 @@ from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
 )
 
-_ScalarType = TypeVar("_ScalarType", bool, int, float, str)
+# _ScalarType = TypeVar("_ScalarType", bool, int, float, str)
+_ScalarType_co = TypeVar("_ScalarType_co", bound=Union[bool, int, float, str], covariant=True)
+NUMERIC = (bool, int, float)
 
 
 @final
-class Scalar(Generic[_ScalarType]):
+class Scalar(Generic[_ScalarType_co]):
     """A scalar data class, which encapsulates scalar data and units information."""
 
     __slots__ = [
@@ -22,12 +24,12 @@ class Scalar(Generic[_ScalarType]):
         "_extended_properties",
     ]
 
-    _value: _ScalarType
+    _value: _ScalarType_co
     _extended_properties: ExtendedPropertyDictionary
 
     def __init__(
         self,
-        value: _ScalarType,
+        value: _ScalarType_co,
         units: str = "",
     ) -> None:
         """Construct a scalar data object.
@@ -55,7 +57,7 @@ class Scalar(Generic[_ScalarType]):
         self._extended_properties[UNIT_DESCRIPTION] = units
 
     @property
-    def value(self) -> _ScalarType:
+    def value(self) -> _ScalarType_co:
         """The scalar value."""
         return self._value
 
@@ -72,33 +74,53 @@ class Scalar(Generic[_ScalarType]):
             return NotImplemented
         return self.value == value.value and self.units == value.units
 
-    def __gt__(self, value: object) -> bool:
+    def __gt__(self, value: Scalar[_ScalarType_co]) -> bool:
         """Return self > value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
-        return self.value > value.value
+        if isinstance(self.value, NUMERIC) and isinstance(value.value, NUMERIC):
+            return self.value > value.value
+        elif isinstance(self.value, str) and isinstance(value.value, str):
+            return self.value > value.value
+        else:
+            raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
     def __ge__(self, value: object) -> bool:
         """Return self >= value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
-        return self.value >= value.value
+        if isinstance(self.value, NUMERIC) and isinstance(value.value, NUMERIC):
+            return self.value >= value.value
+        elif isinstance(self.value, str) and isinstance(value.value, str):
+            return self.value >= value.value
+        else:
+            raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
     def __lt__(self, value: object) -> bool:
         """Return self < value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
-        return self.value < value.value
+        if isinstance(self.value, NUMERIC) and isinstance(value.value, NUMERIC):
+            return self.value < value.value
+        elif isinstance(self.value, str) and isinstance(value.value, str):
+            return self.value < value.value
+        else:
+            raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
     def __le__(self, value: object) -> bool:
         """Return self <= value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
-        return self.value <= value.value
+        if isinstance(self.value, NUMERIC) and isinstance(value.value, NUMERIC):
+            return self.value <= value.value
+        elif isinstance(self.value, str) and isinstance(value.value, str):
+            return self.value <= value.value
+        else:
+            raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
     def __repr__(self) -> str:
         """Return repr(self)."""
