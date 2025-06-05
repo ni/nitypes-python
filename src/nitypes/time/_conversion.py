@@ -122,21 +122,21 @@ def convert_timedelta(requested_type: type[_TTimeDelta], value: _AnyTimeDelta, /
 
 
 @singledispatch
-def _convert_to_bt_time_value(value: object, /) -> bt.TimeDelta:
+def _convert_to_bt_timedelta(value: object, /) -> bt.TimeDelta:
     raise invalid_arg_type("value", "timedelta", value)
 
 
-@_convert_to_bt_time_value.register
+@_convert_to_bt_timedelta.register
 def _(value: bt.TimeDelta, /) -> bt.TimeDelta:
     return value
 
 
-@_convert_to_bt_time_value.register
+@_convert_to_bt_timedelta.register
 def _(value: dt.timedelta, /) -> bt.TimeDelta:
     return bt.TimeDelta(value)
 
 
-@_convert_to_bt_time_value.register
+@_convert_to_bt_timedelta.register
 def _(value: ht.timedelta, /) -> bt.TimeDelta:
     return bt.TimeDelta(value)
 
@@ -186,6 +186,7 @@ def _(value: ht.timedelta, /) -> ht.timedelta:
 
 
 _CONVERT_TIMEDELTA_FOR_TYPE: dict[type[Any], Callable[[object], object]] = {
+    bt.TimeDelta: _convert_to_bt_timedelta,
     dt.timedelta: _convert_to_dt_timedelta,
     ht.timedelta: _convert_to_ht_timedelta,
 }
