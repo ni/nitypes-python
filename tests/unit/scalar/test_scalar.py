@@ -7,6 +7,10 @@ from typing_extensions import assert_type
 
 from nitypes.scalar import Scalar
 from nitypes.scalar._scalar import _ScalarType_co
+from nitypes.waveform._extended_properties import (
+    UNIT_DESCRIPTION,
+    ExtendedPropertyDictionary,
+)
 
 
 ###############################################################################
@@ -161,3 +165,15 @@ def test___various_values___repr___looks_ok(value: Scalar[Any], expected_repr: s
 )
 def test___various_values___str___looks_ok(value: Scalar[Any], expected_str: str) -> None:
     assert str(value) == expected_str
+
+
+###############################################################################
+# other properties
+###############################################################################
+def test___scalar_with_units___get_extended_properties___returns_correct_dictionary() -> None:
+    value = Scalar(20.0, "watts")
+
+    prop_dict = value.extended_properties
+
+    assert isinstance(prop_dict, ExtendedPropertyDictionary)
+    assert prop_dict.get(UNIT_DESCRIPTION) == "watts"

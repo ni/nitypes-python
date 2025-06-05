@@ -67,6 +67,11 @@ class Scalar(Generic[_ScalarType_co]):
         assert isinstance(value, str)
         return value
 
+    @property
+    def extended_properties(self) -> ExtendedPropertyDictionary:
+        """The extended properties for the scalar."""
+        return self._extended_properties
+
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
         if not isinstance(value, self.__class__):
