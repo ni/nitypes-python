@@ -81,6 +81,7 @@ Class                Smallest Time Increment
 :any:`dt.datetime`   1 microsecond (1e-6 sec)
 :any:`DateTime`      54210 yoctoseconds (5.4e-20 sec)
 :any:`ht.datetime`   1 yoctosecond (1e-24 sec)
+==================   =========================
 
 As a result, :any:`hightime.datetime` can represent the time down to the exact yoctosecond, but
 :any:`DateTime` rounds the yoctosecond field.
