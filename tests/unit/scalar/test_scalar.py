@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import copy
+import pickle
 from typing import Any
 
 import pytest
@@ -177,3 +179,49 @@ def test___scalar_with_units___get_extended_properties___returns_correct_diction
 
     assert isinstance(prop_dict, ExtendedPropertyDictionary)
     assert prop_dict.get(UNIT_DESCRIPTION) == "watts"
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        Scalar(False),
+        Scalar(10),
+        Scalar(20.0),
+        Scalar("value"),
+        Scalar(False, "amps"),
+        Scalar(10, "volts"),
+        Scalar(20.0, "watts"),
+        Scalar("value", ""),
+    ],
+)
+def test___various_values___copy___makes_copy(value: Scalar[_ScalarType_co]) -> None:
+    new_value = copy.copy(value)
+    assert new_value is not value
+    assert new_value == value
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        Scalar(False),
+        Scalar(10),
+        Scalar(20.0),
+        Scalar("value"),
+        Scalar(False, "amps"),
+        Scalar(10, "volts"),
+        Scalar(20.0, "watts"),
+        Scalar("value", ""),
+    ],
+)
+def test___various_values___pickle_unpickle___makes_copy(value: Scalar[_ScalarType_co]) -> None:
+    new_value = pickle.loads(pickle.dumps(value))
+    assert new_value is not value
+    assert new_value == value
+
+
+def test___timedelta___pickle___references_public_modules() -> None:
+    value = Scalar(123)
+    value_bytes = pickle.dumps(value)
+
+    assert b"nitypes.scalar" in value_bytes
+    assert b"nitypes.scalar._scalar" not in value_bytes
