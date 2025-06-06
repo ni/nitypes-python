@@ -219,7 +219,7 @@ def test___various_values___pickle_unpickle___makes_copy(value: Scalar[_ScalarTy
     assert new_value == value
 
 
-def test___timedelta___pickle___references_public_modules() -> None:
+def test___scalar___pickle___references_public_modules() -> None:
     value = Scalar(123)
     value_bytes = pickle.dumps(value)
 
