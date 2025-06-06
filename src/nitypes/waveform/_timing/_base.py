@@ -124,7 +124,7 @@ class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):
         *,
         copy_timestamps: bool = True,
     ) -> None:
-        """Construct a waveform timing object.
+        """Initialize a new waveform timing object.
 
         Args:
             sample_interval_mode: The sample interval mode of the waveform timing.

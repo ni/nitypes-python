@@ -314,7 +314,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> None:
-        """Construct a complex waveform.
+        """Initialize a new complex waveform.
 
         Args:
             sample_count: The number of samples in the waveform.

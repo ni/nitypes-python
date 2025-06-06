@@ -31,7 +31,7 @@ class Scalar(Generic[_ScalarType_co]):
         value: _ScalarType_co,
         units: str = "",
     ) -> None:
-        """Construct a scalar data object.
+        """Initialize a new scalar.
 
         Args:
             value: The scalar data to store in this object.
@@ -90,7 +90,7 @@ class Scalar(Generic[_ScalarType_co]):
         else:
             raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
-    def __ge__(self, value: object) -> bool:
+    def __ge__(self, value: Scalar[_ScalarType_co]) -> bool:
         """Return self >= value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
@@ -102,7 +102,7 @@ class Scalar(Generic[_ScalarType_co]):
         else:
             raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
-    def __lt__(self, value: object) -> bool:
+    def __lt__(self, value: Scalar[_ScalarType_co]) -> bool:
         """Return self < value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
@@ -114,7 +114,7 @@ class Scalar(Generic[_ScalarType_co]):
         else:
             raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
-    def __le__(self, value: object) -> bool:
+    def __le__(self, value: Scalar[_ScalarType_co]) -> bool:
         """Return self <= value."""
         if not isinstance(value, self.__class__):
             return NotImplemented

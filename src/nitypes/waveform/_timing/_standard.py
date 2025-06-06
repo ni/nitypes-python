@@ -75,7 +75,7 @@ class Timing(BaseTiming[dt.datetime, dt.timedelta]):
         *,
         copy_timestamps: bool = True,
     ) -> None:
-        """Construct a waveform timing object.
+        """Initialize a new waveform timing object.
 
         Most applications should use the named constructors instead:
         - Timing.create_with_no_interval

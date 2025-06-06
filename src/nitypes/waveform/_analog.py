@@ -329,7 +329,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> None:
-        """Construct an analog waveform.
+        """Initialize a new analog waveform.
 
         Args:
             sample_count: The number of samples in the analog waveform.

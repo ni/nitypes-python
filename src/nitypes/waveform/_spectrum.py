@@ -349,7 +349,7 @@ class Spectrum(Generic[_TData_co]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         copy_extended_properties: bool = True,
     ) -> None:
-        """Construct a frequency spectrum.
+        """Initialize a new frequency spectrum.
 
         Args:
             sample_count: The number of samples in the spectrum.
