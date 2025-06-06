@@ -231,7 +231,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         timing: Timing | PrecisionTiming | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> None:
-        """Construct a numeric waveform.
+        """Initialize a new numeric waveform.
 
         Args:
             sample_count: The number of samples in the waveform.

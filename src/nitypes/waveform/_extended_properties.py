@@ -22,7 +22,7 @@ class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
     __slots__ = ["_properties"]
 
     def __init__(self, properties: Mapping[str, ExtendedPropertyValue] | None = None, /) -> None:
-        """Construct an ExtendedPropertyDictionary."""
+        """Initialize a new ExtendedPropertyDictionary."""
         self._properties: dict[str, ExtendedPropertyValue] = {}
         if properties is not None:
             self._properties.update(properties)

@@ -74,7 +74,7 @@ class PrecisionTiming(BaseTiming[ht.datetime, ht.timedelta]):
         *,
         copy_timestamps: bool = True,
     ) -> None:
-        """Construct a high-precision waveform timing object.
+        """Initialize a new high-precision waveform timing object.
 
         Most applications should use the named constructors instead:
         - PrecisionTiming.create_with_no_interval

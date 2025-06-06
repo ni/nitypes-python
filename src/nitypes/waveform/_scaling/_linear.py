@@ -17,7 +17,7 @@ class LinearScaleMode(ScaleMode):
     _offset: float
 
     def __init__(self, gain: SupportsFloat, offset: SupportsFloat) -> None:
-        """Construct a scale mode object that scales data linearly.
+        """Initialize a new scale mode object that scales data linearly.
 
         Args:
             gain: The gain of the linear scale.
