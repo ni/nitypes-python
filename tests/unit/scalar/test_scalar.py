@@ -110,6 +110,51 @@ def test___lesser_value___comparison___lesser(
     assert not (left >= right)
 
 
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (Scalar(False), Scalar(10)),
+        (Scalar(False), Scalar(10.0)),
+        (Scalar(0), Scalar(1.0)),
+    ],
+)
+def test___mixed_numeric_types___comparison___lesser(
+    left: Scalar[_ScalarType_co], right: Scalar[_ScalarType_co]
+) -> None:
+    assert left < right
+    assert left <= right
+    assert not (left > right)
+    assert not (left >= right)
+
+
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (Scalar(False), Scalar("value")),
+        (Scalar(10), Scalar("value")),
+        (Scalar(10.0), Scalar("value")),
+    ],
+)
+def test___numeric_and_string___comparison___throws_exception(
+    left: Scalar[_ScalarType_co], right: Scalar[_ScalarType_co]
+) -> None:
+    expected_message = "Comparing Scalar objects of numeric and string types is not permitted"
+
+    with pytest.raises(TypeError) as exc1:
+        _ = left < right
+    with pytest.raises(TypeError) as exc2:
+        _ = left <= right
+    with pytest.raises(TypeError) as exc3:
+        _ = left > right
+    with pytest.raises(TypeError) as exc4:
+        _ = left >= right
+
+    assert exc1.value.args[0].startswith(expected_message)
+    assert exc2.value.args[0].startswith(expected_message)
+    assert exc3.value.args[0].startswith(expected_message)
+    assert exc4.value.args[0].startswith(expected_message)
+
+
 def test___different_units___comparison___throws_exception() -> None:
     left = Scalar(0, "volts")
     right = Scalar(0, "amps")
