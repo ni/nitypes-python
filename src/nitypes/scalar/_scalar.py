@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Generic, Union
+from typing import Any, Generic, Union
 
 from typing_extensions import final, TypeVar
 
@@ -125,6 +125,10 @@ class Scalar(Generic[_ScalarType_co]):
             return self.value <= value.value
         else:
             raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
+
+    def __reduce__(self) -> tuple[Any, ...]:
+        """Return object state for pickling."""
+        return (self.__class__, (self.value, self.units))
 
     def __repr__(self) -> str:
         """Return repr(self)."""
