@@ -19,6 +19,9 @@
   - [Complex Number Conversion](#complex-number-conversion)
 - [Time](#time)
   - [Time Conversion](#time-conversion)
+  - [Binary Time](#binary-time)
+- [Scalar Values](#scalar-values)
+  - [Scalar](#scalar)
 
 # About
 
