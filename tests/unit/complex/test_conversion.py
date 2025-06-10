@@ -105,14 +105,16 @@ def test___complex128_array_to_complex128_array___convert_complex___returns_orig
 
 
 def test___2d_complexint32_array_to_complex128_array___convert_complex___preserves_shape() -> None:
-    value_in = np.array(
+    # As of NumPy 2.3, np.array() can't infer the array shape, but the return type of
+    # np.ndarray.__iter__() is shape-dependent, returning Iterator[_ScalarT] for 1D arrays and
+    # Iterator[NDArray[_ScalarT]] for 2D arrays.
+    value_in: np.ndarray[tuple[int, int], np.dtype[np.void]] = np.array(
         [[(1, 2), (3, -4)], [(-5, 6), (-7, -8)], [(9, 10), (11, 12)]], ComplexInt32DType
     )
 
     value_out = convert_complex(np.complex128, value_in)
 
-    # Use npt.NDArray because np.array() can't infer the array shape when type checking.
-    assert_type(value_out, npt.NDArray[np.complex128])
+    assert_type(value_out, np.ndarray[tuple[int, int], np.dtype[np.complex128]])
     assert isinstance(value_out, np.ndarray) and value_out.shape == (3, 2)
     assert [list(x) for x in value_out] == [
         [1 + 2j, 3 - 4j],
@@ -122,12 +124,16 @@ def test___2d_complexint32_array_to_complex128_array___convert_complex___preserv
 
 
 def test___2d_complex64_array_to_complex128_array___convert_complex___preserves_shape() -> None:
-    value_in = np.array([[1 + 2j, 3 - 4j], [-5 + 6j, -7 - 8j], [9 + 10j, 11 + 12j]], np.complex64)
+    # As of NumPy 2.3, np.array() can't infer the array shape, but the return type of
+    # np.ndarray.__iter__() is shape-dependent, returning Iterator[_ScalarT] for 1D arrays and
+    # Iterator[NDArray[_ScalarT]] for 2D arrays.
+    value_in: np.ndarray[tuple[int, int], np.dtype[np.complex64]] = np.array(
+        [[1 + 2j, 3 - 4j], [-5 + 6j, -7 - 8j], [9 + 10j, 11 + 12j]], np.complex64
+    )
 
     value_out = convert_complex(np.complex128, value_in)
 
-    # Use npt.NDArray because np.array() can't infer the array shape when type checking.
-    assert_type(value_out, npt.NDArray[np.complex128])
+    assert_type(value_out, np.ndarray[tuple[int, int], np.dtype[np.complex128]])
     assert isinstance(value_out, np.ndarray) and value_out.shape == (3, 2)
     assert [list(x) for x in value_out] == [
         [1 + 2j, 3 - 4j],
