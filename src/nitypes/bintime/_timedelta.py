@@ -272,7 +272,7 @@ class TimeDelta:
             return self + self.__class__(value)
         elif isinstance(value, ht.datetime):
             return self._to_hightime_timedelta() + value
-        # Handle dt.datetime separately in order to round to microseconds, not yoctoseconds.
+        # Handle dt.datetime separately to round to the nearest microsecond instead of truncating.
         elif isinstance(value, dt.datetime):
             return self._to_datetime_timedelta() + value
         else:
@@ -280,10 +280,7 @@ class TimeDelta:
 
     __radd__ = __add__
 
-    # __sub__ doesn't support _TOtherDateTime because dt.datetime.__sub__ is asymmetrical:
-    # - dt.datetime.now() - dt.timedelta(1) is supported
-    # - dt.timedelta(1) - dt.datetime.now() is not supported
-    # - dt.datetime.__rsub__ is not supported
+    # __sub__ doesn't support _TOtherDateTime because it doesn't make sense to negate a datetime.
     def __sub__(self, value: TimeDelta | _OtherTimeDelta, /) -> TimeDelta:
         """Return self-value."""
         if isinstance(value, TimeDelta):
@@ -293,9 +290,8 @@ class TimeDelta:
         else:
             return NotImplemented
 
-    # __rsub__ supports _TOtherDateTime in order to allow subtracting a binary DateTime from a
-    # dt/ht.datetime. This is the magic of NotImplemented and reversed binary operators: if the left
-    # operand doesn't support the binary operator, maybe the right operand will.
+    # __rsub__ supports _TOtherDateTime in order to support subtracting a bintime.TimeDelta from a
+    # datetime.datetime or hightime.datetime.
     @overload
     def __rsub__(  # noqa: D105 - missing docstring in magic method
         self, value: TimeDelta | _OtherTimeDelta, /
@@ -323,7 +319,7 @@ class TimeDelta:
             return self.__class__(value) - self
         elif isinstance(value, ht.datetime):
             return value - self._to_hightime_timedelta()
-        # Handle dt.datetime separately in order to round to microseconds, not yoctoseconds.
+        # Handle dt.datetime separately to round to the nearest microsecond instead of truncating.
         elif isinstance(value, dt.datetime):
             return value - self._to_datetime_timedelta()
         else:
