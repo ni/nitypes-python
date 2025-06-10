@@ -5,6 +5,9 @@ from collections.abc import Iterable, Sequence
 from enum import Enum
 from typing import TYPE_CHECKING, TypeVar
 
+import hightime as ht
+
+import nitypes.bintime as bt
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform._exceptions import (
@@ -17,8 +20,8 @@ from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
 if TYPE_CHECKING:
     from nitypes.waveform._timing._base import BaseTiming  # circular import
 
-_TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
-_TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
+_TDateTime = TypeVar("_TDateTime", bt.DateTime, dt.datetime, ht.datetime)
+_TTimeDelta = TypeVar("_TTimeDelta", bt.TimeDelta, dt.timedelta, ht.timedelta)
 
 
 class _Direction(Enum):

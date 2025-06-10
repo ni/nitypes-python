@@ -5,6 +5,9 @@ import warnings
 from collections.abc import Generator, Iterable, Sequence
 from typing import TYPE_CHECKING, TypeVar
 
+import hightime as ht
+
+import nitypes.bintime as bt
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import add_note, invalid_arg_type
 from nitypes.waveform._exceptions import (
@@ -18,8 +21,8 @@ from nitypes.waveform._warnings import sample_interval_mismatch
 if TYPE_CHECKING:
     from nitypes.waveform._timing._base import BaseTiming  # circular import
 
-_TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
-_TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
+_TDateTime = TypeVar("_TDateTime", bt.DateTime, dt.datetime, ht.datetime)
+_TTimeDelta = TypeVar("_TTimeDelta", bt.TimeDelta, dt.timedelta, ht.timedelta)
 
 
 class RegularSampleIntervalStrategy(SampleIntervalStrategy[_TDateTime, _TTimeDelta]):

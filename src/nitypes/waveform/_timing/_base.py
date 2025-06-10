@@ -4,10 +4,12 @@ import datetime as dt
 import operator
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
-from typing import Any, Generic, SupportsIndex, TypeVar
+from typing import Any, Generic, SupportsIndex, TypeVar, Union
 
-from typing_extensions import Self
+import hightime as ht
+from typing_extensions import Self, TypeAlias
 
+import nitypes.bintime as bt
 from nitypes._exceptions import add_note
 from nitypes.waveform._timing._sample_interval import (
     SampleIntervalMode,
@@ -15,8 +17,11 @@ from nitypes.waveform._timing._sample_interval import (
     create_sample_interval_strategy,
 )
 
-_TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
-_TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
+_AnyDateTime: TypeAlias = Union[bt.DateTime, dt.datetime, ht.datetime]
+_TDateTime = TypeVar("_TDateTime", bt.DateTime, dt.datetime, ht.datetime)
+
+_AnyTimeDelta: TypeAlias = Union[bt.TimeDelta, dt.timedelta, ht.timedelta]
+_TTimeDelta = TypeVar("_TTimeDelta", bt.TimeDelta, dt.timedelta, ht.timedelta)
 
 
 class BaseTiming(ABC, Generic[_TDateTime, _TTimeDelta]):

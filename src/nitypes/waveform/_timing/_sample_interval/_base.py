@@ -3,16 +3,18 @@ from __future__ import annotations
 import datetime as dt
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Sequence
-from typing import Generic, TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic, TypeVar
 
+import hightime as ht
+
+import nitypes.bintime as bt
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
-
 
 if TYPE_CHECKING:
     from nitypes.waveform._timing._base import BaseTiming  # circular import
 
-_TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
-_TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
+_TDateTime = TypeVar("_TDateTime", bt.DateTime, dt.datetime, ht.datetime)
+_TTimeDelta = TypeVar("_TTimeDelta", bt.TimeDelta, dt.timedelta, ht.timedelta)
 
 
 class SampleIntervalStrategy(ABC, Generic[_TDateTime, _TTimeDelta]):
