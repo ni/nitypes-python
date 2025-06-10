@@ -37,6 +37,8 @@ _REPR_TICKS = False
 _OtherTimeDelta: TypeAlias = Union[dt.timedelta, ht.timedelta]
 _OTHER_TIMEDELTA_TUPLE = (dt.timedelta, ht.timedelta)
 
+_OtherDateTime: TypeAlias = Union[dt.datetime, ht.datetime]
+
 
 @final
 class TimeDelta:
@@ -245,17 +247,43 @@ class TimeDelta:
         """Return abs(self)."""
         return -self if self._ticks < 0 else self
 
-    def __add__(self, value: TimeDelta | _OtherTimeDelta, /) -> TimeDelta:
+    @overload
+    def __add__(  # noqa: D105 - missing docstring in magic method
+        self, value: TimeDelta | _OtherTimeDelta, /
+    ) -> TimeDelta: ...
+
+    @overload
+    def __add__(  # noqa: D105 - missing docstring in magic method
+        self, value: ht.datetime, /
+    ) -> ht.datetime: ...
+
+    @overload
+    def __add__(  # noqa: D105 - missing docstring in magic method
+        self, value: dt.datetime, /
+    ) -> dt.datetime: ...
+
+    def __add__(
+        self, value: TimeDelta | _OtherTimeDelta | _OtherDateTime, /
+    ) -> TimeDelta | _OtherDateTime:
         """Return self+value."""
         if isinstance(value, TimeDelta):
             return self.__class__.from_ticks(self._ticks + value._ticks)
         elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self + self.__class__(value)
+        elif isinstance(value, ht.datetime):
+            return self._to_hightime_timedelta() + value
+        # Handle dt.datetime separately in order to round to microseconds, not yoctoseconds.
+        elif isinstance(value, dt.datetime):
+            return self._to_datetime_timedelta() + value
         else:
             return NotImplemented
 
     __radd__ = __add__
 
+    # __sub__ doesn't support _TOtherDateTime because dt.datetime.__sub__ is asymmetrical:
+    # - dt.datetime.now() - dt.timedelta(1) is supported
+    # - dt.timedelta(1) - dt.datetime.now() is not supported
+    # - dt.datetime.__rsub__ is not supported
     def __sub__(self, value: TimeDelta | _OtherTimeDelta, /) -> TimeDelta:
         """Return self-value."""
         if isinstance(value, TimeDelta):
@@ -265,12 +293,39 @@ class TimeDelta:
         else:
             return NotImplemented
 
-    def __rsub__(self, value: TimeDelta | _OtherTimeDelta, /) -> TimeDelta:
+    # __rsub__ supports _TOtherDateTime in order to allow subtracting a binary DateTime from a
+    # dt/ht.datetime. This is the magic of NotImplemented and reversed binary operators: if the left
+    # operand doesn't support the binary operator, maybe the right operand will.
+    @overload
+    def __rsub__(  # noqa: D105 - missing docstring in magic method
+        self, value: TimeDelta | _OtherTimeDelta, /
+    ) -> TimeDelta: ...
+
+    @overload
+    def __rsub__(  # noqa: D105 - missing docstring in magic method
+        self, value: ht.datetime, /
+    ) -> ht.datetime: ...
+
+    @overload
+    def __rsub__(  # noqa: D105 - missing docstring in magic method
+        self, value: dt.datetime, /
+    ) -> dt.datetime: ...
+
+    # AB#3153350 - nitypes.bintime.DateTime signatures of __sub__ and __rsub__ are unsafely
+    # overlapping
+    def __rsub__(  # type: ignore[misc]
+        self, value: TimeDelta | _OtherTimeDelta | _OtherDateTime, /
+    ) -> TimeDelta | _OtherDateTime:
         """Return value-self."""
         if isinstance(value, TimeDelta):
             return self.__class__.from_ticks(value._ticks - self._ticks)
         elif isinstance(value, _OTHER_TIMEDELTA_TUPLE):
             return self.__class__(value) - self
+        elif isinstance(value, ht.datetime):
+            return value - self._to_hightime_timedelta()
+        # Handle dt.datetime separately in order to round to microseconds, not yoctoseconds.
+        elif isinstance(value, dt.datetime):
+            return value - self._to_datetime_timedelta()
         else:
             return NotImplemented
 

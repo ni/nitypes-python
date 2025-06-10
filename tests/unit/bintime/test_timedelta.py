@@ -14,6 +14,9 @@ from typing_extensions import assert_type
 from nitypes.bintime import TimeDelta
 from nitypes.bintime._timedelta import _INT128_MAX, _INT128_MIN
 
+_BT_EPSILON = ht.timedelta(yoctoseconds=54210)
+_DT_EPSILON = ht.timedelta(microseconds=1)
+
 
 #############
 # Constructor
@@ -420,6 +423,27 @@ def test___dt_timedelta___add___returns_sum(
 @pytest.mark.parametrize(
     "left, right, expected",
     [
+        (
+            TimeDelta(Decimal("1e15")),
+            dt.timedelta(microseconds=314159),
+            TimeDelta(Decimal("1_000_000_000_000_000.314_159")),
+        ),
+    ],
+)
+def test___dt_timedelta_inexact_result___add___returns_approximate_sum(
+    left: TimeDelta, right: dt.timedelta, expected: TimeDelta
+) -> None:
+    assert (left + right).precision_total_seconds() == pytest.approx(
+        expected.precision_total_seconds()
+    )
+    assert (right + left).precision_total_seconds() == pytest.approx(
+        expected.precision_total_seconds()
+    )
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
         (TimeDelta(0), ht.timedelta(seconds=0), TimeDelta(0)),
         (TimeDelta(2), ht.timedelta(seconds=2), TimeDelta(4)),
         (TimeDelta(2), ht.timedelta(seconds=-2), TimeDelta(0)),
@@ -452,27 +476,6 @@ def test___ht_timedelta___add___returns_sum(
     [
         (
             TimeDelta(Decimal("1e15")),
-            dt.timedelta(microseconds=314159),
-            TimeDelta(Decimal("1_000_000_000_000_000.314_159")),
-        ),
-    ],
-)
-def test___dt_timedelta_inexact_result___add___returns_approximate_sum(
-    left: TimeDelta, right: dt.timedelta, expected: TimeDelta
-) -> None:
-    assert (left + right).precision_total_seconds() == pytest.approx(
-        expected.precision_total_seconds()
-    )
-    assert (right + left).precision_total_seconds() == pytest.approx(
-        expected.precision_total_seconds()
-    )
-
-
-@pytest.mark.parametrize(
-    "left, right, expected",
-    [
-        (
-            TimeDelta(Decimal("1e15")),
             ht.timedelta(femtoseconds=314159),
             TimeDelta(Decimal("1_000_000_000_000_000.000_000_000_314_159")),
         ),
@@ -487,6 +490,69 @@ def test___ht_timedelta_inexact_result___add___returns_approximate_sum(
     assert (right + left).precision_total_seconds() == pytest.approx(
         expected.precision_total_seconds()
     )
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (dt.datetime(2025, 1, 1), TimeDelta(0), dt.datetime(2025, 1, 1)),
+        (dt.datetime(2025, 1, 1), TimeDelta(2), dt.datetime(2025, 1, 1, 0, 0, 2)),
+        (dt.datetime(2025, 1, 1), TimeDelta(-2), dt.datetime(2024, 12, 31, 23, 59, 58)),
+    ],
+)
+def test___dt_datetime___add___returns_sum(
+    left: dt.datetime, right: TimeDelta, expected: dt.datetime
+) -> None:
+    assert left + right == expected
+    assert right + left == expected
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (dt.datetime(2025, 1, 1), TimeDelta(1e-6), dt.datetime(2025, 1, 1, 0, 0, 0, 1)),
+        (dt.datetime(2025, 1, 1), TimeDelta(-1e-6), dt.datetime(2024, 12, 31, 23, 59, 59, 999999)),
+    ],
+)
+def test___dt_datetime_inexact_result___add___returns_approximate_sum(
+    left: dt.datetime, right: TimeDelta, expected: dt.datetime
+) -> None:
+    assert abs((left + right) - expected) <= _DT_EPSILON
+    assert abs((right + left) - expected) <= _DT_EPSILON
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (ht.datetime(2025, 1, 1), TimeDelta(0), ht.datetime(2025, 1, 1)),
+        (ht.datetime(2025, 1, 1), TimeDelta(2), ht.datetime(2025, 1, 1, 0, 0, 2)),
+        (ht.datetime(2025, 1, 1), TimeDelta(-2), ht.datetime(2024, 12, 31, 23, 59, 58)),
+    ],
+)
+def test___ht_datetime___add___returns_sum(
+    left: ht.datetime, right: TimeDelta, expected: ht.datetime
+) -> None:
+    assert left + right == expected
+    assert right + left == expected
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (ht.datetime(2025, 1, 1), TimeDelta(1e-6), ht.datetime(2025, 1, 1, 0, 0, 0, 1)),
+        (ht.datetime(2025, 1, 1), TimeDelta(-1e-6), ht.datetime(2024, 12, 31, 23, 59, 59, 999999)),
+        (
+            ht.datetime(2025, 1, 1),
+            TimeDelta(Decimal("1e-15")),
+            ht.datetime(2025, 1, 1, 0, 0, 0, 0, 1),
+        ),
+    ],
+)
+def test___ht_datetime_inexact_result___add___returns_approximate_sum(
+    left: ht.datetime, right: TimeDelta, expected: ht.datetime
+) -> None:
+    assert abs((left + right) - expected) <= _BT_EPSILON
+    assert abs((right + left) - expected) <= _BT_EPSILON
 
 
 @pytest.mark.parametrize(
@@ -546,6 +612,27 @@ def test___dt_timedelta___sub___returns_difference(
 @pytest.mark.parametrize(
     "left, right, expected",
     [
+        (
+            TimeDelta(Decimal("1e15")),
+            dt.timedelta(microseconds=314159),
+            TimeDelta(Decimal("999_999_999_999_999.685_841")),
+        ),
+    ],
+)
+def test___dt_timedelta_inexact_result___sub___returns_approximate_difference(
+    left: TimeDelta, right: dt.timedelta, expected: TimeDelta
+) -> None:
+    assert (left - right).precision_total_seconds() == pytest.approx(
+        expected.precision_total_seconds()
+    )
+    assert (right - left).precision_total_seconds() == pytest.approx(
+        -expected.precision_total_seconds()
+    )
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
         (TimeDelta(0), ht.timedelta(seconds=0), TimeDelta(0)),
         (TimeDelta(2), ht.timedelta(seconds=2), TimeDelta(0)),
         (TimeDelta(2), ht.timedelta(seconds=-2), TimeDelta(4)),
@@ -578,27 +665,6 @@ def test___ht_timedelta___sub___returns_difference(
     [
         (
             TimeDelta(Decimal("1e15")),
-            dt.timedelta(microseconds=314159),
-            TimeDelta(Decimal("999_999_999_999_999.685_841")),
-        ),
-    ],
-)
-def test___dt_timedelta_inexact_result___sub___returns_approximate_difference(
-    left: TimeDelta, right: dt.timedelta, expected: TimeDelta
-) -> None:
-    assert (left - right).precision_total_seconds() == pytest.approx(
-        expected.precision_total_seconds()
-    )
-    assert (right - left).precision_total_seconds() == pytest.approx(
-        -expected.precision_total_seconds()
-    )
-
-
-@pytest.mark.parametrize(
-    "left, right, expected",
-    [
-        (
-            TimeDelta(Decimal("1e15")),
             ht.timedelta(femtoseconds=314159),
             TimeDelta(Decimal("999_999_999_999_999.999_999_999_685_800")),
         ),
@@ -613,6 +679,69 @@ def test___ht_timedelta_inexact_result___sub___returns_approximate_difference(
     assert (right - left).precision_total_seconds() == pytest.approx(
         -expected.precision_total_seconds()
     )
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (dt.datetime(2025, 1, 1), TimeDelta(0), dt.datetime(2025, 1, 1)),
+        (dt.datetime(2025, 1, 1), TimeDelta(2), dt.datetime(2024, 12, 31, 23, 59, 58)),
+        (dt.datetime(2025, 1, 1), TimeDelta(-2), dt.datetime(2025, 1, 1, 0, 0, 2)),
+    ],
+)
+def test___dt_datetime___sub___returns_sum(
+    left: dt.datetime, right: TimeDelta, expected: dt.datetime
+) -> None:
+    assert left - right == expected
+    # __sub__(timedelta, datetime) is not supported.
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (dt.datetime(2025, 1, 1), TimeDelta(1e-6), dt.datetime(2024, 12, 31, 23, 59, 59, 999999)),
+        (dt.datetime(2025, 1, 1), TimeDelta(-1e-6), dt.datetime(2025, 1, 1, 0, 0, 0, 1)),
+    ],
+)
+def test___dt_datetime_inexact_result___sub___returns_approximate_sum(
+    left: dt.datetime, right: TimeDelta, expected: dt.datetime
+) -> None:
+    assert abs((left - right) - expected) <= _DT_EPSILON
+    # __sub__(timedelta, datetime) is not supported.
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (ht.datetime(2025, 1, 1), TimeDelta(0), ht.datetime(2025, 1, 1)),
+        (ht.datetime(2025, 1, 1), TimeDelta(2), ht.datetime(2024, 12, 31, 23, 59, 58)),
+        (ht.datetime(2025, 1, 1), TimeDelta(-2), ht.datetime(2025, 1, 1, 0, 0, 2)),
+    ],
+)
+def test___ht_datetime___sub___returns_sum(
+    left: ht.datetime, right: TimeDelta, expected: ht.datetime
+) -> None:
+    assert left - right == expected
+    # __sub__(timedelta, datetime) is not supported.
+
+
+@pytest.mark.parametrize(
+    "left, right, expected",
+    [
+        (ht.datetime(2025, 1, 1), TimeDelta(1e-6), ht.datetime(2024, 12, 31, 23, 59, 59, 999999)),
+        (ht.datetime(2025, 1, 1), TimeDelta(-1e-6), ht.datetime(2025, 1, 1, 0, 0, 0, 1)),
+        (
+            ht.datetime(2025, 1, 1),
+            TimeDelta(Decimal("1e-15")),
+            ht.datetime(2025, 1, 1) - ht.timedelta(femtoseconds=1),
+        ),
+    ],
+)
+def test___ht_datetime_inexact_result___sub___returns_approximate_sum(
+    left: ht.datetime, right: TimeDelta, expected: ht.datetime
+) -> None:
+    assert abs((left - right) - expected) <= _BT_EPSILON
+    # __sub__(timedelta, datetime) is not supported.
 
 
 @pytest.mark.parametrize(
