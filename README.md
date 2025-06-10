@@ -19,6 +19,9 @@
   - [Complex Number Conversion](#complex-number-conversion)
 - [Time](#time)
   - [Time Conversion](#time-conversion)
+  - [Binary Time](#binary-time)
+- [Scalar Values](#scalar-values)
+  - [Scalar](#scalar)
 
 # About
 
@@ -100,7 +103,25 @@ in the API Reference.
 ## Time Conversion
 
 You can use the `nitypes.time.convert_datetime()` and `nitypes.time.convert_timedelta()` functions
-to convert time values between the standard `datetime` library and the high-precision `hightime`
-library.For more details, see [Time >>
+to convert time values between the standard `datetime` library, the high-precision `hightime`
+library, and `bintime`. For more details, see [Time >>
 Conversion](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/time/index.html#conversion) in
 the API Reference.
+
+## Binary Time
+
+The `nitypes.bintime` module implements the NI Binary Time Format (NI-BTF), a high-resolution time
+format used by NI software. An NI-BTF time value is a 128-bit fixed point number consisting of a
+64-bit whole seconds part and a 64-bit fractional seconds part. For more details, see [NI Binary
+Time Format](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/bintime/index.html#ni-binary-time-format)
+in the API Reference.
+
+# Scalar Values
+
+## Scalar
+
+`nitypes.scalar.Scalar` is a data type that represents a single scalar value with units
+information. Valid types for the scalar value are `bool`, `int`, `float`, and `str`. For more
+details, see
+[Scalar](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/scalar/index.html#scalar) in the
+API Reference.
