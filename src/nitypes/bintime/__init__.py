@@ -130,16 +130,16 @@ nitypes.bintime.TimeDelta(Decimal('100.125'))
 :any:`TimeDelta` has the same resolution and rounding behavior as :any:`DateTime`.
 
 >>> TimeDelta(Decimal("100.01234567890123456789"))
-nitypes.bintime.TimeDelta(Decimal('100.0123456789012345678887769273579522177897160872817039489746094'))
+nitypes.bintime.TimeDelta(Decimal('100.012345678901234567889'))
 
 Unlike other ``timedelta`` objects, you cannot construct a :any:`TimeDelta` from separate weeks,
 days, hours, etc. If you want to do that, construct a :any:`datetime.timedelta` or
 :any:`hightime.timedelta` and then use it to construct a :any:`TimeDelta`.
 
 >>> TimeDelta(datetime.timedelta(days=1, microseconds=1))
-nitypes.bintime.TimeDelta(Decimal('86400.00000099999999999997009683672111179930652724578976631164551'))
+nitypes.bintime.TimeDelta(Decimal('86400.0000010000000000000'))
 >>> TimeDelta(hightime.timedelta(days=1, femtoseconds=1))
-nitypes.bintime.TimeDelta(Decimal('86400.00000000000000100001387379200501470677409088239073753356934'))
+nitypes.bintime.TimeDelta(Decimal('86400.0000000000000010000'))
 
 Math Operations
 ---------------

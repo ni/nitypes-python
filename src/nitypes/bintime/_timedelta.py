@@ -469,20 +469,29 @@ class TimeDelta:
         seconds = self.seconds
         minutes, seconds = divmod(seconds, 60)
         hours, minutes = divmod(minutes, 60)
-        # Display 18 digits of fractional seconds, rounded to the nearest digit.
+        # Display up to 18 digits of fractional seconds, rounded to the nearest digit.
         fractional_seconds = 10**18 * (self._ticks & _FRACTIONAL_SECONDS_MASK)
         fractional_seconds = (fractional_seconds + _TICKS_PER_SECOND // 2) // _TICKS_PER_SECOND
         s = f"{days} day, " if abs(days) == 1 else f"{days} days, " if days else ""
-        s += f"{hours}:{minutes:02}:{seconds:02}.{fractional_seconds:018}"
+        s += f"{hours}:{minutes:02}:{seconds:02}"
+        if fractional_seconds != 0:
+            s += f".{fractional_seconds:018}".rstrip("0")  # strip trailing zeroes
         return s
 
     def __repr__(self) -> str:
         """Return repr(self)."""
         if _REPR_TICKS:
             return (
-                f"{self.__class__.__module__}.{self.__class__.__name__}.from_ticks({self._ticks})"
+                f"{self.__class__.__module__}.{self.__class__.__name__}"
+                f".from_ticks({self._ticks})"
             )
-        return f"{self.__class__.__module__}.{self.__class__.__name__}({self.precision_total_seconds()!r})"
+        # Display up to 24 decimal digits (yoctoseconds), like hightime does. The smallest time
+        # increment representable with NI-BTF is 54210 yoctoseconds, so if all 24 decimal digits are
+        # displayed, the last few are due to rounding error.
+        return (
+            f"{self.__class__.__module__}.{self.__class__.__name__}"
+            f"(Decimal('{self.precision_total_seconds():.024}'))"
+        )
 
 
 TimeDelta.max = TimeDelta.from_ticks(_INT128_MAX)
