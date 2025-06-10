@@ -103,8 +103,8 @@ in the API Reference.
 ## Time Conversion
 
 You can use the `nitypes.time.convert_datetime()` and `nitypes.time.convert_timedelta()` functions
-to convert time values between the standard `datetime` library and the high-precision `hightime`
-library. For more details, see [Time >>
+to convert time values between the standard `datetime` library, the high-precision `hightime`
+library, and `bintime`. For more details, see [Time >>
 Conversion](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/time/index.html#conversion) in
 the API Reference.
 
