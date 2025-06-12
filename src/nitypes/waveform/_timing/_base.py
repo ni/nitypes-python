@@ -3,11 +3,14 @@ from __future__ import annotations
 import datetime as dt
 import operator
 from collections.abc import Iterable, Sequence
-from typing import Any, ClassVar, Generic, SupportsIndex, cast, final
+from typing import Any, ClassVar, Generic, SupportsIndex, TypeVar, cast, final
 
+import hightime as ht
 from typing_extensions import Self
 
+import nitypes.bintime as bt
 from nitypes._exceptions import add_note
+from nitypes.time import convert_datetime, convert_timedelta
 from nitypes.waveform._timing._sample_interval import (
     SampleIntervalMode,
     SampleIntervalStrategy,
@@ -17,6 +20,20 @@ from nitypes.waveform._timing._types import (
     _TSampleInterval_co,
     _TTimeOffset_co,
     _TTimestamp_co,
+)
+
+_TOtherTimestamp = TypeVar("_TOtherTimestamp", bt.DateTime, dt.datetime, ht.datetime)
+_TOtherTimeOffset = TypeVar(
+    "_TOtherTimeOffset",
+    bt.TimeDelta,
+    dt.timedelta,
+    ht.timedelta,
+)
+_TOtherSampleInterval = TypeVar(
+    "_TOtherSampleInterval",
+    bt.TimeDelta,
+    dt.timedelta,
+    ht.timedelta,
 )
 
 
@@ -216,6 +233,60 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
             raise ValueError("The count must be a non-negative integer.")
 
         return self._sample_interval_strategy.get_timestamps(self, start_index, count)
+
+    def to_bintime(self) -> Timing[bt.DateTime, bt.TimeDelta, bt.TimeDelta]:
+        """Convert the timing information to use :any:`nitypes.bintime`."""
+        return self._convert(bt.DateTime, bt.TimeDelta, bt.TimeDelta)
+
+    def to_datetime(self) -> Timing[dt.datetime, dt.timedelta, dt.timedelta]:
+        """Convert the timing information to use :any:`datetime`."""
+        return self._convert(dt.datetime, dt.timedelta, dt.timedelta)
+
+    def to_hightime(self) -> Timing[ht.datetime, ht.timedelta, ht.timedelta]:
+        """Convert the timing information to use :any:`hightime`."""
+        return self._convert(ht.datetime, ht.timedelta, ht.timedelta)
+
+    # Note that this uses the non-covariant type variables, which are distinct from the covariant
+    # ones.
+    def _convert(
+        self,
+        timestamp_type: type[_TOtherTimestamp],
+        time_offset_type: type[_TOtherTimeOffset],
+        sample_interval_type: type[_TOtherSampleInterval],
+    ) -> Timing[_TOtherTimestamp, _TOtherTimeOffset, _TOtherSampleInterval]:
+        if (
+            isinstance(self._timestamp, (timestamp_type, type(None)))
+            and isinstance(self._time_offset, (time_offset_type, type(None)))
+            and isinstance(self._sample_interval, (sample_interval_type, type(None)))
+            and (
+                self._timestamps is None
+                or all(isinstance(ts, timestamp_type) for ts in self._timestamps)
+            )
+        ):
+            # Without a cast, mypy displays a [return-value] error for every possible combination of
+            # type constraints. With a cast, mypy displays a [redundant-cast] error instead, but it
+            # is clearly not redundant.
+            return cast(Timing[_TOtherTimestamp, _TOtherTimeOffset, _TOtherSampleInterval], self)  # type: ignore[redundant-cast]
+
+        return Timing(
+            self._sample_interval_mode,
+            None if self._timestamp is None else convert_datetime(timestamp_type, self._timestamp),
+            (
+                None
+                if self._time_offset is None
+                else convert_timedelta(time_offset_type, self._time_offset)
+            ),
+            (
+                None
+                if self._sample_interval is None
+                else convert_timedelta(sample_interval_type, self._sample_interval)
+            ),
+            (
+                None
+                if self._timestamps is None
+                else [convert_datetime(timestamp_type, ts) for ts in self._timestamps]
+            ),
+        )
 
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
