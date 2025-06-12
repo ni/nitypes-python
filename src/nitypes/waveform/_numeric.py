@@ -5,12 +5,12 @@ import sys
 import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
-from typing import Any, Generic, SupportsIndex, Union, cast, overload
+from typing import Any, Generic, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self, TypeAlias, TypeVar
+from typing_extensions import Self, TypeVar
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
@@ -30,7 +30,7 @@ from nitypes.waveform._extended_properties import (
     ExtendedPropertyValue,
 )
 from nitypes.waveform._scaling import NO_SCALING, ScaleMode
-from nitypes.waveform._timing import BaseTiming, PrecisionTiming, Timing, convert_timing
+from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 from nitypes.waveform._warnings import scale_mode_mismatch
 
 if sys.version_info < (3, 10):
@@ -46,9 +46,6 @@ _TScaled_co = TypeVar("_TScaled_co", bound=np.generic, covariant=True)
 # _TOtherScaled is for the get_scaled_data() method, which supports both single and
 # double precision.
 _TOtherScaled = TypeVar("_TOtherScaled", bound=np.generic)
-
-_AnyTiming: TypeAlias = Union[BaseTiming[Any, Any], Timing, PrecisionTiming]
-_TTiming = TypeVar("_TTiming", bound=BaseTiming[Any, Any])
 
 
 # Note about NumPy type hints:
@@ -100,7 +97,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing | PrecisionTiming | None = None,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> Self:
         """Construct a waveform from a one-dimensional array or sequence.
@@ -151,7 +148,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing | PrecisionTiming | None = None,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> list[Self]:
         """Construct a list of waveforms from a two-dimensional array or nested sequence.
@@ -205,7 +202,6 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         "_sample_count",
         "_extended_properties",
         "_timing",
-        "_converted_timing_cache",
         "_scale_mode",
         "__weakref__",
     ]
@@ -214,8 +210,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
     _start_index: int
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
-    _timing: BaseTiming[Any, Any]
-    _converted_timing_cache: dict[type[_AnyTiming], _AnyTiming]
+    _timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]
     _scale_mode: ScaleMode
 
     def __init__(
@@ -228,7 +223,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         capacity: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         copy_extended_properties: bool = True,
-        timing: Timing | PrecisionTiming | None = None,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> None:
         """Initialize a new numeric waveform.
@@ -276,7 +271,6 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         if timing is None:
             timing = Timing.empty
         self._timing = timing
-        self._converted_timing_cache = {}
 
         if scale_mode is None:
             scale_mode = NO_SCALING
@@ -512,69 +506,28 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
             raise invalid_arg_type("unit description", "str", value)
         self._extended_properties[UNIT_DESCRIPTION] = value
 
-    def _get_timing(self, requested_type: type[_TTiming]) -> _TTiming:
-        if isinstance(self._timing, requested_type):
-            return self._timing
-        value = cast(_TTiming, self._converted_timing_cache.get(requested_type))
-        if value is None:
-            value = convert_timing(requested_type, self._timing)
-            self._converted_timing_cache[requested_type] = value
-        return value
-
-    def _set_timing(self, value: _AnyTiming) -> None:
+    def _set_timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
         if self._timing is not value:
             self._timing = value
-            self._converted_timing_cache.clear()
 
-    def _validate_timing(self, value: _AnyTiming) -> None:
+    def _validate_timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
         if value._timestamps is not None and len(value._timestamps) != self._sample_count:
             raise irregular_timestamp_count_mismatch(
                 len(value._timestamps), "number of samples in the waveform", self._sample_count
             )
 
     @property
-    def timing(self) -> Timing:
+    def timing(self) -> Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]:
         """The timing information of the waveform.
 
         The default value is Timing.empty.
         """
-        return self._get_timing(Timing)
+        return self._timing
 
     @timing.setter
-    def timing(self, value: Timing) -> None:
+    def timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
         if not isinstance(value, Timing):
             raise invalid_arg_type("timing information", "Timing object", value)
-        self._validate_timing(value)
-        self._set_timing(value)
-
-    @property
-    def is_precision_timing_initialized(self) -> bool:
-        """Indicates whether the waveform's timing information was set using precision timing."""
-        return isinstance(self._timing, PrecisionTiming)
-
-    @property
-    def precision_timing(self) -> PrecisionTiming:
-        """The precision timing information of the waveform.
-
-        The default value is PrecisionTiming.empty.
-
-        Use :any:`precision_timing` instead of :any:`timing` to obtain timing
-        information with higher precision than :any:`timing`. If the timing information is
-        set using :any:`precision_timing`, then this property returns timing information
-        with up to yoctosecond precision. If the timing information is set using
-        :any:`timing`, then the timing information returned has up to microsecond
-        precision.
-
-        Accessing this property can potentially decrease performance if the timing information is
-        set using :any:`timing`. Use :any:`is_precision_timing_initialized` to
-        determine if :any:`precision_timing` has been initialized.
-        """
-        return self._get_timing(PrecisionTiming)
-
-    @precision_timing.setter
-    def precision_timing(self, value: PrecisionTiming) -> None:
-        if not isinstance(value, PrecisionTiming):
-            raise invalid_arg_type("precision timing information", "PrecisionTiming object", value)
         self._validate_timing(value)
         self._set_timing(value)
 
@@ -793,7 +746,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
             args.append(f"raw_data={self.raw_data!r}")
         if self._extended_properties:
             args.append(f"extended_properties={self._extended_properties._properties!r}")
-        if self._timing is not Timing.empty and self._timing is not PrecisionTiming.empty:
+        if self._timing is not Timing.empty:
             args.append(f"timing={self._timing!r}")
         if self._scale_mode is not NO_SCALING:
             args.append(f"scale_mode={self._scale_mode}")

@@ -16,12 +16,12 @@ import pytest
 from packaging.version import Version
 from typing_extensions import assert_type
 
+import nitypes.bintime as bt
 from nitypes.waveform import (
     NO_SCALING,
     AnalogWaveform,
     LinearScaleMode,
     NoneScaleMode,
-    PrecisionTiming,
     SampleIntervalMode,
     ScaleMode,
     ScalingMismatchWarning,
@@ -944,75 +944,61 @@ def test___waveform___take_weak_ref___references_waveform() -> None:
 def test___waveform___has_empty_timing() -> None:
     waveform = AnalogWaveform()
 
-    assert_type(waveform.timing, Timing)
     assert waveform.timing is Timing.empty
-    assert_type(waveform.precision_timing, PrecisionTiming)
-    assert waveform.precision_timing is PrecisionTiming.empty
 
 
-def test___waveform_with_timing___get_precision_timing___converts_timing() -> None:
-    waveform = AnalogWaveform()
-    waveform.timing = Timing.create_with_regular_interval(
-        dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
+def test___bintime___waveform_with_timing___static_type_erased() -> None:
+    sample_interval = bt.TimeDelta(1e-3)
+    timestamp = bt.DateTime.now(dt.timezone.utc)
+    time_offset = bt.TimeDelta(1e-6)
+    waveform = AnalogWaveform(
+        timing=Timing.create_with_regular_interval(sample_interval, timestamp, time_offset)
     )
 
-    precision_timing = waveform.precision_timing
+    assert_type(waveform.timing.sample_interval, bt.TimeDelta | dt.timedelta | ht.timedelta)
+    assert_type(waveform.timing.timestamp, bt.DateTime | dt.datetime | ht.datetime)
+    assert_type(waveform.timing.start_time, bt.DateTime | dt.datetime | ht.datetime)
+    assert_type(waveform.timing.time_offset, bt.TimeDelta | dt.timedelta | ht.timedelta)
+    assert waveform.timing.sample_interval == sample_interval
+    assert waveform.timing.timestamp == timestamp
+    assert waveform.timing.start_time == timestamp + time_offset
+    assert waveform.timing.time_offset == time_offset
 
-    assert_type(precision_timing, PrecisionTiming)
-    assert isinstance(precision_timing, PrecisionTiming)
-    assert precision_timing == PrecisionTiming.create_with_regular_interval(
-        ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+
+def test___datetime___waveform_with_timing___static_type_erased() -> None:
+    sample_interval = dt.timedelta(milliseconds=1)
+    timestamp = dt.datetime.now(dt.timezone.utc)
+    time_offset = dt.timedelta(microseconds=1)
+    waveform = AnalogWaveform(
+        timing=Timing.create_with_regular_interval(sample_interval, timestamp, time_offset)
     )
 
+    assert_type(waveform.timing.sample_interval, bt.TimeDelta | dt.timedelta | ht.timedelta)
+    assert_type(waveform.timing.timestamp, bt.DateTime | dt.datetime | ht.datetime)
+    assert_type(waveform.timing.start_time, bt.DateTime | dt.datetime | ht.datetime)
+    assert_type(waveform.timing.time_offset, bt.TimeDelta | dt.timedelta | ht.timedelta)
+    assert waveform.timing.sample_interval == sample_interval
+    assert waveform.timing.timestamp == timestamp
+    assert waveform.timing.start_time == timestamp + time_offset
+    assert waveform.timing.time_offset == time_offset
 
-def test___waveform_with_precision_timing___get_timing___converts_timing() -> None:
-    waveform = AnalogWaveform()
-    waveform.precision_timing = PrecisionTiming.create_with_regular_interval(
-        ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
+
+def test___hightime___waveform_with_timing___static_type_erased() -> None:
+    sample_interval = ht.timedelta(milliseconds=1)
+    timestamp = ht.datetime.now(dt.timezone.utc)
+    time_offset = ht.timedelta(microseconds=1)
+    waveform = AnalogWaveform(
+        timing=Timing.create_with_regular_interval(sample_interval, timestamp, time_offset)
     )
 
-    timing = waveform.timing
-
-    assert_type(timing, Timing)
-    assert isinstance(timing, Timing)
-    assert timing == Timing.create_with_regular_interval(
-        dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
-    )
-
-
-def test___waveform_with_cached_timing___get_timing___returns_cached_timing() -> None:
-    waveform = AnalogWaveform()
-    waveform.timing = Timing.create_with_regular_interval(
-        dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
-    )
-    precision_timing_before = waveform.precision_timing
-
-    precision_timing = waveform.precision_timing
-
-    assert precision_timing is precision_timing_before
-    assert precision_timing == PrecisionTiming.create_with_regular_interval(
-        ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
-    )
-
-
-def test___waveform_with_cached_timing___set_timing___clears_cached_timing() -> None:
-    waveform = AnalogWaveform()
-    waveform.timing = Timing.create_with_regular_interval(
-        dt.timedelta(milliseconds=1), dt.datetime(2025, 1, 1), dt.timedelta(seconds=1)
-    )
-    precision_timing_before = waveform.precision_timing
-
-    waveform.timing = Timing.create_with_regular_interval(
-        dt.timedelta(milliseconds=2), dt.datetime(2025, 1, 2), dt.timedelta(seconds=2)
-    )
-
-    precision_timing_after = waveform.precision_timing
-    assert precision_timing_before == PrecisionTiming.create_with_regular_interval(
-        ht.timedelta(milliseconds=1), ht.datetime(2025, 1, 1), ht.timedelta(seconds=1)
-    )
-    assert precision_timing_after == PrecisionTiming.create_with_regular_interval(
-        ht.timedelta(milliseconds=2), ht.datetime(2025, 1, 2), ht.timedelta(seconds=2)
-    )
+    assert_type(waveform.timing.sample_interval, bt.TimeDelta | dt.timedelta | ht.timedelta)
+    assert_type(waveform.timing.timestamp, bt.DateTime | dt.datetime | ht.datetime)
+    assert_type(waveform.timing.start_time, bt.DateTime | dt.datetime | ht.datetime)
+    assert_type(waveform.timing.time_offset, bt.TimeDelta | dt.timedelta | ht.timedelta)
+    assert waveform.timing.sample_interval == sample_interval
+    assert waveform.timing.timestamp == timestamp
+    assert waveform.timing.start_time == timestamp + time_offset
+    assert waveform.timing.time_offset == time_offset
 
 
 ###############################################################################
@@ -1636,10 +1622,10 @@ def test___irregular_waveform_and_int32_ndarray_with_wrong_sample_count___load_d
         ),
         (
             AnalogWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
             AnalogWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
         ),
         (
@@ -1665,6 +1651,23 @@ def test___irregular_waveform_and_int32_ndarray_with_wrong_sample_count___load_d
             ),
             AnalogWaveform.from_array_1d(
                 [0, 1, 2, 3, 4, 5, 0, 0, 0], np.int32, start_index=1, sample_count=5
+            ),
+        ),
+        # Same value, different time type
+        (
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            ),
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+        ),
+        (
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+            AnalogWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
             ),
         ),
     ],
@@ -1704,10 +1707,10 @@ def test___same_value___equality___equal(
         ),
         (
             AnalogWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
             AnalogWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=2))
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=2))
             ),
         ),
         (
@@ -1725,23 +1728,6 @@ def test___same_value___equality___equal(
         (
             AnalogWaveform(scale_mode=NO_SCALING),
             AnalogWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
-        ),
-        # __eq__ does not convert timing, even if the values are equivalent.
-        (
-            AnalogWaveform(
-                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
-            ),
-            AnalogWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
-            ),
-        ),
-        (
-            AnalogWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
-            ),
-            AnalogWaveform(
-                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
-            ),
         ),
     ],
 )
@@ -1797,10 +1783,10 @@ else:
         ),
         (
             AnalogWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
             "nitypes.waveform.AnalogWaveform(0, "
-            "timing=nitypes.waveform.PrecisionTiming(nitypes.waveform.SampleIntervalMode.REGULAR, "
+            "timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, "
             "sample_interval=hightime.timedelta(microseconds=1000)))",
         ),
         (
@@ -1853,9 +1839,7 @@ _VARIOUS_VALUES = [
     AnalogWaveform.from_array_1d([1, 2, 3], np.float64),
     AnalogWaveform.from_array_1d([1, 2, 3], np.int32),
     AnalogWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))),
-    AnalogWaveform(
-        timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
-    ),
+    AnalogWaveform(timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))),
     AnalogWaveform(
         extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
     ),
@@ -1894,7 +1878,7 @@ def _assert_deep_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any]) ->
     assert value is not other
     assert value._data is not other._data and value._data.base is not other._data
     assert value._extended_properties is not other._extended_properties
-    if other._timing is not Timing.empty and other._timing is not PrecisionTiming.empty:
+    if other._timing is not Timing.empty and other._timing is not Timing.empty:
         assert value._timing is not other._timing
     if other._scale_mode is not NO_SCALING:
         assert value._scale_mode is not other._scale_mode

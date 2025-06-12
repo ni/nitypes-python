@@ -15,7 +15,7 @@ from tests.unit.waveform._timing._utils import assert_deep_copy, assert_shallow_
 # empty
 ###############################################################################
 def test___empty___is_waveform_timing() -> None:
-    assert_type(Timing.empty, Timing)
+    assert_type(Timing.empty, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert isinstance(Timing.empty, Timing)
 
 

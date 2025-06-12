@@ -116,17 +116,12 @@ from nitypes.waveform._scaling import (
     ScaleMode,
 )
 from nitypes.waveform._spectrum import Spectrum
-from nitypes.waveform._timing import (
-    BaseTiming,
-    PrecisionTiming,
-    SampleIntervalMode,
-    Timing,
-)
+from nitypes.waveform._timing import SampleIntervalMode, Timing
 from nitypes.waveform._warnings import ScalingMismatchWarning, TimingMismatchWarning
 
 __all__ = [
     "AnalogWaveform",
-    "BaseTiming",
+    "Timing",
     "ComplexWaveform",
     "ExtendedPropertyDictionary",
     "ExtendedPropertyValue",
@@ -134,7 +129,6 @@ __all__ = [
     "NO_SCALING",
     "NoneScaleMode",
     "NumericWaveform",
-    "PrecisionTiming",
     "SampleIntervalMode",
     "ScaleMode",
     "ScalingMismatchWarning",
@@ -148,7 +142,7 @@ __doctest_requires__ = {".": "numpy>=2.0"}
 
 # Hide that it was defined in a helper file
 AnalogWaveform.__module__ = __name__
-BaseTiming.__module__ = __name__
+Timing.__module__ = __name__
 ComplexWaveform.__module__ = __name__
 ExtendedPropertyDictionary.__module__ = __name__
 # ExtendedPropertyValue is a TypeAlias
@@ -156,7 +150,6 @@ LinearScaleMode.__module__ = __name__
 # NO_SCALING is a constant
 NoneScaleMode.__module__ = __name__
 NumericWaveform.__module__ = __name__
-PrecisionTiming.__module__ = __name__
 SampleIntervalMode.__module__ = __name__
 ScaleMode.__module__ = __name__
 ScalingMismatchWarning.__module__ = __name__
