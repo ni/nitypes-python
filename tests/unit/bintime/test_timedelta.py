@@ -12,7 +12,14 @@ import pytest
 from typing_extensions import assert_type
 
 from nitypes.bintime import TimeDelta
-from nitypes.bintime._timedelta import _INT128_MAX, _INT128_MIN
+from nitypes.bintime._timedelta import (
+    _BITS_PER_SECOND,
+    _FRACTIONAL_SECONDS_MASK,
+    _INT128_MAX,
+    _INT128_MIN,
+    _TICKS_PER_SECOND,
+    WholeAndFractionalSeconds,
+)
 
 _BT_EPSILON = ht.timedelta(yoctoseconds=54210)
 _DT_EPSILON = ht.timedelta(microseconds=1)
@@ -1283,3 +1290,55 @@ def test___various_values___str___looks_ok(value: TimeDelta, expected: str) -> N
 )
 def test___various_values___repr___looks_ok(value: TimeDelta, expected: str) -> None:
     assert repr(value) == expected
+
+
+@pytest.mark.parametrize(
+    "seconds",
+    [
+        0,
+        2,
+        -2,
+        1.5,
+        1234.5678,
+    ],
+)
+def test___various_values___get_ticks___returns_correct_value(seconds: float) -> None:
+    value = TimeDelta(seconds)
+
+    assert value.ticks == seconds * _TICKS_PER_SECOND
+
+
+@pytest.mark.parametrize(
+    "seconds",
+    [
+        0,
+        2,
+        -2,
+        1.5,
+        1234.5678,
+    ],
+)
+def test___various_values___to_tuple___returns_correct_values(seconds: float) -> None:
+    value = TimeDelta(seconds)
+
+    whole_seconds, fractional_seconds = value.to_tuple()
+    assert whole_seconds == value.ticks >> _BITS_PER_SECOND
+    assert fractional_seconds == value.ticks & _FRACTIONAL_SECONDS_MASK
+
+
+@pytest.mark.parametrize(
+    "seconds",
+    [
+        0,
+        2,
+        -2,
+        1.5,
+        1234.5678,
+    ],
+)
+def test___various_values___from_whole_fract_sec___timedelta_correct(seconds: float) -> None:
+    value = TimeDelta(seconds)
+    whole_seconds, fractional_seconds = value.to_tuple()
+    other_value = TimeDelta.from_tuple(WholeAndFractionalSeconds(whole_seconds, fractional_seconds))
+
+    assert value == other_value

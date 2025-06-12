@@ -6,7 +6,7 @@ import math
 import operator
 from decimal import Decimal
 from functools import singledispatchmethod
-from typing import Any, ClassVar, SupportsIndex, Union, final, overload
+from typing import Any, ClassVar, NamedTuple, SupportsIndex, Union, final, overload
 
 import hightime as ht
 from typing_extensions import Self, TypeAlias
@@ -38,6 +38,13 @@ _OtherTimeDelta: TypeAlias = Union[dt.timedelta, ht.timedelta]
 _OTHER_TIMEDELTA_TUPLE = (dt.timedelta, ht.timedelta)
 
 _OtherDateTime: TypeAlias = Union[dt.datetime, ht.datetime]
+
+
+class WholeAndFractionalSeconds(NamedTuple):
+    """A named tuple containing 64bit ints for whole and fractional seconds."""
+
+    whole_seconds: int
+    fractional_seconds: int
 
 
 @final
@@ -159,6 +166,22 @@ class TimeDelta:
         self._ticks = ticks
         return self
 
+    @classmethod
+    def from_tuple(cls, value: WholeAndFractionalSeconds) -> Self:
+        """Create a TimeDelta from a 64-bit whole seconds and fractional seconds ints."""
+        ticks = value.whole_seconds << _BITS_PER_SECOND
+        ticks = ticks | value.fractional_seconds
+        if not (_INT128_MIN <= ticks <= _INT128_MAX):
+            raise OverflowError(
+                "The ticks value is out of range.\n\n"
+                f"Requested value: {ticks}\n"
+                f"Minimum value: {_INT128_MIN}\n",
+                f"Maximum value: {_INT128_MAX}",
+            )
+        self = cls.__new__(cls)
+        self._ticks = ticks
+        return self
+
     def _to_datetime_timedelta(self) -> dt.timedelta:
         """Return self as a :any:`datetime.timedelta`."""
         whole_seconds = self._ticks >> _BITS_PER_SECOND
@@ -212,6 +235,17 @@ class TimeDelta:
             _YOCTOSECONDS_PER_SECOND * (self._ticks & _FRACTIONAL_SECONDS_MASK)
         ) >> _BITS_PER_SECOND
         return value % _YOCTOSECONDS_PER_FEMTOSECOND
+
+    @property
+    def ticks(self) -> int:
+        """The total ticks in the time delta as a 128-bit integer."""
+        return self._ticks
+
+    def to_tuple(self) -> WholeAndFractionalSeconds:
+        """The whole seconds and fractional seconds parts of the time delta as 64-bit ints."""
+        whole_seconds = self._ticks >> _BITS_PER_SECOND
+        fractional_seconds = self._ticks & _FRACTIONAL_SECONDS_MASK
+        return WholeAndFractionalSeconds(whole_seconds, fractional_seconds)
 
     def total_seconds(self) -> float:
         """The total seconds in the time delta.

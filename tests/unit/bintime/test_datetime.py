@@ -10,6 +10,11 @@ from typing_extensions import assert_type
 from tzlocal import get_localzone
 
 from nitypes.bintime import DateTime, TimeDelta
+from nitypes.bintime._timedelta import (
+    _BITS_PER_SECOND,
+    _FRACTIONAL_SECONDS_MASK,
+    WholeAndFractionalSeconds,
+)
 
 
 #############
@@ -513,3 +518,60 @@ def test___various_values___str___looks_ok(value: TimeDelta, expected: str) -> N
 )
 def test___various_values___repr___looks_ok(value: TimeDelta, expected: str) -> None:
     assert repr(value) == expected
+
+
+@pytest.mark.parametrize(
+    "seconds",
+    [
+        0,
+        2,
+        -2,
+        1.5,
+        1234.5678,
+    ],
+)
+def test___various_values___get_ticks___returns_correct_value(seconds: float) -> None:
+    ticks = TimeDelta._to_ticks(seconds)
+    value = DateTime.from_ticks(ticks)
+
+    assert value.ticks == ticks
+
+
+@pytest.mark.parametrize(
+    "seconds",
+    [
+        0,
+        2,
+        -2,
+        1.5,
+        1234.5678,
+    ],
+)
+def test___various_values___get_whole_fract_sec___returns_correct_values(seconds: float) -> None:
+    ticks = TimeDelta._to_ticks(seconds)
+    value = DateTime.from_ticks(ticks)
+
+    whole_seconds, fractional_seconds = value.to_tuple()
+    assert whole_seconds == ticks >> _BITS_PER_SECOND
+    assert fractional_seconds == ticks & _FRACTIONAL_SECONDS_MASK
+
+
+@pytest.mark.parametrize(
+    "seconds",
+    [
+        0,
+        2,
+        -2,
+        1.5,
+        1234.5678,
+    ],
+)
+def test___various_values___from_tuple___datetime_correct(seconds: float) -> None:
+    ticks = TimeDelta._to_ticks(seconds)
+    whole_seconds = ticks >> _BITS_PER_SECOND
+    fractional_seconds = ticks & _FRACTIONAL_SECONDS_MASK
+
+    value = DateTime.from_tuple(WholeAndFractionalSeconds(whole_seconds, fractional_seconds))
+
+    assert value.ticks == ticks
+    assert value.to_tuple() == (whole_seconds, fractional_seconds)

@@ -11,6 +11,7 @@ from nitypes._exceptions import invalid_arg_type, invalid_arg_value
 from nitypes.bintime._timedelta import (
     _OTHER_TIMEDELTA_TUPLE,
     TimeDelta,
+    WholeAndFractionalSeconds,
     _OtherTimeDelta,
 )
 
@@ -148,6 +149,14 @@ class DateTime:
         return self
 
     @classmethod
+    def from_tuple(cls, value: WholeAndFractionalSeconds) -> Self:
+        """Create a DateTime from whole and fractional seconds as 64-bit ints."""
+        self = cls.__new__(cls)
+        self._offset = TimeDelta.from_tuple(value)
+        self._hightime_cache = None
+        return self
+
+    @classmethod
     def from_offset(cls, offset: TimeDelta) -> Self:
         """Create an DateTime from a TimeValue offset from the epoch, Jan 1, 1904."""
         self = cls.__new__(cls)
@@ -220,9 +229,18 @@ class DateTime:
         return self._offset.yoctoseconds
 
     @property
+    def ticks(self) -> int:
+        """The number of ticks since the epoch, Jan 1, 1904."""
+        return self._offset.ticks
+
+    @property
     def tzinfo(self) -> dt.tzinfo | None:
         """The time zone."""
         return dt.timezone.utc
+
+    def to_tuple(self) -> WholeAndFractionalSeconds:
+        """Convert to the number of whole and fractional seconds since the epoch, Jan 1, 1904."""
+        return self._offset.to_tuple()
 
     @classmethod
     def now(cls, tz: dt.tzinfo | None = None) -> Self:
