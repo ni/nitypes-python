@@ -133,7 +133,6 @@ __all__ = [
     "ScalingMismatchWarning",
     "Spectrum",
     "Timing",
-    "Timing",
     "TimingMismatchError",
     "TimingMismatchWarning",
 ]
