@@ -547,7 +547,7 @@ def test___various_values___get_ticks___returns_correct_value(seconds: float) ->
         1234.5678,
     ],
 )
-def test___various_values___get_whole_fract_sec___returns_correct_values(seconds: float) -> None:
+def test___various_values___to_tuple___returns_correct_values(seconds: float) -> None:
     ticks = TimeDelta._to_ticks(seconds)
     value = DateTime.from_ticks(ticks)
 

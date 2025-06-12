@@ -1336,7 +1336,7 @@ def test___various_values___to_tuple___returns_correct_values(seconds: float) ->
         1234.5678,
     ],
 )
-def test___various_values___from_whole_fract_sec___timedelta_correct(seconds: float) -> None:
+def test___various_values___from_tuple___timedelta_correct(seconds: float) -> None:
     value = TimeDelta(seconds)
     whole_seconds, fractional_seconds = value.to_tuple()
     other_value = TimeDelta.from_tuple(WholeAndFractionalSeconds(whole_seconds, fractional_seconds))

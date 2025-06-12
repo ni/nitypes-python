@@ -211,7 +211,7 @@ from nitypes.bintime._dtypes import (
     CVITimeIntervalBase,
     CVITimeIntervalDType,
 )
-from nitypes.bintime._timedelta import TimeDelta
+from nitypes.bintime._timedelta import TimeDelta, WholeAndFractionalSeconds
 
 __all__ = [
     "DateTime",
@@ -220,8 +220,10 @@ __all__ = [
     "CVITimeIntervalBase",
     "CVITimeIntervalDType",
     "TimeDelta",
+    "WholeAndFractionalSeconds",
 ]
 
 # Hide that it was defined in a helper file
 DateTime.__module__ = __name__
 TimeDelta.__module__ = __name__
+WholeAndFractionalSeconds.__module__ = __name__
