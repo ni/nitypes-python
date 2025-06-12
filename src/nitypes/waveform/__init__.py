@@ -121,7 +121,6 @@ from nitypes.waveform._warnings import ScalingMismatchWarning, TimingMismatchWar
 
 __all__ = [
     "AnalogWaveform",
-    "Timing",
     "ComplexWaveform",
     "ExtendedPropertyDictionary",
     "ExtendedPropertyValue",
@@ -134,6 +133,7 @@ __all__ = [
     "ScalingMismatchWarning",
     "Spectrum",
     "Timing",
+    "Timing",
     "TimingMismatchError",
     "TimingMismatchWarning",
 ]
@@ -142,7 +142,6 @@ __doctest_requires__ = {".": "numpy>=2.0"}
 
 # Hide that it was defined in a helper file
 AnalogWaveform.__module__ = __name__
-Timing.__module__ = __name__
 ComplexWaveform.__module__ = __name__
 ExtendedPropertyDictionary.__module__ = __name__
 # ExtendedPropertyValue is a TypeAlias
