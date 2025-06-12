@@ -457,19 +457,19 @@ def test___different_value___equality___not_equal(
         ),
         (
             Timing.create_with_regular_interval(bt.TimeDelta(1e-3)),
-            "nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=nitypes.bintime.TimeDelta(Decimal('0.001000000000000000020816681711721685132943093776702880859375')))",
+            "nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=nitypes.bintime.TimeDelta(Decimal('0.00100000000000000002081668')))",
         ),
         (
             Timing.create_with_regular_interval(
                 bt.TimeDelta(1e-3), bt.DateTime(2025, 1, 1, tzinfo=dt.timezone.utc)
             ),
-            "nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, timestamp=nitypes.bintime.DateTime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc), sample_interval=nitypes.bintime.TimeDelta(Decimal('0.001000000000000000020816681711721685132943093776702880859375')))",
+            "nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, timestamp=nitypes.bintime.DateTime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc), sample_interval=nitypes.bintime.TimeDelta(Decimal('0.00100000000000000002081668')))",
         ),
         (
             Timing.create_with_regular_interval(
                 bt.TimeDelta(1e-3), bt.DateTime(2025, 1, 1, tzinfo=dt.timezone.utc), bt.TimeDelta(1)
             ),
-            "nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, timestamp=nitypes.bintime.DateTime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc), time_offset=nitypes.bintime.TimeDelta(Decimal('1')), sample_interval=nitypes.bintime.TimeDelta(Decimal('0.001000000000000000020816681711721685132943093776702880859375')))",
+            "nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, timestamp=nitypes.bintime.DateTime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc), time_offset=nitypes.bintime.TimeDelta(Decimal('1')), sample_interval=nitypes.bintime.TimeDelta(Decimal('0.00100000000000000002081668')))",
         ),
         (
             Timing.create_with_irregular_interval(
