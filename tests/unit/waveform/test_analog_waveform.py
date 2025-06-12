@@ -1878,7 +1878,7 @@ def _assert_deep_copy(value: AnalogWaveform[Any], other: AnalogWaveform[Any]) ->
     assert value is not other
     assert value._data is not other._data and value._data.base is not other._data
     assert value._extended_properties is not other._extended_properties
-    if other._timing is not Timing.empty and other._timing is not Timing.empty:
+    if other._timing is not Timing.empty:
         assert value._timing is not other._timing
     if other._scale_mode is not NO_SCALING:
         assert value._scale_mode is not other._scale_mode
