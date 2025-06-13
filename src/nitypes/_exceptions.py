@@ -83,6 +83,16 @@ def unsupported_dtype(
     )
 
 
+def int_out_of_range(value: int, min: int, max: int) -> OverflowError:
+    """Create an OverflowError when an int is out of the specified range."""
+    raise OverflowError(
+        "The input value is out of range.\n\n"
+        f"Requested value: {value}\n"
+        f"Minimum value: {min}\n",
+        f"Maximum value: {max}",
+    )
+
+
 # English-specific hack. This is why we prefer "Key: value" for localizable errors. TODO: consider
 # moving the full strings into a string table instead of building them out of English noun phrases.
 def _a(noun: str) -> str:

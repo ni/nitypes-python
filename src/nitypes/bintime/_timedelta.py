@@ -12,7 +12,7 @@ import hightime as ht
 from typing_extensions import Self, TypeAlias
 
 from nitypes._arguments import arg_to_int
-from nitypes._exceptions import invalid_arg_type
+from nitypes._exceptions import int_out_of_range, invalid_arg_type
 from nitypes.bintime._time_value_tuple import TimeValueTuple
 
 _INT64_MAX = (1 << 63) - 1
@@ -153,16 +153,19 @@ class TimeDelta:
     def from_ticks(cls, ticks: SupportsIndex) -> Self:
         """Create a TimeDelta from a 128-bit fixed point number expressed as an integer."""
         ticks = arg_to_int("ticks", ticks)
-        TimeDelta._check_int_range(ticks, _INT128_MIN, _INT128_MAX)
+        if not (_INT128_MIN <= ticks <= _INT128_MAX):
+            raise int_out_of_range(ticks, _INT128_MIN, _INT128_MAX)
         self = cls.__new__(cls)
         self._ticks = ticks
         return self
 
     @classmethod
     def from_tuple(cls, value: TimeValueTuple) -> Self:
-        """Create a TimeDelta from a 64-bit whole seconds and fractional seconds ints."""
-        TimeDelta._check_int_range(value.whole_seconds, _INT64_MIN, _INT64_MAX)
-        TimeDelta._check_int_range(value.fractional_seconds, _UINT64_MIN, _UINT64_MAX)
+        """Create a TimeDelta from 64-bit whole seconds and fractional seconds ints."""
+        if not (_INT64_MIN <= value.whole_seconds <= _INT64_MAX):
+            raise int_out_of_range(value.whole_seconds, _INT64_MIN, _INT64_MAX)
+        if not (_UINT64_MIN <= value.fractional_seconds <= _UINT64_MAX):
+            raise int_out_of_range(value.fractional_seconds, _UINT64_MIN, _UINT64_MAX)
         ticks = value.whole_seconds << _BITS_PER_SECOND
         ticks = ticks | value.fractional_seconds
         return cls.from_ticks(ticks)
