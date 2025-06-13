@@ -1001,6 +1001,38 @@ def test___hightime___waveform_with_timing___static_type_erased() -> None:
     assert waveform.timing.time_offset == time_offset
 
 
+@pytest.mark.parametrize(
+    "timing",
+    [
+        Timing.create_with_regular_interval(
+            bt.TimeDelta(1e-3), bt.DateTime(2025, 1, 1, tzinfo=dt.timezone.utc), bt.TimeDelta(1e-6)
+        ),
+        Timing.create_with_regular_interval(
+            dt.timedelta(milliseconds=1),
+            dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc),
+            dt.timedelta(microseconds=1),
+        ),
+        Timing.create_with_regular_interval(
+            ht.timedelta(milliseconds=1),
+            ht.datetime(2025, 1, 1, tzinfo=dt.timezone.utc),
+            dt.timedelta(microseconds=1),
+        ),
+    ],
+)
+def test___polymorphic_timing___get_timing_properties___behaves_polymorphically(
+    timing: Timing[Any, Any, Any],
+) -> None:
+    waveform = AnalogWaveform(timing=timing)
+
+    assert waveform.timing.sample_interval.total_seconds() == pytest.approx(1e-3)
+    assert (
+        waveform.timing.timestamp.year,
+        waveform.timing.timestamp.month,
+        waveform.timing.timestamp.day,
+    ) == (2025, 1, 1)
+    assert waveform.timing.time_offset.total_seconds() == pytest.approx(1e-6)
+
+
 ###############################################################################
 # scale_mode
 ###############################################################################
