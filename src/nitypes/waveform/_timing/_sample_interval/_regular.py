@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from collections.abc import Generator, Iterable, Sequence
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, final
 
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import add_note, invalid_arg_type
@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from nitypes.waveform._timing._timing import Timing  # circular import
 
 
+@final
 class RegularSampleIntervalStrategy(
     SampleIntervalStrategy[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]
 ):

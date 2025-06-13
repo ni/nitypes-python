@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, final
 
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type
@@ -53,6 +53,7 @@ def _get_direction(left: _TTimestamp, right: _TTimestamp) -> _Direction:
     return _Direction.UNKNOWN
 
 
+@final
 class IrregularSampleIntervalStrategy(
     SampleIntervalStrategy[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]
 ):
