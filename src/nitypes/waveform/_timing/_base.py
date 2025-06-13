@@ -41,8 +41,6 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
     Waveform timing objects are immutable.
     """
 
-    _DEFAULT_TIME_OFFSET = dt.timedelta(0)
-
     empty: ClassVar[Timing[dt.datetime, dt.timedelta, dt.timedelta]]
     """A waveform timing object with no timestamp, time offset, or sample interval."""
 
@@ -200,17 +198,23 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
     @property
     def start_time(self) -> _TTimestamp_co:
         """The time that the first sample in the waveform was acquired."""
-        # Work around https://github.com/python/mypy/issues/18203
-        return self.timestamp + self.time_offset  # type: ignore[operator,no-any-return]
+        value = self.timestamp
+        if self.has_time_offset:
+            # Work around https://github.com/python/mypy/issues/18203
+            value += self.time_offset  # type: ignore[operator]
+        return value  # type: ignore[reportReturnType,unused-ignore]
+
+    @property
+    def has_time_offset(self) -> bool:
+        """Indicates whether the waveform timing has a time offset."""
+        return self._time_offset is not None
 
     @property
     def time_offset(self) -> _TTimeOffset_co:
         """The time difference between the timestamp and the first sample."""
         value = self._time_offset
         if value is None:
-            # Assume _TTimeOffset_co is solved as the default of dt.timedelta when constructing a
-            # Timing with _time_offset set to None.
-            return cast(_TTimeOffset_co, self.__class__._DEFAULT_TIME_OFFSET)
+            raise RuntimeError("The waveform timing does not have a time offset.")
         return value
 
     @property

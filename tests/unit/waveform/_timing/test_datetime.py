@@ -34,8 +34,12 @@ def test___empty___no_start_time() -> None:
     assert exc.value.args[0] == "The waveform timing does not have a timestamp."
 
 
-def test___empty___default_time_offset() -> None:
-    assert Timing.empty.time_offset == dt.timedelta()
+def test___empty___no_time_offset() -> None:
+    assert not Timing.empty.has_time_offset
+    with pytest.raises(RuntimeError) as exc:
+        _ = Timing.empty.time_offset
+
+    assert exc.value.args[0] == "The waveform timing does not have a time offset."
 
 
 def test___empty___no_sample_interval() -> None:
@@ -58,7 +62,7 @@ def test___no_args___create_with_no_interval___creates_empty_waveform_timing() -
 
     assert_type(timing, Timing)
     assert not timing.has_timestamp
-    assert timing.time_offset == dt.timedelta()
+    assert not timing.has_time_offset
     assert timing._sample_interval is None
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
@@ -69,7 +73,7 @@ def test___timestamp___create_with_no_interval___creates_waveform_timing_with_ti
 
     assert_type(timing, Timing)
     assert timing.timestamp == timestamp
-    assert timing.time_offset == dt.timedelta()
+    assert not timing.has_time_offset
     assert timing._sample_interval is None
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
@@ -113,7 +117,7 @@ def test___sample_interval___create_with_regular_interval___creates_waveform_tim
 
     assert_type(timing, Timing)
     assert not timing.has_timestamp
-    assert timing.time_offset == dt.timedelta()
+    assert not timing.has_time_offset
     assert timing.sample_interval == sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
 
@@ -128,7 +132,7 @@ def test___sample_interval_and_timestamp___create_with_regular_interval___create
 
     assert_type(timing, Timing)
     assert timing.timestamp == timestamp
-    assert timing.time_offset == dt.timedelta()
+    assert not timing.has_time_offset
     assert timing.sample_interval == sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
 
