@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import datetime as dt
 import warnings
 from collections.abc import Iterable, Sequence
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, final
 
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import add_note, invalid_arg_type
@@ -13,46 +12,54 @@ from nitypes.waveform._exceptions import (
 )
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
+from nitypes.waveform._timing._types import (
+    _ANY_DATETIME_TUPLE,
+    _ANY_TIMEDELTA_TUPLE,
+    _TSampleInterval_co,
+    _TTimeOffset_co,
+    _TTimestamp_co,
+)
 from nitypes.waveform._warnings import sample_interval_mismatch
 
 if TYPE_CHECKING:
-    from nitypes.waveform._timing._base import BaseTiming  # circular import
-
-_TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
-_TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
+    from nitypes.waveform._timing._timing import Timing  # circular import
 
 
-class NoneSampleIntervalStrategy(SampleIntervalStrategy[_TDateTime, _TTimeDelta]):
+@final
+class NoneSampleIntervalStrategy(
+    SampleIntervalStrategy[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]
+):
     """Implements SampleIntervalMode.NONE specific behavior."""
 
     def validate_init_args(  # noqa: D102 - Missing docstring in public method - override
         self,
-        timing: BaseTiming[_TDateTime, _TTimeDelta],
+        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
         sample_interval_mode: SampleIntervalMode,
-        timestamp: _TDateTime | None,
-        time_offset: _TTimeDelta | None,
-        sample_interval: _TTimeDelta | None,
-        timestamps: Sequence[_TDateTime] | None,
+        timestamp: _TTimestamp_co | None,
+        time_offset: _TTimeOffset_co | None,
+        sample_interval: _TSampleInterval_co | None,
+        timestamps: Sequence[_TTimestamp_co] | None,
     ) -> None:
-        datetime_type = timing.__class__._get_datetime_type()
-        timedelta_type = timing.__class__._get_timedelta_type()
-        if not isinstance(timestamp, (datetime_type, type(None))):
+        if not isinstance(timestamp, (_ANY_DATETIME_TUPLE, type(None))):
             raise invalid_arg_type("timestamp", "datetime or None", timestamp)
-        if not isinstance(time_offset, (timedelta_type, type(None))):
+        if not isinstance(time_offset, (_ANY_TIMEDELTA_TUPLE, type(None))):
             raise invalid_arg_type("time offset", "timedelta or None", time_offset)
         validate_unsupported_arg("sample interval", sample_interval)
         validate_unsupported_arg("timestamps", timestamps)
 
     def get_timestamps(  # noqa: D102 - Missing docstring in public method - override
-        self, timing: BaseTiming[_TDateTime, _TTimeDelta], start_index: int, count: int
-    ) -> Iterable[_TDateTime]:
+        self,
+        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
+        start_index: int,
+        count: int,
+    ) -> Iterable[_TTimestamp_co]:
         raise no_timestamp_information()
 
     def append_timestamps(  # noqa: D102 - Missing docstring in public method - override
         self,
-        timing: BaseTiming[_TDateTime, _TTimeDelta],
-        timestamps: Sequence[_TDateTime] | None,
-    ) -> BaseTiming[_TDateTime, _TTimeDelta]:
+        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
+        timestamps: Sequence[_TTimestamp_co] | None,
+    ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
         try:
             validate_unsupported_arg("timestamps", timestamps)
         except (TypeError, ValueError) as e:
@@ -62,9 +69,9 @@ class NoneSampleIntervalStrategy(SampleIntervalStrategy[_TDateTime, _TTimeDelta]
 
     def append_timing(  # noqa: D102 - Missing docstring in public method - override
         self,
-        timing: BaseTiming[_TDateTime, _TTimeDelta],
-        other: BaseTiming[_TDateTime, _TTimeDelta],
-    ) -> BaseTiming[_TDateTime, _TTimeDelta]:
+        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
+        other: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
+    ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
         if other._sample_interval_mode not in (SampleIntervalMode.NONE, SampleIntervalMode.REGULAR):
             raise sample_interval_mode_mismatch()
         if timing._sample_interval != other._sample_interval:

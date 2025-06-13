@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from nitypes.waveform import BaseTiming
+from nitypes.waveform import Timing
 
 
-def assert_deep_copy(value: BaseTiming[Any, Any], other: BaseTiming[Any, Any]) -> None:
+def assert_deep_copy(value: Timing[Any, Any, Any], other: Timing[Any, Any, Any]) -> None:
     """Assert that value is a deep copy of other."""
     assert value == other
     assert value is not other
@@ -19,7 +19,7 @@ def assert_deep_copy(value: BaseTiming[Any, Any], other: BaseTiming[Any, Any]) -
         assert value._timestamps is not other._timestamps
 
 
-def assert_shallow_copy(value: BaseTiming[Any, Any], other: BaseTiming[Any, Any]) -> None:
+def assert_shallow_copy(value: Timing[Any, Any, Any], other: Timing[Any, Any, Any]) -> None:
     """Assert that value is a shallow copy of other."""
     assert value == other
     assert value is not other

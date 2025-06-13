@@ -1,15 +1,27 @@
 """Waveform timing data types for NI Python APIs."""
 
-from nitypes.waveform._timing._base import BaseTiming
-from nitypes.waveform._timing._conversion import convert_timing
-from nitypes.waveform._timing._precision import PrecisionTiming
 from nitypes.waveform._timing._sample_interval import SampleIntervalMode
-from nitypes.waveform._timing._standard import Timing
+from nitypes.waveform._timing._timing import Timing
+from nitypes.waveform._timing._types import (
+    _AnyDateTime,
+    _AnyTimeDelta,
+    _TSampleInterval,
+    _TSampleInterval_co,
+    _TTimeOffset,
+    _TTimeOffset_co,
+    _TTimestamp,
+    _TTimestamp_co,
+)
 
 __all__ = [
-    "BaseTiming",
-    "convert_timing",
-    "PrecisionTiming",
+    "_AnyDateTime",
+    "_AnyTimeDelta",
+    "_TTimestamp",
+    "_TTimestamp_co",
+    "_TTimeOffset",
+    "_TTimeOffset_co",
+    "_TSampleInterval",
+    "_TSampleInterval_co",
     "SampleIntervalMode",
     "Timing",
 ]

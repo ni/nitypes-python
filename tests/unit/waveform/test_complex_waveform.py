@@ -12,13 +12,7 @@ import pytest
 from typing_extensions import assert_type
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType
-from nitypes.waveform import (
-    NO_SCALING,
-    ComplexWaveform,
-    LinearScaleMode,
-    PrecisionTiming,
-    Timing,
-)
+from nitypes.waveform import NO_SCALING, ComplexWaveform, LinearScaleMode, Timing
 
 
 ###############################################################################
@@ -366,10 +360,10 @@ def test___complexint32_waveform_with_unknown_structured_dtype___get_scaled_data
         ),
         (
             ComplexWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
             ComplexWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
         ),
         (
@@ -395,6 +389,23 @@ def test___complexint32_waveform_with_unknown_structured_dtype___get_scaled_data
             ),
             ComplexWaveform.from_array_1d(
                 [0, 1, 2, 3, 4, 5, 0, 0, 0], ComplexInt32DType, start_index=1, sample_count=5
+            ),
+        ),
+        # Same value, different time type
+        (
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
+            ),
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+        ),
+        (
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
+            ),
+            ComplexWaveform(
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
             ),
         ),
     ],
@@ -434,10 +445,10 @@ def test___same_value___equality___equal(
         ),
         (
             ComplexWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
             ComplexWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=2))
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=2))
             ),
         ),
         (
@@ -455,23 +466,6 @@ def test___same_value___equality___equal(
         (
             ComplexWaveform(scale_mode=NO_SCALING),
             ComplexWaveform(scale_mode=LinearScaleMode(2.0, 1.0)),
-        ),
-        # __eq__ does not convert timing, even if the values are equivalent.
-        (
-            ComplexWaveform(
-                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
-            ),
-            ComplexWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
-            ),
-        ),
-        (
-            ComplexWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
-            ),
-            ComplexWaveform(
-                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
-            ),
         ),
     ],
 )
@@ -521,9 +515,9 @@ def test___different_value___equality___not_equal(
         ),
         (
             ComplexWaveform(
-                timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
+                timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))
             ),
-            "nitypes.waveform.ComplexWaveform(0, timing=nitypes.waveform.PrecisionTiming(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=hightime.timedelta(microseconds=1000)))",
+            "nitypes.waveform.ComplexWaveform(0, timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, sample_interval=hightime.timedelta(microseconds=1000)))",
         ),
         (
             ComplexWaveform(
@@ -574,9 +568,7 @@ _VARIOUS_VALUES = [
     ComplexWaveform.from_array_1d([123 + 3.45j, 6.78 - 9.01j], np.complex128),
     ComplexWaveform.from_array_1d([(1, 2), (3, 4), (5, 6)], ComplexInt32DType),
     ComplexWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))),
-    ComplexWaveform(
-        timing=PrecisionTiming.create_with_regular_interval(ht.timedelta(milliseconds=1))
-    ),
+    ComplexWaveform(timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))),
     ComplexWaveform(
         extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"}
     ),
@@ -620,7 +612,7 @@ def _assert_deep_copy(value: ComplexWaveform[Any], other: ComplexWaveform[Any]) 
     assert value is not other
     assert value._data is not other._data and value._data.base is not other._data
     assert value._extended_properties is not other._extended_properties
-    if other._timing is not Timing.empty and other._timing is not PrecisionTiming.empty:
+    if other._timing is not Timing.empty:
         assert value._timing is not other._timing
     if other._scale_mode is not NO_SCALING:
         assert value._scale_mode is not other._scale_mode

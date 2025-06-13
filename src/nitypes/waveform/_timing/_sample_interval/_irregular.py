@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import datetime as dt
 from collections.abc import Iterable, Sequence
 from enum import Enum
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING, final
 
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type
@@ -13,12 +12,16 @@ from nitypes.waveform._exceptions import (
 )
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
+from nitypes.waveform._timing._types import (
+    _ANY_DATETIME_TUPLE,
+    _TSampleInterval_co,
+    _TTimeOffset_co,
+    _TTimestamp,
+    _TTimestamp_co,
+)
 
 if TYPE_CHECKING:
-    from nitypes.waveform._timing._base import BaseTiming  # circular import
-
-_TDateTime = TypeVar("_TDateTime", bound=dt.datetime)
-_TTimeDelta = TypeVar("_TTimeDelta", bound=dt.timedelta)
+    from nitypes.waveform._timing._timing import Timing  # circular import
 
 
 class _Direction(Enum):
@@ -27,7 +30,7 @@ class _Direction(Enum):
     DECREASING = 1
 
 
-def _are_timestamps_monotonic(timestamps: Sequence[_TDateTime]) -> bool:
+def _are_timestamps_monotonic(timestamps: Sequence[_TTimestamp_co]) -> bool:
     direction = _Direction.UNKNOWN
     for i in range(1, len(timestamps)):
         comparison = _get_direction(timestamps[i - 1], timestamps[i])
@@ -41,40 +44,46 @@ def _are_timestamps_monotonic(timestamps: Sequence[_TDateTime]) -> bool:
     return True
 
 
-def _get_direction(left: _TDateTime, right: _TDateTime) -> _Direction:
-    if left < right:
+def _get_direction(left: _TTimestamp, right: _TTimestamp) -> _Direction:
+    # Work around https://github.com/python/mypy/issues/18203
+    if left < right:  # type: ignore[operator]
         return _Direction.INCREASING
-    if right < left:
+    if right < left:  # type: ignore[operator]
         return _Direction.DECREASING
     return _Direction.UNKNOWN
 
 
-class IrregularSampleIntervalStrategy(SampleIntervalStrategy[_TDateTime, _TTimeDelta]):
+@final
+class IrregularSampleIntervalStrategy(
+    SampleIntervalStrategy[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]
+):
     """Implements SampleIntervalMode.IRREGULAR specific behavior."""
 
     def validate_init_args(  # noqa: D102 - Missing docstring in public method - override
         self,
-        timing: BaseTiming[_TDateTime, _TTimeDelta],
+        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
         sample_interval_mode: SampleIntervalMode,
-        timestamp: _TDateTime | None,
-        time_offset: _TTimeDelta | None,
-        sample_interval: _TTimeDelta | None,
-        timestamps: Sequence[_TDateTime] | None,
+        timestamp: _TTimestamp_co | None,
+        time_offset: _TTimeOffset_co | None,
+        sample_interval: _TSampleInterval_co | None,
+        timestamps: Sequence[_TTimestamp_co] | None,
     ) -> None:
-        datetime_type = timing.__class__._get_datetime_type()
         validate_unsupported_arg("timestamp", timestamp)
         validate_unsupported_arg("time offset", time_offset)
         validate_unsupported_arg("sample interval", sample_interval)
         if not isinstance(timestamps, Sequence) or not all(
-            isinstance(ts, datetime_type) for ts in timestamps
+            isinstance(ts, _ANY_DATETIME_TUPLE) for ts in timestamps
         ):
             raise invalid_arg_type("timestamps", "sequence of datetime objects", timestamps)
         if not _are_timestamps_monotonic(timestamps):
             raise ValueError("The timestamps must be in ascending or descending order.")
 
     def get_timestamps(  # noqa: D102 - Missing docstring in public method - override
-        self, timing: BaseTiming[_TDateTime, _TTimeDelta], start_index: int, count: int
-    ) -> Iterable[_TDateTime]:
+        self,
+        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
+        start_index: int,
+        count: int,
+    ) -> Iterable[_TTimestamp_co]:
         assert timing._timestamps is not None
         if count > len(timing._timestamps):
             raise ValueError("The count must be less than or equal to the number of timestamps.")
@@ -82,9 +91,9 @@ class IrregularSampleIntervalStrategy(SampleIntervalStrategy[_TDateTime, _TTimeD
 
     def append_timestamps(  # noqa: D102 - Missing docstring in public method - override
         self,
-        timing: BaseTiming[_TDateTime, _TTimeDelta],
-        timestamps: Sequence[_TDateTime] | None,
-    ) -> BaseTiming[_TDateTime, _TTimeDelta]:
+        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
+        timestamps: Sequence[_TTimestamp_co] | None,
+    ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
         assert timing._timestamps is not None
 
         if timestamps is None:
@@ -92,7 +101,7 @@ class IrregularSampleIntervalStrategy(SampleIntervalStrategy[_TDateTime, _TTimeD
                 "The timestamps argument is required when appending to a waveform with irregular timing."
             )
 
-        datetime_type = timing.__class__._get_datetime_type()
+        datetime_type = type(timing._timestamps[0]) if timing._timestamps else _ANY_DATETIME_TUPLE
         if not all(isinstance(ts, datetime_type) for ts in timestamps):
             raise TypeError(
                 "The timestamp data type must match the timing information of the current waveform."
@@ -108,9 +117,9 @@ class IrregularSampleIntervalStrategy(SampleIntervalStrategy[_TDateTime, _TTimeD
 
     def append_timing(  # noqa: D102 - Missing docstring in public method - override
         self,
-        timing: BaseTiming[_TDateTime, _TTimeDelta],
-        other: BaseTiming[_TDateTime, _TTimeDelta],
-    ) -> BaseTiming[_TDateTime, _TTimeDelta]:
+        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
+        other: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
+    ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
         if other._sample_interval_mode != SampleIntervalMode.IRREGULAR:
             raise sample_interval_mode_mismatch()
 

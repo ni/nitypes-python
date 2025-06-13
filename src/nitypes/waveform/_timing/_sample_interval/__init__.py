@@ -25,7 +25,7 @@ __all__ = [
 
 def create_sample_interval_strategy(
     sample_interval_mode: SampleIntervalMode,
-) -> SampleIntervalStrategy[Any, Any]:
+) -> SampleIntervalStrategy[Any, Any, Any]:
     """Create a sample interval strategy for the specified mode."""
     strategy_type = _SAMPLE_INTERVAL_STRATEGY_TYPE_FOR_MODE.get(sample_interval_mode)
     if strategy_type is None:
@@ -36,7 +36,7 @@ def create_sample_interval_strategy(
 
 
 _SAMPLE_INTERVAL_STRATEGY_TYPE_FOR_MODE: dict[
-    SampleIntervalMode, type[SampleIntervalStrategy[Any, Any]]
+    SampleIntervalMode, type[SampleIntervalStrategy[Any, Any, Any]]
 ] = {
     SampleIntervalMode.NONE: NoneSampleIntervalStrategy,
     SampleIntervalMode.REGULAR: RegularSampleIntervalStrategy,
