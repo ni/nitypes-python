@@ -7,7 +7,7 @@ import itertools
 import pickle
 import sys
 import weakref
-from typing import Any, SupportsIndex
+from typing import Any, SupportsIndex, Union
 
 import hightime as ht
 import numpy as np
@@ -955,10 +955,10 @@ def test___bintime___waveform_with_timing___static_type_erased() -> None:
         timing=Timing.create_with_regular_interval(sample_interval, timestamp, time_offset)
     )
 
-    assert_type(waveform.timing.sample_interval, bt.TimeDelta | dt.timedelta | ht.timedelta)
-    assert_type(waveform.timing.timestamp, bt.DateTime | dt.datetime | ht.datetime)
-    assert_type(waveform.timing.start_time, bt.DateTime | dt.datetime | ht.datetime)
-    assert_type(waveform.timing.time_offset, bt.TimeDelta | dt.timedelta | ht.timedelta)
+    assert_type(waveform.timing.sample_interval, Union[bt.TimeDelta, dt.timedelta, ht.timedelta])
+    assert_type(waveform.timing.timestamp, Union[bt.DateTime, dt.datetime, ht.datetime])
+    assert_type(waveform.timing.start_time, Union[bt.DateTime, dt.datetime, ht.datetime])
+    assert_type(waveform.timing.time_offset, Union[bt.TimeDelta, dt.timedelta, ht.timedelta])
     assert waveform.timing.sample_interval == sample_interval
     assert waveform.timing.timestamp == timestamp
     assert waveform.timing.start_time == timestamp + time_offset
@@ -973,10 +973,10 @@ def test___datetime___waveform_with_timing___static_type_erased() -> None:
         timing=Timing.create_with_regular_interval(sample_interval, timestamp, time_offset)
     )
 
-    assert_type(waveform.timing.sample_interval, bt.TimeDelta | dt.timedelta | ht.timedelta)
-    assert_type(waveform.timing.timestamp, bt.DateTime | dt.datetime | ht.datetime)
-    assert_type(waveform.timing.start_time, bt.DateTime | dt.datetime | ht.datetime)
-    assert_type(waveform.timing.time_offset, bt.TimeDelta | dt.timedelta | ht.timedelta)
+    assert_type(waveform.timing.sample_interval, Union[bt.TimeDelta, dt.timedelta, ht.timedelta])
+    assert_type(waveform.timing.timestamp, Union[bt.DateTime, dt.datetime, ht.datetime])
+    assert_type(waveform.timing.start_time, Union[bt.DateTime, dt.datetime, ht.datetime])
+    assert_type(waveform.timing.time_offset, Union[bt.TimeDelta, dt.timedelta, ht.timedelta])
     assert waveform.timing.sample_interval == sample_interval
     assert waveform.timing.timestamp == timestamp
     assert waveform.timing.start_time == timestamp + time_offset
@@ -991,10 +991,10 @@ def test___hightime___waveform_with_timing___static_type_erased() -> None:
         timing=Timing.create_with_regular_interval(sample_interval, timestamp, time_offset)
     )
 
-    assert_type(waveform.timing.sample_interval, bt.TimeDelta | dt.timedelta | ht.timedelta)
-    assert_type(waveform.timing.timestamp, bt.DateTime | dt.datetime | ht.datetime)
-    assert_type(waveform.timing.start_time, bt.DateTime | dt.datetime | ht.datetime)
-    assert_type(waveform.timing.time_offset, bt.TimeDelta | dt.timedelta | ht.timedelta)
+    assert_type(waveform.timing.sample_interval, Union[bt.TimeDelta, dt.timedelta, ht.timedelta])
+    assert_type(waveform.timing.timestamp, Union[bt.DateTime, dt.datetime, ht.datetime])
+    assert_type(waveform.timing.start_time, Union[bt.DateTime, dt.datetime, ht.datetime])
+    assert_type(waveform.timing.time_offset, Union[bt.TimeDelta, dt.timedelta, ht.timedelta])
     assert waveform.timing.sample_interval == sample_interval
     assert waveform.timing.timestamp == timestamp
     assert waveform.timing.start_time == timestamp + time_offset
