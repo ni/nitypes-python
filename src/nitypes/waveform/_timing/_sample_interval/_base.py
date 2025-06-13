@@ -12,7 +12,7 @@ from nitypes.waveform._timing._types import (
 )
 
 if TYPE_CHECKING:
-    from nitypes.waveform._timing._base import Timing  # circular import
+    from nitypes.waveform._timing._timing import Timing  # circular import
 
 
 class SampleIntervalStrategy(ABC, Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):

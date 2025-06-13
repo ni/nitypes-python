@@ -22,7 +22,7 @@ from nitypes.waveform._timing._types import (
 from nitypes.waveform._warnings import sample_interval_mismatch
 
 if TYPE_CHECKING:
-    from nitypes.waveform._timing._base import Timing  # circular import
+    from nitypes.waveform._timing._timing import Timing  # circular import
 
 
 class RegularSampleIntervalStrategy(
