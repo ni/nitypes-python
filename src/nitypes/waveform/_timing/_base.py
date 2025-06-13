@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import operator
 from collections.abc import Iterable, Sequence
-from typing import Any, ClassVar, Generic, SupportsIndex, TypeVar, cast, final
+from typing import Any, ClassVar, Generic, SupportsIndex, TypeVar, Union, cast, final
 
 import hightime as ht
 from typing_extensions import Self
@@ -17,23 +17,20 @@ from nitypes.waveform._timing._sample_interval import (
     create_sample_interval_strategy,
 )
 from nitypes.waveform._timing._types import (
+    _TSampleInterval,
     _TSampleInterval_co,
+    _TTimeOffset,
     _TTimeOffset_co,
+    _TTimestamp,
     _TTimestamp_co,
 )
 
-_TOtherTimestamp = TypeVar("_TOtherTimestamp", bt.DateTime, dt.datetime, ht.datetime)
+_TOtherTimestamp = TypeVar("_TOtherTimestamp", bound=Union[bt.DateTime, dt.datetime, ht.datetime])
 _TOtherTimeOffset = TypeVar(
-    "_TOtherTimeOffset",
-    bt.TimeDelta,
-    dt.timedelta,
-    ht.timedelta,
+    "_TOtherTimeOffset", bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta]
 )
 _TOtherSampleInterval = TypeVar(
-    "_TOtherSampleInterval",
-    bt.TimeDelta,
-    dt.timedelta,
-    ht.timedelta,
+    "_TOtherSampleInterval", bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta]
 )
 
 
@@ -49,10 +46,24 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
     empty: ClassVar[Timing[dt.datetime, dt.timedelta, dt.timedelta]]
     """A waveform timing object with no timestamp, time offset, or sample interval."""
 
+    # The typing for these named constructors is tricky:
+    # - They can't use covariant type variables as parameter types. Instead, they use the
+    #   non-covariant type variables, which are distinct. See
+    #   https://github.com/python/mypy/issues/6178
+    # - ``cls`` is implicitly ``type[Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]]``
+    #   and its type variables may already be solved. For example, we can infer the type of ``cls``
+    #   from ``my_timing`` in ``my_timing.__class__.create_with_no_interval()``.
+    # - Construct the object with ``Timing(...)`` not ``cls(...)`` to avoid conflicts between the
+    #   the class's type variables and the argument type variables.
+    # - For type variables that are not inferred from arguments, use the covariant type variables so
+    #   that ``my_timing.__class__.create_with_no_interval()`` matches the type of ``my_timing``.
+
     @classmethod
     def create_with_no_interval(
-        cls, timestamp: _TTimestamp_co | None = None, time_offset: _TTimeOffset_co | None = None
-    ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
+        cls,
+        timestamp: _TTimestamp | None = None,
+        time_offset: _TTimeOffset | None = None,
+    ) -> Timing[_TTimestamp, _TTimeOffset, _TSampleInterval_co]:
         """Create a waveform timing object with no sample interval.
 
         Args:
@@ -64,15 +75,15 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         Returns:
             A waveform timing object.
         """
-        return cls(SampleIntervalMode.NONE, timestamp, time_offset)
+        return Timing(SampleIntervalMode.NONE, timestamp, time_offset)
 
     @classmethod
     def create_with_regular_interval(
         cls,
-        sample_interval: _TSampleInterval_co,
-        timestamp: _TTimestamp_co | None = None,
-        time_offset: _TTimeOffset_co | None = None,
-    ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
+        sample_interval: _TSampleInterval,
+        timestamp: _TTimestamp | None = None,
+        time_offset: _TTimeOffset | None = None,
+    ) -> Timing[_TTimestamp, _TTimeOffset, _TSampleInterval]:
         """Create a waveform timing object with a regular sample interval.
 
         Args:
@@ -85,13 +96,13 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         Returns:
             A waveform timing object.
         """
-        return cls(SampleIntervalMode.REGULAR, timestamp, time_offset, sample_interval)
+        return Timing(SampleIntervalMode.REGULAR, timestamp, time_offset, sample_interval)
 
     @classmethod
     def create_with_irregular_interval(
         cls,
-        timestamps: Sequence[_TTimestamp_co],
-    ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
+        timestamps: Sequence[_TTimestamp],
+    ) -> Timing[_TTimestamp, _TTimeOffset_co, _TSampleInterval_co]:
         """Create a waveform timing object with an irregular sample interval.
 
         Args:
@@ -101,7 +112,7 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         Returns:
             A waveform timing object.
         """
-        return cls(SampleIntervalMode.IRREGULAR, timestamps=timestamps)
+        return Timing(SampleIntervalMode.IRREGULAR, timestamps=timestamps)
 
     __slots__ = [
         "_sample_interval_strategy",
@@ -189,14 +200,17 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
     @property
     def start_time(self) -> _TTimestamp_co:
         """The time that the first sample in the waveform was acquired."""
-        return self.timestamp + self.time_offset
+        # Work around https://github.com/python/mypy/issues/18203
+        return self.timestamp + self.time_offset  # type: ignore[operator,no-any-return]
 
     @property
     def time_offset(self) -> _TTimeOffset_co:
         """The time difference between the timestamp and the first sample."""
         value = self._time_offset
         if value is None:
-            return cast(_TTimeOffset_co, self.__class__._DEFAULT_TIME_OFFSET)  # type: ignore[redundant-cast]
+            # Assume _TTimeOffset_co is solved as the default of dt.timedelta when constructing a
+            # Timing with _time_offset set to None.
+            return cast(_TTimeOffset_co, self.__class__._DEFAULT_TIME_OFFSET)
         return value
 
     @property
@@ -246,14 +260,13 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         """Convert the timing information to use :any:`hightime`."""
         return self._convert(ht.datetime, ht.timedelta, ht.timedelta)
 
-    # Note that this uses the non-covariant type variables, which are distinct from the covariant
-    # ones.
     def _convert(
         self,
         timestamp_type: type[_TOtherTimestamp],
         time_offset_type: type[_TOtherTimeOffset],
         sample_interval_type: type[_TOtherSampleInterval],
     ) -> Timing[_TOtherTimestamp, _TOtherTimeOffset, _TOtherSampleInterval]:
+        # If the runtime type is correct, cast to the requested static type. Not a workaround.
         if (
             isinstance(self._timestamp, (timestamp_type, type(None)))
             and isinstance(self._time_offset, (time_offset_type, type(None)))
@@ -263,10 +276,7 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
                 or all(isinstance(ts, timestamp_type) for ts in self._timestamps)
             )
         ):
-            # Without a cast, mypy displays a [return-value] error for every possible combination of
-            # type constraints. With a cast, mypy displays a [redundant-cast] error instead, but it
-            # is clearly not redundant.
-            return cast(Timing[_TOtherTimestamp, _TOtherTimeOffset, _TOtherSampleInterval], self)  # type: ignore[redundant-cast]
+            return cast(Timing[_TOtherTimestamp, _TOtherTimeOffset, _TOtherSampleInterval], self)
 
         return Timing(
             self._sample_interval_mode,
@@ -348,4 +358,4 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         return new_timing
 
 
-Timing.empty = Timing.create_with_no_interval()
+Timing.empty = Timing(SampleIntervalMode.NONE)

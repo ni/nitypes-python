@@ -28,50 +28,35 @@ _ANY_DATETIME_TUPLE = (bt.DateTime, dt.datetime, ht.datetime)
 _ANY_TIMEDELTA_TUPLE = (bt.TimeDelta, dt.timedelta, ht.timedelta)
 
 _TTimestamp = TypeVar(
-    "_TTimestamp", bt.DateTime, dt.datetime, ht.datetime, _AnyDateTime, default=dt.datetime
+    "_TTimestamp", bound=Union[bt.DateTime, dt.datetime, ht.datetime], default=dt.datetime
 )
 _TTimestamp_co = TypeVar(
     "_TTimestamp_co",
-    bt.DateTime,
-    dt.datetime,
-    ht.datetime,
-    _AnyDateTime,
+    bound=Union[bt.DateTime, dt.datetime, ht.datetime],
     covariant=True,
     default=dt.datetime,
 )
 
 _TTimeOffset = TypeVar(
     "_TTimeOffset",
-    bt.TimeDelta,
-    dt.timedelta,
-    ht.timedelta,
-    _AnyTimeDelta,
+    bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta],
     default=dt.timedelta,
 )
 _TTimeOffset_co = TypeVar(
     "_TTimeOffset_co",
-    bt.TimeDelta,
-    dt.timedelta,
-    ht.timedelta,
-    _AnyTimeDelta,
+    bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta],
     covariant=True,
     default=dt.timedelta,
 )
 
 _TSampleInterval = TypeVar(
     "_TSampleInterval",
-    bt.TimeDelta,
-    dt.timedelta,
-    ht.timedelta,
-    _AnyTimeDelta,
+    bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta],
     default=dt.timedelta,
 )
 _TSampleInterval_co = TypeVar(
     "_TSampleInterval_co",
-    bt.TimeDelta,
-    dt.timedelta,
-    ht.timedelta,
-    _AnyTimeDelta,
+    bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta],
     covariant=True,
     default=dt.timedelta,
 )

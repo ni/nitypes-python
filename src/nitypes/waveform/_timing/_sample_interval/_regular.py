@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from collections.abc import Generator, Iterable, Sequence
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import add_note, invalid_arg_type
@@ -64,11 +64,12 @@ class RegularSampleIntervalStrategy(
         count: int,
     ) -> Generator[_TTimestamp_co]:
         sample_interval = timing.sample_interval
-        timestamp = timing.start_time + start_index * sample_interval
+        # Work around https://github.com/python/mypy/issues/18203
+        timestamp = timing.start_time + start_index * sample_interval  # type: ignore[operator]
         for i in range(count):
             if i != 0:
-                timestamp += sample_interval
-            yield timestamp
+                timestamp += sample_interval  # type: ignore[operator]
+            yield cast(_TTimestamp_co, timestamp)
 
     def append_timestamps(  # noqa: D102 - Missing docstring in public method - override
         self,

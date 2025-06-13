@@ -45,9 +45,10 @@ def _are_timestamps_monotonic(timestamps: Sequence[_TTimestamp_co]) -> bool:
 
 
 def _get_direction(left: _TTimestamp, right: _TTimestamp) -> _Direction:
-    if left < right:
+    # Work around https://github.com/python/mypy/issues/18203
+    if left < right:  # type: ignore[operator]
         return _Direction.INCREASING
-    if right < left:
+    if right < left:  # type: ignore[operator]
         return _Direction.DECREASING
     return _Direction.UNKNOWN
 
