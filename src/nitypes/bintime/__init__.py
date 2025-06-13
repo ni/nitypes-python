@@ -211,6 +211,7 @@ from nitypes.bintime._dtypes import (
     CVITimeIntervalBase,
     CVITimeIntervalDType,
 )
+from nitypes.bintime._time_value_tuple import TimeValueTuple
 from nitypes.bintime._timedelta import TimeDelta
 
 __all__ = [
@@ -220,8 +221,10 @@ __all__ = [
     "CVITimeIntervalBase",
     "CVITimeIntervalDType",
     "TimeDelta",
+    "TimeValueTuple",
 ]
 
 # Hide that it was defined in a helper file
 DateTime.__module__ = __name__
 TimeDelta.__module__ = __name__
+TimeValueTuple.__module__ = __name__

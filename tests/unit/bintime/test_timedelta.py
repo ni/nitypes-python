@@ -12,7 +12,14 @@ import pytest
 from typing_extensions import assert_type
 
 from nitypes.bintime import TimeDelta
-from nitypes.bintime._timedelta import _INT128_MAX, _INT128_MIN
+from nitypes.bintime._time_value_tuple import TimeValueTuple
+from nitypes.bintime._timedelta import (
+    _BITS_PER_SECOND,
+    _FRACTIONAL_SECONDS_MASK,
+    _INT128_MAX,
+    _INT128_MIN,
+    _TICKS_PER_SECOND,
+)
 
 _BT_EPSILON = ht.timedelta(yoctoseconds=54210)
 _DT_EPSILON = ht.timedelta(microseconds=1)
@@ -135,7 +142,7 @@ def test___out_of_range___from_ticks___raises_overflow_error(ticks: int) -> None
     with pytest.raises(OverflowError) as exc:
         _ = TimeDelta.from_ticks(ticks)
 
-    assert exc.value.args[0].startswith("The ticks value is out of range.")
+    assert exc.value.args[0].startswith("The input value is out of range.")
 
 
 def test___unsupported_type___from_ticks___raises_type_error() -> None:
@@ -1283,3 +1290,85 @@ def test___various_values___str___looks_ok(value: TimeDelta, expected: str) -> N
 )
 def test___various_values___repr___looks_ok(value: TimeDelta, expected: str) -> None:
     assert repr(value) == expected
+
+
+@pytest.mark.parametrize(
+    "seconds",
+    [
+        0,
+        2,
+        -2,
+        1.5,
+        1234.5678,
+    ],
+)
+def test___various_values___get_ticks___returns_correct_value(seconds: float) -> None:
+    value = TimeDelta(seconds)
+
+    assert value.ticks == seconds * _TICKS_PER_SECOND
+
+
+@pytest.mark.parametrize(
+    "seconds",
+    [
+        0,
+        2,
+        -2,
+        1.5,
+        1234.5678,
+    ],
+)
+def test___various_values___to_tuple___returns_correct_values(seconds: float) -> None:
+    value = TimeDelta(seconds)
+
+    whole_seconds, fractional_seconds = value.to_tuple()
+    assert whole_seconds == value.ticks >> _BITS_PER_SECOND
+    assert fractional_seconds == value.ticks & _FRACTIONAL_SECONDS_MASK
+
+
+@pytest.mark.parametrize(
+    "seconds",
+    [
+        0,
+        2,
+        -2,
+        1.5,
+        1234.5678,
+    ],
+)
+def test___various_values___from_tuple___timedelta_correct(seconds: float) -> None:
+    value = TimeDelta(seconds)
+    whole_seconds, fractional_seconds = value.to_tuple()
+    other_value = TimeDelta.from_tuple(TimeValueTuple(whole_seconds, fractional_seconds))
+
+    assert value == other_value
+
+
+def test___whole_seconds_too_large___from_tuple___throws_error() -> None:
+    whole_seconds = 1 << 70
+    fractional_seconds = 0
+
+    with pytest.raises(OverflowError) as exc:
+        _ = TimeDelta.from_tuple(TimeValueTuple(whole_seconds, fractional_seconds))
+
+    assert exc.value.args[0].startswith("The input value is out of range")
+
+
+def test___fractional_seconds_too_large___from_tuple___throws_error() -> None:
+    whole_seconds = 0
+    fractional_seconds = 1 << 70
+
+    with pytest.raises(OverflowError) as exc:
+        _ = TimeDelta.from_tuple(TimeValueTuple(whole_seconds, fractional_seconds))
+
+    assert exc.value.args[0].startswith("The input value is out of range")
+
+
+def test___fractional_seconds_negative___from_tuple___throws_error() -> None:
+    whole_seconds = 0
+    fractional_seconds = -1
+
+    with pytest.raises(OverflowError) as exc:
+        _ = TimeDelta.from_tuple(TimeValueTuple(whole_seconds, fractional_seconds))
+
+    assert exc.value.args[0].startswith("The input value is out of range")

@@ -12,8 +12,13 @@ import hightime as ht
 from typing_extensions import Self, TypeAlias
 
 from nitypes._arguments import arg_to_int
-from nitypes._exceptions import invalid_arg_type
+from nitypes._exceptions import int_out_of_range, invalid_arg_type
+from nitypes.bintime._time_value_tuple import TimeValueTuple
 
+_INT64_MAX = (1 << 63) - 1
+_INT64_MIN = -(1 << 63)
+_UINT64_MAX = (1 << 64) - 1
+_UINT64_MIN = 0
 _INT128_MAX = (1 << 127) - 1
 _INT128_MIN = -(1 << 127)
 
@@ -149,15 +154,21 @@ class TimeDelta:
         """Create a TimeDelta from a 128-bit fixed point number expressed as an integer."""
         ticks = arg_to_int("ticks", ticks)
         if not (_INT128_MIN <= ticks <= _INT128_MAX):
-            raise OverflowError(
-                "The ticks value is out of range.\n\n"
-                f"Requested value: {ticks}\n"
-                f"Minimum value: {_INT128_MIN}\n",
-                f"Maximum value: {_INT128_MAX}",
-            )
+            raise int_out_of_range(ticks, _INT128_MIN, _INT128_MAX)
         self = cls.__new__(cls)
         self._ticks = ticks
         return self
+
+    @classmethod
+    def from_tuple(cls, value: TimeValueTuple) -> Self:
+        """Create a TimeDelta from 64-bit whole seconds and fractional seconds ints."""
+        if not (_INT64_MIN <= value.whole_seconds <= _INT64_MAX):
+            raise int_out_of_range(value.whole_seconds, _INT64_MIN, _INT64_MAX)
+        if not (_UINT64_MIN <= value.fractional_seconds <= _UINT64_MAX):
+            raise int_out_of_range(value.fractional_seconds, _UINT64_MIN, _UINT64_MAX)
+        ticks = value.whole_seconds << _BITS_PER_SECOND
+        ticks = ticks | value.fractional_seconds
+        return cls.from_ticks(ticks)
 
     def _to_datetime_timedelta(self) -> dt.timedelta:
         """Return self as a :any:`datetime.timedelta`."""
@@ -212,6 +223,17 @@ class TimeDelta:
             _YOCTOSECONDS_PER_SECOND * (self._ticks & _FRACTIONAL_SECONDS_MASK)
         ) >> _BITS_PER_SECOND
         return value % _YOCTOSECONDS_PER_FEMTOSECOND
+
+    @property
+    def ticks(self) -> int:
+        """The total ticks in the time delta as a 128-bit integer."""
+        return self._ticks
+
+    def to_tuple(self) -> TimeValueTuple:
+        """The whole seconds and fractional seconds parts of the time delta as 64-bit ints."""
+        whole_seconds = self._ticks >> _BITS_PER_SECOND
+        fractional_seconds = self._ticks & _FRACTIONAL_SECONDS_MASK
+        return TimeValueTuple(whole_seconds, fractional_seconds)
 
     def total_seconds(self) -> float:
         """The total seconds in the time delta.
