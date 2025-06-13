@@ -186,16 +186,6 @@ class TimeDelta:
         ) >> _BITS_PER_SECOND
         return ht.timedelta(seconds=whole_seconds, yoctoseconds=yoctoseconds)
 
-    @staticmethod
-    def _check_int_range(value: int, min: int, max: int) -> None:
-        if not (min <= value <= max):
-            raise OverflowError(
-                "The input value is out of range.\n\n"
-                f"Requested value: {value}\n"
-                f"Minimum value: {min}\n",
-                f"Maximum value: {max}",
-            )
-
     @property
     def days(self) -> int:
         """The number of days in the time delta."""
