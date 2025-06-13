@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import pickle
+from typing import Any
 
 import pytest
 from typing_extensions import assert_type
@@ -15,8 +16,8 @@ from tests.unit.waveform._timing._utils import assert_deep_copy, assert_shallow_
 ###############################################################################
 # empty
 ###############################################################################
-def test___empty___is_waveform_timing() -> None:
-    assert_type(Timing.empty, Timing)
+def test___empty___is_timing() -> None:
+    assert_type(Timing.empty, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert isinstance(Timing.empty, Timing)
 
 
@@ -360,7 +361,9 @@ def test___irregular_interval_subset___get_timestamps___gets_timestamps() -> Non
         ),
     ],
 )
-def test___same_value___equality___equal(left: Timing, right: Timing) -> None:
+def test___same_value___equality___equal(
+    left: Timing[Any, Any, Any], right: Timing[Any, Any, Any]
+) -> None:
     assert left == right
     assert not (left != right)
 
@@ -425,8 +428,8 @@ def test___same_value___equality___equal(left: Timing, right: Timing) -> None:
     ],
 )
 def test___different_value___equality___not_equal(
-    left: Timing,
-    right: Timing,
+    left: Timing[Any, Any, Any],
+    right: Timing[Any, Any, Any],
 ) -> None:
     assert not (left == right)
     assert left != right
@@ -486,7 +489,9 @@ def test___different_value___equality___not_equal(
         ),
     ],
 )
-def test___various_values___repr___looks_ok(value: Timing, expected_repr: str) -> None:
+def test___various_values___repr___looks_ok(
+    value: Timing[Any, Any, Any], expected_repr: str
+) -> None:
     assert repr(value) == expected_repr
 
 
@@ -514,14 +519,14 @@ _VARIOUS_VALUES = [
 
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
-def test___various_values___copy___makes_shallow_copy(value: Timing) -> None:
+def test___various_values___copy___makes_shallow_copy(value: Timing[Any, Any, Any]) -> None:
     new_value = copy.copy(value)
 
     assert_shallow_copy(new_value, value)
 
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
-def test___various_values___deepcopy___makes_deep_copy(value: Timing) -> None:
+def test___various_values___deepcopy___makes_deep_copy(value: Timing[Any, Any, Any]) -> None:
     new_value = copy.deepcopy(value)
 
     assert_deep_copy(new_value, value)
@@ -529,7 +534,7 @@ def test___various_values___deepcopy___makes_deep_copy(value: Timing) -> None:
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___pickle_unpickle___makes_deep_copy(
-    value: Timing,
+    value: Timing[Any, Any, Any],
 ) -> None:
     new_value = pickle.loads(pickle.dumps(value))
 

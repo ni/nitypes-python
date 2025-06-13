@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import pickle
+from typing import Any
 
 import pytest
 from typing_extensions import assert_type
@@ -14,7 +15,7 @@ from tests.unit.waveform._timing._utils import assert_deep_copy, assert_shallow_
 ###############################################################################
 # empty
 ###############################################################################
-def test___empty___is_waveform_timing() -> None:
+def test___empty___is_timing() -> None:
     assert_type(Timing.empty, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert isinstance(Timing.empty, Timing)
 
@@ -60,7 +61,7 @@ def test___empty___sample_interval_mode_none() -> None:
 def test___no_args___create_with_no_interval___creates_empty_waveform_timing() -> None:
     timing = Timing.create_with_no_interval()
 
-    assert_type(timing, Timing)
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert not timing.has_timestamp
     assert not timing.has_time_offset
     assert timing._sample_interval is None
@@ -71,7 +72,7 @@ def test___timestamp___create_with_no_interval___creates_waveform_timing_with_ti
     timestamp = dt.datetime.now(dt.timezone.utc)
     timing = Timing.create_with_no_interval(timestamp)
 
-    assert_type(timing, Timing)
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert timing.timestamp == timestamp
     assert not timing.has_time_offset
     assert timing._sample_interval is None
@@ -85,7 +86,7 @@ def test___timestamp_and_time_offset___create_with_no_interval___creates_wavefor
     time_offset = dt.timedelta(seconds=1.23)
     timing = Timing.create_with_no_interval(timestamp, time_offset)
 
-    assert_type(timing, Timing)
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert timing.timestamp == timestamp
     assert timing.time_offset == time_offset
     assert timing._sample_interval is None
@@ -98,7 +99,7 @@ def test___time_offset___create_with_no_interval___creates_waveform_timing_with_
     time_offset = dt.timedelta(seconds=1.23)
     timing = Timing.create_with_no_interval(time_offset=time_offset)
 
-    assert_type(timing, Timing)
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert not timing.has_timestamp
     assert timing.time_offset == time_offset
     assert timing._sample_interval is None
@@ -115,7 +116,7 @@ def test___sample_interval___create_with_regular_interval___creates_waveform_tim
 
     timing = Timing.create_with_regular_interval(sample_interval)
 
-    assert_type(timing, Timing)
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert not timing.has_timestamp
     assert not timing.has_time_offset
     assert timing.sample_interval == sample_interval
@@ -130,7 +131,7 @@ def test___sample_interval_and_timestamp___create_with_regular_interval___create
 
     timing = Timing.create_with_regular_interval(sample_interval, timestamp)
 
-    assert_type(timing, Timing)
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert timing.timestamp == timestamp
     assert not timing.has_time_offset
     assert timing.sample_interval == sample_interval
@@ -146,7 +147,7 @@ def test___sample_interval_timestamp_and_time_offset___create_with_regular_inter
 
     timing = Timing.create_with_regular_interval(sample_interval, timestamp, time_offset)
 
-    assert_type(timing, Timing)
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert timing.timestamp == timestamp
     assert timing.time_offset == time_offset
     assert timing.sample_interval == sample_interval
@@ -161,7 +162,7 @@ def test___sample_interval_and_time_offset___create_with_regular_interval___crea
 
     timing = Timing.create_with_regular_interval(sample_interval, time_offset=time_offset)
 
-    assert_type(timing, Timing)
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert not timing.has_timestamp
     assert timing.time_offset == time_offset
     assert timing.sample_interval == sample_interval
@@ -209,7 +210,7 @@ def test___monotonic_timestamps___create_with_irregular_interval___creates_wavef
 
     timing = Timing.create_with_irregular_interval(timestamps)
 
-    assert_type(timing, Timing)
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
     assert timing._timestamps == timestamps
 
@@ -241,7 +242,7 @@ def test___timestamps_tuple___create_with_irregular_interval___creates_waveform_
 
     timing = Timing.create_with_irregular_interval(timestamps)
 
-    assert_type(timing, Timing)
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert timing.sample_interval_mode == SampleIntervalMode.IRREGULAR
     assert timing._timestamps == list(timestamps)
 
@@ -341,7 +342,9 @@ def test___irregular_interval_subset___get_timestamps___gets_timestamps() -> Non
         ),
     ],
 )
-def test___same_value___equality___equal(left: Timing, right: Timing) -> None:
+def test___same_value___equality___equal(
+    left: Timing[Any, Any, Any], right: Timing[Any, Any, Any]
+) -> None:
     assert left == right
     assert not (left != right)
 
@@ -391,7 +394,9 @@ def test___same_value___equality___equal(left: Timing, right: Timing) -> None:
         ),
     ],
 )
-def test___different_value___equality___not_equal(left: Timing, right: Timing) -> None:
+def test___different_value___equality___not_equal(
+    left: Timing[Any, Any, Any], right: Timing[Any, Any, Any]
+) -> None:
     assert not (left == right)
     assert left != right
 
@@ -443,7 +448,9 @@ def test___different_value___equality___not_equal(left: Timing, right: Timing) -
         ),
     ],
 )
-def test___various_values___repr___looks_ok(value: Timing, expected_repr: str) -> None:
+def test___various_values___repr___looks_ok(
+    value: Timing[Any, Any, Any], expected_repr: str
+) -> None:
     assert repr(value) == expected_repr
 
 
@@ -462,14 +469,14 @@ _VARIOUS_VALUES = [
 
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
-def test___various_values___copy___makes_shallow_copy(value: Timing) -> None:
+def test___various_values___copy___makes_shallow_copy(value: Timing[Any, Any, Any]) -> None:
     new_value = copy.copy(value)
 
     assert_shallow_copy(new_value, value)
 
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
-def test___various_values___deepcopy___makes_deep_copy(value: Timing) -> None:
+def test___various_values___deepcopy___makes_deep_copy(value: Timing[Any, Any, Any]) -> None:
     new_value = copy.deepcopy(value)
 
     assert_deep_copy(new_value, value)
@@ -477,7 +484,7 @@ def test___various_values___deepcopy___makes_deep_copy(value: Timing) -> None:
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
 def test___various_values___pickle_unpickle___makes_deep_copy(
-    value: Timing,
+    value: Timing[Any, Any, Any],
 ) -> None:
     new_value = pickle.loads(pickle.dumps(value))
 
