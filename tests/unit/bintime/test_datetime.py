@@ -10,11 +10,8 @@ from typing_extensions import assert_type
 from tzlocal import get_localzone
 
 from nitypes.bintime import DateTime, TimeDelta
-from nitypes.bintime._timedelta import (
-    _BITS_PER_SECOND,
-    _FRACTIONAL_SECONDS_MASK,
-    WholeAndFractionalSeconds,
-)
+from nitypes.bintime._timedelta import _BITS_PER_SECOND, _FRACTIONAL_SECONDS_MASK
+from nitypes.bintime._whole_and_fractional_seconds import WholeAndFractionalSeconds
 
 
 #############

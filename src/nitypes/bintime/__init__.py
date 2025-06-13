@@ -211,7 +211,8 @@ from nitypes.bintime._dtypes import (
     CVITimeIntervalBase,
     CVITimeIntervalDType,
 )
-from nitypes.bintime._timedelta import TimeDelta, WholeAndFractionalSeconds
+from nitypes.bintime._timedelta import TimeDelta
+from nitypes.bintime._whole_and_fractional_seconds import WholeAndFractionalSeconds
 
 __all__ = [
     "DateTime",

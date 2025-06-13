@@ -18,8 +18,8 @@ from nitypes.bintime._timedelta import (
     _INT128_MAX,
     _INT128_MIN,
     _TICKS_PER_SECOND,
-    WholeAndFractionalSeconds,
 )
+from nitypes.bintime._whole_and_fractional_seconds import WholeAndFractionalSeconds
 
 _BT_EPSILON = ht.timedelta(yoctoseconds=54210)
 _DT_EPSILON = ht.timedelta(microseconds=1)

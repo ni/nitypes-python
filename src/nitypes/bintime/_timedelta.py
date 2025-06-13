@@ -6,13 +6,14 @@ import math
 import operator
 from decimal import Decimal
 from functools import singledispatchmethod
-from typing import Any, ClassVar, NamedTuple, SupportsIndex, Union, final, overload
+from typing import Any, ClassVar, SupportsIndex, Union, final, overload
 
 import hightime as ht
 from typing_extensions import Self, TypeAlias
 
 from nitypes._arguments import arg_to_int
 from nitypes._exceptions import invalid_arg_type
+from nitypes.bintime._whole_and_fractional_seconds import WholeAndFractionalSeconds
 
 _INT128_MAX = (1 << 127) - 1
 _INT128_MIN = -(1 << 127)
@@ -38,13 +39,6 @@ _OtherTimeDelta: TypeAlias = Union[dt.timedelta, ht.timedelta]
 _OTHER_TIMEDELTA_TUPLE = (dt.timedelta, ht.timedelta)
 
 _OtherDateTime: TypeAlias = Union[dt.datetime, ht.datetime]
-
-
-class WholeAndFractionalSeconds(NamedTuple):
-    """A named tuple containing 64bit ints for whole and fractional seconds."""
-
-    whole_seconds: int
-    fractional_seconds: int
 
 
 @final
