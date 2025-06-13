@@ -10,8 +10,8 @@ from typing_extensions import assert_type
 from tzlocal import get_localzone
 
 from nitypes.bintime import DateTime, TimeDelta
+from nitypes.bintime._time_value_tuple import TimeValueTuple
 from nitypes.bintime._timedelta import _BITS_PER_SECOND, _FRACTIONAL_SECONDS_MASK
-from nitypes.bintime._whole_and_fractional_seconds import WholeAndFractionalSeconds
 
 
 #############
@@ -568,7 +568,7 @@ def test___various_values___from_tuple___datetime_correct(seconds: float) -> Non
     whole_seconds = ticks >> _BITS_PER_SECOND
     fractional_seconds = ticks & _FRACTIONAL_SECONDS_MASK
 
-    value = DateTime.from_tuple(WholeAndFractionalSeconds(whole_seconds, fractional_seconds))
+    value = DateTime.from_tuple(TimeValueTuple(whole_seconds, fractional_seconds))
 
     assert value.ticks == ticks
     assert value.to_tuple() == (whole_seconds, fractional_seconds)

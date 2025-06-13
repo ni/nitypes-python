@@ -8,8 +8,8 @@ import hightime as ht
 from typing_extensions import Self, TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
+from nitypes.bintime._time_value_tuple import TimeValueTuple
 from nitypes.bintime._timedelta import _OTHER_TIMEDELTA_TUPLE, TimeDelta, _OtherTimeDelta
-from nitypes.bintime._whole_and_fractional_seconds import WholeAndFractionalSeconds
 
 _DT_EPOCH_1904 = dt.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
 _HT_EPOCH_1904 = ht.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
@@ -145,7 +145,7 @@ class DateTime:
         return self
 
     @classmethod
-    def from_tuple(cls, value: WholeAndFractionalSeconds) -> Self:
+    def from_tuple(cls, value: TimeValueTuple) -> Self:
         """Create a DateTime from whole and fractional seconds as 64-bit ints."""
         self = cls.__new__(cls)
         self._offset = TimeDelta.from_tuple(value)
@@ -234,7 +234,7 @@ class DateTime:
         """The time zone."""
         return dt.timezone.utc
 
-    def to_tuple(self) -> WholeAndFractionalSeconds:
+    def to_tuple(self) -> TimeValueTuple:
         """Convert to the number of whole and fractional seconds since the epoch, Jan 1, 1904."""
         return self._offset.to_tuple()
 
