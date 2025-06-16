@@ -3,8 +3,8 @@
 Analog Waveforms
 ================
 
-An analog waveform represents a single analog signal with timing information and extended
-properties such as units.
+An analog waveform represents a single analog signal with timing information and extended properties
+such as units.
 
 Constructing analog waveforms
 -----------------------------
@@ -53,6 +53,93 @@ array([1, 2, 3], dtype=int32)
 >>> wfm.scaled_data
 array([2.5, 4.5, 6.5])
 
+Timing Information
+------------------
+
+Analog waveforms include timing information, such as the start time and sample interval, to support
+analyzing and visualizing the data.
+
+You can specify timing information by constructing a :any:`Timing` object and passing it to the
+waveform constructor or factory method:
+
+>>> import datetime as dt
+>>> wfm = AnalogWaveform(timing=Timing.create_with_regular_interval(
+...     dt.timedelta(seconds=1e-3), dt.datetime(2024, 12, 31, 23, 59, 59, tzinfo=dt.timezone.utc)
+... ))
+>>> wfm.timing  # doctest: +NORMALIZE_WHITESPACE
+nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
+    timestamp=datetime.datetime(2024, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc),
+    sample_interval=datetime.timedelta(microseconds=1000))
+
+You can query the waveform's timing information using the :any:`Timing` object's properties:
+
+>>> wfm.timing.start_time
+datetime.datetime(2024, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc)
+>>> wfm.timing.sample_interval
+datetime.timedelta(microseconds=1000)
+
+Timing objects are immutable, so you cannot directly set their properties:
+
+>>> wfm.timing.sample_interval = dt.timedelta(seconds=10e-3)
+Traceback (most recent call last):
+...
+AttributeError: property 'sample_interval' of 'Timing' object has no setter
+
+Instead, if you want to modify the timing information for an existing waveform, you can create a new
+timing object and set the :any:`AnalogWaveform.timing` property:
+
+>>> wfm.timing = Timing.create_with_regular_interval(
+...     dt.timedelta(seconds=1e-3), dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)
+... )
+>>> wfm.timing  # doctest: +NORMALIZE_WHITESPACE
+nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
+    timestamp=datetime.datetime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+    sample_interval=datetime.timedelta(microseconds=1000))
+
+Timing objects support time types from the :any:`datetime`, :any:`hightime`, and
+:any:`nitypes.bintime` modules. If you need the timing information in a specific representation, use
+the conversion methods:
+
+>>> wfm.timing.to_datetime()  # doctest: +NORMALIZE_WHITESPACE
+nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
+    timestamp=datetime.datetime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+    sample_interval=datetime.timedelta(microseconds=1000))
+>>> wfm.timing.to_hightime()  # doctest: +NORMALIZE_WHITESPACE
+nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
+    timestamp=hightime.datetime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+    sample_interval=hightime.timedelta(microseconds=1000))
+>>> wfm.timing.to_bintime()  # doctest: +NORMALIZE_WHITESPACE
+nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
+    timestamp=nitypes.bintime.DateTime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+    sample_interval=nitypes.bintime.TimeDelta(Decimal('0.000999999999999999966606573')))
+
+If :any:`AnalogWaveform.timing` is not specified for a given waveform, it defaults to the
+:any:`Timing.empty` singleton object.
+
+>>> AnalogWaveform().timing
+nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.NONE)
+>>> AnalogWaveform().timing is Timing.empty
+True
+
+Accessing unspecified properties of the timing object raises an exception:
+
+>>> Timing.empty.sample_interval
+Traceback (most recent call last):
+...
+RuntimeError: The waveform timing does not have a sample interval.
+
+You can use :any:`Timing.sample_interval_mode` and ``has_*`` properties such as
+:any:`Timing.has_timestamp` to query which properties of the timing object were specified:
+
+>>> wfm.timing.sample_interval_mode
+<SampleIntervalMode.REGULAR: 1>
+>>> (wfm.timing.has_timestamp, wfm.timing.has_sample_interval)
+(True, True)
+>>> Timing.empty.sample_interval_mode
+<SampleIntervalMode.NONE: 0>
+>>> (Timing.empty.has_timestamp, Timing.empty.has_sample_interval)
+(False, False)
+
 Complex Waveforms
 =================
 
@@ -70,9 +157,8 @@ nitypes.waveform.ComplexWaveform(2, raw_data=array([1.+2.j, 3.+4.j]))
 Scaling complex-number data
 ---------------------------
 
-Complex waveforms support scaling raw integer data to floating-point. Python and NumPy do not
-have native support for complex integers, so this uses the :any:`ComplexInt32DType` structured data
-type.
+Complex waveforms support scaling raw integer data to floating-point. Python and NumPy do not have
+native support for complex integers, so this uses the :any:`ComplexInt32DType` structured data type.
 
 >>> from nitypes.complex import ComplexInt32DType
 >>> wfm = ComplexWaveform.from_array_1d([(1, 2), (3, 4)], ComplexInt32DType, scale_mode=scale_mode)
@@ -84,6 +170,11 @@ nitypes.waveform.ComplexWaveform(2, void32, raw_data=array([(1, 2), (3, 4)],
 array([(1, 2), (3, 4)], dtype=[('real', '<i2'), ('imag', '<i2')])
 >>> wfm.scaled_data
 array([2.5+4.j, 6.5+8.j])
+
+Timing information
+------------------
+
+Complex waveforms have the same timing information as analog waveforms.
 
 Frequency Spectrums
 ===================
