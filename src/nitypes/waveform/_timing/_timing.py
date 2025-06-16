@@ -218,6 +218,11 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         return value
 
     @property
+    def has_sample_interval(self) -> bool:
+        """Indicates whether the waveform timing has a sample interval."""
+        return self._sample_interval is not None
+
+    @property
     def sample_interval(self) -> _TSampleInterval_co:
         """The time interval between samples."""
         value = self._sample_interval
