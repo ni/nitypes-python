@@ -45,7 +45,7 @@ def test___empty___no_time_offset() -> None:
 
 
 def test___empty___no_sample_interval() -> None:
-    assert Timing.empty._sample_interval is None
+    assert not Timing.empty.has_sample_interval
     with pytest.raises(RuntimeError) as exc:
         _ = Timing.empty.sample_interval
 
@@ -65,7 +65,7 @@ def test___no_args___create_with_no_interval___creates_empty_waveform_timing() -
     assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert not timing.has_timestamp
     assert not timing.has_time_offset
-    assert timing._sample_interval is None
+    assert not timing.has_sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
@@ -76,7 +76,7 @@ def test___timestamp___create_with_no_interval___creates_waveform_timing_with_ti
     assert_type(timing, Timing[ht.datetime, dt.timedelta, dt.timedelta])
     assert timing.timestamp == timestamp
     assert not timing.has_time_offset
-    assert timing._sample_interval is None
+    assert not timing.has_sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
@@ -90,7 +90,7 @@ def test___timestamp_and_time_offset___create_with_no_interval___creates_wavefor
     assert_type(timing, Timing[ht.datetime, ht.timedelta, dt.timedelta])
     assert timing.timestamp == timestamp
     assert timing.time_offset == time_offset
-    assert timing._sample_interval is None
+    assert not timing.has_sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
@@ -103,7 +103,7 @@ def test___time_offset___create_with_no_interval___creates_waveform_timing_with_
     assert_type(timing, Timing[dt.datetime, ht.timedelta, dt.timedelta])
     assert not timing.has_timestamp
     assert timing.time_offset == time_offset
-    assert timing._sample_interval is None
+    assert not timing.has_sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
