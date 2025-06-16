@@ -136,7 +136,7 @@ __all__ = [
     "TimingMismatchError",
     "TimingMismatchWarning",
 ]
-__doctest_requires__ = {".": "numpy>=2.0"}
+__doctest_requires__ = {".": ["numpy>=2.0"]}
 
 
 # Hide that it was defined in a helper file
