@@ -86,7 +86,7 @@ Traceback (most recent call last):
 AttributeError: property 'sample_interval' of 'Timing' object has no setter
 
 Instead, if you want to modify the timing information for an existing waveform, you can create a new
-timing object and set the :any:`AnalogWaveform.timing` property:
+timing object and set the :any:`NumericWaveform.timing` property:
 
 >>> wfm.timing = Timing.create_with_regular_interval(
 ...     dt.timedelta(seconds=1e-3), dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)
@@ -113,7 +113,7 @@ nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
     timestamp=nitypes.bintime.DateTime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
     sample_interval=nitypes.bintime.TimeDelta(Decimal('0.000999999999999999966606573')))
 
-If :any:`AnalogWaveform.timing` is not specified for a given waveform, it defaults to the
+If :any:`NumericWaveform.timing` is not specified for a given waveform, it defaults to the
 :any:`Timing.empty` singleton object.
 
 >>> AnalogWaveform().timing
