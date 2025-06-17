@@ -59,7 +59,7 @@ def test___empty___sample_interval_mode_none() -> None:
 ###############################################################################
 # create_with_no_interval
 ###############################################################################
-def test___no_args___create_with_no_interval___creates_empty_waveform_timing() -> None:
+def test___no_args___create_with_no_interval___creates_empty_timing() -> None:
     timing = Timing.create_with_no_interval()
 
     assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
@@ -69,7 +69,7 @@ def test___no_args___create_with_no_interval___creates_empty_waveform_timing() -
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
-def test___timestamp___create_with_no_interval___creates_waveform_timing_with_timestamp() -> None:
+def test___timestamp___create_with_no_interval___creates_timing_with_timestamp() -> None:
     timestamp = bt.DateTime.now(dt.timezone.utc)
     timing = Timing.create_with_no_interval(timestamp)
 
@@ -80,7 +80,7 @@ def test___timestamp___create_with_no_interval___creates_waveform_timing_with_ti
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
-def test___timestamp_and_time_offset___create_with_no_interval___creates_waveform_timing_with_timestamp_and_time_offset() -> (
+def test___timestamp_and_time_offset___create_with_no_interval___creates_timing_with_timestamp_and_time_offset() -> (
     None
 ):
     timestamp = bt.DateTime.now(dt.timezone.utc)
@@ -94,9 +94,7 @@ def test___timestamp_and_time_offset___create_with_no_interval___creates_wavefor
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
-def test___time_offset___create_with_no_interval___creates_waveform_timing_with_time_offset() -> (
-    None
-):
+def test___time_offset___create_with_no_interval___creates_timing_with_time_offset() -> None:
     time_offset = bt.TimeDelta(1.23)
     timing = Timing.create_with_no_interval(time_offset=time_offset)
 
@@ -110,7 +108,7 @@ def test___time_offset___create_with_no_interval___creates_waveform_timing_with_
 ###############################################################################
 # create_with_regular_interval
 ###############################################################################
-def test___sample_interval___create_with_regular_interval___creates_waveform_timing_with_sample_interval() -> (
+def test___sample_interval___create_with_regular_interval___creates_timing_with_sample_interval() -> (
     None
 ):
     sample_interval = bt.TimeDelta(1e-3)
@@ -124,7 +122,7 @@ def test___sample_interval___create_with_regular_interval___creates_waveform_tim
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
 
 
-def test___sample_interval_and_timestamp___create_with_regular_interval___creates_waveform_timing_with_sample_interval_and_timestamp() -> (
+def test___sample_interval_and_timestamp___create_with_regular_interval___creates_timing_with_sample_interval_and_timestamp() -> (
     None
 ):
     sample_interval = bt.TimeDelta(1e-3)
@@ -139,7 +137,7 @@ def test___sample_interval_and_timestamp___create_with_regular_interval___create
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
 
 
-def test___sample_interval_timestamp_and_time_offset___create_with_regular_interval___creates_waveform_timing_with_sample_interval_timestamp_and_time_offset() -> (
+def test___sample_interval_timestamp_and_time_offset___create_with_regular_interval___creates_timing_with_sample_interval_timestamp_and_time_offset() -> (
     None
 ):
     sample_interval = bt.TimeDelta(1e-3)
@@ -155,7 +153,7 @@ def test___sample_interval_timestamp_and_time_offset___create_with_regular_inter
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
 
 
-def test___sample_interval_and_time_offset___create_with_regular_interval___creates_waveform_timing_with_sample_interval_and_time_offset() -> (
+def test___sample_interval_and_time_offset___create_with_regular_interval___creates_timing_with_sample_interval_and_time_offset() -> (
     None
 ):
     sample_interval = bt.TimeDelta(1e-3)
@@ -211,7 +209,7 @@ def test___sample_interval_and_time_offset___create_with_regular_interval___crea
         ],
     ],
 )
-def test___monotonic_timestamps___create_with_irregular_interval___creates_waveform_timing_with_timestamps(
+def test___monotonic_timestamps___create_with_irregular_interval___creates_timing_with_timestamps(
     time_offsets: list[bt.TimeDelta],
 ) -> None:
     start_time = bt.DateTime.now(dt.timezone.utc)
@@ -243,7 +241,7 @@ def test___non_monotonic_timestamps___create_with_irregular_interval___raises_va
     assert exc.value.args[0].startswith("The timestamps must be in ascending or descending order.")
 
 
-def test___timestamps_tuple___create_with_irregular_interval___creates_waveform_timing_with_timestamps() -> (
+def test___timestamps_tuple___create_with_irregular_interval___creates_timing_with_timestamps() -> (
     None
 ):
     start_time = bt.DateTime.now(dt.timezone.utc)
