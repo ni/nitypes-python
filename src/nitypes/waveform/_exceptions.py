@@ -141,3 +141,26 @@ def sample_interval_mode_mismatch() -> TimingMismatchError:
     return TimingMismatchError(
         "The timing of one or more waveforms does not match the timing of the current waveform."
     )
+
+
+def signal_count_mismatch(
+    arg_description: Literal["input array", "input waveform", "provided"],
+    arg_signal_count: int,
+    other_description: Literal["array", "waveform"],
+    other_signal_count: int,
+) -> ValueError:
+    """Create a ValueError for an mismatched signal count."""
+    arg_key = {
+        "input array": "Input array signal count",
+        "input waveform": "Input waveform signal count",
+        "provided": "Signal count",
+    }
+    other_key = {
+        "array": "Array signal count",
+        "waveform": "Waveform signal count",
+    }
+    return ValueError(
+        f"The {arg_description} signal count must match the {other_description} signal count.\n\n"
+        f"{arg_key[arg_description]}: {arg_signal_count}\n"
+        f"{other_key[other_description]}: {other_signal_count}"
+    )
