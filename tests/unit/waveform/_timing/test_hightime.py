@@ -57,9 +57,72 @@ def test___empty___sample_interval_mode_none() -> None:
 
 
 ###############################################################################
+# construct
+###############################################################################
+def test___no_optional_args___construct___creates_empty_timing() -> None:
+    timing = Timing(SampleIntervalMode.NONE)
+
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
+    assert not timing.has_timestamp
+    assert not timing.has_time_offset
+    assert not timing.has_sample_interval
+    assert timing.sample_interval_mode == SampleIntervalMode.NONE
+
+
+def test___timestamp___construct___creates_timing_with_timestamp() -> None:
+    timestamp = ht.datetime.now(dt.timezone.utc)
+    timing = Timing(SampleIntervalMode.NONE, timestamp)
+
+    assert_type(timing, Timing[ht.datetime, dt.timedelta, dt.timedelta])
+    assert timing.timestamp == timestamp
+    assert not timing.has_time_offset
+    assert not timing.has_sample_interval
+    assert timing.sample_interval_mode == SampleIntervalMode.NONE
+
+
+def test___time_offset___construct___creates_timing_with_time_offset() -> None:
+    time_offset = ht.timedelta(seconds=1.23)
+    timing = Timing(SampleIntervalMode.NONE, time_offset=time_offset)
+
+    assert_type(timing, Timing[dt.datetime, ht.timedelta, dt.timedelta])
+    assert not timing.has_timestamp
+    assert timing.time_offset == time_offset
+    assert not timing.has_sample_interval
+    assert timing.sample_interval_mode == SampleIntervalMode.NONE
+
+
+def test___sample_interval___construct___creates_timing_with_sample_interval() -> None:
+    sample_interval = ht.timedelta(seconds=1e-3)
+
+    timing = Timing(SampleIntervalMode.REGULAR, sample_interval=sample_interval)
+
+    assert_type(timing, Timing[dt.datetime, dt.timedelta, ht.timedelta])
+    assert not timing.has_timestamp
+    assert not timing.has_time_offset
+    assert timing.sample_interval == sample_interval
+    assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
+
+
+def test___sample_interval_timestamp_and_time_offset___construct___creates_timing_with_sample_interval_timestamp_and_time_offset() -> (
+    None
+):
+    sample_interval = ht.timedelta(seconds=1e-3)
+    timestamp = ht.datetime.now(dt.timezone.utc)
+    time_offset = ht.timedelta(seconds=1.23)
+
+    timing = Timing(SampleIntervalMode.REGULAR, timestamp, time_offset, sample_interval)
+
+    assert_type(timing, Timing[ht.datetime, ht.timedelta, ht.timedelta])
+    assert timing.timestamp == timestamp
+    assert timing.time_offset == time_offset
+    assert timing.sample_interval == sample_interval
+    assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
+
+
+###############################################################################
 # create_with_no_interval
 ###############################################################################
-def test___no_args___create_with_no_interval___creates_empty_waveform_timing() -> None:
+def test___no_args___create_with_no_interval___creates_empty_timing() -> None:
     timing = Timing.create_with_no_interval()
 
     assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
@@ -69,7 +132,7 @@ def test___no_args___create_with_no_interval___creates_empty_waveform_timing() -
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
-def test___timestamp___create_with_no_interval___creates_waveform_timing_with_timestamp() -> None:
+def test___timestamp___create_with_no_interval___creates_timing_with_timestamp() -> None:
     timestamp = ht.datetime.now(dt.timezone.utc)
     timing = Timing.create_with_no_interval(timestamp)
 
@@ -80,7 +143,7 @@ def test___timestamp___create_with_no_interval___creates_waveform_timing_with_ti
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
-def test___timestamp_and_time_offset___create_with_no_interval___creates_waveform_timing_with_timestamp_and_time_offset() -> (
+def test___timestamp_and_time_offset___create_with_no_interval___creates_timing_with_timestamp_and_time_offset() -> (
     None
 ):
     timestamp = ht.datetime.now(dt.timezone.utc)
@@ -94,9 +157,7 @@ def test___timestamp_and_time_offset___create_with_no_interval___creates_wavefor
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
-def test___time_offset___create_with_no_interval___creates_waveform_timing_with_time_offset() -> (
-    None
-):
+def test___time_offset___create_with_no_interval___creates_timing_with_time_offset() -> None:
     time_offset = ht.timedelta(seconds=1.23)
     timing = Timing.create_with_no_interval(time_offset=time_offset)
 
@@ -110,7 +171,7 @@ def test___time_offset___create_with_no_interval___creates_waveform_timing_with_
 ###############################################################################
 # create_with_regular_interval
 ###############################################################################
-def test___sample_interval___create_with_regular_interval___creates_waveform_timing_with_sample_interval() -> (
+def test___sample_interval___create_with_regular_interval___creates_timing_with_sample_interval() -> (
     None
 ):
     sample_interval = ht.timedelta(milliseconds=1)
@@ -124,7 +185,7 @@ def test___sample_interval___create_with_regular_interval___creates_waveform_tim
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
 
 
-def test___sample_interval_and_timestamp___create_with_regular_interval___creates_waveform_timing_with_sample_interval_and_timestamp() -> (
+def test___sample_interval_and_timestamp___create_with_regular_interval___creates_timing_with_sample_interval_and_timestamp() -> (
     None
 ):
     sample_interval = ht.timedelta(milliseconds=1)
@@ -139,7 +200,7 @@ def test___sample_interval_and_timestamp___create_with_regular_interval___create
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
 
 
-def test___sample_interval_timestamp_and_time_offset___create_with_regular_interval___creates_waveform_timing_with_sample_interval_timestamp_and_time_offset() -> (
+def test___sample_interval_timestamp_and_time_offset___create_with_regular_interval___creates_timing_with_sample_interval_timestamp_and_time_offset() -> (
     None
 ):
     sample_interval = ht.timedelta(milliseconds=1)
@@ -155,7 +216,7 @@ def test___sample_interval_timestamp_and_time_offset___create_with_regular_inter
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
 
 
-def test___sample_interval_and_time_offset___create_with_regular_interval___creates_waveform_timing_with_sample_interval_and_time_offset() -> (
+def test___sample_interval_and_time_offset___create_with_regular_interval___creates_timing_with_sample_interval_and_time_offset() -> (
     None
 ):
     sample_interval = ht.timedelta(milliseconds=1)
@@ -203,7 +264,7 @@ def test___sample_interval_and_time_offset___create_with_regular_interval___crea
         ],
     ],
 )
-def test___monotonic_timestamps___create_with_irregular_interval___creates_waveform_timing_with_timestamps(
+def test___monotonic_timestamps___create_with_irregular_interval___creates_timing_with_timestamps(
     time_offsets: list[ht.timedelta],
 ) -> None:
     start_time = ht.datetime.now(dt.timezone.utc)
@@ -235,7 +296,7 @@ def test___non_monotonic_timestamps___create_with_irregular_interval___raises_va
     assert exc.value.args[0].startswith("The timestamps must be in ascending or descending order.")
 
 
-def test___timestamps_tuple___create_with_irregular_interval___creates_waveform_timing_with_timestamps() -> (
+def test___timestamps_tuple___create_with_irregular_interval___creates_timing_with_timestamps() -> (
     None
 ):
     start_time = ht.datetime.now(dt.timezone.utc)
