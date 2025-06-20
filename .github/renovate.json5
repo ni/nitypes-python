@@ -28,11 +28,12 @@
     }
   ],
   "lockFileMaintenance": {
-    // Maintain lock files on Monday nights. This is updates indirect
-    // dependencies that aren't handled by the Python packages group.
+    // Maintain lock files on early Tuesday mornings. This is primarily to
+    // update indirect dependencies that aren't handled by the Python packages
+    // group.
     "enabled": true,
     "schedule": [
-      "* 20-23 * * 1"
+      "* 0-3 * * 2"
     ]
   },
   "osvVulnerabilityAlerts": true
