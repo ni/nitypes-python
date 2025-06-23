@@ -23,7 +23,6 @@ def test___empty___is_timing() -> None:
 
 def test___empty___no_timestamp() -> None:
     assert not Timing.empty.has_timestamp
-    assert not Timing.empty.has_start_time
     with pytest.raises(RuntimeError) as exc:
         _ = Timing.empty.timestamp
 
@@ -31,6 +30,7 @@ def test___empty___no_timestamp() -> None:
 
 
 def test___empty___no_start_time() -> None:
+    assert not Timing.empty.has_start_time
     with pytest.raises(RuntimeError) as exc:
         _ = Timing.empty.start_time
 
@@ -65,7 +65,6 @@ def test___no_optional_args___construct___creates_empty_timing() -> None:
 
     assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert not timing.has_timestamp
-    assert not timing.has_start_time
     assert not timing.has_time_offset
     assert not timing.has_sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
@@ -82,13 +81,19 @@ def test___timestamp___construct___creates_timing_with_timestamp() -> None:
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
 
 
+def test___timestamp___construct___has_start_time() -> None:
+    timestamp = ht.datetime.now(dt.timezone.utc)
+    timing = Timing(SampleIntervalMode.NONE, timestamp)
+
+    assert timing.has_start_time
+
+
 def test___time_offset___construct___creates_timing_with_time_offset() -> None:
     time_offset = ht.timedelta(seconds=1.23)
     timing = Timing(SampleIntervalMode.NONE, time_offset=time_offset)
 
     assert_type(timing, Timing[dt.datetime, ht.timedelta, dt.timedelta])
     assert not timing.has_timestamp
-    assert not timing.has_start_time
     assert timing.time_offset == time_offset
     assert not timing.has_sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
@@ -101,7 +106,6 @@ def test___sample_interval___construct___creates_timing_with_sample_interval() -
 
     assert_type(timing, Timing[dt.datetime, dt.timedelta, ht.timedelta])
     assert not timing.has_timestamp
-    assert not timing.has_start_time
     assert not timing.has_time_offset
     assert timing.sample_interval == sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
@@ -131,7 +135,6 @@ def test___no_args___create_with_no_interval___creates_empty_timing() -> None:
 
     assert_type(timing, Timing[dt.datetime, dt.timedelta, dt.timedelta])
     assert not timing.has_timestamp
-    assert not timing.has_start_time
     assert not timing.has_time_offset
     assert not timing.has_sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
@@ -168,7 +171,6 @@ def test___time_offset___create_with_no_interval___creates_timing_with_time_offs
 
     assert_type(timing, Timing[dt.datetime, ht.timedelta, dt.timedelta])
     assert not timing.has_timestamp
-    assert not timing.has_start_time
     assert timing.time_offset == time_offset
     assert not timing.has_sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
@@ -186,7 +188,6 @@ def test___sample_interval___create_with_regular_interval___creates_timing_with_
 
     assert_type(timing, Timing[dt.datetime, dt.timedelta, ht.timedelta])
     assert not timing.has_timestamp
-    assert not timing.has_start_time
     assert not timing.has_time_offset
     assert timing.sample_interval == sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
@@ -233,7 +234,6 @@ def test___sample_interval_and_time_offset___create_with_regular_interval___crea
 
     assert_type(timing, Timing[dt.datetime, ht.timedelta, ht.timedelta])
     assert not timing.has_timestamp
-    assert not timing.has_start_time
     assert timing.time_offset == time_offset
     assert timing.sample_interval == sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.REGULAR
