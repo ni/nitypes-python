@@ -141,6 +141,7 @@ class DigitalWaveform(Generic[_TState]):
 
     __slots__ = [
         "_data",
+        "_data_1d",
         "_start_index",
         "_sample_count",
         "_extended_properties",
@@ -315,6 +316,7 @@ class DigitalWaveform(Generic[_TState]):
             default_value = DigitalState.FORCE_DOWN
 
         self._data = np.full((capacity, signal_count), default_value, dtype)
+        self._data_1d = None
         self._start_index = start_index
         self._sample_count = sample_count
 
@@ -339,9 +341,11 @@ class DigitalWaveform(Generic[_TState]):
 
         if data.ndim == 1:
             data_signal_count = 1
+            data_1d = data
             data = data.reshape(len(data), 1)
         elif data.ndim == 2:
             data_signal_count = data.shape[1]
+            data_1d = None
         else:
             raise invalid_array_ndim("input array", "one or two-dimensional array", data.ndim)
 
@@ -359,11 +363,12 @@ class DigitalWaveform(Generic[_TState]):
                 start_index, sample_count, "input array length", len(data)
             )
 
-        signal_count = arg_to_uint("signal count", signal_count, 1)
+        signal_count = arg_to_uint("signal count", signal_count, data_signal_count)
         if signal_count != data_signal_count:
             raise signal_count_mismatch("provided", signal_count, "array", data_signal_count)
 
         self._data = data
+        self._data_1d = data_1d
         self._start_index = start_index
         self._sample_count = sample_count
 
@@ -407,7 +412,8 @@ class DigitalWaveform(Generic[_TState]):
     def signal_count(self) -> int:
         """The number of signals in the waveform."""
         # npt.NDArray[_ScalarT] currently has a shape type of _AnyShape, which is tuple[Any, ...]
-        return self._data.shape[1]  # type: ignore[no-any-return]
+        shape: tuple[int, ...] = self._data.shape
+        return shape[1]
 
     @property
     def capacity(self) -> int:
@@ -428,7 +434,12 @@ class DigitalWaveform(Generic[_TState]):
         if value < min_capacity:
             raise capacity_too_small(value, min_capacity, "waveform")
         if value != len(self._data):
-            self._data.resize(value, refcheck=False)
+            if self._data_1d is not None:
+                # If _data is a 2D view of a 1D array, resize the base array and recreate the view.
+                self._data_1d.resize(value, refcheck=False)
+                self._data = self._data_1d.reshape(len(self._data_1d), 1)
+            else:
+                self._data.resize((value, self.signal_count), refcheck=False)
 
     @property
     def dtype(self) -> np.dtype[_TState]:
@@ -539,7 +550,7 @@ class DigitalWaveform(Generic[_TState]):
         timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
     ) -> None:
         if array.dtype != self.dtype:
-            raise data_type_mismatch("input array", array.dtype, "spectrum", self.dtype)
+            raise data_type_mismatch("input array", array.dtype, "waveform", self.dtype)
 
         if array.ndim == 1:
             array_signal_count = 1
@@ -626,7 +637,7 @@ class DigitalWaveform(Generic[_TState]):
         signal_count: SupportsIndex | None = None,
     ) -> None:
         if array.dtype != self.dtype:
-            raise data_type_mismatch("input array", array.dtype, "spectrum", self.dtype)
+            raise data_type_mismatch("input array", array.dtype, "waveform", self.dtype)
 
         if array.ndim == 1:
             array_signal_count = 1
@@ -672,7 +683,7 @@ class DigitalWaveform(Generic[_TState]):
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        ctor_args = (self._sample_count, self.dtype)
+        ctor_args = (self._sample_count, self.signal_count, self.dtype)
         ctor_kwargs: dict[str, Any] = {
             "data": self.data,
             "extended_properties": self._extended_properties,
@@ -693,7 +704,8 @@ class DigitalWaveform(Generic[_TState]):
         # start_index and capacity are not shown because they are allocation details. data hides
         # the unused data before start_index and after start_index+sample_count.
         if self._sample_count > 0:
-            args.append(f"data={self.data!r}")
+            # Hack: undo NumPy's line wrapping
+            args.append(f"data={self.data!r}".replace("\n      ", ""))
         if self._extended_properties:
             args.append(f"extended_properties={self._extended_properties._properties!r}")
         if self._timing is not Timing.empty:
