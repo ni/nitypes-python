@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import builtins
 import sys
 from typing import Any
 
 import numpy as np
 import numpy.typing as npt
+from numpy import bool_ as bool
 
 # In NumPy 2.x, np.long and np.ulong are equivalent to long and unsigned long in C, following
 # the platform's data model.
@@ -26,11 +28,11 @@ else:
     from numpy import intp as long, uintp as ulong
 
 
-__all__ = ["asarray", "isdtype", "long", "ulong"]
+__all__ = ["asarray", "bool", "isdtype", "long", "ulong"]
 
 
 def asarray(  # noqa: D103 - missing docstring in public function
-    a: npt.ArrayLike, dtype: npt.DTypeLike = None, *, copy: bool | None = None
+    a: npt.ArrayLike, dtype: npt.DTypeLike = None, *, copy: builtins.bool | None = None
 ) -> npt.NDArray[Any]:
     b = np.asarray(a, dtype)
     made_copy = b is not a and b.base is None
@@ -43,7 +45,7 @@ def asarray(  # noqa: D103 - missing docstring in public function
 
 def isdtype(  # noqa: D103 - missing docstring in public function
     dtype: type[Any] | np.dtype[Any], kind: npt.DTypeLike | tuple[npt.DTypeLike, ...]
-) -> bool:
+) -> builtins.bool:
     if isinstance(kind, tuple):
         return any(dtype == k for k in kind)
     else:
