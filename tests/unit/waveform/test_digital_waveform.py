@@ -3,11 +3,10 @@ from __future__ import annotations
 import array
 import copy
 import datetime as dt
-import math
 import pickle
 import sys
 import weakref
-from typing import Any, Literal, Union
+from typing import Any, Union
 
 import hightime as ht
 import numpy as np
