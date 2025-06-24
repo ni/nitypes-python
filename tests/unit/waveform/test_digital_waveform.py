@@ -125,7 +125,7 @@ def test___dtype_str_with_tdata_hint___create___narrows_tdata() -> None:
 ###############################################################################
 # data
 ###############################################################################
-def test___int32_waveform___data___returns_int32_data() -> None:
+def test___uint8_waveform___data___returns_uint8_data() -> None:
     waveform = DigitalWaveform.from_lines([0, 1, 2, 3], np.uint8)
 
     data = waveform.data
@@ -138,7 +138,7 @@ def test___int32_waveform___data___returns_int32_data() -> None:
 ###############################################################################
 # get_data
 ###############################################################################
-def test___int32_waveform___get_data___returns_data() -> None:
+def test___uint8_waveform___get_data___returns_data() -> None:
     waveform = DigitalWaveform.from_lines([0, 1, 2, 3], np.uint8)
 
     data = waveform.get_data()
@@ -684,7 +684,7 @@ def test___empty_waveform_list___append___no_effect() -> None:
     assert waveform.data.tolist() == [[0], [1], [2]]
 
 
-def test___int32_waveform_list___append___appends_waveform() -> None:
+def test___uint8_waveform_list___append___appends_waveform() -> None:
     waveform = DigitalWaveform.from_lines([[0], [1], [2]], np.uint8)
     other = [
         DigitalWaveform.from_lines([[3], [4], [5]], np.uint8),
