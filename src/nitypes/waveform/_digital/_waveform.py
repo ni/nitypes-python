@@ -240,6 +240,7 @@ class DigitalWaveform(Generic[_TState]):
         Args:
             sample_count: The number of samples in the waveform.
             signal_count: The number of signals in the waveform.
+            dtype: The NumPy data type for the waveform data.
             default_value: The :any:`DigitalState` to initialize the waveform with.
             data: A NumPy ndarray to use for sample storage. The waveform takes ownership
                 of this array. If not specified, an ndarray is created based on the specified dtype,
@@ -392,7 +393,7 @@ class DigitalWaveform(Generic[_TState]):
         Returns:
             A subset of the raw waveform data.
         """
-        start_index = arg_to_uint("sample index", start_index, 0)
+        start_index = arg_to_uint("start index", start_index, 0)
         if start_index > self.sample_count:
             raise start_index_too_large(
                 start_index, "number of samples in the waveform", self.sample_count
@@ -509,7 +510,6 @@ class DigitalWaveform(Generic[_TState]):
         Raises:
             TimingMismatchError: The current and other waveforms have incompatible timing.
             TimingMismatchWarning: The sample intervals of the waveform(s) do not match.
-            ScalingMismatchWarning: The scale modes of the waveform(s) do not match.
             ValueError: The other array has the wrong number of dimensions or the length of the
                 timestamps argument does not match the length of the other array.
             TypeError: The data types of the current waveform and other array or waveform(s) do not
@@ -531,10 +531,6 @@ class DigitalWaveform(Generic[_TState]):
 
         * Extended properties of the other waveform(s) are merged into the current waveform if they
           are not already set in the current waveform.
-
-        * If the scale mode of other waveform(s) does not match the scale mode of the current
-          waveform, a ScalingMismatchWarning is generated. Otherwise, the scaling information of the
-          other waveform(s) is discarded.
         """
         if isinstance(other, np.ndarray):
             self._append_array(other, timestamps)

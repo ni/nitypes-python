@@ -358,7 +358,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         Returns:
             A subset of the raw waveform data.
         """
-        start_index = arg_to_uint("sample index", start_index, 0)
+        start_index = arg_to_uint("start index", start_index, 0)
         if start_index > self.sample_count:
             raise start_index_too_large(
                 start_index, "number of samples in the waveform", self.sample_count
