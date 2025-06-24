@@ -196,6 +196,11 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         return value
 
     @property
+    def has_start_time(self) -> bool:
+        """Indicates whether the waveform timing has a start_time."""
+        return self.has_timestamp
+
+    @property
     def start_time(self) -> _TTimestamp_co:
         """The time that the first sample in the waveform was acquired."""
         value = self.timestamp

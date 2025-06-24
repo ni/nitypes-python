@@ -29,6 +29,7 @@ def test___empty___no_timestamp() -> None:
 
 
 def test___empty___no_start_time() -> None:
+    assert not Timing.empty.has_start_time
     with pytest.raises(RuntimeError) as exc:
         _ = Timing.empty.start_time
 
@@ -77,6 +78,13 @@ def test___timestamp___construct___creates_timing_with_timestamp() -> None:
     assert not timing.has_time_offset
     assert not timing.has_sample_interval
     assert timing.sample_interval_mode == SampleIntervalMode.NONE
+
+
+def test___timestamp___construct___has_start_time() -> None:
+    timestamp = dt.datetime.now(dt.timezone.utc)
+    timing = Timing(SampleIntervalMode.NONE, timestamp)
+
+    assert timing.has_start_time
 
 
 def test___time_offset___construct___creates_timing_with_time_offset() -> None:
