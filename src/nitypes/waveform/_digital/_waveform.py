@@ -2,93 +2,93 @@ from __future__ import annotations
 
 import datetime as dt
 import sys
-import warnings
-from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
-from typing import Any, Generic, SupportsIndex, overload
+from typing import Any, Generic, SupportsIndex, TypeVar, Union, overload
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self, TypeVar
+from typing_extensions import Self
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
+from nitypes.waveform._digital._state import DigitalState
 from nitypes.waveform._exceptions import (
     capacity_mismatch,
     capacity_too_small,
     data_type_mismatch,
     irregular_timestamp_count_mismatch,
+    signal_count_mismatch,
     start_index_or_sample_count_too_large,
     start_index_too_large,
 )
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
-    UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
     ExtendedPropertyValue,
 )
-from nitypes.waveform._scaling import NO_SCALING, ScaleMode
 from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
-from nitypes.waveform._warnings import scale_mode_mismatch
 
 if sys.version_info < (3, 10):
     import array as std_array
 
-# _TRaw_co specifies the type of the raw_data array. It is not limited to supported
-# types. Requesting an unsupported type raises TypeError at run time.
-_TRaw_co = TypeVar("_TRaw_co", bound=np.generic, covariant=True)
+# np.byte == np.int8, np.ubyte == np.uint8
+_TState = TypeVar("_TState", bound=Union[np.bool, np.int8, np.uint8])
+_TOtherState = TypeVar("_TOtherState", bound=Union[np.bool, np.int8, np.uint8])
+_TPort = TypeVar("_TPort", bound=Union[np.uint8, np.uint16, np.uint32])
 
-# _TScaled_co specifies the type of the scaled_data property.
-_TScaled_co = TypeVar("_TScaled_co", bound=np.generic, covariant=True)
-
-# _TOtherScaled is for the get_scaled_data() method, which supports both single and
-# double precision.
-_TOtherScaled = TypeVar("_TOtherScaled", bound=np.generic)
+_DIGITAL_STATE_DTYPES = (np.bool, np.int8, np.uint8)
+_DIGITAL_PORT_DTYPES = (np.uint8, np.uint16, np.uint32)
 
 
-# Note about NumPy type hints:
-# - At time of writing (April 2025), shape typing is still under development, so we do not
-#   distinguish between 1D and 2D arrays in type hints.
-# - npt.ArrayLike accepts some types that np.asarray() does not, such as buffers, so we are
-#   explicitly using npt.NDArray | Sequence instead of npt.ArrayLike.
-# - _TRaw_co is bound to np.generic, so Sequence[_TRaw_co] will not match list[int].
-# - We are not using PEP 696 – Type Defaults for Type Parameters for type variables on functions
-#   because it makes the type parameter default to np.float64 in some cases where it should be
-#   inferred as Any, such as when dtype is specified as a str. PEP 696 seems more appropriate for
-#   type variables on classes.
+class DigitalWaveform(Generic[_TState]):
+    """A digital waveform, which encapsulates digital data and timing information."""
 
+    @overload
+    @classmethod
+    def from_lines(
+        cls,
+        array: npt.NDArray[_TOtherState],
+        dtype: None = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> DigitalWaveform[_TOtherState]: ...
 
-class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
-    """A numeric waveform, which encapsulates numeric data and timing information.
+    @overload
+    @classmethod
+    def from_lines(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        dtype: type[_TOtherState] | np.dtype[_TOtherState],
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> DigitalWaveform[_TOtherState]: ...
 
-    This is an abstract base class. To create a numeric waveform, use :any:`AnalogWaveform` or
-    :any:`ComplexWaveform`.
-    """
-
-    @staticmethod
-    @abstractmethod
-    def _get_default_raw_dtype() -> type[np.generic] | np.dtype[np.generic]:
-        raise NotImplementedError
-
-    @staticmethod
-    @abstractmethod
-    def _get_default_scaled_dtype() -> type[np.generic] | np.dtype[np.generic]:
-        raise NotImplementedError
-
-    @staticmethod
-    @abstractmethod
-    def _get_supported_raw_dtypes() -> tuple[npt.DTypeLike, ...]:
-        raise NotImplementedError
-
-    @staticmethod
-    @abstractmethod
-    def _get_supported_scaled_dtypes() -> tuple[npt.DTypeLike, ...]:
-        raise NotImplementedError
+    @overload
+    @classmethod
+    def from_lines(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        dtype: npt.DTypeLike = ...,
+        *,
+        copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> DigitalWaveform[Any]: ...
 
     @classmethod
-    def from_array_1d(
+    def from_lines(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
         dtype: npt.DTypeLike = None,
@@ -96,142 +96,153 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
+        signal_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
-        scale_mode: ScaleMode | None = None,
-    ) -> Self:
-        """Construct a waveform from a one-dimensional array or sequence.
+    ) -> DigitalWaveform[Any]:
+        """Construct a waveform from a one or two-dimensional array or sequence of line data.
 
         Args:
-            array: The waveform data as a one-dimensional array or a sequence.
-            dtype: The NumPy data type for the waveform data. This argument is required
-                when array is a sequence.
+            array: The line data as a one or two-dimensional array or a sequence.
+            dtype: The NumPy data type for the waveform data.
             copy: Specifies whether to copy the array or save a reference to it.
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
+            signal_count: The number of signals in the waveform.
             extended_properties: The extended properties of the waveform.
             timing: The timing information of the waveform.
-            scale_mode: The scale mode of the waveform.
 
         Returns:
             A waveform containing the specified data.
         """
         if isinstance(array, np.ndarray):
-            if array.ndim != 1:
+            if array.ndim not in (1, 2):
                 raise invalid_array_ndim(
-                    "input array", "one-dimensional array or sequence", array.ndim
+                    "input array", "one or two-dimensional array or sequence", array.ndim
                 )
+            if dtype is not None and array.dtype != dtype:
+                raise data_type_mismatch("input array", array.dtype, "requested", dtype)
         elif isinstance(array, Sequence) or (
             sys.version_info < (3, 10) and isinstance(array, std_array.array)
         ):
             if dtype is None:
-                raise ValueError("You must specify a dtype when the input array is a sequence.")
+                dtype = np.uint8
         else:
-            raise invalid_arg_type("input array", "one-dimensional array or sequence", array)
+            raise invalid_arg_type("input array", "one or two-dimensional array or sequence", array)
 
         return cls(
-            raw_data=_np_asarray(array, dtype, copy=copy),
+            data=_np_asarray(array, dtype, copy=copy),
             start_index=start_index,
             sample_count=sample_count,
+            signal_count=signal_count,
             extended_properties=extended_properties,
             timing=timing,
-            scale_mode=scale_mode,
         )
-
-    @classmethod
-    def from_array_2d(
-        cls,
-        array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: npt.DTypeLike = None,
-        *,
-        copy: bool = True,
-        start_index: SupportsIndex | None = 0,
-        sample_count: SupportsIndex | None = None,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
-        scale_mode: ScaleMode | None = None,
-    ) -> list[Self]:
-        """Construct a list of waveforms from a two-dimensional array or nested sequence.
-
-        Args:
-            array: The waveform data as a two-dimensional array or a nested sequence.
-            dtype: The NumPy data type for the waveform data. This argument is required
-                when array is a sequence.
-            copy: Specifies whether to copy the array or save a reference to it.
-            start_index: The sample index at which the waveform data begins.
-            sample_count: The number of samples in the waveform.
-            extended_properties: The extended properties of the waveform.
-            timing: The timing information of the waveform.
-            scale_mode: The scale mode of the waveform.
-
-        Returns:
-            A list containing a waveform for each row of the specified data.
-
-        When constructing multiple waveforms, the same extended properties, timing
-        information, and scale mode are applied to all waveforms. Consider assigning
-        these properties after construction.
-        """
-        if isinstance(array, np.ndarray):
-            if array.ndim != 2:
-                raise invalid_array_ndim(
-                    "input array", "two-dimensional array or nested sequence", array.ndim
-                )
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
-            if dtype is None:
-                raise ValueError("You must specify a dtype when the input array is a sequence.")
-        else:
-            raise invalid_arg_type("input array", "two-dimensional array or nested sequence", array)
-
-        return [
-            cls(
-                raw_data=_np_asarray(array[i], dtype, copy=copy),
-                start_index=start_index,
-                sample_count=sample_count,
-                extended_properties=extended_properties,
-                timing=timing,
-                scale_mode=scale_mode,
-            )
-            for i in range(len(array))
-        ]
 
     __slots__ = [
         "_data",
+        "_data_1d",
         "_start_index",
         "_sample_count",
         "_extended_properties",
         "_timing",
-        "_scale_mode",
         "__weakref__",
     ]
 
-    _data: npt.NDArray[_TRaw_co]
+    _data: npt.NDArray[_TState]
+    _data_1d: npt.NDArray[_TState] | None
     _start_index: int
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
     _timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]
-    _scale_mode: ScaleMode
+
+    # If neither dtype nor data is specified, _TData defaults to np.uint8.
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: DigitalWaveform[np.uint8],
+        sample_count: SupportsIndex | None = ...,
+        signal_count: SupportsIndex | None = ...,
+        dtype: None = ...,
+        default_value: bool | int | DigitalState | None = ...,
+        *,
+        data: None = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: DigitalWaveform[_TOtherState],
+        sample_count: SupportsIndex | None = ...,
+        signal_count: SupportsIndex | None = ...,
+        dtype: type[_TOtherState] | np.dtype[_TOtherState] = ...,
+        default_value: bool | int | DigitalState | None = ...,
+        *,
+        data: None = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: DigitalWaveform[_TOtherState],
+        sample_count: SupportsIndex | None = ...,
+        signal_count: SupportsIndex | None = ...,
+        dtype: None = ...,
+        default_value: bool | int | DigitalState | None = ...,
+        *,
+        data: npt.NDArray[_TOtherState] = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
+        self: DigitalWaveform[Any],
+        sample_count: SupportsIndex | None = ...,
+        signal_count: SupportsIndex | None = ...,
+        dtype: npt.DTypeLike = ...,
+        default_value: bool | int | DigitalState | None = ...,
+        *,
+        data: npt.NDArray[Any] | None = ...,
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        copy_extended_properties: bool = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> None: ...
 
     def __init__(
         self,
         sample_count: SupportsIndex | None = None,
+        signal_count: SupportsIndex | None = None,
         dtype: npt.DTypeLike = None,
+        default_value: bool | int | DigitalState | None = None,
         *,
-        raw_data: npt.NDArray[_TRaw_co] | None = None,
+        data: npt.NDArray[Any] | None = None,
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         copy_extended_properties: bool = True,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
-        scale_mode: ScaleMode | None = None,
     ) -> None:
-        """Initialize a new numeric waveform.
+        """Initialize a new digital waveform.
 
         Args:
             sample_count: The number of samples in the waveform.
+            signal_count: The number of signals in the waveform.
             dtype: The NumPy data type for the waveform data.
-            raw_data: A NumPy ndarray to use for sample storage. The waveform takes ownership
+            default_value: The :any:`DigitalState` to initialize the waveform with.
+            data: A NumPy ndarray to use for sample storage. The waveform takes ownership
                 of this array. If not specified, an ndarray is created based on the specified dtype,
                 start index, sample count, and capacity.
             start_index: The sample index at which the waveform data begins.
@@ -242,25 +253,30 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
             copy_extended_properties: Specifies whether to copy the extended properties or take
                 ownership.
             timing: The timing information of the waveform.
-            scale_mode: The scale mode of the waveform.
 
         Returns:
-            A numeric waveform.
+            A digital waveform.
         """
-        if raw_data is None:
+        if data is None:
             self._init_with_new_array(
-                sample_count, dtype, start_index=start_index, capacity=capacity
+                sample_count,
+                signal_count,
+                dtype,
+                default_value,
+                start_index=start_index,
+                capacity=capacity,
             )
-        elif isinstance(raw_data, np.ndarray):
+        elif isinstance(data, np.ndarray):
             self._init_with_provided_array(
-                raw_data,
+                data,
                 dtype,
                 start_index=start_index,
                 sample_count=sample_count,
+                signal_count=signal_count,
                 capacity=capacity,
             )
         else:
-            raise invalid_arg_type("raw data", "NumPy ndarray", raw_data)
+            raise invalid_arg_type("raw data", "NumPy ndarray", data)
 
         if copy_extended_properties or not isinstance(
             extended_properties, ExtendedPropertyDictionary
@@ -272,25 +288,24 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
             timing = Timing.empty
         self._timing = timing
 
-        if scale_mode is None:
-            scale_mode = NO_SCALING
-        self._scale_mode = scale_mode
-
     def _init_with_new_array(
         self,
         sample_count: SupportsIndex | None = None,
+        signal_count: SupportsIndex | None = None,
         dtype: npt.DTypeLike = None,
+        default_value: bool | int | DigitalState | None = None,
         *,
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
     ) -> None:
         start_index = arg_to_uint("start index", start_index, 0)
         sample_count = arg_to_uint("sample count", sample_count, 0)
+        signal_count = arg_to_uint("signal count", signal_count, 1)
         capacity = arg_to_uint("capacity", capacity, sample_count)
 
         if dtype is None:
-            dtype = self.__class__._get_default_raw_dtype()
-        validate_dtype(dtype, self.__class__._get_supported_raw_dtypes())
+            dtype = np.uint8
+        validate_dtype(dtype, _DIGITAL_STATE_DTYPES)
 
         if start_index > capacity:
             raise start_index_too_large(start_index, "capacity", capacity)
@@ -299,29 +314,44 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
                 start_index, sample_count, "capacity", capacity
             )
 
-        self._data = np.zeros(capacity, dtype)
+        if default_value is None:
+            default_value = 0
+        elif not isinstance(default_value, (bool, int, DigitalState)):
+            raise invalid_arg_type("default value", "bool, int, or DigitalState", default_value)
+
+        self._data = np.full((capacity, signal_count), default_value, dtype)
+        self._data_1d = None
         self._start_index = start_index
         self._sample_count = sample_count
 
     def _init_with_provided_array(
         self,
-        data: npt.NDArray[_TRaw_co],
+        data: npt.NDArray[_TState],
         dtype: npt.DTypeLike = None,
         *,
         start_index: SupportsIndex | None = None,
         sample_count: SupportsIndex | None = None,
+        signal_count: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
     ) -> None:
         if not isinstance(data, np.ndarray):
-            raise invalid_arg_type("input array", "one-dimensional array", data)
-        if data.ndim != 1:
-            raise invalid_array_ndim("input array", "one-dimensional array", data.ndim)
+            raise invalid_arg_type("input array", "one or two-dimensional array", data)
 
         if dtype is None:
             dtype = data.dtype
         if dtype != data.dtype:
             raise data_type_mismatch("input array", data.dtype, "requested", np.dtype(dtype))
-        validate_dtype(dtype, self.__class__._get_supported_raw_dtypes())
+        validate_dtype(dtype, _DIGITAL_STATE_DTYPES)
+
+        if data.ndim == 1:
+            data_signal_count = 1
+            data_1d = data
+            data = data.reshape(len(data), 1)
+        elif data.ndim == 2:
+            data_signal_count = data.shape[1]
+            data_1d = None
+        else:
+            raise invalid_array_ndim("input array", "one or two-dimensional array", data.ndim)
 
         capacity = arg_to_uint("capacity", capacity, len(data))
         if capacity != len(data):
@@ -337,19 +367,24 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
                 start_index, sample_count, "input array length", len(data)
             )
 
+        signal_count = arg_to_uint("signal count", signal_count, data_signal_count)
+        if signal_count != data_signal_count:
+            raise signal_count_mismatch("provided", signal_count, "array", data_signal_count)
+
         self._data = data
+        self._data_1d = data_1d
         self._start_index = start_index
         self._sample_count = sample_count
 
     @property
-    def raw_data(self) -> npt.NDArray[_TRaw_co]:
-        """The raw waveform data."""
+    def data(self) -> npt.NDArray[_TState]:
+        """The waveform data, indexed by (sample, signal)."""
         return self._data[self._start_index : self._start_index + self._sample_count]
 
-    def get_raw_data(
+    def get_data(
         self, start_index: SupportsIndex | None = 0, sample_count: SupportsIndex | None = None
-    ) -> npt.NDArray[_TRaw_co]:
-        """Get a subset of the raw waveform data.
+    ) -> npt.NDArray[_TState]:
+        """Get a subset of the waveform data.
 
         Args:
             start_index: The sample index at which the data begins.
@@ -370,84 +405,19 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
                 start_index, sample_count, "number of samples in the waveform", self.sample_count
             )
 
-        return self.raw_data[start_index : start_index + sample_count]
-
-    @property
-    def scaled_data(self) -> npt.NDArray[_TScaled_co]:
-        """The scaled waveform data.
-
-        This property converts all of the waveform samples from the raw data type to the scaled
-        data type and scales them using :any:`scale_mode`. To scale a subset of the waveform or
-        scale to single-precision floating point, use the :any:`get_scaled_data` method
-        instead.
-        """
-        return self.get_scaled_data()
-
-    # If dtype is not specified, the dtype defaults to _TScaled_co.
-    @overload
-    def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self,
-        dtype: None = ...,
-        *,
-        start_index: SupportsIndex | None = ...,
-        sample_count: SupportsIndex | None = ...,
-    ) -> npt.NDArray[_TScaled_co]: ...
-
-    @overload
-    def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self,
-        dtype: type[_TOtherScaled] | np.dtype[_TOtherScaled],
-        *,
-        start_index: SupportsIndex | None = ...,
-        sample_count: SupportsIndex | None = ...,
-    ) -> npt.NDArray[_TOtherScaled]: ...
-
-    @overload
-    def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self,
-        dtype: npt.DTypeLike = ...,
-        *,
-        start_index: SupportsIndex | None = ...,
-        sample_count: SupportsIndex | None = ...,
-    ) -> npt.NDArray[Any]: ...
-
-    def get_scaled_data(
-        self,
-        dtype: npt.DTypeLike = None,
-        *,
-        start_index: SupportsIndex | None = 0,
-        sample_count: SupportsIndex | None = None,
-    ) -> npt.NDArray[Any]:
-        """Get a subset of the scaled waveform data with the specified dtype.
-
-        Args:
-            dtype: The NumPy data type to use for scaled data.
-            start_index: The sample index at which to start scaling.
-            sample_count: The number of samples to scale.
-
-        Returns:
-            A subset of the scaled waveform data.
-        """
-        if dtype is None:
-            dtype = self.__class__._get_default_scaled_dtype()
-        validate_dtype(dtype, self.__class__._get_supported_scaled_dtypes())
-
-        raw_data = self.get_raw_data(start_index, sample_count)
-        converted_data: npt.NDArray[Any] = self._convert_data(dtype, raw_data)
-        return self._scale_mode._transform_data(converted_data)
-
-    @abstractmethod
-    def _convert_data(
-        self,
-        dtype: npt.DTypeLike | type[_TOtherScaled] | np.dtype[_TOtherScaled],
-        raw_data: npt.NDArray[_TRaw_co],
-    ) -> npt.NDArray[_TOtherScaled]:
-        raise NotImplementedError
+        return self.data[start_index : start_index + sample_count]
 
     @property
     def sample_count(self) -> int:
         """The number of samples in the waveform."""
         return self._sample_count
+
+    @property
+    def signal_count(self) -> int:
+        """The number of signals in the waveform."""
+        # npt.NDArray[_ScalarT] currently has a shape type of _AnyShape, which is tuple[Any, ...]
+        shape: tuple[int, ...] = self._data.shape
+        return shape[1]
 
     @property
     def capacity(self) -> int:
@@ -468,10 +438,15 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         if value < min_capacity:
             raise capacity_too_small(value, min_capacity, "waveform")
         if value != len(self._data):
-            self._data.resize(value, refcheck=False)
+            if self._data_1d is not None:
+                # If _data is a 2D view of a 1D array, resize the base array and recreate the view.
+                self._data_1d.resize(value, refcheck=False)
+                self._data = self._data_1d.reshape(len(self._data_1d), 1)
+            else:
+                self._data.resize((value, self.signal_count), refcheck=False)
 
     @property
-    def dtype(self) -> np.dtype[_TRaw_co]:
+    def dtype(self) -> np.dtype[_TState]:
         """The NumPy dtype for the waveform data."""
         return self._data.dtype
 
@@ -492,19 +467,6 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         if not isinstance(value, str):
             raise invalid_arg_type("channel name", "str", value)
         self._extended_properties[CHANNEL_NAME] = value
-
-    @property
-    def unit_description(self) -> str:
-        """The unit of measurement, such as volts, of the waveform."""
-        value = self._extended_properties.get(UNIT_DESCRIPTION, "")
-        assert isinstance(value, str)
-        return value
-
-    @unit_description.setter
-    def unit_description(self, value: str) -> None:
-        if not isinstance(value, str):
-            raise invalid_arg_type("unit description", "str", value)
-        self._extended_properties[UNIT_DESCRIPTION] = value
 
     def _set_timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
         if self._timing is not value:
@@ -531,24 +493,9 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         self._validate_timing(value)
         self._set_timing(value)
 
-    @property
-    def scale_mode(self) -> ScaleMode:
-        """The scale mode of the waveform."""
-        return self._scale_mode
-
-    @scale_mode.setter
-    def scale_mode(self, value: ScaleMode) -> None:
-        if not isinstance(value, ScaleMode):
-            raise invalid_arg_type("scale mode", "ScaleMode object", value)
-        self._scale_mode = value
-
     def append(
         self,
-        other: (
-            npt.NDArray[_TRaw_co]
-            | NumericWaveform[_TRaw_co, _TScaled_co]
-            | Sequence[NumericWaveform[_TRaw_co, _TScaled_co]]
-        ),
+        other: npt.NDArray[_TState] | DigitalWaveform[_TState] | Sequence[DigitalWaveform[_TState]],
         /,
         timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
     ) -> None:
@@ -563,7 +510,6 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         Raises:
             TimingMismatchError: The current and other waveforms have incompatible timing.
             TimingMismatchWarning: The sample intervals of the waveform(s) do not match.
-            ScalingMismatchWarning: The scale modes of the waveform(s) do not match.
             ValueError: The other array has the wrong number of dimensions or the length of the
                 timestamps argument does not match the length of the other array.
             TypeError: The data types of the current waveform and other array or waveform(s) do not
@@ -585,17 +531,13 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
         * Extended properties of the other waveform(s) are merged into the current waveform if they
           are not already set in the current waveform.
-
-        * If the scale mode of other waveform(s) does not match the scale mode of the current
-          waveform, a ScalingMismatchWarning is generated. Otherwise, the scaling information of the
-          other waveform(s) is discarded.
         """
         if isinstance(other, np.ndarray):
             self._append_array(other, timestamps)
-        elif isinstance(other, NumericWaveform):
+        elif isinstance(other, DigitalWaveform):
             validate_unsupported_arg("timestamps", timestamps)
-            self._append_waveform(other)
-        elif isinstance(other, Sequence) and all(isinstance(x, NumericWaveform) for x in other):
+            self._append_waveform(other)  # type: ignore[arg-type]  # https://github.com/python/mypy/issues/19221
+        elif isinstance(other, Sequence) and all(isinstance(x, DigitalWaveform) for x in other):
             validate_unsupported_arg("timestamps", timestamps)
             self._append_waveforms(other)
         else:
@@ -603,13 +545,25 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
     def _append_array(
         self,
-        array: npt.NDArray[_TRaw_co],
+        array: npt.NDArray[_TState],
         timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
     ) -> None:
         if array.dtype != self.dtype:
             raise data_type_mismatch("input array", array.dtype, "waveform", self.dtype)
-        if array.ndim != 1:
-            raise invalid_array_ndim("input array", "one-dimensional array", array.ndim)
+
+        if array.ndim == 1:
+            array_signal_count = 1
+            array = array.reshape(len(array), 1)
+        elif array.ndim == 2:
+            array_signal_count = array.shape[1]
+        else:
+            raise invalid_array_ndim("input array", "one or two-dimensional array", array.ndim)
+
+        if array_signal_count != self.signal_count:
+            raise signal_count_mismatch(
+                "input array", array_signal_count, "waveform", self.signal_count
+            )
+
         if timestamps is not None and len(array) != len(timestamps):
             raise irregular_timestamp_count_mismatch(
                 len(timestamps), "input array length", len(array)
@@ -624,17 +578,13 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         self._data[offset : offset + len(array)] = array
         self._sample_count += len(array)
 
-    def _append_waveform(self, waveform: NumericWaveform[_TRaw_co, _TScaled_co]) -> None:
+    def _append_waveform(self, waveform: DigitalWaveform[_TState]) -> None:
         self._append_waveforms([waveform])
 
-    def _append_waveforms(
-        self, waveforms: Sequence[NumericWaveform[_TRaw_co, _TScaled_co]]
-    ) -> None:
+    def _append_waveforms(self, waveforms: Sequence[DigitalWaveform[_TState]]) -> None:
         for waveform in waveforms:
             if waveform.dtype != self.dtype:
                 raise data_type_mismatch("input waveform", waveform.dtype, "waveform", self.dtype)
-            if waveform._scale_mode != self._scale_mode:
-                warnings.warn(scale_mode_mismatch())
 
         new_timing = self._timing
         for waveform in waveforms:
@@ -645,7 +595,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
         offset = self._start_index + self._sample_count
         for waveform in waveforms:
-            self._data[offset : offset + waveform.sample_count] = waveform.raw_data
+            self._data[offset : offset + waveform.sample_count] = waveform.data
             offset += waveform.sample_count
             self._sample_count += waveform.sample_count
             self._extended_properties._merge(waveform._extended_properties)
@@ -657,7 +607,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
     def load_data(
         self,
-        array: npt.NDArray[_TRaw_co],
+        array: npt.NDArray[_TState],
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
@@ -678,16 +628,24 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
     def _load_array(
         self,
-        array: npt.NDArray[_TRaw_co],
+        array: npt.NDArray[_TState],
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
+        signal_count: SupportsIndex | None = None,
     ) -> None:
         if array.dtype != self.dtype:
             raise data_type_mismatch("input array", array.dtype, "waveform", self.dtype)
-        if array.ndim != 1:
-            raise invalid_array_ndim("input array", "one-dimensional array", array.ndim)
+
+        if array.ndim == 1:
+            array_signal_count = 1
+            array = array.reshape(len(array), 1)
+        elif array.ndim == 2:
+            array_signal_count = array.shape[1]
+        else:
+            raise invalid_array_ndim("input array", "one or two-dimensional array", array.ndim)
+
         if self._timing._timestamps is not None and len(array) != len(self._timing._timestamps):
             raise irregular_timestamp_count_mismatch(
                 len(self._timing._timestamps), "input array length", len(array), reversed=True
@@ -695,6 +653,10 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
         start_index = arg_to_uint("start index", start_index, 0)
         sample_count = arg_to_uint("sample count", sample_count, len(array) - start_index)
+        signal_count = arg_to_uint("signal count", signal_count, array_signal_count)
+
+        if signal_count != array_signal_count:
+            raise signal_count_mismatch("input array", signal_count, "waveform", array_signal_count)
 
         if copy:
             if sample_count > len(self._data):
@@ -713,21 +675,19 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
             return NotImplemented
         return (
             self.dtype == value.dtype
-            and np.array_equal(self.raw_data, value.raw_data)
+            and np.array_equal(self.data, value.data)
             and self._extended_properties == value._extended_properties
             and self._timing == value._timing
-            and self._scale_mode == value._scale_mode
         )
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        ctor_args = (self._sample_count, self.dtype)
+        ctor_args = (self._sample_count, self.signal_count, self.dtype)
         ctor_kwargs: dict[str, Any] = {
-            "raw_data": self.raw_data,
+            "data": self.data,
             "extended_properties": self._extended_properties,
             "copy_extended_properties": False,
             "timing": self._timing,
-            "scale_mode": self._scale_mode,
         }
         return (self.__class__._unpickle, (ctor_args, ctor_kwargs))
 
@@ -737,17 +697,27 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        args = [f"{self._sample_count}"]
-        if self.dtype != self.__class__._get_default_raw_dtype():
+        args = [f"{self._sample_count}, {self.signal_count}"]
+        if self.dtype != np.uint8:
             args.append(f"{self.dtype.name}")
-        # start_index and capacity are not shown because they are allocation details. raw_data hides
+        # start_index and capacity are not shown because they are allocation details. data hides
         # the unused data before start_index and after start_index+sample_count.
         if self._sample_count > 0:
-            args.append(f"raw_data={self.raw_data!r}")
+            # Hack: undo NumPy's line wrapping
+            args.append(f"data={self.data!r}".replace("\n      ", ""))
         if self._extended_properties:
             args.append(f"extended_properties={self._extended_properties._properties!r}")
         if self._timing is not Timing.empty:
             args.append(f"timing={self._timing!r}")
-        if self._scale_mode is not NO_SCALING:
-            args.append(f"scale_mode={self._scale_mode}")
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
+
+
+if sys.version_info >= (3, 10):
+
+    def _bit_count(value: int) -> int:
+        return value.bit_count()
+
+else:
+
+    def _bit_count(value: int) -> int:
+        return bin(value).count("1")
