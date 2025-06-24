@@ -150,6 +150,7 @@ class DigitalWaveform(Generic[_TState]):
     ]
 
     _data: npt.NDArray[_TState]
+    _data_1d: npt.NDArray[_TState] | None
     _start_index: int
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
