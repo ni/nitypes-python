@@ -4,7 +4,6 @@ import array
 import copy
 import datetime as dt
 import pickle
-import sys
 import weakref
 from typing import Any, Union
 
@@ -12,7 +11,6 @@ import hightime as ht
 import numpy as np
 import numpy.typing as npt
 import pytest
-from packaging.version import Version
 from typing_extensions import assert_type
 
 import nitypes.bintime as bt
@@ -1123,12 +1121,6 @@ def test___different_value___equality___not_equal(
     assert left != right
 
 
-if Version(np.__version__) >= Version("2.0.0") or sys.platform != "win32":
-    _NDARRAY_DTYPE_UINT8 = ", dtype=uint8"
-else:
-    _NDARRAY_DTYPE_UINT8 = ""
-
-
 @pytest.mark.parametrize(
     "value, expected_repr",
     [
@@ -1144,11 +1136,11 @@ else:
         (DigitalWaveform(0, 1, np.uint8), "nitypes.waveform.DigitalWaveform(0, 1)"),
         (
             DigitalWaveform(5, 1, np.uint8),
-            f"nitypes.waveform.DigitalWaveform(5, 1, data=array([[0], [0], [0], [0], [0]]{_NDARRAY_DTYPE_UINT8}))",
+            f"nitypes.waveform.DigitalWaveform(5, 1, data=array([[0], [0], [0], [0], [0]], dtype=uint8))",
         ),
         (
             DigitalWaveform(5, 1, np.uint8, start_index=5, capacity=20),
-            f"nitypes.waveform.DigitalWaveform(5, 1, data=array([[0], [0], [0], [0], [0]]{_NDARRAY_DTYPE_UINT8}))",
+            f"nitypes.waveform.DigitalWaveform(5, 1, data=array([[0], [0], [0], [0], [0]], dtype=uint8))",
         ),
         (
             DigitalWaveform.from_lines([0, 1, 2, 3], np.bool),
@@ -1156,7 +1148,7 @@ else:
         ),
         (
             DigitalWaveform.from_lines([0, 1, 2, 3], np.uint8),
-            f"nitypes.waveform.DigitalWaveform(4, 1, data=array([[0], [1], [2], [3]]{_NDARRAY_DTYPE_UINT8}))",
+            f"nitypes.waveform.DigitalWaveform(4, 1, data=array([[0], [1], [2], [3]], dtype=uint8))",
         ),
         (
             DigitalWaveform(
@@ -1187,7 +1179,7 @@ else:
                 np.uint8,
                 timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
             ),
-            f"nitypes.waveform.DigitalWaveform(3, 1, data=array([[1], [2], [3]]{_NDARRAY_DTYPE_UINT8}), "
+            f"nitypes.waveform.DigitalWaveform(3, 1, data=array([[1], [2], [3]], dtype=uint8), "
             "timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, "
             "sample_interval=datetime.timedelta(microseconds=1000)))",
         ),
@@ -1197,7 +1189,7 @@ else:
                 np.uint8,
                 extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
             ),
-            f"nitypes.waveform.DigitalWaveform(3, 1, data=array([[1], [2], [3]]{_NDARRAY_DTYPE_UINT8}), "
+            f"nitypes.waveform.DigitalWaveform(3, 1, data=array([[1], [2], [3]], dtype=uint8), "
             "extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
         ),
     ],
