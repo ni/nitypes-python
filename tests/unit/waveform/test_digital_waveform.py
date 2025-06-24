@@ -15,6 +15,7 @@ from typing_extensions import assert_type
 
 import nitypes.bintime as bt
 from nitypes.waveform import (
+    DigitalState,
     DigitalWaveform,
     SampleIntervalMode,
     Timing,
@@ -117,6 +118,35 @@ def test___dtype_str_with_tdata_hint___create___narrows_tdata() -> None:
     waveform: DigitalWaveform[np.uint8] = DigitalWaveform(dtype="u1")
 
     assert_type(waveform, DigitalWaveform[np.uint8])
+
+
+@pytest.mark.parametrize(
+    "default_value",
+    [
+        False,
+        True,
+        0,
+        1,
+        3,
+        DigitalState.FORCE_DOWN,
+        DigitalState.FORCE_UP,
+        DigitalState.COMPARE_VALID,
+    ],
+)
+def test___default_value___create___creates_waveform_with_default_value(
+    default_value: bool | int | DigitalState,
+) -> None:
+    waveform = DigitalWaveform(2, 3, default_value=default_value)
+
+    assert waveform.sample_count == len(waveform.data) == 2
+    assert waveform.signal_count == 3
+    # default_value does not affect the dtype.
+    assert waveform.dtype == np.uint8
+    assert_type(waveform, DigitalWaveform[np.uint8])
+    assert waveform.data.tolist() == [
+        [default_value, default_value, default_value],
+        [default_value, default_value, default_value],
+    ]
 
 
 ###############################################################################

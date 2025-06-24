@@ -163,7 +163,7 @@ class DigitalWaveform(Generic[_TState]):
         sample_count: SupportsIndex | None = ...,
         signal_count: SupportsIndex | None = ...,
         dtype: None = ...,
-        default_value: DigitalState | None = ...,
+        default_value: bool | int | DigitalState | None = ...,
         *,
         data: None = ...,
         start_index: SupportsIndex | None = ...,
@@ -179,7 +179,7 @@ class DigitalWaveform(Generic[_TState]):
         sample_count: SupportsIndex | None = ...,
         signal_count: SupportsIndex | None = ...,
         dtype: type[_TOtherState] | np.dtype[_TOtherState] = ...,
-        default_value: DigitalState | None = ...,
+        default_value: bool | int | DigitalState | None = ...,
         *,
         data: None = ...,
         start_index: SupportsIndex | None = ...,
@@ -195,7 +195,7 @@ class DigitalWaveform(Generic[_TState]):
         sample_count: SupportsIndex | None = ...,
         signal_count: SupportsIndex | None = ...,
         dtype: None = ...,
-        default_value: DigitalState | None = ...,
+        default_value: bool | int | DigitalState | None = ...,
         *,
         data: npt.NDArray[_TOtherState] = ...,
         start_index: SupportsIndex | None = ...,
@@ -211,7 +211,7 @@ class DigitalWaveform(Generic[_TState]):
         sample_count: SupportsIndex | None = ...,
         signal_count: SupportsIndex | None = ...,
         dtype: npt.DTypeLike = ...,
-        default_value: DigitalState | None = ...,
+        default_value: bool | int | DigitalState | None = ...,
         *,
         data: npt.NDArray[Any] | None = ...,
         start_index: SupportsIndex | None = ...,
@@ -226,7 +226,7 @@ class DigitalWaveform(Generic[_TState]):
         sample_count: SupportsIndex | None = None,
         signal_count: SupportsIndex | None = None,
         dtype: npt.DTypeLike = None,
-        default_value: DigitalState | None = None,
+        default_value: bool | int | DigitalState | None = None,
         *,
         data: npt.NDArray[Any] | None = None,
         start_index: SupportsIndex | None = None,
@@ -292,7 +292,7 @@ class DigitalWaveform(Generic[_TState]):
         sample_count: SupportsIndex | None = None,
         signal_count: SupportsIndex | None = None,
         dtype: npt.DTypeLike = None,
-        default_value: DigitalState | None = None,
+        default_value: bool | int | DigitalState | None = None,
         *,
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
@@ -314,7 +314,9 @@ class DigitalWaveform(Generic[_TState]):
             )
 
         if default_value is None:
-            default_value = DigitalState.FORCE_DOWN
+            default_value = 0
+        elif not isinstance(default_value, (bool, int, DigitalState)):
+            raise invalid_arg_type("default value", "bool, int, or DigitalState", default_value)
 
         self._data = np.full((capacity, signal_count), default_value, dtype)
         self._data_1d = None
