@@ -150,6 +150,73 @@ def test___default_value___create___creates_waveform_with_default_value(
 
 
 ###############################################################################
+# from_lines
+###############################################################################
+def test___uint8_ndarray___from_lines___creates_waveform_with_uint8_dtype() -> None:
+    array = np.array([0, 1, 2, 3], np.uint8)
+
+    waveform = DigitalWaveform.from_lines(array)
+
+    assert_type(waveform, DigitalWaveform[np.uint8])
+    assert isinstance(waveform, DigitalWaveform) and waveform.dtype == np.uint8
+    assert waveform.data.tolist() == [[0], [1], [2], [3]]
+
+
+def test___bool_ndarray___from_lines___creates_waveform_with_bool_dtype() -> None:
+    array = np.array([False, True, False], np.bool)
+
+    waveform = DigitalWaveform.from_lines(array)
+
+    assert_type(waveform, DigitalWaveform[np.bool])
+    assert isinstance(waveform, DigitalWaveform) and waveform.dtype == np.bool
+    assert waveform.data.tolist() == [[False], [True], [False]]
+
+
+def test___int_list_with_int8_dtype___from_lines___creates_waveform_with_int8_dtype() -> None:
+    waveform = DigitalWaveform.from_lines([0, 1, 2, 3], np.int8)
+
+    assert_type(waveform, DigitalWaveform[np.int8])
+    assert isinstance(waveform, DigitalWaveform) and waveform.dtype == np.int8
+    assert waveform.data.tolist() == [[0], [1], [2], [3]]
+
+
+def test___int_list_1d___from_lines___creates_waveform_with_signal_signal() -> None:
+    waveform = DigitalWaveform.from_lines([0, 1, 2, 3])
+
+    assert waveform.sample_count == 4
+    assert waveform.signal_count == 1
+    assert waveform.data.tolist() == [[0], [1], [2], [3]]
+
+
+def test___int_list_2d___from_lines___creates_waveform_with_multi_signal() -> None:
+    waveform = DigitalWaveform.from_lines([[0, 1, 2], [3, 4, 5]])
+
+    assert waveform.sample_count == 2
+    assert waveform.signal_count == 3
+    assert waveform.data.tolist() == [[0, 1, 2], [3, 4, 5]]
+
+
+def test___ndarray_1d___from_lines___creates_waveform_with_one_signal() -> None:
+    array = np.array([0, 1, 2, 3], np.uint8)
+
+    waveform = DigitalWaveform.from_lines(array)
+
+    assert waveform.sample_count == 4
+    assert waveform.signal_count == 1
+    assert waveform.data.tolist() == [[0], [1], [2], [3]]
+
+
+def test___ndarray_2d___from_lines___creates_waveform_with_multi_signal() -> None:
+    array = np.array([[0, 1, 2], [3, 4, 5]], np.uint8)
+
+    waveform = DigitalWaveform.from_lines(array)
+
+    assert waveform.sample_count == 2
+    assert waveform.signal_count == 3
+    assert waveform.data.tolist() == [[0, 1, 2], [3, 4, 5]]
+
+
+###############################################################################
 # data
 ###############################################################################
 def test___uint8_waveform___data___returns_uint8_data() -> None:
