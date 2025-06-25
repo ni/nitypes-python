@@ -55,6 +55,7 @@ class DigitalWaveform(Generic[_TState]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        signal_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[_TOtherState]: ...
@@ -69,6 +70,7 @@ class DigitalWaveform(Generic[_TState]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        signal_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[_TOtherState]: ...
@@ -83,6 +85,7 @@ class DigitalWaveform(Generic[_TState]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        signal_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[Any]: ...
