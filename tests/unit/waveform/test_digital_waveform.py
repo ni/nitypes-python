@@ -5,7 +5,7 @@ import copy
 import datetime as dt
 import pickle
 import weakref
-from typing import Any, Union
+from typing import Any, Sequence, Union
 
 import hightime as ht
 import numpy as np
@@ -167,7 +167,9 @@ def test___bool_ndarray___from_lines___creates_waveform_with_bool_dtype() -> Non
 
     waveform = DigitalWaveform.from_lines(array)
 
-    assert_type(waveform, DigitalWaveform[np.bool])
+    # https://github.com/numpy/numpy/issues/29245 - TYP: mypy returns dtype of
+    # np.bool[Literal[False]] for array of bools
+    assert_type(waveform, DigitalWaveform[np.bool])  # type: ignore[assert-type]
     assert isinstance(waveform, DigitalWaveform) and waveform.dtype == np.bool
     assert waveform.data.tolist() == [[False], [True], [False]]
 
@@ -273,24 +275,6 @@ def test___int_list_and_mask___from_port___creates_waveform_with_masked_lines() 
     ]
 
 
-def test___int_list_and_signal_count___from_port___creates_waveform_with_signal_count() -> None:
-    array = [0, 1, 2, 3, 0xFFFF, 0x1234, 0x5678]
-
-    waveform = DigitalWaveform.from_port(array, signal_count=16)
-
-    assert waveform.sample_count == 7
-    assert waveform.signal_count == 16
-    assert waveform.data.tolist() == [
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
-        [0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0],
-    ]
-
-
 def test___mask___from_port___creates_waveform_with_masked_lines() -> None:
     array = np.array([0xFF, 0x12, 0x34], np.uint8)
 
@@ -310,24 +294,6 @@ def test___mask___from_port___creates_waveform_with_masked_lines() -> None:
         [1, 1, 1, 1],
         [1, 0, 0, 0],
         [1, 1, 0, 0],
-    ]
-
-
-def test___signal_count___from_port___creates_waveform_with_signal_count() -> None:
-    array = np.array([0, 1, 2, 3, 0xFF, 0x12, 0x34], np.uint8)
-
-    waveform = DigitalWaveform.from_port(array, signal_count=5)
-
-    assert waveform.sample_count == 7
-    assert waveform.signal_count == 5
-    assert waveform.data.tolist() == [
-        [0, 0, 0, 0, 0],
-        [1, 0, 0, 0, 0],
-        [0, 1, 0, 0, 0],
-        [1, 1, 0, 0, 0],
-        [1, 1, 1, 1, 1],
-        [0, 1, 0, 0, 1],
-        [0, 0, 1, 0, 1],
     ]
 
 
@@ -360,6 +326,135 @@ def test___array_subset___from_port___creates_waveform_with_array_subset() -> No
         [0, 1, 0, 0, 0, 0, 0, 0],
         [1, 1, 0, 0, 0, 0, 0, 0],
         [1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 1, 0, 0, 1, 0, 0, 0],
+    ]
+
+
+###############################################################################
+# from_ports
+###############################################################################
+def test___uint8_ndarray___from_ports___creates_waveform_with_8_lines() -> None:
+    array = np.array([[0, 1, 2], [0xFF, 0x12, 0x34]], np.uint8)
+
+    waveforms = DigitalWaveform.from_ports(array)
+
+    assert len(waveforms) == 2
+    assert waveforms[0].sample_count == 3
+    assert waveforms[0].signal_count == 8
+    assert waveforms[0].data.tolist() == [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0],
+    ]
+    assert waveforms[1].sample_count == 3
+    assert waveforms[1].signal_count == 8
+    assert waveforms[1].data.tolist() == [
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 1, 1, 0, 0],
+    ]
+
+
+def test___uint16_ndarray___from_ports___creates_waveform_with_16_lines() -> None:
+    array = np.array([[0, 1, 2], [0xFFFF, 0x1234, 0x5678]], np.uint16)
+
+    waveforms = DigitalWaveform.from_ports(array)
+
+    assert len(waveforms) == 2
+    assert waveforms[0].sample_count == 3
+    assert waveforms[0].signal_count == 16
+    assert waveforms[0].data.tolist() == [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]
+    assert waveforms[1].sample_count == 3
+    assert waveforms[1].signal_count == 16
+    assert waveforms[1].data.tolist() == [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0],
+    ]
+
+
+def test___int_list_and_mask___from_ports___creates_waveform_with_masked_lines() -> None:
+    array = [[0, 1, 2], [0xFFFF, 0x1234, 0x5678]]
+
+    waveforms = DigitalWaveform.from_ports(array, masks=[0xFFFF, 0xFFFF])
+
+    assert len(waveforms) == 2
+    assert waveforms[0].sample_count == 3
+    assert waveforms[0].signal_count == 16
+    assert waveforms[0].data.tolist() == [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]
+    assert waveforms[1].sample_count == 3
+    assert waveforms[1].signal_count == 16
+    assert waveforms[1].data.tolist() == [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0],
+    ]
+
+
+def test___masks___from_ports___creates_waveform_with_masked_lines() -> None:
+    array = np.array([[0x00, 0xFF], [0x12, 0x34]], np.uint8)
+
+    waveforms = DigitalWaveform.from_ports(array, [0x0F, 0xF0])
+
+    assert len(waveforms) == 2
+    assert waveforms[0].sample_count == 2
+    assert waveforms[0].signal_count == 4
+    assert waveforms[0].data.tolist() == [
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+    ]
+    assert waveforms[1].sample_count == 2
+    assert waveforms[1].signal_count == 4
+    assert waveforms[1].data.tolist() == [
+        [1, 0, 0, 0],
+        [1, 1, 0, 0],
+    ]
+
+
+def test___bool_dtype___from_ports___creates_waveform_with_bool_dtype() -> None:
+    array = np.array([[0, 1, 2], [0xFF, 0x12, 0x34]], np.uint8)
+
+    waveforms = DigitalWaveform.from_ports(array, dtype=np.bool)
+
+    assert len(waveforms) == 2
+    assert waveforms[0].sample_count == 3
+    assert waveforms[0].signal_count == 8
+    assert waveforms[0].data.tolist() == [
+        [False, False, False, False, False, False, False, False],
+        [True, False, False, False, False, False, False, False],
+        [False, True, False, False, False, False, False, False],
+    ]
+    assert waveforms[1].sample_count == 3
+    assert waveforms[1].signal_count == 8
+    assert waveforms[1].data.tolist() == [
+        [True, True, True, True, True, True, True, True],
+        [False, True, False, False, True, False, False, False],
+        [False, False, True, False, True, True, False, False],
+    ]
+
+
+def test___array_subset___from_ports___creates_waveform_with_array_subset() -> None:
+    array = np.array([[0, 1, 2], [0xFF, 0x12, 0x34]], np.uint8)
+
+    waveforms = DigitalWaveform.from_ports(array, start_index=1, sample_count=1)
+
+    assert len(waveforms) == 2
+    assert waveforms[0].sample_count == 1
+    assert waveforms[0].signal_count == 8
+    assert waveforms[0].data.tolist() == [
+        [1, 0, 0, 0, 0, 0, 0, 0],
+    ]
+    assert waveforms[1].sample_count == 1
+    assert waveforms[1].signal_count == 8
+    assert waveforms[1].data.tolist() == [
         [0, 1, 0, 0, 1, 0, 0, 0],
     ]
 
@@ -1437,10 +1532,59 @@ def test___different_value___equality___not_equal(
             f"nitypes.waveform.DigitalWaveform(3, 1, data=array([[1], [2], [3]], dtype=uint8), "
             "extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
         ),
+        (
+            DigitalWaveform.from_port(
+                [1, 2, 3],
+                0xFF,
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+            ),
+            f"nitypes.waveform.DigitalWaveform(3, 8, data=array([[1, 0, 0, 0, 0, 0, 0, 0], "
+            "[0, 1, 0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0, 0, 0]], dtype=uint8), "
+            "timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, "
+            "sample_interval=datetime.timedelta(microseconds=1000)))",
+        ),
+        (
+            DigitalWaveform.from_port(
+                [1, 2, 3],
+                0xFF,
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+            ),
+            f"nitypes.waveform.DigitalWaveform(3, 8, data=array([[1, 0, 0, 0, 0, 0, 0, 0], "
+            "[0, 1, 0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0, 0, 0]], dtype=uint8), "
+            "extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})",
+        ),
+        (
+            DigitalWaveform.from_ports(
+                [[1, 2, 3], [4, 5, 6]],
+                [0xFF, 0xFF],
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+            ),
+            f"[nitypes.waveform.DigitalWaveform(3, 8, data=array([[1, 0, 0, 0, 0, 0, 0, 0], "
+            "[0, 1, 0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0, 0, 0]], dtype=uint8), "
+            "timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, "
+            "sample_interval=datetime.timedelta(microseconds=1000))), "
+            "nitypes.waveform.DigitalWaveform(3, 8, data=array([[0, 0, 1, 0, 0, 0, 0, 0], "
+            "[1, 0, 1, 0, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0, 0, 0]], dtype=uint8), "
+            "timing=nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR, "
+            "sample_interval=datetime.timedelta(microseconds=1000)))]",
+        ),
+        (
+            DigitalWaveform.from_ports(
+                [[1, 2, 3], [4, 5, 6]],
+                [0xFF, 0xFF],
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+            ),
+            f"[nitypes.waveform.DigitalWaveform(3, 8, data=array([[1, 0, 0, 0, 0, 0, 0, 0], "
+            "[0, 1, 0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0, 0, 0]], dtype=uint8), "
+            "extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'}), "
+            "nitypes.waveform.DigitalWaveform(3, 8, data=array([[0, 0, 1, 0, 0, 0, 0, 0], "
+            "[1, 0, 1, 0, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0, 0, 0]], dtype=uint8), "
+            "extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription': 'Volts'})]",
+        ),
     ],
 )
 def test___various_values___repr___looks_ok(
-    value: DigitalWaveform[Any], expected_repr: str
+    value: DigitalWaveform[Any] | Sequence[DigitalWaveform[Any]], expected_repr: str
 ) -> None:
     assert repr(value) == expected_repr
 
