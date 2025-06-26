@@ -146,7 +146,7 @@ def sample_interval_mode_mismatch() -> TimingMismatchError:
 def signal_count_mismatch(
     arg_description: Literal["input array", "input waveform", "provided"],
     arg_signal_count: int,
-    other_description: Literal["array", "mask", "port", "waveform"],
+    other_description: Literal["array", "port", "waveform"],
     other_signal_count: int,
 ) -> ValueError:
     """Create a ValueError for an mismatched signal count."""
@@ -157,7 +157,6 @@ def signal_count_mismatch(
     }
     other_key = {
         "array": "Array signal count",
-        "mask": "Mask signal count",
         "port": "Port signal count",
         "waveform": "Waveform signal count",
     }
