@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import sys
 from collections.abc import Mapping, Sequence
-from typing import Any, Generic, SupportsIndex, TypeVar, Union, overload
+from typing import Any, Generic, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
@@ -13,7 +13,14 @@ from typing_extensions import Self
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
+from nitypes.waveform._digital._port import bit_mask, get_port_dtype, port_to_line_data
 from nitypes.waveform._digital._state import DigitalState
+from nitypes.waveform._digital._types import (
+    _DIGITAL_PORT_DTYPES,
+    _DIGITAL_STATE_DTYPES,
+    _TOtherState,
+    _TState,
+)
 from nitypes.waveform._exceptions import (
     capacity_mismatch,
     capacity_too_small,
@@ -33,14 +40,6 @@ from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 if sys.version_info < (3, 10):
     import array as std_array
 
-# np.byte == np.int8, np.ubyte == np.uint8
-_TState = TypeVar("_TState", bound=Union[np.bool, np.int8, np.uint8])
-_TOtherState = TypeVar("_TOtherState", bound=Union[np.bool, np.int8, np.uint8])
-_TPort = TypeVar("_TPort", bound=Union[np.uint8, np.uint16, np.uint32])
-
-_DIGITAL_STATE_DTYPES = (np.bool, np.int8, np.uint8)
-_DIGITAL_PORT_DTYPES = (np.uint8, np.uint16, np.uint32)
-
 
 class DigitalWaveform(Generic[_TState]):
     """A digital waveform, which encapsulates digital data and timing information."""
@@ -55,6 +54,7 @@ class DigitalWaveform(Generic[_TState]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        signal_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[_TOtherState]: ...
@@ -69,6 +69,7 @@ class DigitalWaveform(Generic[_TState]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        signal_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[_TOtherState]: ...
@@ -83,6 +84,7 @@ class DigitalWaveform(Generic[_TState]):
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
+        signal_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[Any]: ...
@@ -138,6 +140,262 @@ class DigitalWaveform(Generic[_TState]):
             extended_properties=extended_properties,
             timing=timing,
         )
+
+    @overload
+    @classmethod
+    def from_port(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        mask: SupportsIndex | None = ...,
+        dtype: None = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> DigitalWaveform[np.uint8]: ...
+
+    @overload
+    @classmethod
+    def from_port(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        mask: SupportsIndex | None = ...,
+        dtype: (
+            type[_TOtherState] | np.dtype[_TOtherState]  # pyright: ignore[reportInvalidTypeVarUse]
+        ) = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> DigitalWaveform[_TOtherState]: ...
+
+    @overload
+    @classmethod
+    def from_port(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        mask: SupportsIndex | None = ...,
+        dtype: npt.DTypeLike = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> DigitalWaveform[Any]: ...
+
+    @classmethod
+    def from_port(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        mask: SupportsIndex | None = None,
+        dtype: npt.DTypeLike = None,
+        *,
+        start_index: SupportsIndex | None = 0,
+        sample_count: SupportsIndex | None = None,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+    ) -> DigitalWaveform[Any]:
+        """Construct a waveform from a one-dimensional array or sequence of port data.
+
+        This method allocates a new array in order to convert the port data to line data.
+
+        Each element of the port data array represents a digital sample taken over a port of
+        signals. Each bit in the sample is a signal value, either on or off. The least significant
+        bit of the sample is placed at signal index 0 of the DigitalWaveform.
+
+        If the input array is not a NumPy array, you must specify the mask.
+
+        Args:
+            array: The port data as a one-dimensional array or a sequence.
+            mask: A bitmask specifying which lines to include in the waveform.
+            dtype: The NumPy data type for the waveform (line) data.
+            start_index: The sample index at which the waveform data begins.
+            sample_count: The number of samples in the waveform.
+            extended_properties: The extended properties of the waveform.
+            timing: The timing information of the waveform.
+
+        Returns:
+            A waveform containing the specified data.
+        """
+        if isinstance(array, np.ndarray):
+            if array.ndim != 1:
+                raise invalid_array_ndim(
+                    "input array", "one-dimensional array or sequence", array.ndim
+                )
+            validate_dtype(array.dtype, _DIGITAL_PORT_DTYPES)
+            default_mask = bit_mask(array.dtype.itemsize * 8)
+        elif isinstance(array, Sequence) or (
+            sys.version_info < (3, 10) and isinstance(array, std_array.array)
+        ):
+            # np.array([0,1]).dtype is np.int64 by default, so the user must specify the port size.
+            if mask is None:
+                raise ValueError(
+                    "You must specify a mask when the input array is not a NumPy array."
+                )
+            default_mask = 0
+        else:
+            raise invalid_arg_type("input array", "one or two-dimensional array or sequence", array)
+
+        if dtype is None:
+            dtype = np.uint8
+        validate_dtype(dtype, _DIGITAL_STATE_DTYPES)
+
+        mask = arg_to_uint("mask", mask, default_mask)
+
+        if isinstance(array, np.ndarray):
+            port_dtype = array.dtype
+        else:
+            port_dtype = get_port_dtype(mask)
+
+        port_data = _np_asarray(array, port_dtype)
+        line_data = port_to_line_data(port_data, mask)
+        if line_data.dtype != dtype:
+            line_data = line_data.view(dtype)
+
+        return cls(
+            data=line_data,
+            dtype=dtype,
+            start_index=start_index,
+            sample_count=sample_count,
+            extended_properties=extended_properties,
+            timing=timing,
+        )
+
+    @overload
+    @classmethod
+    def from_ports(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        masks: Sequence[SupportsIndex] | None = ...,
+        dtype: None = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> Sequence[DigitalWaveform[np.uint8]]: ...
+
+    @overload
+    @classmethod
+    def from_ports(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        masks: Sequence[SupportsIndex] | None = ...,
+        dtype: (
+            type[_TOtherState] | np.dtype[_TOtherState]  # pyright: ignore[reportInvalidTypeVarUse]
+        ) = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> Sequence[DigitalWaveform[_TOtherState]]: ...
+
+    @overload
+    @classmethod
+    def from_ports(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        masks: Sequence[SupportsIndex] | None = ...,
+        dtype: npt.DTypeLike = ...,
+        *,
+        start_index: SupportsIndex | None = ...,
+        sample_count: SupportsIndex | None = ...,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+    ) -> Sequence[DigitalWaveform[Any]]: ...
+
+    @classmethod
+    def from_ports(
+        cls,
+        array: npt.NDArray[Any] | Sequence[Any],
+        masks: Sequence[SupportsIndex] | None = None,
+        dtype: npt.DTypeLike = None,
+        *,
+        start_index: SupportsIndex | None = 0,
+        sample_count: SupportsIndex | None = None,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+    ) -> Sequence[DigitalWaveform[Any]]:
+        """Construct a waveform from a two-dimensional array or sequence of port data.
+
+        This method allocates a new array in order to convert the port data to line data.
+
+        Each row of the port data array corresponds to a resulting DigitalWaveform. Each element of
+        the port data array represents a digital sample taken over a port of signals. Each bit in
+        the sample is a signal value, either on or off. The least significant bit of the sample is
+        placed at signal index 0 of the corresponding DigitalWaveform.
+
+        If the input array is not a NumPy array, you must specify the masks.
+
+        Args:
+            array: The port data as a two-dimensional array or a sequence.
+            masks: A sequence of bitmasks specifying which lines from each port to include in the
+                corresponding waveform.
+            dtype: The NumPy data type for the waveform (line) data.
+            start_index: The sample index at which the waveform data begins.
+            sample_count: The number of samples in the waveform.
+            extended_properties: The extended properties of the waveform.
+            timing: The timing information of the waveform.
+
+        Returns:
+            A waveform containing the specified data.
+        """
+        if isinstance(array, np.ndarray):
+            if array.ndim != 2:
+                raise invalid_array_ndim(
+                    "input array", "two-dimensional array or sequence", array.ndim
+                )
+            validate_dtype(array.dtype, _DIGITAL_PORT_DTYPES)
+            default_masks = [bit_mask(array.dtype.itemsize * 8)] * array.shape[0]
+        elif isinstance(array, Sequence) or (
+            sys.version_info < (3, 10) and isinstance(array, std_array.array)
+        ):
+            # np.array([0,1]).dtype is np.int64 by default, so the user must specify the port size.
+            if masks is None:
+                raise ValueError(
+                    "You must specify the masks when the input array is not a NumPy array."
+                )
+            default_masks = []
+        else:
+            raise invalid_arg_type("input array", "one or two-dimensional array or sequence", array)
+
+        if dtype is None:
+            dtype = np.uint8
+        validate_dtype(dtype, _DIGITAL_STATE_DTYPES)
+
+        if not isinstance(masks, (type(None), Sequence)):
+            raise invalid_arg_type("masks", "sequence of ints")
+        if masks is not None:
+            validated_masks = [arg_to_uint("mask", mask) for mask in masks]
+        else:
+            validated_masks = default_masks
+
+        if isinstance(array, np.ndarray):
+            port_dtype = array.dtype
+        else:
+            port_dtype = get_port_dtype(validated_masks)
+
+        port_data = _np_asarray(array, port_dtype)
+        waveforms = []
+        for port_index in range(port_data.shape[0]):
+            line_data = port_to_line_data(port_data[port_index, :], validated_masks[port_index])
+            if line_data.dtype != dtype:
+                line_data = line_data.view(dtype)
+
+            waveforms.append(
+                cls(
+                    data=line_data,
+                    dtype=dtype,
+                    start_index=start_index,
+                    sample_count=sample_count,
+                    extended_properties=extended_properties,
+                    timing=timing,
+                )
+            )
+        return waveforms
 
     __slots__ = [
         "_data",
@@ -710,14 +968,3 @@ class DigitalWaveform(Generic[_TState]):
         if self._timing is not Timing.empty:
             args.append(f"timing={self._timing!r}")
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
-
-
-if sys.version_info >= (3, 10):
-
-    def _bit_count(value: int) -> int:
-        return value.bit_count()
-
-else:
-
-    def _bit_count(value: int) -> int:
-        return bin(value).count("1")
