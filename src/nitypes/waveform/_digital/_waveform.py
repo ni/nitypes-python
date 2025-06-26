@@ -422,7 +422,7 @@ class DigitalWaveform(Generic[_TState]):
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
     _timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]
-    _signals: DigitalWaveformSignalCollection
+    _signals: DigitalWaveformSignalCollection[_TState]
     _signal_name_cache: list[str] | None
 
     # If neither dtype nor data is specified, _TData defaults to np.uint8.

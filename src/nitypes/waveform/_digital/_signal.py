@@ -33,6 +33,11 @@ class DigitalWaveformSignal(Generic[_TState]):
         return self._owner
 
     @property
+    def signal_index(self) -> int:
+        """The signal index."""
+        return self._signal_index
+
+    @property
     def data(self) -> npt.NDArray[_TState]:
         """The signal data, indexed by sample."""
         return self._owner.data[:, self._signal_index]
@@ -50,7 +55,7 @@ class DigitalWaveformSignal(Generic[_TState]):
         """Return self==value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
-        # Do not compare the name.
+        # Do not compare the index or name.
         return np.array_equal(self.data, value.data)
 
     def __reduce__(self) -> tuple[Any, ...]:

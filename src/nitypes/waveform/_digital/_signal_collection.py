@@ -8,7 +8,7 @@ from nitypes.waveform._digital._signal import DigitalWaveformSignal
 from nitypes.waveform._digital._waveform import DigitalWaveform, _TState
 
 
-class DigitalWaveformSignalCollection(Generic[_TState], Sequence[DigitalWaveformSignal]):
+class DigitalWaveformSignalCollection(Generic[_TState], Sequence[DigitalWaveformSignal[_TState]]):
     """A collection of digital waveform signals."""
 
     _owner: DigitalWaveform[_TState]

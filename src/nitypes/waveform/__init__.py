@@ -245,6 +245,8 @@ AnalogWaveform.__module__ = __name__
 ComplexWaveform.__module__ = __name__
 DigitalState.__module__ = __name__
 DigitalWaveform.__module__ = __name__
+DigitalWaveformSignal.__module__ = __name__
+DigitalWaveformSignalCollection.__module__ = __name__
 ExtendedPropertyDictionary.__module__ = __name__
 # ExtendedPropertyValue is a TypeAlias
 LinearScaleMode.__module__ = __name__
