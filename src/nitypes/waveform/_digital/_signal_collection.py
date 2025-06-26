@@ -9,9 +9,12 @@ from nitypes.waveform._digital._waveform import DigitalWaveform, _TState
 
 
 class DigitalWaveformSignalCollection(Generic[_TState], Sequence[DigitalWaveformSignal[_TState]]):
-    """A collection of digital waveform signals."""
+    """A collection of digital waveform signals.
 
-    __slots__ = ["_owner", "_signals"]
+    To construct this object, use the :any:`DigitalWaveform.signals` property.
+    """
+
+    __slots__ = ["_owner", "_signals", "__weakref__"]
 
     _owner: DigitalWaveform[_TState]
     _signals: list[DigitalWaveformSignal[_TState] | None]

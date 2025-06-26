@@ -412,7 +412,7 @@ class DigitalWaveform(Generic[_TState]):
         "_extended_properties",
         "_timing",
         "_signals",
-        "_signal_name_cache",
+        "_signal_names",
         "__weakref__",
     ]
 
@@ -422,8 +422,8 @@ class DigitalWaveform(Generic[_TState]):
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
     _timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]
-    _signals: DigitalWaveformSignalCollection[_TState]
-    _signal_name_cache: list[str] | None
+    _signals: DigitalWaveformSignalCollection[_TState] | None
+    _signal_names: list[str] | None
 
     # If neither dtype nor data is specified, _TData defaults to np.uint8.
     @overload
@@ -553,16 +553,12 @@ class DigitalWaveform(Generic[_TState]):
             extended_properties = ExtendedPropertyDictionary(extended_properties)
         self._extended_properties = extended_properties
 
-        from nitypes.waveform._digital._signal_collection import (
-            DigitalWaveformSignalCollection,
-        )
-
-        self._signals = DigitalWaveformSignalCollection(self)
-        self._signal_name_cache = None
-
         if timing is None:
             timing = Timing.empty
         self._timing = timing
+
+        self._signals = None
+        self._signal_names = None
 
     def _init_with_new_array(
         self,
@@ -654,8 +650,18 @@ class DigitalWaveform(Generic[_TState]):
 
     @property
     def signals(self) -> DigitalWaveformSignalCollection[_TState]:
-        """The waveform signals."""
-        return self._signals
+        """A collection of objects representing waveform signals."""
+        # Lazily allocate self._signals if the application needs it.
+        #
+        # https://github.com/ni/nitypes-python/issues/131 - DigitalWaveform.signals introduces a
+        # reference cycle, which affects GC overhead.
+        value = self._signals
+        if value is None:
+            from nitypes.waveform._digital import DigitalWaveformSignalCollection
+
+            value = self._signals = DigitalWaveformSignalCollection(self)
+
+        return value
 
     @property
     def data(self) -> npt.NDArray[_TState]:
@@ -750,14 +756,17 @@ class DigitalWaveform(Generic[_TState]):
         self._extended_properties[CHANNEL_NAME] = value
 
     def _get_signal_names(self) -> list[str]:
-        if self._signal_name_cache is None:
+        # Lazily allocate self._signal_names if the application needs it.
+        signal_names = self._signal_names
+        if signal_names is None:
             signal_names_str = self._extended_properties.get(LINE_NAMES, "")
             assert isinstance(signal_names_str, str)
-            signal_names = [name.strip() for name in signal_names_str.split(",")]
+            signal_names = self._signal_names = [
+                name.strip() for name in signal_names_str.split(",")
+            ]
             if len(signal_names) < self.signal_count:
                 signal_names.extend([""] * (self.signal_count - len(signal_names)))
-            self._signal_name_cache = signal_names
-        return self._signal_name_cache
+        return signal_names
 
     def _get_signal_name(self, signal_index: int) -> str:
         return self._get_signal_names()[signal_index]

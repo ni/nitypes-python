@@ -10,17 +10,16 @@ from nitypes.waveform._digital._waveform import DigitalWaveform, _TState
 
 
 class DigitalWaveformSignal(Generic[_TState]):
-    """A signal of a digital waveform."""
+    """A signal of a digital waveform.
 
-    __slots__ = [
-        "_owner",
-        "_signal_index",
-        "__weakref__",
-    ]
+    To construct this object, use the :any:`DigitalWaveform.signals` property and index the returned
+    collection, e.g. ``waveform.signals[0]`` or ``waveform.signals["Dev1/port0/line0"]``.
+    """
+
+    __slots__ = ["_owner", "_signal_index", "__weakref__"]
 
     _owner: DigitalWaveform[_TState]
     _signal_index: int
-    _sample_count: int
 
     def __init__(self, owner: DigitalWaveform[_TState], signal_index: SupportsIndex) -> None:
         """Initialize a new digital waveform signal."""
