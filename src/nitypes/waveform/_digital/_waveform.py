@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import sys
 from collections.abc import Mapping, Sequence
-from typing import Any, Generic, SupportsIndex, overload
+from typing import TYPE_CHECKING, Any, Generic, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
@@ -32,6 +32,7 @@ from nitypes.waveform._exceptions import (
 )
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
+    LINE_NAMES,
     ExtendedPropertyDictionary,
     ExtendedPropertyValue,
 )
@@ -39,6 +40,12 @@ from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 
 if sys.version_info < (3, 10):
     import array as std_array
+
+if TYPE_CHECKING:
+    from nitypes.waveform._digital._signal_collection import (
+        DigitalWaveformSignalCollection,  # circular import
+    )
+
 
 
 class DigitalWaveform(Generic[_TState]):
@@ -404,6 +411,8 @@ class DigitalWaveform(Generic[_TState]):
         "_sample_count",
         "_extended_properties",
         "_timing",
+        "_signals",
+        "_signal_name_cache",
         "__weakref__",
     ]
 
@@ -413,6 +422,8 @@ class DigitalWaveform(Generic[_TState]):
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
     _timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]
+    _signals: DigitalWaveformSignalCollection
+    _signal_name_cache: list[str] | None
 
     # If neither dtype nor data is specified, _TData defaults to np.uint8.
     @overload
@@ -542,6 +553,13 @@ class DigitalWaveform(Generic[_TState]):
             extended_properties = ExtendedPropertyDictionary(extended_properties)
         self._extended_properties = extended_properties
 
+        from nitypes.waveform._digital._signal_collection import (
+            DigitalWaveformSignalCollection,
+        )
+
+        self._signals = DigitalWaveformSignalCollection(self)
+        self._signal_name_cache = None
+
         if timing is None:
             timing = Timing.empty
         self._timing = timing
@@ -635,6 +653,11 @@ class DigitalWaveform(Generic[_TState]):
         self._sample_count = sample_count
 
     @property
+    def signals(self) -> DigitalWaveformSignalCollection[_TState]:
+        """The waveform signals."""
+        return self._signals
+
+    @property
     def data(self) -> npt.NDArray[_TState]:
         """The waveform data, indexed by (sample, signal)."""
         return self._data[self._start_index : self._start_index + self._sample_count]
@@ -725,6 +748,24 @@ class DigitalWaveform(Generic[_TState]):
         if not isinstance(value, str):
             raise invalid_arg_type("channel name", "str", value)
         self._extended_properties[CHANNEL_NAME] = value
+
+    def _get_signal_names(self) -> list[str]:
+        if self._signal_name_cache is None:
+            signal_names_str = self._extended_properties.get(LINE_NAMES, "")
+            assert isinstance(signal_names_str, str)
+            signal_names = [name.strip() for name in signal_names_str.split(",")]
+            if len(signal_names) < self.signal_count:
+                signal_names.extend([""] * (self.signal_count - len(signal_names)))
+            self._signal_name_cache = signal_names
+        return self._signal_name_cache
+
+    def _get_signal_name(self, signal_index: int) -> str:
+        return self._get_signal_names()[signal_index]
+
+    def _set_signal_name(self, signal_index: int, value: str) -> None:
+        signal_names = self._get_signal_names()
+        signal_names[signal_index] = value
+        self._extended_properties[LINE_NAMES] = ", ".join(signal_names)
 
     def _set_timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
         if self._timing is not value:

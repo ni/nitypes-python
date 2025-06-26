@@ -17,6 +17,8 @@ import nitypes.bintime as bt
 from nitypes.waveform import (
     DigitalState,
     DigitalWaveform,
+    DigitalWaveformSignal,
+    DigitalWaveformSignalCollection,
     SampleIntervalMode,
     Timing,
     TimingMismatchError,
@@ -1663,3 +1665,121 @@ def test___waveform___pickle___references_public_modules() -> None:
     assert b"nitypes.waveform._digital" not in value_bytes
     assert b"nitypes.waveform._extended_properties" not in value_bytes
     assert b"nitypes.waveform._timing" not in value_bytes
+
+
+###############################################################################
+# signal collection
+###############################################################################
+def test___waveform___signals___is_signal_collection() -> None:
+    waveform = DigitalWaveform(10, 3)
+
+    assert_type(waveform.signals, DigitalWaveformSignalCollection[np.uint8])
+    assert isinstance(waveform.signals, DigitalWaveformSignalCollection)
+
+
+def test___waveform___signals_len___returns_signal_count() -> None:
+    waveform = DigitalWaveform(10, 3)
+
+    assert len(waveform.signals) == 3
+
+
+def test___int_index___signals_getitem___returns_signal() -> None:
+    waveform = DigitalWaveform(10, 3)
+
+    assert_type(waveform.signals[0], DigitalWaveformSignal[np.uint8])
+    assert waveform.signals[0]._signal_index == 0
+    assert waveform.signals[1]._signal_index == 1
+    assert waveform.signals[2]._signal_index == 2
+
+
+def test___negative_int_index___signals_getitem___returns_signal() -> None:
+    waveform = DigitalWaveform(10, 3)
+
+    assert waveform.signals[-1]._signal_index == 2
+    assert waveform.signals[-2]._signal_index == 1
+    assert waveform.signals[-3]._signal_index == 0
+
+
+def test___str_index___signals_getitem___returns_signal() -> None:
+    waveform = DigitalWaveform(
+        10, 3, extended_properties={"NI_LineNames": "port0/line0, port0/line1, port0/line2"}
+    )
+
+    assert_type(waveform.signals["port0/line0"], DigitalWaveformSignal[np.uint8])
+    assert waveform.signals["port0/line0"]._signal_index == 0
+    assert waveform.signals["port0/line1"]._signal_index == 1
+    assert waveform.signals["port0/line2"]._signal_index == 2
+
+
+def test___invalid_str_index___signals_getitem___raises_index_error() -> None:
+    waveform = DigitalWaveform(
+        10, 3, extended_properties={"NI_LineNames": "port0/line0, port0/line1, port0/line2"}
+    )
+
+    with pytest.raises(IndexError) as exc:
+        _ = waveform.signals["port0/line3"]
+
+    assert exc.value.args[0] == "port0/line3"
+
+
+def test___slice_index___signals_getitem___returns_signal() -> None:
+    waveform = DigitalWaveform(10, 5)
+
+    assert_type(waveform.signals[1:3], Sequence[DigitalWaveformSignal[np.uint8]])
+    assert [signal._signal_index for signal in waveform.signals[1:3]] == [1, 2]
+    assert [signal._signal_index for signal in waveform.signals[2:]] == [2, 3, 4]
+    assert [signal._signal_index for signal in waveform.signals[:3]] == [0, 1, 2]
+
+
+def test___negative_slice_index___signals_getitem___returns_signal() -> None:
+    waveform = DigitalWaveform(10, 5)
+
+    assert [signal._signal_index for signal in waveform.signals[-2:]] == [3, 4]
+    assert [signal._signal_index for signal in waveform.signals[:-2]] == [0, 1, 2]
+    assert [signal._signal_index for signal in waveform.signals[-3:-1]] == [2, 3]
+
+
+###############################################################################
+# signal name
+###############################################################################
+def test___signal___set_signal_name___sets_name() -> None:
+    waveform = DigitalWaveform(10, 3)
+
+    waveform.signals[0].name = "port0/line0"
+    waveform.signals[1].name = "port0/line1"
+    waveform.signals[2].name = "port0/line2"
+
+    assert waveform.extended_properties["NI_LineNames"] == "port0/line0, port0/line1, port0/line2"
+
+
+def test___signal_with_line_names___get_signal_name___returns_line_name() -> None:
+    waveform = DigitalWaveform(
+        10, 3, extended_properties={"NI_LineNames": "port0/line0, port0/line1, port0/line2"}
+    )
+
+    assert waveform.signals[0].name == "port0/line0"
+    assert waveform.signals[1].name == "port0/line1"
+    assert waveform.signals[2].name == "port0/line2"
+
+
+def test___signal_with_line_names___set_signal_name___returns_line_name() -> None:
+    waveform = DigitalWaveform(
+        10, 3, extended_properties={"NI_LineNames": "port0/line0, port0/line1, port0/line2"}
+    )
+
+    waveform.signals[1].name = "MySignal"
+
+    assert waveform.extended_properties["NI_LineNames"] == "port0/line0, MySignal, port0/line2"
+
+
+###############################################################################
+# signal data
+###############################################################################
+def test___waveform___get_signal_data___returns_line_data() -> None:
+    waveform = DigitalWaveform.from_lines([[0, 1, 2], [3, 4, 5]], np.uint8)
+
+    assert_type(waveform.signals[0].data, npt.NDArray[np.uint8])
+    assert len(waveform.signals) == 3
+    assert waveform.signals[0].data.tolist() == [0, 3]
+    assert waveform.signals[1].data.tolist() == [1, 4]
+    assert waveform.signals[2].data.tolist() == [2, 5]
