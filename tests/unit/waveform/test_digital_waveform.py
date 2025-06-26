@@ -5,7 +5,7 @@ import copy
 import datetime as dt
 import pickle
 import weakref
-from typing import Any, Union
+from typing import Any, Sequence, Union
 
 import hightime as ht
 import numpy as np

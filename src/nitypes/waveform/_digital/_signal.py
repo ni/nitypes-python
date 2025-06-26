@@ -1,12 +1,15 @@
 from __future__ import annotations
 
-from typing import Any, Generic, SupportsIndex
+from typing import TYPE_CHECKING, Any, Generic, SupportsIndex
 
 import numpy as np
 import numpy.typing as npt
 
 from nitypes._arguments import arg_to_uint
-from nitypes.waveform._digital._waveform import DigitalWaveform, _TState
+from nitypes.waveform._digital._types import _TState
+
+if TYPE_CHECKING:
+    from nitypes.waveform._digital._waveform import DigitalWaveform  # circular import
 
 
 class DigitalWaveformSignal(Generic[_TState]):

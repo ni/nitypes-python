@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import sys
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Generic, SupportsIndex, overload
+from typing import Any, Generic, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
@@ -14,6 +14,7 @@ from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
 from nitypes.waveform._digital._port import bit_mask, get_port_dtype, port_to_line_data
+from nitypes.waveform._digital._signal_collection import DigitalWaveformSignalCollection
 from nitypes.waveform._digital._state import DigitalState
 from nitypes.waveform._digital._types import (
     _DIGITAL_PORT_DTYPES,
@@ -40,12 +41,6 @@ from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 
 if sys.version_info < (3, 10):
     import array as std_array
-
-if TYPE_CHECKING:
-    from nitypes.waveform._digital._signal_collection import (
-        DigitalWaveformSignalCollection,  # circular import
-    )
-
 
 
 class DigitalWaveform(Generic[_TState]):
@@ -657,10 +652,7 @@ class DigitalWaveform(Generic[_TState]):
         # reference cycle, which affects GC overhead.
         value = self._signals
         if value is None:
-            from nitypes.waveform._digital import DigitalWaveformSignalCollection
-
             value = self._signals = DigitalWaveformSignalCollection(self)
-
         return value
 
     @property

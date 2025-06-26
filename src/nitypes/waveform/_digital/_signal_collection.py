@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Generic, overload
+from typing import TYPE_CHECKING, Generic, overload
 
 from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform._digital._signal import DigitalWaveformSignal
-from nitypes.waveform._digital._waveform import DigitalWaveform, _TState
+from nitypes.waveform._digital._types import _TState
+
+if TYPE_CHECKING:
+    from nitypes.waveform._digital._waveform import DigitalWaveform  # circular import
 
 
 class DigitalWaveformSignalCollection(Generic[_TState], Sequence[DigitalWaveformSignal[_TState]]):
