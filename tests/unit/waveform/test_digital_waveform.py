@@ -217,6 +217,154 @@ def test___ndarray_2d___from_lines___creates_waveform_with_multi_signal() -> Non
 
 
 ###############################################################################
+# from_port
+###############################################################################
+def test___uint8_ndarray___from_port___creates_waveform_with_8_lines() -> None:
+    array = np.array([0, 1, 2, 3, 0xFF, 0x12, 0x34], np.uint8)
+
+    waveform = DigitalWaveform.from_port(array)
+
+    assert waveform.sample_count == 7
+    assert waveform.signal_count == 8
+    assert waveform.data.tolist() == [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 1, 1, 0, 0],
+    ]
+
+
+def test___uint16_ndarray___from_port___creates_waveform_with_16_lines() -> None:
+    array = np.array([0, 1, 2, 3, 0xFFFF, 0x1234, 0x5678], np.uint16)
+
+    waveform = DigitalWaveform.from_port(array)
+
+    assert waveform.sample_count == 7
+    assert waveform.signal_count == 16
+    assert waveform.data.tolist() == [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0],
+    ]
+
+
+def test___int_list_and_mask___from_port___creates_waveform_with_masked_lines() -> None:
+    array = [0, 1, 2, 3, 0xFFFF, 0x1234, 0x5678]
+
+    waveform = DigitalWaveform.from_port(array, mask=0xFFFF)
+
+    assert waveform.sample_count == 7
+    assert waveform.signal_count == 16
+    assert waveform.data.tolist() == [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0],
+    ]
+
+
+def test___int_list_and_signal_count___from_port___creates_waveform_with_signal_count() -> None:
+    array = [0, 1, 2, 3, 0xFFFF, 0x1234, 0x5678]
+
+    waveform = DigitalWaveform.from_port(array, signal_count=16)
+
+    assert waveform.sample_count == 7
+    assert waveform.signal_count == 16
+    assert waveform.data.tolist() == [
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0],
+    ]
+
+
+def test___mask___from_port___creates_waveform_with_masked_lines() -> None:
+    array = np.array([0xFF, 0x12, 0x34], np.uint8)
+
+    waveform_lo = DigitalWaveform.from_port(array, 0x0F)
+    waveform_hi = DigitalWaveform.from_port(array, 0xF0)
+
+    assert waveform_lo.sample_count == 3
+    assert waveform_lo.signal_count == 4
+    assert waveform_lo.data.tolist() == [
+        [1, 1, 1, 1],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+    ]
+    assert waveform_hi.sample_count == 3
+    assert waveform_hi.signal_count == 4
+    assert waveform_hi.data.tolist() == [
+        [1, 1, 1, 1],
+        [1, 0, 0, 0],
+        [1, 1, 0, 0],
+    ]
+
+
+def test___signal_count___from_port___creates_waveform_with_signal_count() -> None:
+    array = np.array([0, 1, 2, 3, 0xFF, 0x12, 0x34], np.uint8)
+
+    waveform = DigitalWaveform.from_port(array, signal_count=5)
+
+    assert waveform.sample_count == 7
+    assert waveform.signal_count == 5
+    assert waveform.data.tolist() == [
+        [0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [1, 1, 0, 0, 0],
+        [1, 1, 1, 1, 1],
+        [0, 1, 0, 0, 1],
+        [0, 0, 1, 0, 1],
+    ]
+
+
+def test___bool_dtype___from_port___creates_waveform_with_bool_dtype() -> None:
+    array = np.array([0, 1, 2, 3, 0xFF, 0x12, 0x34], np.uint8)
+
+    waveform = DigitalWaveform.from_port(array, dtype=np.bool)
+
+    assert waveform.sample_count == 7
+    assert waveform.signal_count == 8
+    assert waveform.data.tolist() == [
+        [False, False, False, False, False, False, False, False],
+        [True, False, False, False, False, False, False, False],
+        [False, True, False, False, False, False, False, False],
+        [True, True, False, False, False, False, False, False],
+        [True, True, True, True, True, True, True, True],
+        [False, True, False, False, True, False, False, False],
+        [False, False, True, False, True, True, False, False],
+    ]
+
+
+def test___array_subset___from_port___creates_waveform_with_array_subset() -> None:
+    array = np.array([0, 1, 2, 3, 0xFF, 0x12, 0x34], np.uint8)
+
+    waveform = DigitalWaveform.from_port(array, start_index=2, sample_count=4)
+
+    assert waveform.sample_count == 4
+    assert waveform.signal_count == 8
+    assert waveform.data.tolist() == [
+        [0, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 1],
+        [0, 1, 0, 0, 1, 0, 0, 0],
+    ]
+
+
+###############################################################################
 # data
 ###############################################################################
 def test___uint8_waveform___data___returns_uint8_data() -> None:
