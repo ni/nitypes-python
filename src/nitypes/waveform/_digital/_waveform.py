@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import sys
 from collections.abc import Mapping, Sequence
-from typing import Any, Generic, SupportsIndex, TypeVar, Union, overload
+from typing import Any, Generic, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
@@ -15,6 +15,12 @@ from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
 from nitypes.waveform._digital._port import bit_mask, get_port_dtype, port_to_line_data
 from nitypes.waveform._digital._state import DigitalState
+from nitypes.waveform._digital._types import (
+    _DIGITAL_PORT_DTYPES,
+    _DIGITAL_STATE_DTYPES,
+    _TOtherState,
+    _TState,
+)
 from nitypes.waveform._exceptions import (
     capacity_mismatch,
     capacity_too_small,
@@ -33,14 +39,6 @@ from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 
 if sys.version_info < (3, 10):
     import array as std_array
-
-# np.byte == np.int8, np.ubyte == np.uint8
-_TState = TypeVar("_TState", bound=Union[np.bool, np.int8, np.uint8])
-_TOtherState = TypeVar("_TOtherState", bound=Union[np.bool, np.int8, np.uint8])
-_TPort = TypeVar("_TPort", bound=Union[np.uint8, np.uint16, np.uint32])
-
-_DIGITAL_STATE_DTYPES = (np.bool, np.int8, np.uint8)
-_DIGITAL_PORT_DTYPES = (np.uint8, np.uint16, np.uint32)
 
 
 class DigitalWaveform(Generic[_TState]):
