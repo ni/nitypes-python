@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from typing import Sequence, TypeVar, Union
 
 import numpy as np
@@ -10,35 +9,6 @@ AnyPort = Union[np.uint8, np.uint16, np.uint32]
 TPort = TypeVar("TPort", bound=AnyPort)
 
 DIGITAL_PORT_DTYPES = (np.uint8, np.uint16, np.uint32)
-
-
-def bit_count(value: int | Sequence[int], /) -> int:
-    """Return the number of 1 bits in value.
-
-    >>> bit_count(0xFFFF)
-    16
-    >>> bit_count(0x1084)
-    3
-    >>> bit_count([0xFF, 0xFF])
-    16
-    >>> bit_count([0xF0, 0x0F])
-    8
-    """
-    if isinstance(value, Sequence):
-        return sum(_bit_count(v) for v in value)
-    else:
-        return _bit_count(value)
-
-
-if sys.version_info >= (3, 10):
-
-    def _bit_count(value: int) -> int:
-        return value.bit_count()
-
-else:
-
-    def _bit_count(value: int) -> int:
-        return bin(value).count("1")
 
 
 def bit_mask(n: int, /) -> int:
@@ -64,41 +34,6 @@ def bit_mask(n: int, /) -> int:
             "The number of bits must be a non-negative integer.\n\n" f"Number of bits: {n}"
         )
     return (1 << n) - 1
-
-
-def bit_masks(n: int, port_size: int, /) -> list[int]:
-    """Return the bit masks with the lower n bits set.
-
-    >>> bit_masks(0, 8)
-    []
-    >>> bit_masks(4, 8)
-    [15]
-    >>> bit_masks(9, 8)
-    [255, 1]
-    >>> bit_masks(32, 8)
-    [255, 255, 255, 255]
-    >>> bit_masks(32, 16)
-    [65535, 65535]
-    >>> bit_masks(-1, 8)
-    Traceback (most recent call last):
-    ...
-    ValueError: The number of bits must be a non-negative integer.
-    <BLANKLINE>
-    Number of bits: -1
-    """
-    if n < 0:
-        raise ValueError(
-            "The number of bits must be a non-negative integer.\n\n" f"Number of bits: {n}"
-        )
-    masks = []
-    while n > 0:
-        if n >= port_size:
-            masks.append(bit_mask(port_size))
-            n -= port_size
-        else:
-            masks.append(bit_mask(n))
-            n = 0
-    return masks
 
 
 def get_port_dtype(mask: int | Sequence[int]) -> np.dtype[AnyPort]:
