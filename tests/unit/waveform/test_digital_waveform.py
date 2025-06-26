@@ -182,7 +182,7 @@ def test___int_list_with_int8_dtype___from_lines___creates_waveform_with_int8_dt
     assert waveform.data.tolist() == [[0], [1], [2], [3]]
 
 
-def test___int_list_1d___from_lines___creates_waveform_with_signal_signal() -> None:
+def test___int_list_1d___from_lines___creates_waveform_with_one_signal() -> None:
     waveform = DigitalWaveform.from_lines([0, 1, 2, 3])
 
     assert waveform.sample_count == 4
