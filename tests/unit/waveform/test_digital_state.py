@@ -18,8 +18,18 @@ def test___state___to_char___returns_char(state: DigitalState, expected_char: st
 
 
 @pytest.mark.parametrize("state", [-1, 8, 255])
-def test___invalid_state___to_char___returns_question_mark(state: DigitalState) -> None:
-    assert DigitalState.to_char(state) == "?"
+def test___invalid_state___to_char___raises_key_error(state: DigitalState) -> None:
+    with pytest.raises(KeyError) as exc:
+        _ = DigitalState.to_char(state)
+
+    assert exc.value.args[0] == state
+
+
+@pytest.mark.parametrize("state", [-1, 8, 255])
+def test___invalid_state_errors_replace___to_char___returns_question_mark(
+    state: DigitalState,
+) -> None:
+    assert DigitalState.to_char(state, errors="replace") == "?"
 
 
 @pytest.mark.parametrize(

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from enum import IntEnum
 
+from nitypes._exceptions import invalid_arg_value
+
 _CHAR_TABLE = "01ZLHXTV"
 
 _STATE_TEST_TABLE = [
@@ -86,12 +88,28 @@ class DigitalState(IntEnum):
             raise KeyError(char)
 
     @classmethod
-    def to_char(cls, state: DigitalState) -> str:
-        """Get a character representing the digital state."""
-        if 0 <= state < len(_CHAR_TABLE):
-            return _CHAR_TABLE[state]
-        else:
-            return "?"
+    def to_char(cls, state: DigitalState, errors: str = "strict") -> str:
+        """Get a character representing the digital state.
+
+        Args:
+            state: The digital state.
+            errors: Specifies how to handle errors.
+                * "strict": raise ``KeyError``
+                * "replace": return "?"
+
+        Returns:
+            A character representing the digital state.
+        """
+        if errors not in ("strict", "replace"):
+            raise invalid_arg_value("errors argument", "supported value", errors)
+        try:
+            return DigitalState(state).char
+        except ValueError:
+            if errors == "strict":
+                raise KeyError(state)
+            elif errors == "replace":
+                return "?"
+            raise
 
     @staticmethod
     def test(state1: DigitalState, state2: DigitalState) -> bool:
