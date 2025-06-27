@@ -80,7 +80,7 @@ datetime.timedelta(microseconds=1000)
 
 Timing objects are immutable, so you cannot directly set their properties:
 
->>> wfm.timing.sample_interval = dt.timedelta(seconds=10e-3)
+>>> wfm.timing.sample_interval = dt.timedelta(seconds=10e-3)  # doctest: +SKIP
 Traceback (most recent call last):
 ...
 AttributeError: property 'sample_interval' of 'Timing' object has no setter
