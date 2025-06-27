@@ -304,10 +304,31 @@ Testing digital waveforms
 You can use :any:`DigitalWaveform.test` to compare an acquired waveform against an expected
 waveform. This returns a :any:`DigitalWaveformTestResult` object, which has a Boolean ``successs`
 property and a ``failures`` property that contains a collection of :any:`DigitalWaveformFailure`
-objects, indicating the locatio of each test failure.
+objects, indicating the location of each test failure.
 
+Here is an example. The expected waveform counts in binary using ``COMPARE_LOW`` and
+``COMPARE_HIGH``, but signal 1 of the actual waveform is stuck high.
 
+>>> actual = DigitalWaveform.from_lines([[0, 1], [1, 1], [0, 1], [1, 1]])
+>>> expected = DigitalWaveform.from_lines([[DigitalState.COMPARE_LOW, DigitalState.COMPARE_LOW],
+... [DigitalState.COMPARE_HIGH, DigitalState.COMPARE_LOW],
+... [DigitalState.COMPARE_LOW, DigitalState.COMPARE_HIGH],
+... [DigitalState.COMPARE_HIGH, DigitalState.COMPARE_HIGH]])
+>>> result = actual.test(expected)
+>>> result.success
+False
+>>> len(result.failures)
+2
 
+The failures indicate the sample indices into the actual and expected waveforms, the signal index,
+and the digital state from the actual and expected waveforms:
+
+>>> result.failures[0]  # doctest: +NORMALIZE_WHITESPACE
+DigitalWaveformFailure(sample_index=0, expected_sample_index=0, signal_index=1,
+actual_state=<DigitalState.FORCE_UP: 1>, expected_state=<DigitalState.COMPARE_LOW: 3>)
+>>> result.failures[1]  # doctest: +NORMALIZE_WHITESPACE
+DigitalWaveformFailure(sample_index=1, expected_sample_index=1, signal_index=1,
+actual_state=<DigitalState.FORCE_UP: 1>, expected_state=<DigitalState.COMPARE_LOW: 3>)
 
 Timing information
 ------------------
