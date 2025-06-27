@@ -140,6 +140,11 @@ class DigitalWaveform(Generic[_TState]):
     ) -> DigitalWaveform[Any]:
         """Construct a waveform from a one or two-dimensional array or sequence of line data.
 
+        Each element of the line data array represents a digital state, such as 1 for "on" or 0
+        for "off". The line data should be in a 1D array indexed by sample or a 2D array indexed
+        by (sample, signal). The line data may also use digital state values from the
+        :any:`DigitalState` enum.
+
         Args:
             array: The line data as a one or two-dimensional array or a sequence.
             dtype: The NumPy data type for the waveform data.
@@ -238,8 +243,9 @@ class DigitalWaveform(Generic[_TState]):
         This method allocates a new array in order to convert the port data to line data.
 
         Each element of the port data array represents a digital sample taken over a port of
-        signals. Each bit in the sample is a signal value, either on or off. The least significant
-        bit of the sample is placed at signal index 0 of the DigitalWaveform.
+        signals. Each bit in the sample represents a digital state, either 1 for "on" or 0 for 
+        "off". The least significant bit of the sample is placed at signal index 0 of the
+        DigitalWaveform.
 
         If the input array is not a NumPy array, you must specify the mask.
 
@@ -361,8 +367,9 @@ class DigitalWaveform(Generic[_TState]):
 
         Each row of the port data array corresponds to a resulting DigitalWaveform. Each element of
         the port data array represents a digital sample taken over a port of signals. Each bit in
-        the sample is a signal value, either on or off. The least significant bit of the sample is
-        placed at signal index 0 of the corresponding DigitalWaveform.
+        the sample is represents a digital state, either 1 for "on" or 0 for "off". The least 
+        significant bit of the sample is placed at signal index 0 of the corresponding 
+        DigitalWaveform.
 
         If the input array is not a NumPy array, you must specify the masks.
 

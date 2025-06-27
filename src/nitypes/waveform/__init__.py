@@ -185,7 +185,7 @@ properties such as channel name and signal names.
 Constructing digital waveforms
 ------------------------------
 
-To construct a digital waveform, use the `:any:`DigitalWaveform` class:
+To construct a digital waveform, use the :any:`DigitalWaveform` class:
 
 >>> DigitalWaveform()
 nitypes.waveform.DigitalWaveform(0, 1)
@@ -197,9 +197,9 @@ When displaying a digital waveform as a string, the first number is the sample c
 number is the signal count.
 
 To construct a digital waveform from a NumPy array of line data, use the
-:any:`DigitalWaveform.from_lines` method. Each array element represents a digital signal value such
-as on or off. The line data should be in a 1D array indexed by ``sample`` or a 2D array indexed by
-``(sample, signal)``. The digital waveform will display the line data as a 2D array.
+:any:`DigitalWaveform.from_lines` method. Each array element represents a digital state, such as 1
+for "on" or 0 for "off". The line data should be in a 1D array indexed by sample or a 2D array
+indexed by (sample, signal). The digital waveform displays the line data as a 2D array.
 
 >>> import numpy as np
 >>> DigitalWaveform.from_lines(np.array([0, 1, 0], np.uint8))
@@ -215,8 +215,9 @@ nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [1, 0], [0, 1], [1, 1
 
 To construct a digital waveform from a NumPy array of port data, use the
 :any:`DigitalWaveform.from_port` method. Each element of the port data array represents a digital
-sample taken over a port of signals. Each bit in the sample is a signal value, either on or off. The
-least significant bit of the sample is placed at signal index 0 of the DigitalWaveform.
+sample taken over a port of signals. Each bit in the sample is a signal value, either 1 for "on" or
+0 for "off". The least significant bit of the sample is placed at signal index 0 of the
+DigitalWaveform.
 
 >>> DigitalWaveform.from_port(np.array([0, 1, 2, 3], np.uint8))  # doctest: +NORMALIZE_WHITESPACE
 nitypes.waveform.DigitalWaveform(4, 8, data=array([[0, 0, 0, 0, 0, 0, 0, 0],
@@ -292,8 +293,8 @@ By default, digital waveforms use a NumPy ``dtype`` of :any:`numpy.uint8`, which
 memory for each digital state. 
 
 Using ``np.uint8`` allows the waveform to contain digital states other than "on" or off", such as
-such as :any:`DigitalState.FORCE_OFF` (X) or :any:`DigitalState.COMPARE_HIGH` (H). This capability
-is used for digital pattern applications.
+such as :any:`DigitalState.FORCE_OFF` (``X``) or :any:`DigitalState.COMPARE_HIGH` (``H``). This
+capability is used for digital pattern applications.
 
 You can also construct a digital waveform using a NumPy ``dtype`` of :any:`numpy.bool`. This also
 uses a byte of memory for each digital state, but it restricts the states to "on" and "off".
@@ -302,12 +303,12 @@ Testing digital waveforms
 -------------------------
 
 You can use :any:`DigitalWaveform.test` to compare an acquired waveform against an expected
-waveform. This returns a :any:`DigitalWaveformTestResult` object, which has a Boolean ``successs`
-property and a ``failures`` property that contains a collection of :any:`DigitalWaveformFailure`
-objects, indicating the location of each test failure.
+waveform. This returns a :any:`DigitalWaveformTestResult` object, which has a Boolean ``success``
+property and a ``failures`` property containing a collection of :any:`DigitalWaveformFailure`
+objects, which indicate the location of each test failure.
 
-Here is an example. The expected waveform counts in binary using ``COMPARE_LOW`` and
-``COMPARE_HIGH``, but signal 1 of the actual waveform is stuck high.
+Here is an example. The expected waveform counts in binary using ``COMPARE_LOW`` (``L``) and
+``COMPARE_HIGH`` (``H``), but signal 1 of the actual waveform is stuck high.
 
 >>> actual = DigitalWaveform.from_lines([[0, 1], [1, 1], [0, 1], [1, 1]])
 >>> expected = DigitalWaveform.from_lines([[DigitalState.COMPARE_LOW, DigitalState.COMPARE_LOW],
