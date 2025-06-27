@@ -3,7 +3,8 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import pickle
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import hightime as ht
 import numpy as np

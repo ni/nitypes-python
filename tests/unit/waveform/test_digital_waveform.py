@@ -5,7 +5,8 @@ import copy
 import datetime as dt
 import pickle
 import weakref
-from typing import Any, Sequence, Union
+from collections.abc import Sequence
+from typing import Any, Union
 
 import hightime as ht
 import numpy as np

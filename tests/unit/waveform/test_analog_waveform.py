@@ -7,7 +7,8 @@ import itertools
 import pickle
 import sys
 import weakref
-from typing import Any, Sequence, SupportsIndex, Union
+from collections.abc import Sequence
+from typing import Any, SupportsIndex, Union
 
 import hightime as ht
 import numpy as np
