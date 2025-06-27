@@ -47,32 +47,32 @@ class DigitalState(IntEnum):
     _value_: int
 
     FORCE_DOWN = 0
-    """Force logic low. Drive to the low voltage level (VIL)."""
+    """Force logic low (``0``). Drive to the low voltage level (VIL)."""
 
     FORCE_UP = 1
-    """Force logic high. Drive to the high voltage level (VIH)."""
+    """Force logic high (``1``). Drive to the high voltage level (VIH)."""
 
     FORCE_OFF = 2
-    """Force logic high impedance. Turn the driver off."""
+    """Force logic high impedance (``Z``). Turn the driver off."""
 
     COMPARE_LOW = 3
-    """Compare logic low (edge). Compare for a voltage level lower than the low voltage threshold
-    (VOL)."""
+    """Compare logic low (edge) (``L``). Compare for a voltage level lower than the low voltage
+    threshold (VOL)."""
 
     COMPARE_HIGH = 4
-    """Compare logic high (edge). Compare for a voltage level higher than the high voltage threshold
-    (VOH)."""
+    """Compare logic high (edge) (``H``). Compare for a voltage level higher than the high voltage
+    threshold (VOH)."""
 
     COMPARE_UNKNOWN = 5
-    """Compare logic unknown. Don't compare."""
+    """Compare logic unknown (``X``). Don't compare."""
 
     COMPARE_OFF = 6
-    """Compare logic high impedance (edge). Compare for a voltage level between the low voltage
-    threshold (VOL) and the high voltage threshold (VOH)."""
+    """Compare logic high impedance (edge) (``T``). Compare for a voltage level between the low
+    voltage threshold (VOL) and the high voltage threshold (VOH)."""
 
     COMPARE_VALID = 7
-    """Compare logic valid level (edge). Compare for a voltage level either lower than the low
-    voltage threshold (VOL) or higher than the high voltage threshold (VOH)."""
+    """Compare logic valid level (edge) (``V``). Compare for a voltage level either lower than the
+    low voltage threshold (VOL) or higher than the high voltage threshold (VOH)."""
 
     @property
     def char(self) -> str:

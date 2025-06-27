@@ -176,6 +176,166 @@ Timing information
 
 Complex waveforms have the same timing information as analog waveforms.
 
+Digital Waveforms
+=================
+
+A digital waveform represents one or more digital signals with timing information and extended
+properties such as channel name and signal names.
+
+Constructing digital waveforms
+------------------------------
+
+To construct a digital waveform, use the :any:`DigitalWaveform` class:
+
+>>> DigitalWaveform()
+nitypes.waveform.DigitalWaveform(0, 1)
+>>> DigitalWaveform(sample_count=5, signal_count=3)  # doctest: +NORMALIZE_WHITESPACE
+nitypes.waveform.DigitalWaveform(5, 3, data=array([[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0],
+[0, 0, 0]], dtype=uint8))
+
+When displaying a digital waveform as a string, the first number is the sample count and the second
+number is the signal count.
+
+To construct a digital waveform from a NumPy array of line data, use the
+:any:`DigitalWaveform.from_lines` method. Each array element represents a digital state, such as 1
+for "on" or 0 for "off". The line data should be in a 1D array indexed by sample or a 2D array
+indexed by (sample, signal). The digital waveform displays the line data as a 2D array.
+
+>>> import numpy as np
+>>> DigitalWaveform.from_lines(np.array([0, 1, 0], np.uint8))
+nitypes.waveform.DigitalWaveform(3, 1, data=array([[0], [1], [0]], dtype=uint8))
+>>> DigitalWaveform.from_lines(np.array([[0, 0], [1, 0], [0, 1], [1, 1]], np.uint8))
+nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [1, 0], [0, 1], [1, 1]], dtype=uint8))
+
+You can also use :any:`DigitalWaveform.from_lines` to construct a digital waveform from a sequence,
+such as a list.
+
+>>> DigitalWaveform.from_lines([[0, 0], [1, 0], [0, 1], [1, 1]])
+nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [1, 0], [0, 1], [1, 1]], dtype=uint8))
+
+To construct a digital waveform from a NumPy array of port data, use the
+:any:`DigitalWaveform.from_port` method. Each element of the port data array represents a digital
+sample taken over a port of signals. Each bit in the sample is a signal value, either 1 for "on" or
+0 for "off". The least significant bit of the sample is placed at signal index 0 of the
+DigitalWaveform.
+
+>>> DigitalWaveform.from_port(np.array([0, 1, 2, 3], np.uint8))  # doctest: +NORMALIZE_WHITESPACE
+nitypes.waveform.DigitalWaveform(4, 8, data=array([[0, 0, 0, 0, 0, 0, 0, 0],
+[1, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0, 0, 0]], dtype=uint8))
+
+You can use a mask to specify which lines in the port to include in the waveform.
+
+>>> DigitalWaveform.from_port(np.array([0, 1, 2, 3], np.uint8), 0x3)
+nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [1, 0], [0, 1], [1, 1]], dtype=uint8))
+
+You can also use a non-NumPy sequence such as a list, but you must specify a mask so the waveform
+knows how many bits are in each list element.
+
+>>> DigitalWaveform.from_port([0, 1, 2, 3], 0x3)
+nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [1, 0], [0, 1], [1, 1]], dtype=uint8))
+
+The 2D version, :any:`DigitalWaveform.from_ports`, constructs a sequence of waveforms, one for each
+row of data in the array or nested sequence.
+
+>>> nested_list = [[0, 1, 2, 3], [3, 0, 3, 0]]
+>>> DigitalWaveform.from_ports(nested_list, [0x3, 0x3])  # doctest: +NORMALIZE_WHITESPACE
+[nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [1, 0], [0, 1], [1, 1]], dtype=uint8)),
+ nitypes.waveform.DigitalWaveform(4, 2, data=array([[1, 1], [0, 0], [1, 1], [0, 0]], dtype=uint8))]
+
+Digital signals
+---------------
+
+You can access individual signals using the :any:`DigitalWaveform.signals` property.
+
+>>> wfm = DigitalWaveform.from_port([0, 1, 2, 3], 0x3)
+>>> wfm.signals[0]
+nitypes.waveform.DigitalWaveformSignal(data=array([0, 1, 0, 1], dtype=uint8))
+>>> wfm.signals[1]
+nitypes.waveform.DigitalWaveformSignal(data=array([0, 0, 1, 1], dtype=uint8))
+
+The :any:`DigitalWaveformSignal.data` property returns a view of the data for that signal.
+
+>>> wfm.signals[0].data
+array([0, 1, 0, 1], dtype=uint8)
+
+Digital signal names
+--------------------
+
+The :any:`DigitalWaveformSignal.name` property allows you to get and set the signal names.
+
+>>> wfm.signals[0].name = "port0/line0"
+>>> wfm.signals[1].name = "port0/line1"
+>>> wfm.signals[0].name
+'port0/line0'
+>>> wfm.signals[0]
+nitypes.waveform.DigitalWaveformSignal(name='port0/line0', data=array([0, 1, 0, 1], dtype=uint8))
+
+The signal names are stored in the ``NI_LineNames`` extended property on the digital waveform.
+
+>>> wfm.extended_properties["NI_LineNames"]
+'port0/line0, port0/line1'
+
+When creating a digital waveform, you can directly set the ``NI_LineNames`` extended property.
+
+>>> wfm = DigitalWaveform.from_port([2, 4], 0x7,
+... extended_properties={"NI_LineNames": "Dev1/port1/line4, Dev1/port1/line5, Dev1/port1/line6"})
+>>> wfm.signals[0]
+nitypes.waveform.DigitalWaveformSignal(name='Dev1/port1/line4', data=array([0, 0], dtype=uint8))
+>>> wfm.signals[1]
+nitypes.waveform.DigitalWaveformSignal(name='Dev1/port1/line5', data=array([1, 0], dtype=uint8))
+>>> wfm.signals[2]
+nitypes.waveform.DigitalWaveformSignal(name='Dev1/port1/line6', data=array([0, 1], dtype=uint8))
+
+Digital state types
+-------------------
+
+By default, digital waveforms use a NumPy ``dtype`` of :any:`numpy.uint8`, which uses a byte of
+memory for each digital state.
+
+Using ``np.uint8`` allows the waveform to contain digital states other than "on" or off", such as
+such as :any:`DigitalState.FORCE_OFF` (``X``) or :any:`DigitalState.COMPARE_HIGH` (``H``). This
+capability is used for digital pattern applications.
+
+You can also construct a digital waveform using a NumPy ``dtype`` of :any:`numpy.bool`. This also
+uses a byte of memory for each digital state, but it restricts the states to "on" and "off".
+
+Testing digital waveforms
+-------------------------
+
+You can use :any:`DigitalWaveform.test` to compare an acquired waveform against an expected
+waveform. This returns a :any:`DigitalWaveformTestResult` object, which has a Boolean ``success``
+property and a ``failures`` property containing a collection of :any:`DigitalWaveformFailure`
+objects, which indicate the location of each test failure.
+
+Here is an example. The expected waveform counts in binary using ``COMPARE_LOW`` (``L``) and
+``COMPARE_HIGH`` (``H``), but signal 1 of the actual waveform is stuck high.
+
+>>> actual = DigitalWaveform.from_lines([[0, 1], [1, 1], [0, 1], [1, 1]])
+>>> expected = DigitalWaveform.from_lines([[DigitalState.COMPARE_LOW, DigitalState.COMPARE_LOW],
+... [DigitalState.COMPARE_HIGH, DigitalState.COMPARE_LOW],
+... [DigitalState.COMPARE_LOW, DigitalState.COMPARE_HIGH],
+... [DigitalState.COMPARE_HIGH, DigitalState.COMPARE_HIGH]])
+>>> result = actual.test(expected)
+>>> result.success
+False
+>>> len(result.failures)
+2
+
+The failures indicate the sample indices into the actual and expected waveforms, the signal index,
+and the digital state from the actual and expected waveforms:
+
+>>> result.failures[0]  # doctest: +NORMALIZE_WHITESPACE
+DigitalWaveformFailure(sample_index=0, expected_sample_index=0, signal_index=1,
+actual_state=<DigitalState.FORCE_UP: 1>, expected_state=<DigitalState.COMPARE_LOW: 3>)
+>>> result.failures[1]  # doctest: +NORMALIZE_WHITESPACE
+DigitalWaveformFailure(sample_index=1, expected_sample_index=1, signal_index=1,
+actual_state=<DigitalState.FORCE_UP: 1>, expected_state=<DigitalState.COMPARE_LOW: 3>)
+
+Timing information
+------------------
+
+Digital waveforms have the same timing information as analog waveforms.
+
 Frequency Spectrums
 ===================
 

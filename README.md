@@ -13,6 +13,7 @@
 - [Waveforms](#waveforms)
   - [Analog Waveforms](#analog-waveforms)
   - [Complex Waveforms](#complex-waveforms)
+  - [Digital Waveforms](#digital-waveforms)
   - [Frequency Spectrums](#frequency-spectrums)
 - [Complex Numbers](#complex-numbers)
   - [Complex Integers](#complex-integers)
@@ -27,7 +28,7 @@
 
 The `nitypes` Python package defines data types for NI Python APIs:
 
-- Analog and complex waveforms
+- Analog, complex, and digital waveforms
 - Frequency spectrums
 - Complex integers
 - Time conversion
@@ -69,6 +70,14 @@ in the API Reference.
 The `nitypes.waveform.ComplexWaveform` class represents a complex-number signal, such as I/Q data,
 with timing information and extended properties (such as channel name and units). For more details,
 see [Complex
+Waveforms](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/waveform/index.html#complex-waveforms)
+in the API Reference.
+
+## Digital Waveforms
+
+The `nitypes.waveform.DigitalWaveform` class represents one or more digital signals with timing
+information and extended properties (such as channel name and signal names). For more details, see
+[Digital
 Waveforms](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/waveform/index.html#complex-waveforms)
 in the API Reference.
 
