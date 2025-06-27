@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import sys
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from typing import Any, Generic, SupportsIndex, overload
 
 import hightime as ht
@@ -41,6 +42,39 @@ from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 
 if sys.version_info < (3, 10):
     import array as std_array
+
+
+@dataclass(frozen=True)
+class DigitalWaveformFailure:
+    """A test failure, indicating where the actual waveform did not match the expected waveform."""
+
+    sample_index: int
+    """The sample index into the compared waveform where the test failure occurred."""
+
+    expected_sample_index: int
+    """The sample index into the expected waveform where the test failure occurred."""
+
+    signal_index: int
+    """The signal index where the test failure occurred."""
+
+    actual_state: DigitalState
+    """The state from the compared waveform where the test failure occurred."""
+
+    expected_state: DigitalState
+    """The state from the expected waveform where the test failure occurred."""
+
+
+@dataclass(frozen=True)
+class DigitalWaveformTestResult:
+    """A test result from comparing a digital waveform against an expected digital waveform."""
+
+    @property
+    def success(self) -> bool:
+        """True if the test is successful, False if the test failed."""
+        return len(self.failures) == 0
+
+    failures: Sequence[DigitalWaveformFailure]
+    """A collection of test failure information."""
 
 
 class DigitalWaveform(Generic[_TState]):
@@ -968,6 +1002,67 @@ class DigitalWaveform(Generic[_TState]):
             self._data = array
             self._start_index = start_index
             self._sample_count = sample_count
+
+    def test(
+        self,
+        expected_waveform: DigitalWaveform[_TState],
+        *,
+        start_sample: SupportsIndex | None = 0,
+        expected_start_sample: SupportsIndex | None = 0,
+        sample_count: SupportsIndex | None = None,
+    ) -> DigitalWaveformTestResult:
+        """Test the digital waveform against an expected digital waveform.
+
+        Args:
+            expected_waveform: The expected digital waveform to compare against.
+            start_sample: The beginning sample of ``self`` to compare.
+            expected_start_sample: The beginning sample of ``expected_waveform`` to compare.
+            sample_count: The number of samples to compare.
+
+        Returns:
+            The test result.
+        """
+        start_sample = arg_to_uint("start sample", start_sample, 0)
+        expected_start_sample = arg_to_uint("expected start sample", expected_start_sample, 0)
+        sample_count = arg_to_uint("sample count", sample_count, self.sample_count - start_sample)
+
+        if self.signal_count != expected_waveform.signal_count:
+            raise signal_count_mismatch(
+                "expected waveform", expected_waveform.signal_count, "waveform", self.signal_count
+            )
+        if start_sample + sample_count > self.sample_count:
+            raise start_index_or_sample_count_too_large(
+                start_sample, sample_count, "number of samples in the waveform", self.sample_count
+            )
+        if expected_start_sample + sample_count > expected_waveform.sample_count:
+            raise start_index_or_sample_count_too_large(
+                expected_start_sample,
+                sample_count,
+                "number of samples in the expected waveform",
+                expected_waveform.sample_count,
+            )
+
+        failures = []
+        for _ in range(sample_count):
+            for signal_index in range(self.signal_count):
+                actual_state = DigitalState(self.data[start_sample, signal_index])
+                expected_state = DigitalState(
+                    expected_waveform.data[expected_start_sample, signal_index]
+                )
+                if DigitalState.test(actual_state, expected_state):
+                    failures.append(
+                        DigitalWaveformFailure(
+                            start_sample,
+                            expected_start_sample,
+                            signal_index,
+                            actual_state,
+                            expected_state,
+                        )
+                    )
+            start_sample += 1
+            expected_start_sample += 1
+
+        return DigitalWaveformTestResult(failures)
 
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
