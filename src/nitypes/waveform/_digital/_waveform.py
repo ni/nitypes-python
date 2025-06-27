@@ -4,7 +4,7 @@ import datetime as dt
 import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Generic, NamedTuple, SupportsIndex, overload
+from typing import Any, Generic, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
@@ -64,12 +64,14 @@ class DigitalWaveformFailure:
     """The state from the expected waveform where the test failure occurred."""
 
 
-# This is a NamedTuple so you can unpack it into separate variables.
-class DigitalWaveformTestResult(NamedTuple):
+@dataclass(frozen=True)
+class DigitalWaveformTestResult:
     """A test result from comparing a digital waveform against an expected digital waveform."""
 
-    success: bool
-    """True if the test is successful, False if the test failed."""
+    @property
+    def success(self) -> bool:
+        """True if the test is successful, False if the test failed."""
+        return len(self.failures) == 0
 
     failures: Sequence[DigitalWaveformFailure]
     """A collection of test failure information."""
@@ -1041,7 +1043,7 @@ class DigitalWaveform(Generic[_TState]):
             )
 
         failures = []
-        for sample_index in range(sample_count):
+        for _ in range(sample_count):
             for signal_index in range(self.signal_count):
                 actual_state = DigitalState(self.data[start_sample, signal_index])
                 expected_state = DigitalState(
@@ -1059,7 +1061,8 @@ class DigitalWaveform(Generic[_TState]):
                     )
             start_sample += 1
             expected_start_sample += 1
-        return DigitalWaveformTestResult(len(failures) == 0, failures)
+
+        return DigitalWaveformTestResult(failures)
 
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
