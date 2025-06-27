@@ -194,7 +194,12 @@ nitypes.waveform.Spectrum(3, data=array([1., 2., 3.]), start_frequency=100.0,
 
 from nitypes.waveform._analog import AnalogWaveform
 from nitypes.waveform._complex import ComplexWaveform
-from nitypes.waveform._digital import DigitalState, DigitalWaveform
+from nitypes.waveform._digital import (
+    DigitalState,
+    DigitalWaveform,
+    DigitalWaveformSignal,
+    DigitalWaveformSignalCollection,
+)
 from nitypes.waveform._exceptions import TimingMismatchError
 from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
@@ -216,6 +221,8 @@ __all__ = [
     "ComplexWaveform",
     "DigitalState",
     "DigitalWaveform",
+    "DigitalWaveformSignal",
+    "DigitalWaveformSignalCollection",
     "ExtendedPropertyDictionary",
     "ExtendedPropertyValue",
     "LinearScaleMode",
@@ -238,6 +245,8 @@ AnalogWaveform.__module__ = __name__
 ComplexWaveform.__module__ = __name__
 DigitalState.__module__ = __name__
 DigitalWaveform.__module__ = __name__
+DigitalWaveformSignal.__module__ = __name__
+DigitalWaveformSignalCollection.__module__ = __name__
 ExtendedPropertyDictionary.__module__ = __name__
 # ExtendedPropertyValue is a TypeAlias
 LinearScaleMode.__module__ = __name__

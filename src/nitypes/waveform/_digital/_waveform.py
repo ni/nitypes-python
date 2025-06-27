@@ -14,6 +14,7 @@ from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
 from nitypes.waveform._digital._port import bit_mask, get_port_dtype, port_to_line_data
+from nitypes.waveform._digital._signal_collection import DigitalWaveformSignalCollection
 from nitypes.waveform._digital._state import DigitalState
 from nitypes.waveform._digital._types import (
     _DIGITAL_PORT_DTYPES,
@@ -32,6 +33,7 @@ from nitypes.waveform._exceptions import (
 )
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
+    LINE_NAMES,
     ExtendedPropertyDictionary,
     ExtendedPropertyValue,
 )
@@ -404,6 +406,8 @@ class DigitalWaveform(Generic[_TState]):
         "_sample_count",
         "_extended_properties",
         "_timing",
+        "_signals",
+        "_signal_names",
         "__weakref__",
     ]
 
@@ -413,6 +417,8 @@ class DigitalWaveform(Generic[_TState]):
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
     _timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]
+    _signals: DigitalWaveformSignalCollection[_TState] | None
+    _signal_names: list[str] | None
 
     # If neither dtype nor data is specified, _TData defaults to np.uint8.
     @overload
@@ -546,6 +552,9 @@ class DigitalWaveform(Generic[_TState]):
             timing = Timing.empty
         self._timing = timing
 
+        self._signals = None
+        self._signal_names = None
+
     def _init_with_new_array(
         self,
         sample_count: SupportsIndex | None = None,
@@ -633,6 +642,18 @@ class DigitalWaveform(Generic[_TState]):
         self._data_1d = data_1d
         self._start_index = start_index
         self._sample_count = sample_count
+
+    @property
+    def signals(self) -> DigitalWaveformSignalCollection[_TState]:
+        """A collection of objects representing waveform signals."""
+        # Lazily allocate self._signals if the application needs it.
+        #
+        # https://github.com/ni/nitypes-python/issues/131 - DigitalWaveform.signals introduces a
+        # reference cycle, which affects GC overhead.
+        value = self._signals
+        if value is None:
+            value = self._signals = DigitalWaveformSignalCollection(self)
+        return value
 
     @property
     def data(self) -> npt.NDArray[_TState]:
@@ -725,6 +746,27 @@ class DigitalWaveform(Generic[_TState]):
         if not isinstance(value, str):
             raise invalid_arg_type("channel name", "str", value)
         self._extended_properties[CHANNEL_NAME] = value
+
+    def _get_signal_names(self) -> list[str]:
+        # Lazily allocate self._signal_names if the application needs it.
+        signal_names = self._signal_names
+        if signal_names is None:
+            signal_names_str = self._extended_properties.get(LINE_NAMES, "")
+            assert isinstance(signal_names_str, str)
+            signal_names = self._signal_names = [
+                name.strip() for name in signal_names_str.split(",")
+            ]
+            if len(signal_names) < self.signal_count:
+                signal_names.extend([""] * (self.signal_count - len(signal_names)))
+        return signal_names
+
+    def _get_signal_name(self, signal_index: int) -> str:
+        return self._get_signal_names()[signal_index]
+
+    def _set_signal_name(self, signal_index: int, value: str) -> None:
+        signal_names = self._get_signal_names()
+        signal_names[signal_index] = value
+        self._extended_properties[LINE_NAMES] = ", ".join(signal_names)
 
     def _set_timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
         if self._timing is not value:

@@ -1628,7 +1628,7 @@ def _assert_shallow_copy(value: DigitalWaveform[Any], other: DigitalWaveform[Any
 
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
-def test___various_values___deepcopy___makes_shallow_copy(value: DigitalWaveform[Any]) -> None:
+def test___various_values___deepcopy___makes_deep_copy(value: DigitalWaveform[Any]) -> None:
     new_value = copy.deepcopy(value)
 
     _assert_deep_copy(new_value, value)
