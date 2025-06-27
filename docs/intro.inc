@@ -109,4 +109,4 @@ Scalar
 
 :any:`Scalar` is a data type that represents a single scalar value with units
 information. Valid types for the scalar value are :any:`bool`, :any:`int`,
-:any:`float`, and :any:`str`. For more details, see :any:`scalar`.
+:any:`float`, and :any:`str`. For more details, see :doc:`scalars`.
