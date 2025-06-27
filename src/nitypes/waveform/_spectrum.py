@@ -30,7 +30,7 @@ if sys.version_info < (3, 10):
 
 
 _TData = TypeVar("_TData", bound=Union[np.floating, np.integer])
-_TData_co = TypeVar("_TData_co", bound=Union[np.floating, np.integer], covariant=True)
+_TOtherData = TypeVar("_TOtherData", bound=Union[np.floating, np.integer])
 
 # Use the C types here because np.isdtype() considers some of them to be distinct types, even when
 # they have the same size (e.g. np.intc vs. np.int_).
@@ -56,14 +56,14 @@ _DATA_DTYPES = (
 
 
 @final
-class Spectrum(Generic[_TData_co]):
+class Spectrum(Generic[_TData]):
     """A frequency spectrum, which encapsulates analog data and frequency information."""
 
     @overload
     @classmethod
     def from_array_1d(
         cls,
-        array: npt.NDArray[_TData],
+        array: npt.NDArray[_TOtherData],
         dtype: None = ...,
         *,
         copy: bool = ...,
@@ -72,14 +72,14 @@ class Spectrum(Generic[_TData_co]):
         start_frequency: SupportsFloat | None = ...,
         frequency_increment: SupportsFloat | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-    ) -> Spectrum[_TData]: ...
+    ) -> Spectrum[_TOtherData]: ...
 
     @overload
     @classmethod
     def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
-        dtype: type[_TData] | np.dtype[_TData],
+        dtype: type[_TOtherData] | np.dtype[_TOtherData],
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -87,7 +87,7 @@ class Spectrum(Generic[_TData_co]):
         start_frequency: SupportsFloat | None = ...,
         frequency_increment: SupportsFloat | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-    ) -> Spectrum[_TData]: ...
+    ) -> Spectrum[_TOtherData]: ...
 
     @overload
     @classmethod
@@ -159,7 +159,7 @@ class Spectrum(Generic[_TData_co]):
     @classmethod
     def from_array_2d(
         cls,
-        array: npt.NDArray[_TData],
+        array: npt.NDArray[_TOtherData],
         dtype: None = ...,
         *,
         copy: bool = ...,
@@ -168,14 +168,14 @@ class Spectrum(Generic[_TData_co]):
         start_frequency: SupportsFloat | None = ...,
         frequency_increment: SupportsFloat | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-    ) -> list[Spectrum[_TData]]: ...
+    ) -> Sequence[Spectrum[_TOtherData]]: ...
 
     @overload
     @classmethod
     def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: type[_TData] | np.dtype[_TData],
+        dtype: type[_TOtherData] | np.dtype[_TOtherData],
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -183,7 +183,7 @@ class Spectrum(Generic[_TData_co]):
         start_frequency: SupportsFloat | None = ...,
         frequency_increment: SupportsFloat | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-    ) -> list[Spectrum[_TData]]: ...
+    ) -> Sequence[Spectrum[_TOtherData]]: ...
 
     @overload
     @classmethod
@@ -198,7 +198,7 @@ class Spectrum(Generic[_TData_co]):
         start_frequency: SupportsFloat | None = ...,
         frequency_increment: SupportsFloat | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-    ) -> list[Spectrum[Any]]: ...
+    ) -> Sequence[Spectrum[Any]]: ...
 
     @classmethod
     def from_array_2d(
@@ -212,7 +212,7 @@ class Spectrum(Generic[_TData_co]):
         start_frequency: SupportsFloat | None = None,
         frequency_increment: SupportsFloat | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-    ) -> list[Spectrum[Any]]:
+    ) -> Sequence[Spectrum[Any]]:
         """Construct a list of spectrums from a two-dimensional array or nested sequence.
 
         Args:
@@ -268,14 +268,14 @@ class Spectrum(Generic[_TData_co]):
         "__weakref__",
     ]
 
-    _data: npt.NDArray[_TData_co]
+    _data: npt.NDArray[_TData]
     _start_index: int
     _sample_count: int
     _start_frequency: float
     _frequency_increment: float
     _extended_properties: ExtendedPropertyDictionary
 
-    # If neither dtype nor data is specified, _TData_co defaults to np.float64.
+    # If neither dtype nor data is specified, _TData defaults to np.float64.
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self: Spectrum[np.float64],
@@ -293,9 +293,9 @@ class Spectrum(Generic[_TData_co]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: Spectrum[_TData],
+        self: Spectrum[_TOtherData],
         sample_count: SupportsIndex | None = ...,
-        dtype: type[_TData] | np.dtype[_TData] = ...,
+        dtype: type[_TOtherData] | np.dtype[_TOtherData] = ...,
         *,
         data: None = ...,
         start_index: SupportsIndex | None = ...,
@@ -308,11 +308,11 @@ class Spectrum(Generic[_TData_co]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: Spectrum[_TData],
+        self: Spectrum[_TOtherData],
         sample_count: SupportsIndex | None = ...,
         dtype: None = ...,
         *,
-        data: npt.NDArray[_TData] = ...,
+        data: npt.NDArray[_TOtherData] = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         start_frequency: SupportsFloat | None = ...,
@@ -423,7 +423,7 @@ class Spectrum(Generic[_TData_co]):
 
     def _init_with_provided_array(
         self,
-        data: npt.NDArray[_TData_co],
+        data: npt.NDArray[_TData],
         dtype: npt.DTypeLike = None,
         *,
         start_index: SupportsIndex | None = None,
@@ -460,13 +460,13 @@ class Spectrum(Generic[_TData_co]):
         self._sample_count = sample_count
 
     @property
-    def data(self) -> npt.NDArray[_TData_co]:
+    def data(self) -> npt.NDArray[_TData]:
         """The spectrum data."""
         return self._data[self._start_index : self._start_index + self._sample_count]
 
     def get_data(
         self, start_index: SupportsIndex | None = 0, sample_count: SupportsIndex | None = None
-    ) -> npt.NDArray[_TData_co]:
+    ) -> npt.NDArray[_TData]:
         """Get a subset of the spectrum data.
 
         Args:
@@ -517,7 +517,7 @@ class Spectrum(Generic[_TData_co]):
             self._data.resize(value, refcheck=False)
 
     @property
-    def dtype(self) -> np.dtype[_TData_co]:
+    def dtype(self) -> np.dtype[_TData]:
         """The NumPy dtype for the spectrum data."""
         return self._data.dtype
 
@@ -576,7 +576,7 @@ class Spectrum(Generic[_TData_co]):
 
     def append(
         self,
-        other: npt.NDArray[_TData_co] | Spectrum[_TData_co] | Sequence[Spectrum[_TData_co]],
+        other: npt.NDArray[_TData] | Spectrum[_TData] | Sequence[Spectrum[_TData]],
         /,
     ) -> None:
         """Append data to the spectrum.
@@ -605,7 +605,7 @@ class Spectrum(Generic[_TData_co]):
 
     def _append_array(
         self,
-        array: npt.NDArray[_TData_co],
+        array: npt.NDArray[_TData],
     ) -> None:
         if array.dtype != self.dtype:
             raise data_type_mismatch("input array", array.dtype, "spectrum", self.dtype)
@@ -618,10 +618,10 @@ class Spectrum(Generic[_TData_co]):
         self._data[offset : offset + len(array)] = array
         self._sample_count += len(array)
 
-    def _append_spectrum(self, spectrum: Spectrum[_TData_co]) -> None:
+    def _append_spectrum(self, spectrum: Spectrum[_TData]) -> None:
         self._append_spectrums([spectrum])
 
-    def _append_spectrums(self, spectrums: Sequence[Spectrum[_TData_co]]) -> None:
+    def _append_spectrums(self, spectrums: Sequence[Spectrum[_TData]]) -> None:
         for spectrum in spectrums:
             if spectrum.dtype != self.dtype:
                 raise data_type_mismatch("input spectrum", spectrum.dtype, "spectrum", self.dtype)
@@ -642,7 +642,7 @@ class Spectrum(Generic[_TData_co]):
 
     def load_data(
         self,
-        array: npt.NDArray[_TData_co],
+        array: npt.NDArray[_TData],
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
@@ -663,7 +663,7 @@ class Spectrum(Generic[_TData_co]):
 
     def _load_array(
         self,
-        array: npt.NDArray[_TData_co],
+        array: npt.NDArray[_TData],
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
