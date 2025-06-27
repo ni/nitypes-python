@@ -103,8 +103,8 @@ in the API Reference.
 
 You can use the `nitypes.complex.convert_complex()` function to convert complex-number NumPy arrays
 between `nitypes.complex.ComplexInt32DType` and the standard `np.complex64` and `np.complex128` data
-types. For more details, see [Complex >>
-Conversion](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/complex/index.html#conversion)
+types. For more details, see [Complex >> Converting Complex
+Numbers](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/complex/index.html#converting-complex-numbers)
 in the API Reference.
 
 # Time
@@ -113,9 +113,7 @@ in the API Reference.
 
 You can use the `nitypes.time.convert_datetime()` and `nitypes.time.convert_timedelta()` functions
 to convert time values between the standard `datetime` library, the high-precision `hightime`
-library, and `bintime`. For more details, see [Time >>
-Conversion](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/time/index.html#conversion) in
-the API Reference.
+library, and `bintime`.
 
 ## Binary Time
 
