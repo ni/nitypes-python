@@ -148,7 +148,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         Returns:
             An analog waveform containing the specified data.
         """
-        return super(AnalogWaveform, cls).from_array_1d(
+        return super().from_array_1d(
             array,
             dtype,
             copy=copy,
@@ -238,7 +238,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         information, and scale mode are applied to all waveforms. Consider assigning
         these properties after construction.
         """
-        return super(AnalogWaveform, cls).from_array_2d(
+        return super().from_array_2d(
             array,
             dtype,
             copy=copy,
