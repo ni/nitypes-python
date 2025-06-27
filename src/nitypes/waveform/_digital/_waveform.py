@@ -1013,8 +1013,8 @@ class DigitalWaveform(Generic[_TState]):
 
         Args:
             expected_waveform: The expected digital waveform to compare against.
-            start_sample: The beginning sample of :any:`self` to compare.
-            expected_start_sample: The beginning sample of :any:`expected_waveform` to compare.
+            start_sample: The beginning sample of ``self`` to compare.
+            expected_start_sample: The beginning sample of ``expected_waveform`` to compare.
             sample_count: The number of samples to compare.
 
         Returns:
