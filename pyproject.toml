@@ -67,6 +67,7 @@ sphinx-autoapi = ">=1.8.4"
 m2r2 = ">=0.3.2"
 toml = ">=0.10.2"
 tomlkit = ">=0.11.0"
+pytest-doctestplus = ">=1.4"
 
 [tool.black]
 line-length = 100
