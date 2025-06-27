@@ -440,18 +440,14 @@ setuptools = "*"
 
 [[package]]
 name = "hightime"
-version = "0.3.0-dev0"
+version = "0.3.0.dev0"
 description = "Hightime Python API"
 optional = false
-python-versions = "^3.9"
-files = []
-develop = false
-
-[package.source]
-type = "git"
-url = "https://github.com/ni/hightime.git"
-reference = "HEAD"
-resolved_reference = "56506783601505cb075fe9aa670eee92cac01f54"
+python-versions = "<4.0,>=3.9"
+files = [
+    {file = "hightime-0.3.0.dev0-py3-none-any.whl", hash = "sha256:777dd17ce9a6da40b650565992bf05f7016888076e1465740eae192a056ab292"},
+    {file = "hightime-0.3.0.dev0.tar.gz", hash = "sha256:a89308b5effa746995de29182eb6bb8bdb0293c39b3d99bb46b05a38615c2104"},
+]
 
 [[package]]
 name = "idna"
@@ -1640,4 +1636,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "1e8107d184bd2ad91c64c20d033c5ea9fe32d067a6c3abfbca67bba1cd0b6cd0"
+content-hash = "1acabb64df7393fef8e54f3e5550960520addbfe5e90d7bddd34ed0cdbfe667b"
