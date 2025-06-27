@@ -80,10 +80,10 @@ datetime.timedelta(microseconds=1000)
 
 Timing objects are immutable, so you cannot directly set their properties:
 
->>> wfm.timing.sample_interval = dt.timedelta(seconds=10e-3)
+>>> wfm.timing.sample_interval = dt.timedelta(seconds=10e-3)  # doctest: +ELLIPSIS
 Traceback (most recent call last):
 ...
-AttributeError: property 'sample_interval' of 'Timing' object has no setter
+AttributeError: ...
 
 Instead, if you want to modify the timing information for an existing waveform, you can create a new
 timing object and set the :any:`NumericWaveform.timing` property:

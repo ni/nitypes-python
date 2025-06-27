@@ -512,7 +512,7 @@ class TimeDelta:
         # displayed, the last few are due to rounding error.
         return (
             f"{self.__class__.__module__}.{self.__class__.__name__}"
-            f"(Decimal('{self.precision_total_seconds():.024}'))"
+            f"(Decimal('{self.precision_total_seconds():.24}'))"
         )
 
 
