@@ -94,6 +94,7 @@ class DigitalState(IntEnum):
         Args:
             state: The digital state.
             errors: Specifies how to handle errors.
+
                 * "strict": raise ``KeyError``
                 * "replace": return "?"
 
