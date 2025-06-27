@@ -29,8 +29,8 @@ sequence, such as a list. In this case, you must specify the NumPy data type.
 >>> AnalogWaveform.from_array_1d([1.0, 2.0, 3.0], np.float64)
 nitypes.waveform.AnalogWaveform(3, raw_data=array([1., 2., 3.]))
 
-The 2D version, :any:`AnalogWaveform.from_array_2d`, constructs a list of waveforms, one for each
-row of data in the array or nested sequence.
+The 2D version, :any:`AnalogWaveform.from_array_2d`, returns multiple waveforms, one for each row of
+data in the array or nested sequence.
 
 >>> nested_list = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
 >>> AnalogWaveform.from_array_2d(nested_list, np.float64)  # doctest: +NORMALIZE_WHITESPACE
@@ -234,8 +234,8 @@ knows how many bits are in each list element.
 >>> DigitalWaveform.from_port([0, 1, 2, 3], 0x3)
 nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [1, 0], [0, 1], [1, 1]], dtype=uint8))
 
-The 2D version, :any:`DigitalWaveform.from_ports`, constructs a sequence of waveforms, one for each
-row of data in the array or nested sequence.
+The 2D version, :any:`DigitalWaveform.from_ports`, returns multiple waveforms, one for each row of
+data in the array or nested sequence.
 
 >>> nested_list = [[0, 1, 2, 3], [3, 0, 3, 0]]
 >>> DigitalWaveform.from_ports(nested_list, [0x3, 0x3])  # doctest: +NORMALIZE_WHITESPACE

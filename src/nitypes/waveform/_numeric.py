@@ -147,8 +147,8 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
-    ) -> list[Self]:
-        """Construct a list of waveforms from a two-dimensional array or nested sequence.
+    ) -> Sequence[Self]:
+        """Construct multiple waveforms from a two-dimensional array or nested sequence.
 
         Args:
             array: The waveform data as a two-dimensional array or a nested sequence.
@@ -162,7 +162,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             scale_mode: The scale mode of the waveform.
 
         Returns:
-            A list containing a waveform for each row of the specified data.
+            A sequence containing a waveform for each row of the specified data.
 
         When constructing multiple waveforms, the same extended properties, timing
         information, and scale mode are applied to all waveforms. Consider assigning

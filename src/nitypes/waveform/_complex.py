@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, SupportsIndex, Union, cast, overload
+from typing import Any, SupportsIndex, Union, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -157,7 +157,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[ComplexWaveform[_TOtherRaw]]: ...
+    ) -> Sequence[ComplexWaveform[_TOtherRaw]]: ...
 
     @overload
     @classmethod
@@ -172,7 +172,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[ComplexWaveform[_TOtherRaw]]: ...
+    ) -> Sequence[ComplexWaveform[_TOtherRaw]]: ...
 
     @overload
     @classmethod
@@ -187,7 +187,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[ComplexWaveform[Any]]: ...
+    ) -> Sequence[ComplexWaveform[Any]]: ...
 
     @override
     @classmethod
@@ -202,8 +202,8 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
-    ) -> list[ComplexWaveform[Any]]:
-        """Construct a list of complex waveforms from a two-dimensional array or nested sequence.
+    ) -> Sequence[ComplexWaveform[Any]]:
+        """Construct multiple complex waveforms from a two-dimensional array or nested sequence.
 
         Args:
             array: The waveform data as a two-dimensional array or a nested sequence.
@@ -217,25 +217,21 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
             scale_mode: The scale mode of the waveform.
 
         Returns:
-            A list containing a complex waveform for each row of the specified data.
+            A sequence containing a complex waveform for each row of the specified data.
 
         When constructing multiple waveforms, the same extended properties, timing
         information, and scale mode are applied to all waveforms. Consider assigning
         these properties after construction.
         """
-        # list[T] is invariant but we are using it in a covariant way here.
-        return cast(
-            list[ComplexWaveform[Any]],
-            super(ComplexWaveform, cls).from_array_2d(
-                array,
-                dtype,
-                copy=copy,
-                start_index=start_index,
-                sample_count=sample_count,
-                extended_properties=extended_properties,
-                timing=timing,
-                scale_mode=scale_mode,
-            ),
+        return super(ComplexWaveform, cls).from_array_2d(
+            array,
+            dtype,
+            copy=copy,
+            start_index=start_index,
+            sample_count=sample_count,
+            extended_properties=extended_properties,
+            timing=timing,
+            scale_mode=scale_mode,
         )
 
     __slots__ = ()
