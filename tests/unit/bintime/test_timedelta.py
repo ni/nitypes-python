@@ -4,8 +4,9 @@ import copy
 import datetime as dt
 import pickle
 import random
+from collections.abc import Generator
 from decimal import Decimal
-from typing import Any, Generator
+from typing import Any
 
 import hightime as ht
 import pytest
@@ -1171,7 +1172,7 @@ _VARIOUS_VALUES = [
 
 
 def test___various_values___hash___returns_probably_unique_int() -> None:
-    hashes = set([hash(x) for x in _VARIOUS_VALUES])
+    hashes = {hash(x) for x in _VARIOUS_VALUES}
     assert len(hashes) == len(_VARIOUS_VALUES)
 
 

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import operator
-from collections.abc import Mapping
-from typing import Iterator, MutableMapping, Union
+from collections.abc import Iterator, Mapping, MutableMapping
+from typing import Union
 
 from typing_extensions import TypeAlias
 

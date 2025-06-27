@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, SupportsIndex, Union, cast, overload
+from typing import Any, SupportsIndex, Union, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -13,10 +13,10 @@ from nitypes.waveform._numeric import NumericWaveform, _TOtherScaled
 from nitypes.waveform._scaling import ScaleMode
 from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 
-# _TRaw and _TRaw_co specify the type of the raw_data array. AnalogWaveform accepts a narrower set
-# of types than NumericWaveform.
+# _TRaw specifies the type of the raw_data array. AnalogWaveform accepts a narrower set of types
+# than NumericWaveform.
 _TRaw = TypeVar("_TRaw", bound=Union[np.floating, np.integer])
-_TRaw_co = TypeVar("_TRaw_co", bound=Union[np.floating, np.integer], covariant=True)
+_TOtherRaw = TypeVar("_TOtherRaw", bound=Union[np.floating, np.integer])
 
 # Use the C types here because np.isdtype() considers some of them to be distinct types, even when
 # they have the same size (e.g. np.intc vs. np.int_).
@@ -48,7 +48,7 @@ _SCALED_DTYPES = (
 
 
 @final
-class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
+class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
     """An analog waveform, which encapsulates analog data and timing information."""
 
     @override
@@ -77,7 +77,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
     @classmethod
     def from_array_1d(
         cls,
-        array: npt.NDArray[_TRaw],
+        array: npt.NDArray[_TOtherRaw],
         dtype: None = ...,
         *,
         copy: bool = ...,
@@ -86,14 +86,14 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> AnalogWaveform[_TRaw]: ...
+    ) -> AnalogWaveform[_TOtherRaw]: ...
 
     @overload
     @classmethod
     def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
-        dtype: type[_TRaw] | np.dtype[_TRaw],
+        dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw],
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -101,7 +101,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> AnalogWaveform[_TRaw]: ...
+    ) -> AnalogWaveform[_TOtherRaw]: ...
 
     @overload
     @classmethod
@@ -148,7 +148,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         Returns:
             An analog waveform containing the specified data.
         """
-        return super(AnalogWaveform, cls).from_array_1d(
+        return super().from_array_1d(
             array,
             dtype,
             copy=copy,
@@ -163,7 +163,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
     @classmethod
     def from_array_2d(
         cls,
-        array: npt.NDArray[_TRaw],
+        array: npt.NDArray[_TOtherRaw],
         dtype: None = ...,
         *,
         copy: bool = ...,
@@ -172,14 +172,14 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[AnalogWaveform[_TRaw]]: ...
+    ) -> Sequence[AnalogWaveform[_TOtherRaw]]: ...
 
     @overload
     @classmethod
     def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: type[_TRaw] | np.dtype[_TRaw],
+        dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw],
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -187,7 +187,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[AnalogWaveform[_TRaw]]: ...
+    ) -> Sequence[AnalogWaveform[_TOtherRaw]]: ...
 
     @overload
     @classmethod
@@ -202,7 +202,7 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[AnalogWaveform[Any]]: ...
+    ) -> Sequence[AnalogWaveform[Any]]: ...
 
     @override
     @classmethod
@@ -217,8 +217,8 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
-    ) -> list[AnalogWaveform[Any]]:
-        """Construct a list of analog waveforms from a two-dimensional array or nested sequence.
+    ) -> Sequence[AnalogWaveform[Any]]:
+        """Construct multiple analog waveforms from a two-dimensional array or nested sequence.
 
         Args:
             array: The waveform data as a two-dimensional array or a nested sequence.
@@ -232,30 +232,26 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
             scale_mode: The scale mode of the waveform.
 
         Returns:
-            A list containing an analog waveform for each row of the specified data.
+            A sequence containing an analog waveform for each row of the specified data.
 
         When constructing multiple waveforms, the same extended properties, timing
         information, and scale mode are applied to all waveforms. Consider assigning
         these properties after construction.
         """
-        # list[T] is invariant but we are using it in a covariant way here.
-        return cast(
-            list[AnalogWaveform[Any]],
-            super(AnalogWaveform, cls).from_array_2d(
-                array,
-                dtype,
-                copy=copy,
-                start_index=start_index,
-                sample_count=sample_count,
-                extended_properties=extended_properties,
-                timing=timing,
-                scale_mode=scale_mode,
-            ),
+        return super().from_array_2d(
+            array,
+            dtype,
+            copy=copy,
+            start_index=start_index,
+            sample_count=sample_count,
+            extended_properties=extended_properties,
+            timing=timing,
+            scale_mode=scale_mode,
         )
 
     __slots__ = ()
 
-    # If neither dtype nor raw_data is specified, _TRaw_co defaults to np.float64.
+    # If neither dtype nor raw_data is specified, _TRaw defaults to np.float64.
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self: AnalogWaveform[np.float64],
@@ -273,9 +269,9 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: AnalogWaveform[_TRaw],
+        self: AnalogWaveform[_TOtherRaw],
         sample_count: SupportsIndex | None = ...,
-        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
+        dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw] = ...,
         *,
         raw_data: None = ...,
         start_index: SupportsIndex | None = ...,
@@ -288,11 +284,11 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: AnalogWaveform[_TRaw],
+        self: AnalogWaveform[_TOtherRaw],
         sample_count: SupportsIndex | None = ...,
         dtype: None = ...,
         *,
-        raw_data: npt.NDArray[_TRaw] = ...,
+        raw_data: npt.NDArray[_TOtherRaw] = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
@@ -367,6 +363,6 @@ class AnalogWaveform(NumericWaveform[_TRaw_co, np.float64]):
     def _convert_data(
         self,
         dtype: npt.DTypeLike | type[_TOtherScaled] | np.dtype[_TOtherScaled],
-        raw_data: npt.NDArray[_TRaw_co],
+        raw_data: npt.NDArray[_TRaw],
     ) -> npt.NDArray[_TOtherScaled]:
         return raw_data.astype(dtype)

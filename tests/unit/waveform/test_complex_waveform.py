@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import pickle
+from collections.abc import Sequence
 from typing import Any
 
 import hightime as ht
@@ -162,6 +163,7 @@ def test___complexint32_ndarray___from_array_2d___creates_waveform_with_complexi
 
     waveforms = ComplexWaveform.from_array_2d(data)
 
+    assert_type(waveforms, Sequence[ComplexWaveform[ComplexInt32Base]])
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
@@ -174,6 +176,7 @@ def test___complex64_ndarray___from_array_2d___creates_waveform_with_complex64_d
 
     waveforms = ComplexWaveform.from_array_2d(data)
 
+    assert_type(waveforms, Sequence[ComplexWaveform[np.complex64]])
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
@@ -186,6 +189,7 @@ def test___complex128_ndarray___from_array_2d___creates_waveform_with_complex128
 
     waveforms = ComplexWaveform.from_array_2d(data)
 
+    assert_type(waveforms, Sequence[ComplexWaveform[np.complex128]])
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
@@ -200,6 +204,7 @@ def test___complex_list_list_with_dtype___from_array_2d___creates_waveform_with_
 
     waveforms = ComplexWaveform.from_array_2d(data, np.complex64)
 
+    assert_type(waveforms, Sequence[ComplexWaveform[np.complex64]])
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i]
@@ -214,6 +219,7 @@ def test___int_list_list_with_dtype_str___from_array_2d___creates_waveform_with_
 
     waveforms = ComplexWaveform.from_array_2d(data, "complex64")
 
+    assert_type(waveforms, Sequence[ComplexWaveform[Any]])  # dtype not inferred from string
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i]

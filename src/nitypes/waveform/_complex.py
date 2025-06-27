@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, SupportsIndex, Union, cast, overload
+from typing import Any, SupportsIndex, Union, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -13,11 +13,11 @@ from nitypes.waveform._numeric import NumericWaveform, _TOtherScaled
 from nitypes.waveform._scaling import ScaleMode
 from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 
-# _TRaw and _TRaw_co specify the type of the raw_data array. ComplexWaveform accepts a narrower
-# set of types than NumericWaveform. Note that ComplexInt32Base is an alias for np.void, but other
-# structured data types are rejected at run time.
+# _TRaw specifies the type of the raw_data array. ComplexWaveform accepts a narrower set of types
+# than NumericWaveform. Note that ComplexInt32Base is an alias for np.void, but other structured
+# data types are rejected at run time.
 _TRaw = TypeVar("_TRaw", bound=Union[np.complexfloating, ComplexInt32Base])
-_TRaw_co = TypeVar("_TRaw_co", bound=Union[np.complexfloating, ComplexInt32Base], covariant=True)
+_TOtherRaw = TypeVar("_TOtherRaw", bound=Union[np.complexfloating, ComplexInt32Base])
 
 _RAW_DTYPES = (
     # Complex floating point
@@ -35,7 +35,7 @@ _SCALED_DTYPES = (
 
 
 @final
-class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
+class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
     """A complex waveform, which encapsulates complex data and timing information."""
 
     @override
@@ -62,7 +62,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
     @classmethod
     def from_array_1d(
         cls,
-        array: npt.NDArray[_TRaw],
+        array: npt.NDArray[_TOtherRaw],
         dtype: None = ...,
         *,
         copy: bool = ...,
@@ -71,14 +71,14 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> ComplexWaveform[_TRaw]: ...
+    ) -> ComplexWaveform[_TOtherRaw]: ...
 
     @overload
     @classmethod
     def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
-        dtype: type[_TRaw] | np.dtype[_TRaw],
+        dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw],
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -86,7 +86,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> ComplexWaveform[_TRaw]: ...
+    ) -> ComplexWaveform[_TOtherRaw]: ...
 
     @overload
     @classmethod
@@ -133,7 +133,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         Returns:
             A complex waveform containing the specified data.
         """
-        return super(ComplexWaveform, cls).from_array_1d(
+        return super().from_array_1d(
             array,
             dtype,
             copy=copy,
@@ -148,7 +148,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
     @classmethod
     def from_array_2d(
         cls,
-        array: npt.NDArray[_TRaw],
+        array: npt.NDArray[_TOtherRaw],
         dtype: None = ...,
         *,
         copy: bool = ...,
@@ -157,14 +157,14 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[ComplexWaveform[_TRaw]]: ...
+    ) -> Sequence[ComplexWaveform[_TOtherRaw]]: ...
 
     @overload
     @classmethod
     def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: type[_TRaw] | np.dtype[_TRaw],
+        dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw],
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -172,7 +172,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[ComplexWaveform[_TRaw]]: ...
+    ) -> Sequence[ComplexWaveform[_TOtherRaw]]: ...
 
     @overload
     @classmethod
@@ -187,7 +187,7 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
-    ) -> list[ComplexWaveform[Any]]: ...
+    ) -> Sequence[ComplexWaveform[Any]]: ...
 
     @override
     @classmethod
@@ -202,8 +202,8 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
-    ) -> list[ComplexWaveform[Any]]:
-        """Construct a list of complex waveforms from a two-dimensional array or nested sequence.
+    ) -> Sequence[ComplexWaveform[Any]]:
+        """Construct multiple complex waveforms from a two-dimensional array or nested sequence.
 
         Args:
             array: The waveform data as a two-dimensional array or a nested sequence.
@@ -217,30 +217,26 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
             scale_mode: The scale mode of the waveform.
 
         Returns:
-            A list containing a complex waveform for each row of the specified data.
+            A sequence containing a complex waveform for each row of the specified data.
 
         When constructing multiple waveforms, the same extended properties, timing
         information, and scale mode are applied to all waveforms. Consider assigning
         these properties after construction.
         """
-        # list[T] is invariant but we are using it in a covariant way here.
-        return cast(
-            list[ComplexWaveform[Any]],
-            super(ComplexWaveform, cls).from_array_2d(
-                array,
-                dtype,
-                copy=copy,
-                start_index=start_index,
-                sample_count=sample_count,
-                extended_properties=extended_properties,
-                timing=timing,
-                scale_mode=scale_mode,
-            ),
+        return super().from_array_2d(
+            array,
+            dtype,
+            copy=copy,
+            start_index=start_index,
+            sample_count=sample_count,
+            extended_properties=extended_properties,
+            timing=timing,
+            scale_mode=scale_mode,
         )
 
     __slots__ = ()
 
-    # If neither dtype nor raw_data is specified, _TRaw_co defaults to np.complex128.
+    # If neither dtype nor raw_data is specified, _TRaw defaults to np.complex128.
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self: ComplexWaveform[np.complex128],
@@ -258,9 +254,9 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: ComplexWaveform[_TRaw],
+        self: ComplexWaveform[_TOtherRaw],
         sample_count: SupportsIndex | None = ...,
-        dtype: type[_TRaw] | np.dtype[_TRaw] = ...,
+        dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw] = ...,
         *,
         raw_data: None = ...,
         start_index: SupportsIndex | None = ...,
@@ -273,11 +269,11 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
 
     @overload
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
-        self: ComplexWaveform[_TRaw],
+        self: ComplexWaveform[_TOtherRaw],
         sample_count: SupportsIndex | None = ...,
         dtype: None = ...,
         *,
-        raw_data: npt.NDArray[_TRaw] = ...,
+        raw_data: npt.NDArray[_TOtherRaw] = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
@@ -352,6 +348,6 @@ class ComplexWaveform(NumericWaveform[_TRaw_co, np.complex128]):
     def _convert_data(
         self,
         dtype: npt.DTypeLike | type[_TOtherScaled] | np.dtype[_TOtherScaled],
-        raw_data: npt.NDArray[_TRaw_co],
+        raw_data: npt.NDArray[_TRaw],
     ) -> npt.NDArray[_TOtherScaled]:
         return convert_complex(dtype, raw_data)

@@ -7,6 +7,7 @@ import itertools
 import pickle
 import sys
 import weakref
+from collections.abc import Sequence
 from typing import Any, SupportsIndex, Union
 
 import hightime as ht
@@ -344,6 +345,7 @@ def test___float64_ndarray___from_array_2d___creates_waveform_with_float64_dtype
 
     waveforms = AnalogWaveform.from_array_2d(data)
 
+    assert_type(waveforms, Sequence[AnalogWaveform[np.float64]])
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
@@ -356,6 +358,7 @@ def test___int32_ndarray___from_array_2d___creates_waveform_with_int32_dtype() -
 
     waveforms = AnalogWaveform.from_array_2d(data)
 
+    assert_type(waveforms, Sequence[AnalogWaveform[np.int32]])
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
@@ -370,6 +373,7 @@ def test___int16_ndarray_with_mismatched_dtype___from_array_2d___creates_wavefor
 
     waveforms = AnalogWaveform.from_array_2d(data, np.int32)
 
+    assert_type(waveforms, Sequence[AnalogWaveform[np.int32]])
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
@@ -384,6 +388,7 @@ def test___int32_array_list_with_dtype___from_array_2d___creates_waveform_with_s
 
     waveforms = AnalogWaveform.from_array_2d(data, np.int32)
 
+    assert_type(waveforms, Sequence[AnalogWaveform[np.int32]])
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i].tolist()
@@ -398,6 +403,7 @@ def test___int_list_list_with_dtype___from_array_2d___creates_waveform_with_spec
 
     waveforms = AnalogWaveform.from_array_2d(data, np.int32)
 
+    assert_type(waveforms, Sequence[AnalogWaveform[np.int32]])
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i]
@@ -412,6 +418,7 @@ def test___int_list_list_with_dtype_str___from_array_2d___creates_waveform_with_
 
     waveforms = AnalogWaveform.from_array_2d(data, "int32")
 
+    assert_type(waveforms, Sequence[AnalogWaveform[Any]])  # dtype not inferred from string
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == data[i]

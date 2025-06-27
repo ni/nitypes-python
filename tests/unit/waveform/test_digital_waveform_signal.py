@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import copy
 import pickle
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 import numpy.typing as npt

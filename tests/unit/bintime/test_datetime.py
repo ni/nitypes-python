@@ -424,7 +424,7 @@ _VARIOUS_VALUES = [
 
 
 def test___various_values___hash___returns_probably_unique_int() -> None:
-    hashes = set([hash(x) for x in _VARIOUS_VALUES])
+    hashes = {hash(x) for x in _VARIOUS_VALUES}
     assert len(hashes) == len(_VARIOUS_VALUES)
 
 
