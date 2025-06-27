@@ -1005,8 +1005,8 @@ class DigitalWaveform(Generic[_TState]):
         self,
         expected_waveform: DigitalWaveform[_TState],
         *,
-        start_sample: SupportsIndex | None = None,
-        expected_start_sample: SupportsIndex | None = None,
+        start_sample: SupportsIndex | None = 0,
+        expected_start_sample: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
     ) -> DigitalWaveformTestResult:
         """Test the digital waveform against an expected digital waveform.
