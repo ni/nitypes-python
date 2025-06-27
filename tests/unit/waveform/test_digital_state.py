@@ -46,7 +46,11 @@ def test___invalid_char___from_char___raises_key_error(char: str) -> None:
     "char1, char2, expected_result",
     [
         ("0", "0", False),
+        ("0", "L", False),
+        ("0", "H", True),
         ("1", "1", False),
+        ("1", "H", False),
+        ("1", "L", True),
         ("1", "0", True),
         ("1", "X", False),
         ("0", "X", False),
@@ -58,3 +62,20 @@ def test___states___test___returns_pass_fail(char1: str, char2: str, expected_re
     state2 = DigitalState.from_char(char2)
 
     assert DigitalState.test(state1, state2) == expected_result
+    assert DigitalState.test(state2, state1) == expected_result
+
+
+@pytest.mark.parametrize(
+    "state1, state2",
+    [
+        (DigitalState.FORCE_DOWN, -1),
+        (8, DigitalState.COMPARE_UNKNOWN),
+    ],
+)
+def test___invalid_state___test___raises_value_error(
+    state1: DigitalState, state2: DigitalState
+) -> None:
+    with pytest.raises(ValueError) as exc:
+        _ = DigitalState.test(state1, state2)
+
+    assert "is not a valid DigitalState" in exc.value.args[0]

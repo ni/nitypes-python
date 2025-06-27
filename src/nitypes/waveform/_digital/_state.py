@@ -25,19 +25,19 @@ class DigitalState(IntEnum):
     >>> DigitalState.FORCE_OFF == 2
     True
 
-    Or you can use its :any:`value` and :any:`char` properties:
-
-    >>> DigitalState.FORCE_OFF.value
-    2
-    >>> DigitalState.FORCE_OFF.char
-    'Z'
-
-    You can also use :any:`from_char` and :any:`to_char` to convert between states and characters:
+    Use :any:`from_char` and :any:`to_char` to convert between states and characters:
 
     >>> DigitalState.from_char("Z")
     <DigitalState.FORCE_OFF: 2>
     >>> DigitalState.to_char(2)
     'Z'
+
+    Use :any:`test` to compare actual vs. expected states, returning True on failure.
+
+    >>> DigitalState.test(DigitalState.FORCE_DOWN, DigitalState.COMPARE_LOW)
+    False
+    >>> DigitalState.test(DigitalState.FORCE_UP, DigitalState.COMPARE_LOW)
+    True
     """
 
     _value_: int
@@ -97,4 +97,4 @@ class DigitalState(IntEnum):
     @staticmethod
     def test(state1: DigitalState, state2: DigitalState) -> bool:
         """Test two digital states and return True if the test failed."""
-        return not _STATE_TEST_TABLE[state1][state2]
+        return not _STATE_TEST_TABLE[DigitalState(state1)][DigitalState(state2)]
