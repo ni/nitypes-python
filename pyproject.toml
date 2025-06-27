@@ -72,8 +72,12 @@ tomlkit = ">=0.11.0"
 line-length = 100
 
 [tool.pytest.ini_options]
-addopts = "--doctest-modules --doctest-plus --strict-markers"
-testpaths = ["src/nitypes", "tests"]
+addopts = "--doctest-modules --doctest-plus --doctest-rst --strict-markers"
+testpaths = ["docs", "src/nitypes", "tests"]
+doctest_subpackage_requires = [
+  "docs/complex-numbers.rst = numpy>=2.0",
+  "docs/waveforms.rst = numpy>=2.0"
+]
 
 [build-system]
 requires = ["poetry-core>=1.8"]

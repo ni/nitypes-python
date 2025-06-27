@@ -30,6 +30,7 @@ Constructing arrays of complex integers
 You can construct an array of complex integers from a sequence of tuples using :func:`numpy.array`:
 
 >>> import numpy as np
+>>> from nitypes.complex import ComplexInt32DType
 >>> np.array([(1, 2), (3, 4)], dtype=ComplexInt32DType)
 array([(1, 2), (3, 4)], dtype=[('real', '<i2'), ('imag', '<i2')])
 
@@ -102,6 +103,7 @@ method:
 To convert NumPy arrays between between different complex number data types, use the
 :func:`convert_complex` function:
 
+>>> from nitypes.complex import convert_complex
 >>> convert_complex(np.complex128, x)
 array([1.+2.j, 3.+4.j, 5.+6.j])
 >>> convert_complex(ComplexInt32DType, np.array([1.23+4.56j]))

@@ -33,6 +33,7 @@ Constructing
 As with :any:`datetime.datetime`, you can construct a :any:`DateTime` by specifying the year,
 month, day, etc.:
 
+>>> from nitypes.bintime import DateTime
 >>> import datetime
 >>> DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
 nitypes.bintime.DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
@@ -122,6 +123,7 @@ Constructing
 You can construct a :any:`TimeDelta` from a number of seconds, expressed as an :any:`int`,
 :any:`float`, or :any:`decimal.Decimal`.
 
+>>> from nitypes.bintime import TimeDelta
 >>> TimeDelta(100)
 nitypes.bintime.TimeDelta(Decimal('100'))
 >>> TimeDelta(100.125)

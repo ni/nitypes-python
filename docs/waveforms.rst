@@ -14,6 +14,7 @@ Constructing analog waveforms
 
 To construct an analog waveform, use the :any:`AnalogWaveform` class:
 
+>>> from nitypes.waveform import AnalogWaveform
 >>> AnalogWaveform()
 nitypes.waveform.AnalogWaveform(0)
 >>> AnalogWaveform(5)
@@ -46,6 +47,7 @@ Scaling analog data
 By default, analog waveforms contain floating point data in :any:`numpy.float64` format, but they
 can also be used to scale raw integer data to floating-point:
 
+>>> from nitypes.waveform import LinearScaleMode
 >>> scale_mode = LinearScaleMode(gain=2.0, offset=0.5)
 >>> wfm = AnalogWaveform.from_array_1d([1, 2, 3], np.int32, scale_mode=scale_mode)
 >>> wfm  # doctest: +NORMALIZE_WHITESPACE
@@ -65,6 +67,7 @@ analyzing and visualizing the data.
 You can specify timing information by constructing a :any:`Timing` object and passing it to the
 waveform constructor or factory method:
 
+>>> from nitypes.waveform import Timing
 >>> import datetime as dt
 >>> wfm = AnalogWaveform(timing=Timing.create_with_regular_interval(
 ...     dt.timedelta(seconds=1e-3), dt.datetime(2024, 12, 31, 23, 59, 59, tzinfo=dt.timezone.utc)
@@ -156,6 +159,7 @@ Constructing complex waveforms
 
 To construct a complex waveform, use the :any:`ComplexWaveform` class:
 
+>>> from nitypes.waveform import ComplexWaveform
 >>> ComplexWaveform.from_array_1d([1 + 2j, 3 + 4j], np.complex128)
 nitypes.waveform.ComplexWaveform(2, raw_data=array([1.+2.j, 3.+4.j]))
 
@@ -194,6 +198,7 @@ Constructing digital waveforms
 
 To construct a digital waveform, use the :any:`DigitalWaveform` class:
 
+>>> from nitypes.waveform import DigitalWaveform
 >>> DigitalWaveform()
 nitypes.waveform.DigitalWaveform(0, 1)
 >>> DigitalWaveform(sample_count=5, signal_count=3)  # doctest: +NORMALIZE_WHITESPACE
@@ -317,6 +322,7 @@ objects, which indicate the location of each test failure.
 Here is an example. The expected waveform counts in binary using ``COMPARE_LOW`` (``L``) and
 ``COMPARE_HIGH`` (``H``), but signal 1 of the actual waveform is stuck high.
 
+>>> from nitypes.waveform import DigitalState
 >>> actual = DigitalWaveform.from_lines([[0, 1], [1, 1], [0, 1], [1, 1]])
 >>> expected = DigitalWaveform.from_lines([[DigitalState.COMPARE_LOW, DigitalState.COMPARE_LOW],
 ... [DigitalState.COMPARE_HIGH, DigitalState.COMPARE_LOW],
@@ -356,6 +362,7 @@ Constructing spectrums
 
 To construct a spectrum, use the :any:`Spectrum` class:
 
+>>> from nitypes.waveform import Spectrum
 >>> Spectrum.from_array_1d([1, 2, 3], np.float64, start_frequency=100, frequency_increment=10)  # doctest: +NORMALIZE_WHITESPACE
 nitypes.waveform.Spectrum(3, data=array([1., 2., 3.]), start_frequency=100.0,
     frequency_increment=10.0)

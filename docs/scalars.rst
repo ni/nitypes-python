@@ -9,6 +9,7 @@ Constructing scalar data objects
 
 To construct a scalar data object, use the :any:`Scalar` class:
 
+>>> from nitypes.scalar import Scalar
 >>> Scalar(False)
 nitypes.scalar.Scalar(value=False, units='')
 >>> Scalar(0)
