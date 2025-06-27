@@ -17,6 +17,7 @@ import nitypes.bintime as bt
 from nitypes.waveform import (
     DigitalState,
     DigitalWaveform,
+    DigitalWaveformFailure,
     SampleIntervalMode,
     Timing,
     TimingMismatchError,
@@ -1663,3 +1664,82 @@ def test___waveform___pickle___references_public_modules() -> None:
     assert b"nitypes.waveform._digital" not in value_bytes
     assert b"nitypes.waveform._extended_properties" not in value_bytes
     assert b"nitypes.waveform._timing" not in value_bytes
+
+
+###############################################################################
+# test
+###############################################################################
+def test___same_data___test___returns_success() -> None:
+    waveform = DigitalWaveform.from_port([1, 2, 3, 0xFF, 0x12, 0x34], 0xFF)
+    expected_waveform = DigitalWaveform.from_port([1, 2, 3, 0xFF, 0x12, 0x34], 0xFF)
+
+    result = waveform.test(expected_waveform)
+
+    assert result.success
+    assert len(result.failures) == 0
+
+
+def test___different_data___test___reports_failures() -> None:
+    waveform = DigitalWaveform.from_port([1, 3, 3, 0xFF, 0x82, 0x34], 0xFF)
+    expected_waveform = DigitalWaveform.from_port([1, 2, 3, 0xFF, 0x12, 0x34], 0xFF)
+
+    result = waveform.test(expected_waveform)
+
+    assert not result.success
+    assert result.failures == [
+        DigitalWaveformFailure(
+            1,
+            1,
+            0,
+            DigitalState.FORCE_UP,
+            DigitalState.FORCE_DOWN,
+        ),
+        DigitalWaveformFailure(
+            4,
+            4,
+            4,
+            DigitalState.FORCE_DOWN,
+            DigitalState.FORCE_UP,
+        ),
+        DigitalWaveformFailure(
+            4,
+            4,
+            7,
+            DigitalState.FORCE_UP,
+            DigitalState.FORCE_DOWN,
+        ),
+    ]
+
+
+def test___shifted_different_data___test___reports_shifted_failures() -> None:
+    waveform = DigitalWaveform.from_port([0, 0, 1, 3, 3, 0xFF, 0x82, 0x34], 0xFF)
+    expected_waveform = DigitalWaveform.from_port([0, 1, 2, 3, 0xFF, 0x12, 0x34, 0, 0, 0], 0xFF)
+
+    result = waveform.test(
+        expected_waveform, start_sample=2, expected_start_sample=1, sample_count=6
+    )
+
+    assert not result.success
+    assert result.failures == [
+        DigitalWaveformFailure(
+            3,
+            2,
+            0,
+            DigitalState.FORCE_UP,
+            DigitalState.FORCE_DOWN,
+        ),
+        DigitalWaveformFailure(
+            6,
+            5,
+            4,
+            DigitalState.FORCE_DOWN,
+            DigitalState.FORCE_UP,
+        ),
+        DigitalWaveformFailure(
+            6,
+            5,
+            7,
+            DigitalState.FORCE_UP,
+            DigitalState.FORCE_DOWN,
+        ),
+    ]

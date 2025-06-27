@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from enum import IntEnum
 
+_CHAR_TABLE = "01ZLHXTV"
+
 _STATE_TEST_TABLE = [
     # 0  1  Z  L  H  X  T  V
     [1, 0, 0, 1, 0, 1, 0, 1],  # 0
@@ -41,57 +43,54 @@ class DigitalState(IntEnum):
     """
 
     _value_: int
-    char: str
 
-    def __new__(cls, value: int, pattern: str) -> DigitalState:
-        """Construct a new digital state."""
-        obj = int.__new__(cls, value)
-        obj._value_ = value
-        obj.char = pattern
-        return obj
-
-    FORCE_DOWN = (0, "0")
+    FORCE_DOWN = 0
     """Force logic low. Drive to the low voltage level (VIL)."""
 
-    FORCE_UP = (1, "1")
+    FORCE_UP = 1
     """Force logic high. Drive to the high voltage level (VIH)."""
 
-    FORCE_OFF = (2, "Z")
+    FORCE_OFF = 2
     """Force logic high impedance. Turn the driver off."""
 
-    COMPARE_LOW = (3, "L")
+    COMPARE_LOW = 3
     """Compare logic low (edge). Compare for a voltage level lower than the low voltage threshold
     (VOL)."""
 
-    COMPARE_HIGH = (4, "H")
+    COMPARE_HIGH = 4
     """Compare logic high (edge). Compare for a voltage level higher than the high voltage threshold
     (VOH)."""
 
-    COMPARE_UNKNOWN = (5, "X")
+    COMPARE_UNKNOWN = 5
     """Compare logic unknown. Don't compare."""
 
-    COMPARE_OFF = (6, "T")
+    COMPARE_OFF = 6
     """Compare logic high impedance (edge). Compare for a voltage level between the low voltage
     threshold (VOL) and the high voltage threshold (VOH)."""
 
-    COMPARE_VALID = (7, "V")
+    COMPARE_VALID = 7
     """Compare logic valid level (edge). Compare for a voltage level either lower than the low
     voltage threshold (VOL) or higher than the high voltage threshold (VOH)."""
+
+    @property
+    def char(self) -> str:
+        """The character representing the digital state."""
+        return _CHAR_TABLE[self]
 
     @classmethod
     def from_char(cls, char: str) -> DigitalState:
         """Look up the digital state for the corresponding character."""
-        obj = next((obj for obj in cls if obj.char == char), None)
-        if obj is None:
+        try:
+            return DigitalState(_CHAR_TABLE.index(char))
+        except ValueError:
             raise KeyError(char)
-        return obj
 
     @classmethod
     def to_char(cls, state: DigitalState) -> str:
         """Get a character representing the digital state."""
-        try:
-            return DigitalState(state).char
-        except ValueError:
+        if 0 <= state < len(_CHAR_TABLE):
+            return _CHAR_TABLE[state]
+        else:
             return "?"
 
     @staticmethod

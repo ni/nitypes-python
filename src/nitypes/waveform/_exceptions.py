@@ -107,6 +107,7 @@ def start_index_or_sample_count_too_large(
     capacity_description: Literal[
         "capacity",
         "input array length",
+        "number of samples in the expected waveform",
         "number of samples in the spectrum",
         "number of samples in the waveform",
     ],
@@ -116,6 +117,7 @@ def start_index_or_sample_count_too_large(
     capacity_key = {
         "capacity": "Capacity",
         "input array length": "Array length",
+        "number of samples in the expected waveform": "Number of samples",
         "number of samples in the spectrum": "Number of samples",
         "number of samples in the waveform": "Number of samples",
     }
@@ -144,13 +146,14 @@ def sample_interval_mode_mismatch() -> TimingMismatchError:
 
 
 def signal_count_mismatch(
-    arg_description: Literal["input array", "input waveform", "provided"],
+    arg_description: Literal["expected waveform", "input array", "input waveform", "provided"],
     arg_signal_count: int,
     other_description: Literal["array", "port", "waveform"],
     other_signal_count: int,
 ) -> ValueError:
     """Create a ValueError for an mismatched signal count."""
     arg_key = {
+        "expected waveform": "Expected waveform signal count",
         "input array": "Input array signal count",
         "input waveform": "Input waveform signal count",
         "provided": "Signal count",
