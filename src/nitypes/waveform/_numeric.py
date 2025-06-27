@@ -36,15 +36,12 @@ from nitypes.waveform._warnings import scale_mode_mismatch
 if sys.version_info < (3, 10):
     import array as std_array
 
-# _TRaw_co specifies the type of the raw_data array. It is not limited to supported
-# types. Requesting an unsupported type raises TypeError at run time.
-_TRaw_co = TypeVar("_TRaw_co", bound=np.generic, covariant=True)
+# _TRaw specifies the type of the raw_data array. It is not limited to supported types. Requesting
+# an unsupported type raises TypeError at run time. It is invariant because waveforms are mutable.
+_TRaw = TypeVar("_TRaw", bound=np.generic)
 
-# _TScaled_co specifies the type of the scaled_data property.
-_TScaled_co = TypeVar("_TScaled_co", bound=np.generic, covariant=True)
-
-# _TOtherScaled is for the get_scaled_data() method, which supports both single and
-# double precision.
+# _TScaled specifies the type of the scaled_data property.
+_TScaled = TypeVar("_TScaled", bound=np.generic)
 _TOtherScaled = TypeVar("_TOtherScaled", bound=np.generic)
 
 
@@ -53,14 +50,14 @@ _TOtherScaled = TypeVar("_TOtherScaled", bound=np.generic)
 #   distinguish between 1D and 2D arrays in type hints.
 # - npt.ArrayLike accepts some types that np.asarray() does not, such as buffers, so we are
 #   explicitly using npt.NDArray | Sequence instead of npt.ArrayLike.
-# - _TRaw_co is bound to np.generic, so Sequence[_TRaw_co] will not match list[int].
+# - _TRaw is bound to np.generic, so Sequence[_TRaw] will not match list[int].
 # - We are not using PEP 696 – Type Defaults for Type Parameters for type variables on functions
 #   because it makes the type parameter default to np.float64 in some cases where it should be
 #   inferred as Any, such as when dtype is specified as a str. PEP 696 seems more appropriate for
 #   type variables on classes.
 
 
-class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
+class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
     """A numeric waveform, which encapsulates numeric data and timing information.
 
     This is an abstract base class. To create a numeric waveform, use :any:`AnalogWaveform` or
@@ -206,7 +203,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         "__weakref__",
     ]
 
-    _data: npt.NDArray[_TRaw_co]
+    _data: npt.NDArray[_TRaw]
     _start_index: int
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
@@ -218,7 +215,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         sample_count: SupportsIndex | None = None,
         dtype: npt.DTypeLike = None,
         *,
-        raw_data: npt.NDArray[_TRaw_co] | None = None,
+        raw_data: npt.NDArray[_TRaw] | None = None,
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
@@ -305,7 +302,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
     def _init_with_provided_array(
         self,
-        data: npt.NDArray[_TRaw_co],
+        data: npt.NDArray[_TRaw],
         dtype: npt.DTypeLike = None,
         *,
         start_index: SupportsIndex | None = None,
@@ -342,13 +339,13 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         self._sample_count = sample_count
 
     @property
-    def raw_data(self) -> npt.NDArray[_TRaw_co]:
+    def raw_data(self) -> npt.NDArray[_TRaw]:
         """The raw waveform data."""
         return self._data[self._start_index : self._start_index + self._sample_count]
 
     def get_raw_data(
         self, start_index: SupportsIndex | None = 0, sample_count: SupportsIndex | None = None
-    ) -> npt.NDArray[_TRaw_co]:
+    ) -> npt.NDArray[_TRaw]:
         """Get a subset of the raw waveform data.
 
         Args:
@@ -373,7 +370,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         return self.raw_data[start_index : start_index + sample_count]
 
     @property
-    def scaled_data(self) -> npt.NDArray[_TScaled_co]:
+    def scaled_data(self) -> npt.NDArray[_TScaled]:
         """The scaled waveform data.
 
         This property converts all of the waveform samples from the raw data type to the scaled
@@ -383,7 +380,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         """
         return self.get_scaled_data()
 
-    # If dtype is not specified, the dtype defaults to _TScaled_co.
+    # If dtype is not specified, the dtype defaults to _TScaled.
     @overload
     def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self,
@@ -391,7 +388,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-    ) -> npt.NDArray[_TScaled_co]: ...
+    ) -> npt.NDArray[_TScaled]: ...
 
     @overload
     def get_scaled_data(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
@@ -440,7 +437,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
     def _convert_data(
         self,
         dtype: npt.DTypeLike | type[_TOtherScaled] | np.dtype[_TOtherScaled],
-        raw_data: npt.NDArray[_TRaw_co],
+        raw_data: npt.NDArray[_TRaw],
     ) -> npt.NDArray[_TOtherScaled]:
         raise NotImplementedError
 
@@ -471,7 +468,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
             self._data.resize(value, refcheck=False)
 
     @property
-    def dtype(self) -> np.dtype[_TRaw_co]:
+    def dtype(self) -> np.dtype[_TRaw]:
         """The NumPy dtype for the waveform data."""
         return self._data.dtype
 
@@ -545,9 +542,9 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
     def append(
         self,
         other: (
-            npt.NDArray[_TRaw_co]
-            | NumericWaveform[_TRaw_co, _TScaled_co]
-            | Sequence[NumericWaveform[_TRaw_co, _TScaled_co]]
+            npt.NDArray[_TRaw]
+            | NumericWaveform[_TRaw, _TScaled]
+            | Sequence[NumericWaveform[_TRaw, _TScaled]]
         ),
         /,
         timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
@@ -603,7 +600,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
     def _append_array(
         self,
-        array: npt.NDArray[_TRaw_co],
+        array: npt.NDArray[_TRaw],
         timestamps: Sequence[dt.datetime] | Sequence[ht.datetime] | None = None,
     ) -> None:
         if array.dtype != self.dtype:
@@ -624,12 +621,10 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
         self._data[offset : offset + len(array)] = array
         self._sample_count += len(array)
 
-    def _append_waveform(self, waveform: NumericWaveform[_TRaw_co, _TScaled_co]) -> None:
+    def _append_waveform(self, waveform: NumericWaveform[_TRaw, _TScaled]) -> None:
         self._append_waveforms([waveform])
 
-    def _append_waveforms(
-        self, waveforms: Sequence[NumericWaveform[_TRaw_co, _TScaled_co]]
-    ) -> None:
+    def _append_waveforms(self, waveforms: Sequence[NumericWaveform[_TRaw, _TScaled]]) -> None:
         for waveform in waveforms:
             if waveform.dtype != self.dtype:
                 raise data_type_mismatch("input waveform", waveform.dtype, "waveform", self.dtype)
@@ -657,7 +652,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
     def load_data(
         self,
-        array: npt.NDArray[_TRaw_co],
+        array: npt.NDArray[_TRaw],
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
@@ -678,7 +673,7 @@ class NumericWaveform(ABC, Generic[_TRaw_co, _TScaled_co]):
 
     def _load_array(
         self,
-        array: npt.NDArray[_TRaw_co],
+        array: npt.NDArray[_TRaw],
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
