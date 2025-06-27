@@ -12,6 +12,7 @@ import toml
 extensions = [
     "autoapi.extension",
     "m2r2",
+    "pytest_doctestplus.sphinx.doctestplus",
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
