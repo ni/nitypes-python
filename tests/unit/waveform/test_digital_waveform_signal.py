@@ -228,6 +228,7 @@ def _assert_shallow_copy(
 ) -> None:
     assert value == other
     assert value is not other
+    assert value._owner is other._owner
 
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
@@ -242,6 +243,7 @@ def test___various_values___deepcopy___makes_deep_copy(
 def _assert_deep_copy(value: DigitalWaveformSignal[Any], other: DigitalWaveformSignal[Any]) -> None:
     assert value == other
     assert value is not other
+    assert value._owner is not other._owner
 
 
 @pytest.mark.parametrize("value", _VARIOUS_VALUES)
