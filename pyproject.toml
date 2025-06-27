@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nitypes"
-version = "0.1.0-dev3"
+version = "0.1.0-dev4"
 license = "MIT"
 description = "Data types for NI Python APIs"
 authors = ["NI <opensource@ni.com>"]
