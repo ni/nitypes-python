@@ -290,7 +290,7 @@ Digital state types
 -------------------
 
 By default, digital waveforms use a NumPy ``dtype`` of :any:`numpy.uint8`, which uses a byte of
-memory for each digital state. 
+memory for each digital state.
 
 Using ``np.uint8`` allows the waveform to contain digital states other than "on" or off", such as
 such as :any:`DigitalState.FORCE_OFF` (``X``) or :any:`DigitalState.COMPARE_HIGH` (``H``). This

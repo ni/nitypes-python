@@ -243,7 +243,7 @@ class DigitalWaveform(Generic[_TState]):
         This method allocates a new array in order to convert the port data to line data.
 
         Each element of the port data array represents a digital sample taken over a port of
-        signals. Each bit in the sample represents a digital state, either 1 for "on" or 0 for 
+        signals. Each bit in the sample represents a digital state, either 1 for "on" or 0 for
         "off". The least significant bit of the sample is placed at signal index 0 of the
         DigitalWaveform.
 
@@ -367,8 +367,8 @@ class DigitalWaveform(Generic[_TState]):
 
         Each row of the port data array corresponds to a resulting DigitalWaveform. Each element of
         the port data array represents a digital sample taken over a port of signals. Each bit in
-        the sample is represents a digital state, either 1 for "on" or 0 for "off". The least 
-        significant bit of the sample is placed at signal index 0 of the corresponding 
+        the sample is represents a digital state, either 1 for "on" or 0 for "off". The least
+        significant bit of the sample is placed at signal index 0 of the corresponding
         DigitalWaveform.
 
         If the input array is not a NumPy array, you must specify the masks.
