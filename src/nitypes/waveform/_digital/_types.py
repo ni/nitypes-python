@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import TypeVar, Union
 
+import numpy as np
+from typing_extensions import TypeAlias
+
 from nitypes._numpy import bool as _np_bool
 
-import numpy as np
-
-from typing_extensions import TypeAlias
 
 __all__ = [
     "_AnyPort",
