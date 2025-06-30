@@ -65,6 +65,10 @@ more details, see [Analog
 Waveforms](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/waveform/index.html#analog-waveforms)
 in the API Reference.
 
+> NOTE: Data stored in the extended properties dictionary of a waveform is not encrypted. Please
+exercise caution when storing personal identifying information or file paths in the extended
+properties dictionary.
+
 ## Complex Waveforms
 
 The `nitypes.waveform.ComplexWaveform` class represents a complex-number signal, such as I/Q data,
@@ -73,6 +77,10 @@ see [Complex
 Waveforms](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/waveform/index.html#complex-waveforms)
 in the API Reference.
 
+> NOTE: Data stored in the extended properties dictionary of a waveform is not encrypted. Please
+exercise caution when storing personal identifying information or file paths in the extended
+properties dictionary.
+
 ## Digital Waveforms
 
 The `nitypes.waveform.DigitalWaveform` class represents one or more digital signals with timing
@@ -80,6 +88,10 @@ information and extended properties (such as channel name and signal names). For
 [Digital
 Waveforms](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/waveform/index.html#complex-waveforms)
 in the API Reference.
+
+> NOTE: Data stored in the extended properties dictionary of a waveform is not encrypted. Please
+exercise caution when storing personal identifying information or file paths in the extended
+properties dictionary.
 
 ## Frequency Spectrums
 
@@ -130,7 +142,11 @@ in the API Reference.
 ## Scalar
 
 `nitypes.scalar.Scalar` is a data type that represents a single scalar value with units
-information. Valid types for the scalar value are `bool`, `int`, `float`, and `str`. For more
-details, see
+information and extended properties. Valid types for the scalar value are `bool`, `int`, `float`,
+and `str`. For more details, see
 [Scalar](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/scalar/index.html#scalar) in the
 API Reference.
+
+> NOTE: Data stored in the extended properties dictionary of a scalar is not encrypted. Please
+exercise caution when storing personal identifying information or file paths in the extended
+properties dictionary.
