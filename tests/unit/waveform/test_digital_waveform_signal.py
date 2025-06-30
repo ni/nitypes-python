@@ -10,6 +10,7 @@ import numpy.typing as npt
 import pytest
 from typing_extensions import assert_type
 
+from nitypes._numpy import bool as _np_bool
 from nitypes.waveform import (
     DigitalWaveform,
     DigitalWaveformSignal,
@@ -146,8 +147,8 @@ def test___waveform___get_signal_data___returns_line_data() -> None:
             DigitalWaveform.from_lines([0, 1, 2, 3], np.uint8).signals[0],
         ),
         (
-            DigitalWaveform.from_lines([False, True, False], np.bool).signals[0],
-            DigitalWaveform.from_lines([False, True, False], np.bool).signals[0],
+            DigitalWaveform.from_lines([False, True, False], _np_bool).signals[0],
+            DigitalWaveform.from_lines([False, True, False], _np_bool).signals[0],
         ),
         # Equality does not take the signal index or signal name into account.
         (
@@ -171,8 +172,8 @@ def test___same_value___equality___equal(
             DigitalWaveform.from_lines([0, 1, 4, 3], np.uint8).signals[0],
         ),
         (
-            DigitalWaveform.from_lines([False, True, False], np.bool).signals[0],
-            DigitalWaveform.from_lines([False, False, False], np.bool).signals[0],
+            DigitalWaveform.from_lines([False, True, False], _np_bool).signals[0],
+            DigitalWaveform.from_lines([False, False, False], _np_bool).signals[0],
         ),
     ],
 )
@@ -191,7 +192,7 @@ def test___different_value___equality___not_equal(
             "nitypes.waveform.DigitalWaveformSignal(data=array([0, 0, 0], dtype=uint8))",
         ),
         (
-            DigitalWaveform(3, 2, np.bool).signals[0],
+            DigitalWaveform(3, 2, _np_bool).signals[0],
             "nitypes.waveform.DigitalWaveformSignal(data=array([False, False, False]))",
         ),
         (
@@ -210,7 +211,7 @@ def test___various_values___repr___looks_ok(
 
 _VARIOUS_VALUES = [
     DigitalWaveform(3, 2).signals[0],
-    DigitalWaveform(3, 2, np.bool).signals[0],
+    DigitalWaveform(3, 2, _np_bool).signals[0],
     DigitalWaveform(3, 2, extended_properties={"NI_LineNames": "port0/line0, port0/line1"}).signals[
         1
     ],
