@@ -15,6 +15,7 @@ import pytest
 from typing_extensions import assert_type
 
 import nitypes.bintime as bt
+from nitypes._numpy import bool as _np_bool
 from nitypes.waveform import (
     DigitalState,
     DigitalWaveform,
@@ -54,14 +55,14 @@ def test___sample_count___create___creates_waveform_with_sample_count_default_si
 def test___sample_count_signal_count_and_dtype___create___creates_waveform_with_sample_count_and_dtype() -> (
     None
 ):
-    waveform = DigitalWaveform(10, 3, np.bool)
+    waveform = DigitalWaveform(10, 3, _np_bool)
 
     assert waveform.sample_count == waveform.capacity == len(waveform.data) == 10
     assert waveform.signal_count == 3
-    assert waveform.dtype == np.bool
+    assert waveform.dtype == _np_bool
     # https://github.com/numpy/numpy/issues/29245 - TYP: mypy returns dtype of
-    # np.bool[Literal[False]] for array of bools
-    assert_type(waveform, DigitalWaveform[np.bool])  # type: ignore[assert-type]
+    # _np_bool[Literal[False]] for array of bools
+    assert_type(waveform, DigitalWaveform[_np_bool])  # type: ignore[assert-type]
 
 
 def test___sample_count_and_dtype_str___create___creates_waveform_with_sample_count_and_dtype() -> (
@@ -165,14 +166,14 @@ def test___uint8_ndarray___from_lines___creates_waveform_with_uint8_dtype() -> N
 
 
 def test___bool_ndarray___from_lines___creates_waveform_with_bool_dtype() -> None:
-    array = np.array([False, True, False], np.bool)
+    array = np.array([False, True, False], _np_bool)
 
     waveform = DigitalWaveform.from_lines(array)
 
     # https://github.com/numpy/numpy/issues/29245 - TYP: mypy returns dtype of
-    # np.bool[Literal[False]] for array of bools
-    assert_type(waveform, DigitalWaveform[np.bool])  # type: ignore[assert-type]
-    assert isinstance(waveform, DigitalWaveform) and waveform.dtype == np.bool
+    # _np_bool[Literal[False]] for array of bools
+    assert_type(waveform, DigitalWaveform[_np_bool])  # type: ignore[assert-type]
+    assert isinstance(waveform, DigitalWaveform) and waveform.dtype == _np_bool
     assert waveform.data.tolist() == [[False], [True], [False]]
 
 
@@ -302,7 +303,7 @@ def test___mask___from_port___creates_waveform_with_masked_lines() -> None:
 def test___bool_dtype___from_port___creates_waveform_with_bool_dtype() -> None:
     array = np.array([0, 1, 2, 3, 0xFF, 0x12, 0x34], np.uint8)
 
-    waveform = DigitalWaveform.from_port(array, dtype=np.bool)
+    waveform = DigitalWaveform.from_port(array, dtype=_np_bool)
 
     assert waveform.sample_count == 7
     assert waveform.signal_count == 8
@@ -424,7 +425,7 @@ def test___masks___from_ports___creates_waveform_with_masked_lines() -> None:
 def test___bool_dtype___from_ports___creates_waveform_with_bool_dtype() -> None:
     array = np.array([[0, 1, 2], [0xFF, 0x12, 0x34]], np.uint8)
 
-    waveforms = DigitalWaveform.from_ports(array, dtype=np.bool)
+    waveforms = DigitalWaveform.from_ports(array, dtype=_np_bool)
 
     assert len(waveforms) == 2
     assert waveforms[0].sample_count == 3
@@ -767,8 +768,8 @@ def test___uint8_ndarray___append___appends_array() -> None:
 
 
 def test___bool_ndarray___append___appends_array() -> None:
-    waveform = DigitalWaveform.from_lines([False, True, False], np.bool)
-    array = np.array([True, False, True], np.bool)
+    waveform = DigitalWaveform.from_lines([False, True, False], _np_bool)
+    array = np.array([True, False, True], _np_bool)
 
     waveform.append(array)
 
@@ -776,7 +777,7 @@ def test___bool_ndarray___append___appends_array() -> None:
 
 
 def test___ndarray_with_mismatched_dtype___append___raises_type_error() -> None:
-    waveform = DigitalWaveform.from_lines([0, 1, 2], np.bool)
+    waveform = DigitalWaveform.from_lines([0, 1, 2], _np_bool)
     array = np.array([3, 4, 5], np.uint8)
 
     with pytest.raises(TypeError) as exc:
@@ -898,8 +899,8 @@ def test___uint8_waveform___append___appends_waveform() -> None:
 
 
 def test___bool_waveform___append___appends_waveform() -> None:
-    waveform = DigitalWaveform.from_lines([[False], [True], [False]], np.bool)
-    other = DigitalWaveform.from_lines([[True], [False], [True]], np.bool)
+    waveform = DigitalWaveform.from_lines([[False], [True], [False]], _np_bool)
+    other = DigitalWaveform.from_lines([[True], [False], [True]], _np_bool)
 
     waveform.append(other)
 
@@ -907,7 +908,7 @@ def test___bool_waveform___append___appends_waveform() -> None:
 
 
 def test___waveform_with_mismatched_dtype___append___raises_type_error() -> None:
-    waveform = DigitalWaveform.from_lines([[False], [True], [False]], np.bool)
+    waveform = DigitalWaveform.from_lines([[False], [True], [False]], _np_bool)
     other = DigitalWaveform.from_lines([[3], [4], [5]], np.uint8)
 
     with pytest.raises(TypeError) as exc:
@@ -1037,10 +1038,10 @@ def test___uint8_waveform_list___append___appends_waveform() -> None:
 
 
 def test___bool_waveform_tuple___append___appends_waveform() -> None:
-    waveform = DigitalWaveform.from_lines([[False], [True], [False]], np.bool)
+    waveform = DigitalWaveform.from_lines([[False], [True], [False]], _np_bool)
     other = (
-        DigitalWaveform.from_lines([[True], [False], [True]], np.bool),
-        DigitalWaveform.from_lines([[True], [True], [False]], np.bool),
+        DigitalWaveform.from_lines([[True], [False], [True]], _np_bool),
+        DigitalWaveform.from_lines([[True], [True], [False]], _np_bool),
     )
 
     waveform.append(other)
@@ -1061,9 +1062,9 @@ def test___bool_waveform_tuple___append___appends_waveform() -> None:
 def test___waveform_list_with_mismatched_dtype___append___raises_type_error_and_does_not_append() -> (
     None
 ):
-    waveform = DigitalWaveform.from_lines([[False], [True], [False]], np.bool)
+    waveform = DigitalWaveform.from_lines([[False], [True], [False]], _np_bool)
     other = [
-        DigitalWaveform.from_lines([[True], [False], [True]], np.bool),
+        DigitalWaveform.from_lines([[True], [False], [True]], _np_bool),
         DigitalWaveform.from_lines([[6], [7], [8]], np.uint8),
     ]
 
@@ -1175,8 +1176,8 @@ def test___uint8_ndarray___load_data___overwrites_data() -> None:
 
 
 def test___bool_ndarray___load_data___overwrites_data() -> None:
-    waveform = DigitalWaveform.from_lines([[False], [True], [False]], np.bool)
-    array = np.array([[True], [False], [True]], np.bool)
+    waveform = DigitalWaveform.from_lines([[False], [True], [False]], _np_bool)
+    array = np.array([[True], [False], [True]], _np_bool)
 
     waveform.load_data(array)
 
@@ -1184,7 +1185,7 @@ def test___bool_ndarray___load_data___overwrites_data() -> None:
 
 
 def test___ndarray_with_mismatched_dtype___load_data___raises_type_error() -> None:
-    waveform = DigitalWaveform.from_lines([[False], [True], [False]], np.bool)
+    waveform = DigitalWaveform.from_lines([[False], [True], [False]], _np_bool)
     array = np.array([[3], [4], [5]], np.uint8)
 
     with pytest.raises(TypeError) as exc:
@@ -1196,8 +1197,8 @@ def test___ndarray_with_mismatched_dtype___load_data___raises_type_error() -> No
 
 
 def test___ndarray_2d___load_data___overwrites_data() -> None:
-    waveform = DigitalWaveform.from_lines([[False, True], [False, False]], np.bool)
-    array = np.array([[True, True], [False, False], [True, False]], np.bool)
+    waveform = DigitalWaveform.from_lines([[False, True], [False, False]], _np_bool)
+    array = np.array([[True, True], [False, False], [True, False]], _np_bool)
 
     waveform.load_data(array)
 
@@ -1325,20 +1326,20 @@ def test___irregular_waveform_and_uint8_ndarray_with_wrong_sample_count___load_d
         (DigitalWaveform(), DigitalWaveform()),
         (DigitalWaveform(10), DigitalWaveform(10)),
         (DigitalWaveform(10, 1), DigitalWaveform(10, 1)),
-        (DigitalWaveform(10, 1, np.bool), DigitalWaveform(10, 1, np.bool)),
+        (DigitalWaveform(10, 1, _np_bool), DigitalWaveform(10, 1, _np_bool)),
         (DigitalWaveform(10, 1, np.uint8), DigitalWaveform(10, 1, np.uint8)),
         (
             DigitalWaveform(10, 1, np.uint8, start_index=5, capacity=20),
             DigitalWaveform(10, 1, np.uint8, start_index=5, capacity=20),
         ),
         (
-            DigitalWaveform.from_lines([0, 1, 2, 3], np.bool),
-            DigitalWaveform.from_lines([0, 1, 2, 3], np.bool),
+            DigitalWaveform.from_lines([0, 1, 2, 3], _np_bool),
+            DigitalWaveform.from_lines([0, 1, 2, 3], _np_bool),
         ),
-        # np.bool coerces non-zero values to True, so in this case, 4 == 2.
+        # _np_bool coerces non-zero values to True, so in this case, 4 == 2.
         (
-            DigitalWaveform.from_lines([0, 1, 4, 3], np.bool),
-            DigitalWaveform.from_lines([0, 1, 2, 3], np.bool),
+            DigitalWaveform.from_lines([0, 1, 4, 3], _np_bool),
+            DigitalWaveform.from_lines([0, 1, 2, 3], _np_bool),
         ),
         (
             DigitalWaveform.from_lines([0, 1, 2, 3], np.uint8),
@@ -1413,14 +1414,14 @@ def test___same_value___equality___equal(
         (DigitalWaveform(), DigitalWaveform(10)),
         (DigitalWaveform(10), DigitalWaveform(11)),
         (DigitalWaveform(10, 1), DigitalWaveform(10, 2)),
-        (DigitalWaveform(10, 1, np.bool), DigitalWaveform(10, 1, np.uint8)),
+        (DigitalWaveform(10, 1, _np_bool), DigitalWaveform(10, 1, np.uint8)),
         (
             DigitalWaveform(15, 1, np.uint8, start_index=5, capacity=20),
             DigitalWaveform(10, 1, np.uint8, start_index=5, capacity=20),
         ),
         (
-            DigitalWaveform.from_lines([0, 1, 0, 3], np.bool),
-            DigitalWaveform.from_lines([0, 1, 2, 3], np.bool),
+            DigitalWaveform.from_lines([0, 1, 0, 3], _np_bool),
+            DigitalWaveform.from_lines([0, 1, 2, 3], _np_bool),
         ),
         (
             DigitalWaveform.from_lines([0, 1, 4, 3], np.uint8),
@@ -1428,7 +1429,7 @@ def test___same_value___equality___equal(
         ),
         (
             DigitalWaveform.from_lines([0, 1, 2, 3], np.uint8),
-            DigitalWaveform.from_lines([0, 1, 2, 3], np.bool),
+            DigitalWaveform.from_lines([0, 1, 2, 3], _np_bool),
         ),
         (
             DigitalWaveform(
@@ -1472,7 +1473,7 @@ def test___different_value___equality___not_equal(
             "nitypes.waveform.DigitalWaveform(3, 2, data=array([[0, 0], [0, 0], [0, 0]], dtype=uint8))",
         ),
         (
-            DigitalWaveform(3, 2, np.bool),
+            DigitalWaveform(3, 2, _np_bool),
             "nitypes.waveform.DigitalWaveform(3, 2, bool, data=array([[False, False], [False, False], [False, False]]))",
         ),
         (DigitalWaveform(0, 1, np.uint8), "nitypes.waveform.DigitalWaveform(0, 1)"),
@@ -1485,7 +1486,7 @@ def test___different_value___equality___not_equal(
             f"nitypes.waveform.DigitalWaveform(5, 1, data=array([[0], [0], [0], [0], [0]], dtype=uint8))",
         ),
         (
-            DigitalWaveform.from_lines([0, 1, 2, 3], np.bool),
+            DigitalWaveform.from_lines([0, 1, 2, 3], _np_bool),
             "nitypes.waveform.DigitalWaveform(4, 1, bool, data=array([[False], [ True], [ True], [ True]]))",
         ),
         (
@@ -1594,10 +1595,10 @@ def test___various_values___repr___looks_ok(
 _VARIOUS_VALUES = [
     DigitalWaveform(),
     DigitalWaveform(10, 2),
-    DigitalWaveform(10, 2, np.bool),
+    DigitalWaveform(10, 2, _np_bool),
     DigitalWaveform(10, 2, np.uint8),
     DigitalWaveform(10, 2, np.uint8, start_index=5, capacity=20),
-    DigitalWaveform.from_lines([0, 1, 2, 3], np.bool),
+    DigitalWaveform.from_lines([0, 1, 2, 3], _np_bool),
     DigitalWaveform.from_lines([0, 1, 2, 3], np.uint8),
     DigitalWaveform(timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))),
     DigitalWaveform(timing=Timing.create_with_regular_interval(ht.timedelta(milliseconds=1))),
@@ -1654,7 +1655,7 @@ def test___various_values___pickle_unpickle___makes_deep_copy(value: DigitalWave
 
 def test___waveform___pickle___references_public_modules() -> None:
     value = DigitalWaveform(
-        data=np.array([1, 2, 3], np.bool),
+        data=np.array([1, 2, 3], _np_bool),
         extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
         timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
     )

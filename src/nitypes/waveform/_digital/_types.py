@@ -7,7 +7,6 @@ from typing_extensions import TypeAlias
 
 from nitypes._numpy import bool as _np_bool
 
-
 __all__ = [
     "_AnyPort",
     "_AnyState",
