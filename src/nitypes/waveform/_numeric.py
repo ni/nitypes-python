@@ -4,17 +4,18 @@ import datetime as dt
 import sys
 import warnings
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from typing import Any, Generic, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self, TypeVar
+from typing_extensions import Self, TypeVar, Unpack
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
+from nitypes.waveform._common_config import CommonWaveformConfig
 from nitypes.waveform._exceptions import (
     capacity_mismatch,
     capacity_too_small,
@@ -27,7 +28,6 @@ from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
-    ExtendedPropertyValue,
 )
 from nitypes.waveform._scaling import NO_SCALING, ScaleMode
 from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
@@ -91,11 +91,8 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         dtype: npt.DTypeLike = None,
         *,
         copy: bool = True,
-        start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
-        scale_mode: ScaleMode | None = None,
+        **kwargs: Unpack[CommonWaveformConfig],
     ) -> Self:
         """Construct a waveform from a one-dimensional array or sequence.
 
@@ -104,11 +101,16 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             dtype: The NumPy data type for the waveform data. This argument is required
                 when array is a sequence.
             copy: Specifies whether to copy the array or save a reference to it.
-            start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
-            extended_properties: The extended properties of the waveform.
-            timing: The timing information of the waveform.
-            scale_mode: The scale mode of the waveform.
+            kwargs: A typed dictionary of common waveform configuration
+                start_index: The sample index at which the waveform data begins.
+                capacity: The number of samples to allocate. Pre-allocating a larger buffer
+                    optimizes appending samples to the waveform.
+                extended_properties: The extended properties of the waveform.
+                copy_extended_properties: Specifies whether to copy the extended properties or take
+                    ownership.
+                timing: The timing information of the waveform.
+                scale_mode: The scale mode of the waveform.
 
         Returns:
             A waveform containing the specified data.
@@ -127,12 +129,9 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             raise invalid_arg_type("input array", "one-dimensional array or sequence", array)
 
         return cls(
+            **kwargs,
             raw_data=_np_asarray(array, dtype, copy=copy),
-            start_index=start_index,
             sample_count=sample_count,
-            extended_properties=extended_properties,
-            timing=timing,
-            scale_mode=scale_mode,
         )
 
     @classmethod
@@ -142,11 +141,8 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         dtype: npt.DTypeLike = None,
         *,
         copy: bool = True,
-        start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
-        scale_mode: ScaleMode | None = None,
+        **kwargs: Unpack[CommonWaveformConfig],
     ) -> Sequence[Self]:
         """Construct multiple waveforms from a two-dimensional array or nested sequence.
 
@@ -155,11 +151,16 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             dtype: The NumPy data type for the waveform data. This argument is required
                 when array is a sequence.
             copy: Specifies whether to copy the array or save a reference to it.
-            start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
-            extended_properties: The extended properties of the waveform.
-            timing: The timing information of the waveform.
-            scale_mode: The scale mode of the waveform.
+            kwargs: A typed dictionary of common waveform configuration
+                start_index: The sample index at which the waveform data begins.
+                capacity: The number of samples to allocate. Pre-allocating a larger buffer
+                    optimizes appending samples to the waveform.
+                extended_properties: The extended properties of the waveform.
+                copy_extended_properties: Specifies whether to copy the extended properties or take
+                    ownership.
+                timing: The timing information of the waveform.
+                scale_mode: The scale mode of the waveform.
 
         Returns:
             A sequence containing a waveform for each row of the specified data.
@@ -183,12 +184,9 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
 
         return [
             cls(
+                **kwargs,
                 raw_data=_np_asarray(array[i], dtype, copy=copy),
-                start_index=start_index,
                 sample_count=sample_count,
-                extended_properties=extended_properties,
-                timing=timing,
-                scale_mode=scale_mode,
             )
             for i in range(len(array))
         ]
@@ -216,12 +214,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         dtype: npt.DTypeLike = None,
         *,
         raw_data: npt.NDArray[_TRaw] | None = None,
-        start_index: SupportsIndex | None = None,
-        capacity: SupportsIndex | None = None,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        copy_extended_properties: bool = True,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
-        scale_mode: ScaleMode | None = None,
+        **kwargs: Unpack[CommonWaveformConfig],
     ) -> None:
         """Initialize a new numeric waveform.
 
@@ -231,19 +224,27 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             raw_data: A NumPy ndarray to use for sample storage. The waveform takes ownership
                 of this array. If not specified, an ndarray is created based on the specified dtype,
                 start index, sample count, and capacity.
-            start_index: The sample index at which the waveform data begins.
-            sample_count: The number of samples in the waveform.
-            capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
-                appending samples to the waveform.
-            extended_properties: The extended properties of the waveform.
-            copy_extended_properties: Specifies whether to copy the extended properties or take
-                ownership.
-            timing: The timing information of the waveform.
-            scale_mode: The scale mode of the waveform.
+            kwargs: A typed dictionary of common waveform configuration
+                start_index: The sample index at which the waveform data begins.
+                capacity: The number of samples to allocate. Pre-allocating a larger buffer
+                    optimizes appending samples to the waveform.
+                extended_properties: The extended properties of the waveform.
+                copy_extended_properties: Specifies whether to copy the extended properties or take
+                    ownership.
+                timing: The timing information of the waveform.
+                scale_mode: The scale mode of the waveform.
 
         Returns:
             A numeric waveform.
         """
+        # Parse kwargs
+        start_index = kwargs.get("start_index", None)
+        capacity = kwargs.get("capacity", None)
+        extended_properties = kwargs.get("extended_properties", None)
+        copy_extended_properties = kwargs.get("copy_extended_properties", True)
+        timing = kwargs.get("timing", None)
+        scale_mode = kwargs.get("scale_mode", None)
+
         if raw_data is None:
             self._init_with_new_array(
                 sample_count, dtype, start_index=start_index, capacity=capacity
