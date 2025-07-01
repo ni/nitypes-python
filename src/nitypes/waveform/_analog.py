@@ -126,15 +126,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
                 when array is a sequence.
             copy: Specifies whether to copy the array or save a reference to it.
             sample_count: The number of samples in the waveform.
-            kwargs: A typed dictionary of common waveform configuration
-                start_index: The sample index at which the waveform data begins.
-                capacity: The number of samples to allocate. Pre-allocating a larger buffer
-                    optimizes appending samples to the waveform.
-                extended_properties: The extended properties of the waveform.
-                copy_extended_properties: Specifies whether to copy the extended properties or take
-                    ownership.
-                timing: The timing information of the waveform.
-                scale_mode: The scale mode of the waveform.
+            kwargs: A typed dictionary of common waveform configuration.
 
         Returns:
             An analog waveform containing the specified data.
@@ -202,15 +194,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
                 when array is a sequence.
             copy: Specifies whether to copy the array or save a reference to it.
             sample_count: The number of samples in the waveform.
-            kwargs: A typed dictionary of common waveform configuration
-                start_index: The sample index at which the waveform data begins.
-                capacity: The number of samples to allocate. Pre-allocating a larger buffer
-                    optimizes appending samples to the waveform.
-                extended_properties: The extended properties of the waveform.
-                copy_extended_properties: Specifies whether to copy the extended properties or take
-                    ownership.
-                timing: The timing information of the waveform.
-                scale_mode: The scale mode of the waveform.
+            kwargs: A typed dictionary of common waveform configuration.
 
         Returns:
             A sequence containing an analog waveform for each row of the specified data.
@@ -287,15 +271,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
             raw_data: A NumPy ndarray to use for sample storage. The analog waveform takes ownership
                 of this array. If not specified, an ndarray is created based on the specified dtype,
                 start index, sample count, and capacity.
-            kwargs: A typed dictionary of common waveform configuration
-                start_index: The sample index at which the waveform data begins.
-                capacity: The number of samples to allocate. Pre-allocating a larger buffer
-                    optimizes appending samples to the waveform.
-                extended_properties: The extended properties of the waveform.
-                copy_extended_properties: Specifies whether to copy the extended properties or take
-                    ownership.
-                timing: The timing information of the waveform.
-                scale_mode: The scale mode of the waveform.
+            kwargs: A typed dictionary of common waveform configuration.
 
         Returns:
             An analog waveform.
