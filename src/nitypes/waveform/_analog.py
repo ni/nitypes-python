@@ -131,7 +131,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
             copy: Specifies whether to copy the array or save a reference to it.
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
-            kwargs: A typed dictionary of common waveform configuration.
+            kwargs: Waveform options saved in a :any:`WaveformOptions` object.
 
         Returns:
             An analog waveform containing the specified data.
@@ -205,7 +205,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
             copy: Specifies whether to copy the array or save a reference to it.
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
-            kwargs: A typed dictionary of common waveform configuration.
+            kwargs: Waveform options saved in a :any:`WaveformOptions` object.
 
         Returns:
             A sequence containing an analog waveform for each row of the specified data.
@@ -296,7 +296,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
             raw_data: A NumPy ndarray to use for sample storage. The analog waveform takes ownership
                 of this array. If not specified, an ndarray is created based on the specified dtype,
                 start index, sample count, and capacity.
-            kwargs: A typed dictionary of common waveform configuration.
+            kwargs: Waveform options saved in a :any:`WaveformOptions` object.
 
         Returns:
             An analog waveform.

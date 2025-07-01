@@ -148,7 +148,7 @@ class DigitalWaveform(Generic[_TState]):
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
             signal_count: The number of signals in the waveform.
-            kwargs: A typed dictionary of common waveform configuration.
+            kwargs: Waveform options saved in a :any:`WaveformOptions` object.
 
         Returns:
             A waveform containing the specified data.
@@ -245,7 +245,7 @@ class DigitalWaveform(Generic[_TState]):
             dtype: The NumPy data type for the waveform (line) data.
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
-            kwargs: A typed dictionary of common waveform configuration.
+            kwargs: Waveform options saved in a :any:`WaveformOptions` object.
 
         Returns:
             A waveform containing the specified data.
@@ -364,7 +364,7 @@ class DigitalWaveform(Generic[_TState]):
             dtype: The NumPy data type for the waveform (line) data.
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
-            kwargs: A typed dictionary of common waveform configuration.
+            kwargs: Waveform options saved in a :any:`WaveformOptions` object.
 
         Returns:
             A waveform containing the specified data.
@@ -526,7 +526,7 @@ class DigitalWaveform(Generic[_TState]):
             sample_count: The number of samples in the waveform.
             capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
                 appending samples to the waveform.
-            kwargs: A typed dictionary of common waveform configuration.
+            kwargs: Waveform options saved in a :any:`WaveformOptions` object.
 
         Returns:
             A digital waveform.
