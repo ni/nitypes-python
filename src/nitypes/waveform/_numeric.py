@@ -474,7 +474,12 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
 
     @property
     def extended_properties(self) -> ExtendedPropertyDictionary:
-        """The extended properties for the waveform."""
+        """The extended properties for the waveform.
+
+        NOTE: Data stored in the extended properties dictionary of a waveform is not encrypted.
+        Please exercise caution when storing personal identifying information or file paths in
+        the extended properties dictionary.
+        """
         return self._extended_properties
 
     @property
