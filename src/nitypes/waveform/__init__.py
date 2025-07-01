@@ -368,6 +368,7 @@ from nitypes.waveform._extended_properties import (
     ExtendedPropertyValue,
 )
 from nitypes.waveform._numeric import NumericWaveform
+from nitypes.waveform._options import WaveformOptions
 from nitypes.waveform._scaling import (
     NO_SCALING,
     LinearScaleMode,
@@ -400,6 +401,7 @@ __all__ = [
     "Timing",
     "TimingMismatchError",
     "TimingMismatchWarning",
+    "WaveformOptions",
 ]
 __doctest_requires__ = {".": ["numpy>=2.0"]}
 
@@ -426,3 +428,4 @@ Spectrum.__module__ = __name__
 Timing.__module__ = __name__
 TimingMismatchError.__module__ = __name__
 TimingMismatchWarning.__module__ = __name__
+WaveformOptions.__module__ = __name__

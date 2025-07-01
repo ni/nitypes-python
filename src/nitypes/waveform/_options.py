@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import SupportsIndex
 
 from typing_extensions import TypedDict
 
@@ -10,17 +9,8 @@ from nitypes.waveform._scaling import ScaleMode
 from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 
 
-class CommonWaveformConfig(TypedDict, total=False):
-    """Common waveform configuration as a typed dictionary."""
-
-    start_index: SupportsIndex | None
-    """The sample index at which the waveform data begins."""
-
-    capacity: SupportsIndex | None
-    """The number of samples to allocate.
-    
-    Pre-allocating a larger buffer optimizes appending samples to the waveform.
-    """
+class WaveformOptions(TypedDict, total=False):
+    """Waveform options as a typed dictionary."""
 
     extended_properties: Mapping[str, ExtendedPropertyValue] | None
     """The extended properties of the waveform."""

@@ -15,7 +15,6 @@ from typing_extensions import Self, TypeVar, Unpack
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
-from nitypes.waveform._common_config import CommonWaveformConfig
 from nitypes.waveform._exceptions import (
     capacity_mismatch,
     capacity_too_small,
@@ -29,6 +28,7 @@ from nitypes.waveform._extended_properties import (
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
 )
+from nitypes.waveform._options import WaveformOptions
 from nitypes.waveform._scaling import NO_SCALING, ScaleMode
 from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 from nitypes.waveform._warnings import scale_mode_mismatch
@@ -91,8 +91,9 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         dtype: npt.DTypeLike = None,
         *,
         copy: bool = True,
+        start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> Self:
         """Construct a waveform from a one-dimensional array or sequence.
 
@@ -101,6 +102,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             dtype: The NumPy data type for the waveform data. This argument is required
                 when array is a sequence.
             copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
             kwargs: A typed dictionary of common waveform configuration.
 
@@ -123,6 +125,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         return cls(
             **kwargs,
             raw_data=_np_asarray(array, dtype, copy=copy),
+            start_index=start_index,
             sample_count=sample_count,
         )
 
@@ -133,8 +136,9 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         dtype: npt.DTypeLike = None,
         *,
         copy: bool = True,
+        start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[Self]:
         """Construct multiple waveforms from a two-dimensional array or nested sequence.
 
@@ -143,6 +147,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             dtype: The NumPy data type for the waveform data. This argument is required
                 when array is a sequence.
             copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
             kwargs: A typed dictionary of common waveform configuration.
 
@@ -170,6 +175,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             cls(
                 **kwargs,
                 raw_data=_np_asarray(array[i], dtype, copy=copy),
+                start_index=start_index,
                 sample_count=sample_count,
             )
             for i in range(len(array))
@@ -198,12 +204,17 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         dtype: npt.DTypeLike = None,
         *,
         raw_data: npt.NDArray[_TRaw] | None = None,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = None,
+        capacity: SupportsIndex | None = None,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None:
         """Initialize a new numeric waveform.
 
         Args:
+            start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
+            capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
+                appending samples to the waveform.
             dtype: The NumPy data type for the waveform data.
             raw_data: A NumPy ndarray to use for sample storage. The waveform takes ownership
                 of this array. If not specified, an ndarray is created based on the specified dtype,
@@ -214,8 +225,6 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             A numeric waveform.
         """
         # Parse kwargs
-        start_index = kwargs.get("start_index", None)
-        capacity = kwargs.get("capacity", None)
         extended_properties = kwargs.get("extended_properties", None)
         copy_extended_properties = kwargs.get("copy_extended_properties", True)
         timing = kwargs.get("timing", None)

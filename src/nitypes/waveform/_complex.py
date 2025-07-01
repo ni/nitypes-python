@@ -8,8 +8,8 @@ import numpy.typing as npt
 from typing_extensions import TypeVar, Unpack, final, override
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType, convert_complex
-from nitypes.waveform._common_config import CommonWaveformConfig
 from nitypes.waveform._numeric import NumericWaveform, _TOtherScaled
+from nitypes.waveform._options import WaveformOptions
 
 # _TRaw specifies the type of the raw_data array. ComplexWaveform accepts a narrower set of types
 # than NumericWaveform. Note that ComplexInt32Base is an alias for np.void, but other structured
@@ -64,8 +64,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: None = ...,
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> ComplexWaveform[_TOtherRaw]: ...
 
     @overload
@@ -76,8 +77,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw],
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> ComplexWaveform[_TOtherRaw]: ...
 
     @overload
@@ -88,8 +90,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: npt.DTypeLike = ...,
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> ComplexWaveform[Any]: ...
 
     @override
@@ -100,8 +103,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: npt.DTypeLike = None,
         *,
         copy: bool = True,
+        start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> ComplexWaveform[Any]:
         """Construct a complex waveform from a one-dimensional array or sequence.
 
@@ -110,6 +114,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
             dtype: The NumPy data type for the waveform data. This argument is required
                 when array is a sequence.
             copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
             kwargs: A typed dictionary of common waveform configuration.
 
@@ -121,6 +126,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
             dtype,
             **kwargs,
             copy=copy,
+            start_index=start_index,
             sample_count=sample_count,
         )
 
@@ -132,8 +138,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: None = ...,
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[ComplexWaveform[_TOtherRaw]]: ...
 
     @overload
@@ -144,8 +151,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw],
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[ComplexWaveform[_TOtherRaw]]: ...
 
     @overload
@@ -156,8 +164,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: npt.DTypeLike = ...,
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[ComplexWaveform[Any]]: ...
 
     @override
@@ -168,8 +177,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: npt.DTypeLike = None,
         *,
         copy: bool = True,
+        start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[ComplexWaveform[Any]]:
         """Construct multiple complex waveforms from a two-dimensional array or nested sequence.
 
@@ -178,6 +188,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
             dtype: The NumPy data type for the waveform data. This argument is required
                 when array is a sequence.
             copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
             kwargs: A typed dictionary of common waveform configuration.
 
@@ -193,6 +204,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
             dtype,
             **kwargs,
             copy=copy,
+            start_index=start_index,
             sample_count=sample_count,
         )
 
@@ -206,7 +218,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: None = ...,
         *,
         raw_data: None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     @overload
@@ -216,7 +230,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw] = ...,
         *,
         raw_data: None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     @overload
@@ -226,7 +242,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: None = ...,
         *,
         raw_data: npt.NDArray[_TOtherRaw] = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     @overload
@@ -236,7 +254,9 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: npt.DTypeLike = ...,
         *,
         raw_data: npt.NDArray[Any] | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     def __init__(
@@ -245,12 +265,17 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
         dtype: npt.DTypeLike = None,
         *,
         raw_data: npt.NDArray[Any] | None = None,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = None,
+        capacity: SupportsIndex | None = None,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None:
         """Initialize a new complex waveform.
 
         Args:
+            start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
+            capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
+                appending samples to the waveform.
             dtype: The NumPy data type for the waveform data. If not specified, the data
                 type defaults to np.complex128.
             raw_data: A NumPy ndarray to use for sample storage. The waveform takes ownership
@@ -266,6 +291,8 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
             dtype,
             **kwargs,
             raw_data=raw_data,
+            start_index=start_index,
+            capacity=capacity,
         )
 
     @override

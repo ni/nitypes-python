@@ -8,8 +8,8 @@ import numpy.typing as npt
 from typing_extensions import TypeVar, Unpack, final, override
 
 from nitypes._numpy import long as _np_long, ulong as _np_ulong
-from nitypes.waveform._common_config import CommonWaveformConfig
 from nitypes.waveform._numeric import NumericWaveform, _TOtherScaled
+from nitypes.waveform._options import WaveformOptions
 
 # _TRaw specifies the type of the raw_data array. AnalogWaveform accepts a narrower set of types
 # than NumericWaveform.
@@ -79,8 +79,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: None = ...,
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> AnalogWaveform[_TOtherRaw]: ...
 
     @overload
@@ -91,8 +92,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw],
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> AnalogWaveform[_TOtherRaw]: ...
 
     @overload
@@ -103,8 +105,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: npt.DTypeLike = ...,
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> AnalogWaveform[Any]: ...
 
     @override
@@ -115,8 +118,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: npt.DTypeLike = None,
         *,
         copy: bool = True,
+        start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> AnalogWaveform[Any]:
         """Construct an analog waveform from a one-dimensional array or sequence.
 
@@ -125,6 +129,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
             dtype: The NumPy data type for the waveform data. This argument is required
                 when array is a sequence.
             copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
             kwargs: A typed dictionary of common waveform configuration.
 
@@ -136,6 +141,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
             dtype,
             **kwargs,
             copy=copy,
+            start_index=start_index,
             sample_count=sample_count,
         )
 
@@ -147,8 +153,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: None = ...,
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[AnalogWaveform[_TOtherRaw]]: ...
 
     @overload
@@ -159,8 +166,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw],
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[AnalogWaveform[_TOtherRaw]]: ...
 
     @overload
@@ -171,8 +179,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: npt.DTypeLike = ...,
         *,
         copy: bool = ...,
+        start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[AnalogWaveform[Any]]: ...
 
     @override
@@ -183,8 +192,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: npt.DTypeLike = None,
         *,
         copy: bool = True,
+        start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
-        **kwargs: Unpack[CommonWaveformConfig],
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[AnalogWaveform[Any]]:
         """Construct multiple analog waveforms from a two-dimensional array or nested sequence.
 
@@ -193,6 +203,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
             dtype: The NumPy data type for the waveform data. This argument is required
                 when array is a sequence.
             copy: Specifies whether to copy the array or save a reference to it.
+            start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
             kwargs: A typed dictionary of common waveform configuration.
 
@@ -208,6 +219,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
             dtype,
             **kwargs,
             copy=copy,
+            start_index=start_index,
             sample_count=sample_count,
         )
 
@@ -221,7 +233,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: None = ...,
         *,
         raw_data: None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     @overload
@@ -231,7 +245,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: type[_TOtherRaw] | np.dtype[_TOtherRaw] = ...,
         *,
         raw_data: None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     @overload
@@ -241,7 +257,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: None = ...,
         *,
         raw_data: npt.NDArray[_TOtherRaw] = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     @overload
@@ -251,7 +269,9 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: npt.DTypeLike = ...,
         *,
         raw_data: npt.NDArray[Any] | None = ...,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = ...,
+        capacity: SupportsIndex | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     def __init__(
@@ -260,12 +280,17 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         dtype: npt.DTypeLike = None,
         *,
         raw_data: npt.NDArray[Any] | None = None,
-        **kwargs: Unpack[CommonWaveformConfig],
+        start_index: SupportsIndex | None = None,
+        capacity: SupportsIndex | None = None,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None:
         """Initialize a new analog waveform.
 
         Args:
+            start_index: The sample index at which the analog waveform data begins.
             sample_count: The number of samples in the analog waveform.
+            capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
+                appending samples to the waveform.
             dtype: The NumPy data type for the analog waveform data. If not specified, the data
                 type defaults to np.float64.
             raw_data: A NumPy ndarray to use for sample storage. The analog waveform takes ownership
@@ -281,6 +306,8 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
             dtype,
             **kwargs,
             raw_data=raw_data,
+            start_index=start_index,
+            capacity=capacity,
         )
 
     @override
