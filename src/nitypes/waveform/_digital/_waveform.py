@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import datetime as dt
 import sys
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Generic, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self
+from typing_extensions import Self, Unpack
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
@@ -36,8 +36,8 @@ from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     LINE_NAMES,
     ExtendedPropertyDictionary,
-    ExtendedPropertyValue,
 )
+from nitypes.waveform._options import WaveformOptions
 from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
 
 if sys.version_info < (3, 10):
@@ -91,8 +91,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         signal_count: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> DigitalWaveform[_TOtherState]: ...
 
     @overload
@@ -106,8 +105,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         signal_count: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> DigitalWaveform[_TOtherState]: ...
 
     @overload
@@ -121,8 +119,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         signal_count: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> DigitalWaveform[Any]: ...
 
     @classmethod
@@ -135,8 +132,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         signal_count: SupportsIndex | None = None,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        **kwargs: Unpack[WaveformOptions],
     ) -> DigitalWaveform[Any]:
         """Construct a waveform from a one or two-dimensional array or sequence of line data.
 
@@ -152,8 +148,7 @@ class DigitalWaveform(Generic[_TState]):
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
             signal_count: The number of signals in the waveform.
-            extended_properties: The extended properties of the waveform.
-            timing: The timing information of the waveform.
+            kwargs: A typed dictionary of common waveform configuration.
 
         Returns:
             A waveform containing the specified data.
@@ -174,12 +169,11 @@ class DigitalWaveform(Generic[_TState]):
             raise invalid_arg_type("input array", "one or two-dimensional array or sequence", array)
 
         return cls(
+            **kwargs,
             data=_np_asarray(array, dtype, copy=copy),
             start_index=start_index,
             sample_count=sample_count,
             signal_count=signal_count,
-            extended_properties=extended_properties,
-            timing=timing,
         )
 
     @overload
@@ -192,8 +186,7 @@ class DigitalWaveform(Generic[_TState]):
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> DigitalWaveform[np.uint8]: ...
 
     @overload
@@ -208,8 +201,7 @@ class DigitalWaveform(Generic[_TState]):
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> DigitalWaveform[_TOtherState]: ...
 
     @overload
@@ -222,8 +214,7 @@ class DigitalWaveform(Generic[_TState]):
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> DigitalWaveform[Any]: ...
 
     @classmethod
@@ -235,8 +226,7 @@ class DigitalWaveform(Generic[_TState]):
         *,
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        **kwargs: Unpack[WaveformOptions],
     ) -> DigitalWaveform[Any]:
         """Construct a waveform from a one-dimensional array or sequence of port data.
 
@@ -255,8 +245,7 @@ class DigitalWaveform(Generic[_TState]):
             dtype: The NumPy data type for the waveform (line) data.
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
-            extended_properties: The extended properties of the waveform.
-            timing: The timing information of the waveform.
+            kwargs: A typed dictionary of common waveform configuration.
 
         Returns:
             A waveform containing the specified data.
@@ -297,12 +286,11 @@ class DigitalWaveform(Generic[_TState]):
             line_data = line_data.view(dtype)
 
         return cls(
+            **kwargs,
             data=line_data,
             dtype=dtype,
             start_index=start_index,
             sample_count=sample_count,
-            extended_properties=extended_properties,
-            timing=timing,
         )
 
     @overload
@@ -315,8 +303,7 @@ class DigitalWaveform(Generic[_TState]):
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[DigitalWaveform[np.uint8]]: ...
 
     @overload
@@ -331,8 +318,7 @@ class DigitalWaveform(Generic[_TState]):
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[DigitalWaveform[_TOtherState]]: ...
 
     @overload
@@ -345,8 +331,7 @@ class DigitalWaveform(Generic[_TState]):
         *,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[DigitalWaveform[Any]]: ...
 
     @classmethod
@@ -358,8 +343,7 @@ class DigitalWaveform(Generic[_TState]):
         *,
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        **kwargs: Unpack[WaveformOptions],
     ) -> Sequence[DigitalWaveform[Any]]:
         """Construct a waveform from a two-dimensional array or sequence of port data.
 
@@ -380,8 +364,7 @@ class DigitalWaveform(Generic[_TState]):
             dtype: The NumPy data type for the waveform (line) data.
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
-            extended_properties: The extended properties of the waveform.
-            timing: The timing information of the waveform.
+            kwargs: A typed dictionary of common waveform configuration.
 
         Returns:
             A waveform containing the specified data.
@@ -430,12 +413,11 @@ class DigitalWaveform(Generic[_TState]):
 
             waveforms.append(
                 cls(
+                    **kwargs,
                     data=line_data,
                     dtype=dtype,
                     start_index=start_index,
                     sample_count=sample_count,
-                    extended_properties=extended_properties,
-                    timing=timing,
                 )
             )
         return waveforms
@@ -473,9 +455,7 @@ class DigitalWaveform(Generic[_TState]):
         data: None = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     @overload
@@ -489,9 +469,7 @@ class DigitalWaveform(Generic[_TState]):
         data: None = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     @overload
@@ -505,9 +483,7 @@ class DigitalWaveform(Generic[_TState]):
         data: npt.NDArray[_TOtherState] = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     @overload
@@ -521,9 +497,7 @@ class DigitalWaveform(Generic[_TState]):
         data: npt.NDArray[Any] | None = ...,
         start_index: SupportsIndex | None = ...,
         capacity: SupportsIndex | None = ...,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None: ...
 
     def __init__(
@@ -536,9 +510,7 @@ class DigitalWaveform(Generic[_TState]):
         data: npt.NDArray[Any] | None = None,
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
-        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        copy_extended_properties: bool = True,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        **kwargs: Unpack[WaveformOptions],
     ) -> None:
         """Initialize a new digital waveform.
 
@@ -554,14 +526,21 @@ class DigitalWaveform(Generic[_TState]):
             sample_count: The number of samples in the waveform.
             capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
                 appending samples to the waveform.
-            extended_properties: The extended properties of the waveform.
-            copy_extended_properties: Specifies whether to copy the extended properties or take
-                ownership.
-            timing: The timing information of the waveform.
+            kwargs: A typed dictionary of common waveform configuration.
 
         Returns:
             A digital waveform.
         """
+        # Parse kwargs
+        extended_properties = kwargs.get("extended_properties", None)
+        copy_extended_properties = kwargs.get("copy_extended_properties", True)
+        timing = kwargs.get("timing", None)
+
+        # Scaling is not supported for digital waveforms.
+        scale_mode = kwargs.get("scale_mode", None)
+        if scale_mode:
+            raise AttributeError("You cannot set scale_mode on a digital waveform.")
+
         if data is None:
             self._init_with_new_array(
                 sample_count,
