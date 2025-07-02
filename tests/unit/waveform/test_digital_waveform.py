@@ -16,6 +16,7 @@ from typing_extensions import assert_type
 
 import nitypes.bintime as bt
 from nitypes._numpy import bool as _np_bool
+import nitypes.waveform._exceptions as wfmex
 from nitypes.waveform import (
     DigitalState,
     DigitalWaveform,
@@ -1188,7 +1189,7 @@ def test___ndarray_with_mismatched_dtype___load_data___raises_type_error() -> No
     waveform = DigitalWaveform.from_lines([[False], [True], [False]], _np_bool)
     array = np.array([[3], [4], [5]], np.uint8)
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         waveform.load_data(array)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(

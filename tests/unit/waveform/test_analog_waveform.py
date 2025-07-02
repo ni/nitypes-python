@@ -18,6 +18,7 @@ from packaging.version import Version
 from typing_extensions import assert_type
 
 import nitypes.bintime as bt
+import nitypes.waveform._exceptions as wfmex
 from nitypes.waveform import (
     NO_SCALING,
     AnalogWaveform,
@@ -1499,7 +1500,7 @@ def test___ndarray_with_mismatched_dtype___load_data___raises_type_error() -> No
     waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
     array = np.array([3, 4, 5], np.int32)
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         waveform.load_data(array)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
