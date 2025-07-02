@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, cast, final
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import add_note, invalid_arg_type
 from nitypes.waveform._exceptions import (
-    no_timestamp_information,
-    sample_interval_mode_mismatch,
+    NoTimestampInformationError,
+    SampleIntervalModeMismatchError,
 )
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
@@ -56,7 +56,7 @@ class RegularSampleIntervalStrategy(
     ) -> Iterable[_TTimestamp_co]:
         if timing.has_timestamp:
             return self._generate_regular_timestamps(timing, start_index, count)
-        raise no_timestamp_information()
+        raise NoTimestampInformationError()
 
     def _generate_regular_timestamps(
         self,
@@ -90,7 +90,7 @@ class RegularSampleIntervalStrategy(
         other: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
     ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
         if other._sample_interval_mode not in (SampleIntervalMode.NONE, SampleIntervalMode.REGULAR):
-            raise sample_interval_mode_mismatch()
+            raise SampleIntervalModeMismatchError()
         if timing._sample_interval != other._sample_interval:
             warnings.warn(sample_interval_mismatch())
         return timing

@@ -8,7 +8,7 @@ from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform._exceptions import (
     TimingMismatchError,
-    sample_interval_mode_mismatch,
+    SampleIntervalModeMismatchError,
 )
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
@@ -121,7 +121,7 @@ class IrregularSampleIntervalStrategy(
         other: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
     ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
         if other._sample_interval_mode != SampleIntervalMode.IRREGULAR:
-            raise sample_interval_mode_mismatch()
+            raise SampleIntervalModeMismatchError()
 
         assert timing._timestamps is not None and other._timestamps is not None
 
