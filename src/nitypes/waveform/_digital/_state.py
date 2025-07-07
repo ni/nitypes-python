@@ -4,18 +4,22 @@ from enum import IntEnum
 
 from nitypes._exceptions import invalid_arg_value
 
-_CHAR_TABLE = "01ZLHXTV"
+_CHAR_TABLE = ["0", "1", "Z", "L", "H", "X", "T", "V", "0L", "1H", "N01", "N01LH"]
 
 _STATE_TEST_TABLE = [
-    # 0  1  Z  L  H  X  T  V
-    [1, 0, 0, 1, 0, 1, 0, 1],  # 0
-    [0, 1, 0, 0, 1, 1, 0, 1],  # 1
-    [0, 0, 1, 0, 0, 1, 1, 0],  # Z
-    [1, 0, 0, 1, 0, 1, 0, 0],  # L
-    [0, 1, 0, 0, 1, 1, 0, 0],  # H
-    [1, 1, 1, 1, 1, 1, 1, 1],  # X
-    [0, 0, 1, 0, 0, 1, 1, 0],  # T
-    [1, 1, 0, 0, 0, 1, 0, 1],  # V
+    # 0  1  Z  L  H  X  T  V 0L 1H N01 N01LH
+    [1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0],  # 0
+    [0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0],  # 1
+    [0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1],  # Z
+    [1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0],  # L
+    [0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0],  # H
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],  # X
+    [0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0],  # T
+    [1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],  # V
+    [1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0],  # 0L
+    [0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0],  # 1H
+    [0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0],  # N01
+    [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],  # N01LH
 ]
 
 
@@ -73,6 +77,22 @@ class DigitalState(IntEnum):
     COMPARE_VALID = 7
     """Compare logic valid level (edge) (``V``). Compare for a voltage level either lower than the
     low voltage threshold (VOL) or higher than the high voltage threshold (VOH)."""
+
+    EQUAL_0_L = 8
+    """Compare logic equal to 0 or Low (edge) (``0L``). Compare for a voltage level equal to 0 or
+    Low."""
+
+    EQUAL_1_H = 9
+    """Compare logic equal to 1 or High (edge) (``1H``). Compare for a voltage level equal to 1 or
+    High."""
+
+    NOT_EQUAL_0_1 = 10
+    """Compare logic not equal to 0 or 1 (edge) (``N01``). Compare for a voltage level not equal
+    to 0 or 1."""
+
+    NOT_EQUAL_0_1_L_H = 11
+    """Compare logic not equal to 0, 1, Low, or High (edge) (``N01LH``). Compare for a voltage
+    level not equal to 0, 1, Low, or High."""
 
     @property
     def char(self) -> str:
