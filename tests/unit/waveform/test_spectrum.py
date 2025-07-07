@@ -704,7 +704,7 @@ def test___invalid_capacity___set_capacity___raises_value_error(
     data = [1, 2, 3]
     spectrum = Spectrum.from_array_1d(data, np.int32)
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises((wfmex.CapacityTooSmallError, ValueError)) as exc:
         spectrum.capacity = capacity
 
     assert exc.value.args[0].startswith(expected_message)
@@ -848,7 +848,7 @@ def test___ndarray_with_mismatched_dtype___append___raises_type_error() -> None:
     spectrum = Spectrum.from_array_1d([0, 1, 2], np.float64)
     array = np.array([3, 4, 5], np.int32)
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         spectrum.append(array)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
@@ -900,7 +900,7 @@ def test___spectrum_with_mismatched_dtype___append___raises_type_error() -> None
     spectrum = Spectrum.from_array_1d([0, 1, 2], np.float64)
     other = Spectrum.from_array_1d([3, 4, 5], np.int32)
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         spectrum.append(other)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
@@ -954,7 +954,7 @@ def test___spectrum_list_with_mismatched_dtype___append___raises_type_error_and_
         Spectrum.from_array_1d([6, 7, 8], np.int32),
     ]
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         spectrum.append(other)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
