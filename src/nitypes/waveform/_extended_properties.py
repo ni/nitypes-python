@@ -19,9 +19,9 @@ ExtendedPropertyValue: TypeAlias = Union[bool, float, int, str]
 class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
     """A dictionary of extended properties.
 
-    NOTE: Data stored in the extended properties dictionary of a waveform is not encrypted.
-    Please exercise caution when storing personal identifying information or file paths in
-    the extended properties dictionary.
+    .. note::
+        Data stored in the extended properties dictionary is not encrypted when you send it
+        over the network or write it to a TDMS file.
     """
 
     __slots__ = ["_properties"]
