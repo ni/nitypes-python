@@ -624,7 +624,9 @@ class Spectrum(Generic[_TData]):
     def _append_spectrums(self, spectrums: Sequence[Spectrum[_TData]]) -> None:
         for spectrum in spectrums:
             if spectrum.dtype != self.dtype:
-                raise DatatypeMismatchError("input spectrum", spectrum.dtype, "spectrum", self.dtype)
+                raise DatatypeMismatchError(
+                    "input spectrum", spectrum.dtype, "spectrum", self.dtype
+                )
 
         self._increase_capacity(sum(spectrum.sample_count for spectrum in spectrums))
 

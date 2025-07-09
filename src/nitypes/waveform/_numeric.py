@@ -627,7 +627,9 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
     def _append_waveforms(self, waveforms: Sequence[NumericWaveform[_TRaw, _TScaled]]) -> None:
         for waveform in waveforms:
             if waveform.dtype != self.dtype:
-                raise DatatypeMismatchError("input waveform", waveform.dtype, "waveform", self.dtype)
+                raise DatatypeMismatchError(
+                    "input waveform", waveform.dtype, "waveform", self.dtype
+                )
             if waveform._scale_mode != self._scale_mode:
                 warnings.warn(scale_mode_mismatch())
 

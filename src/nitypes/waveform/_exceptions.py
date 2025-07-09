@@ -9,7 +9,7 @@ class TimingMismatchError(RuntimeError):
     pass
 
 
-class CapacityMismatchError(Exception):
+class CapacityMismatchError(ValueError):
     """An error for an invalid capacity."""
 
     def __init__(self, capacity: int, array_length: int) -> None:
@@ -22,7 +22,7 @@ class CapacityMismatchError(Exception):
         super().__init__(self.message)
 
 
-class CapacityTooSmallError(Exception):
+class CapacityTooSmallError(ValueError):
     """An error for an invalid capacity argument."""
 
     def __init__(self, capacity: int, min_capacity: int, object_description: str) -> None:
@@ -34,7 +34,8 @@ class CapacityTooSmallError(Exception):
         )
         super().__init__(self.message)
 
-class DatatypeMismatchError(Exception):
+
+class DatatypeMismatchError(TypeError):
     """An error for a data type mismatch."""
 
     def __init__(
@@ -63,8 +64,9 @@ class DatatypeMismatchError(Exception):
         super().__init__(self.message)
 
 
-class IrregularTimestampCountMismatchError(Exception):
+class IrregularTimestampCountMismatchError(ValueError):
     """An error for an irregular timestamp count mismatch."""
+
     def __init__(
         self,
         irregular_timestamp_count: int,
@@ -94,7 +96,7 @@ class IrregularTimestampCountMismatchError(Exception):
         super().__init__(self.message)
 
 
-class StartIndexTooLargeError(Exception):
+class StartIndexTooLargeError(ValueError):
     """Create a ValueError for an invalid start index argument."""
 
     def __init__(
@@ -123,8 +125,9 @@ class StartIndexTooLargeError(Exception):
         super().__init__(self.message)
 
 
-class StartIndexOrSampleCountTooLargeError(Exception):
+class StartIndexOrSampleCountTooLargeError(ValueError):
     """An error for an invalid start index or sample count argument."""
+
     def __init__(
         self,
         start_index: int,
@@ -155,7 +158,7 @@ class StartIndexOrSampleCountTooLargeError(Exception):
         super().__init__(self.message)
 
 
-class NoTimestampInformationError(Exception):
+class NoTimestampInformationError(RuntimeError):
     """An error for waveform timing with no timestamp information."""
 
     def __init__(self) -> None:
@@ -167,7 +170,8 @@ class NoTimestampInformationError(Exception):
         )
         super().__init__(self.message)
 
-class SampleIntervalModeMismatchError(Exception):
+
+class SampleIntervalModeMismatchError(TimingMismatchError):
     """An error for mixing none/regular with irregular timing."""
 
     def __init__(self) -> None:
@@ -178,15 +182,17 @@ class SampleIntervalModeMismatchError(Exception):
         super().__init__(self.message)
 
 
-class SignalCountMismatchError(Exception):
-    def SignalCountMismatchError(
+class SignalCountMismatchError(ValueError):
+    """An error for a mismatched signal count."""
+
+    def __init__(
         self,
         arg_description: Literal["expected waveform", "input array", "input waveform", "provided"],
         arg_signal_count: int,
         other_description: Literal["array", "port", "waveform"],
         other_signal_count: int,
     ) -> None:
-        """Create a ValueError for an mismatched signal count."""
+        """Create a SignalCountMismatchError."""
         arg_key = {
             "expected waveform": "Expected waveform signal count",
             "input array": "Input array signal count",

@@ -9,6 +9,7 @@ import pytest
 from typing_extensions import assert_type
 
 import nitypes.bintime as bt
+import nitypes.waveform._exceptions as wfmex
 from nitypes.waveform import SampleIntervalMode, Timing
 from tests.unit.waveform._timing._utils import assert_deep_copy, assert_shallow_copy
 
@@ -328,11 +329,11 @@ def test___timestamps_tuple___create_with_irregular_interval___creates_timing_wi
 ###############################################################################
 # get_timestamps
 ###############################################################################
-def test___no_interval___get_timestamps___raises_runtime_error() -> None:
+def test___no_interval___get_timestamps___raises_correct_error() -> None:
     start_time = bt.DateTime.now(dt.timezone.utc)
     timing = Timing.create_with_no_interval(start_time)
 
-    with pytest.raises(RuntimeError) as exc:
+    with pytest.raises(wfmex.NoTimestampInformationError) as exc:
         _ = timing.get_timestamps(0, 5)
 
     assert exc.value.args[0].startswith(

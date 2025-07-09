@@ -925,7 +925,9 @@ class DigitalWaveform(Generic[_TState]):
     def _append_waveforms(self, waveforms: Sequence[DigitalWaveform[_TState]]) -> None:
         for waveform in waveforms:
             if waveform.dtype != self.dtype:
-                raise DatatypeMismatchError("input waveform", waveform.dtype, "waveform", self.dtype)
+                raise DatatypeMismatchError(
+                    "input waveform", waveform.dtype, "waveform", self.dtype
+                )
 
         new_timing = self._timing
         for waveform in waveforms:
@@ -997,7 +999,9 @@ class DigitalWaveform(Generic[_TState]):
         signal_count = arg_to_uint("signal count", signal_count, array_signal_count)
 
         if signal_count != array_signal_count:
-            raise SignalCountMismatchError("input array", signal_count, "waveform", array_signal_count)
+            raise SignalCountMismatchError(
+                "input array", signal_count, "waveform", array_signal_count
+            )
 
         if copy:
             if sample_count > len(self._data):
