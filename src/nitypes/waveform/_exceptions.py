@@ -14,12 +14,12 @@ class CapacityMismatchError(ValueError):
 
     def __init__(self, capacity: int, array_length: int) -> None:
         """Create a CapacityMismatchError."""
-        self.message = (
+        message = (
             f"The capacity must match the input array length.\n\n"
             f"Capacity: {capacity}\n"
             f"Array length: {array_length}"
         )
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class CapacityTooSmallError(ValueError):
@@ -27,12 +27,12 @@ class CapacityTooSmallError(ValueError):
 
     def __init__(self, capacity: int, min_capacity: int, object_description: str) -> None:
         """Create a CapacityTooSmallError."""
-        self.message = (
+        message = (
             f"The capacity must be equal to or greater than the number of samples in the {object_description}.\n\n"
             f"Capacity: {capacity}\n"
             f"Number of samples: {min_capacity}"
         )
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class DatatypeMismatchError(TypeError):
@@ -56,12 +56,12 @@ class DatatypeMismatchError(TypeError):
             "spectrum": "Spectrum data type",
             "waveform": "Waveform data type",
         }
-        self.message = (
+        message = (
             f"The data type of the {arg_description} must match the {other_description} data type.\n\n"
             f"{arg_key[arg_description]}: {arg_dtype}\n"
             f"{other_key[other_description]}: {other_dtype}"
         )
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class IrregularTimestampCountMismatchError(ValueError):
@@ -81,19 +81,19 @@ class IrregularTimestampCountMismatchError(ValueError):
             "number of samples in the waveform": "Number of samples",
         }
         if reversed:
-            self.message = (
+            message = (
                 "The input array length must be equal to the number of irregular timestamps.\n\n"
                 f"{other_key[other_description]}: {other}\n"
                 f"Number of timestamps: {irregular_timestamp_count}"
             )
         else:
-            self.message = (
+            message = (
                 f"The number of irregular timestamps must be equal to the {other_description}.\n\n"
                 f"Number of timestamps: {irregular_timestamp_count}\n"
                 f"{other_key[other_description]}: {other}"
             )
 
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class StartIndexTooLargeError(ValueError):
@@ -117,12 +117,12 @@ class StartIndexTooLargeError(ValueError):
             "number of samples in the spectrum": "Number of samples",
             "number of samples in the waveform": "Number of samples",
         }
-        self.message = (
+        message = (
             f"The start index must be less than or equal to the {capacity_description}.\n\n"
             f"Start index: {start_index}\n"
             f"{capacity_key[capacity_description]}: {capacity}"
         )
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class StartIndexOrSampleCountTooLargeError(ValueError):
@@ -149,13 +149,13 @@ class StartIndexOrSampleCountTooLargeError(ValueError):
             "number of samples in the spectrum": "Number of samples",
             "number of samples in the waveform": "Number of samples",
         }
-        self.message = (
+        message = (
             f"The sum of the start index and sample count must be less than or equal to the {capacity_description}.\n\n"
             f"Start index: {start_index}\n"
             f"Sample count: {sample_count}\n"
             f"{capacity_key[capacity_description]}: {capacity}"
         )
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class NoTimestampInformationError(RuntimeError):
@@ -163,12 +163,12 @@ class NoTimestampInformationError(RuntimeError):
 
     def __init__(self) -> None:
         """Create a NoTimestampInformationError."""
-        self.message = (
+        message = (
             "The waveform timing does not have valid timestamp information. "
             "To obtain timestamps, the waveform must be irregular or must be initialized "
             "with a valid time stamp and sample interval."
         )
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class SampleIntervalModeMismatchError(TimingMismatchError):
@@ -176,10 +176,10 @@ class SampleIntervalModeMismatchError(TimingMismatchError):
 
     def __init__(self) -> None:
         """Create a SampleIntervalModeMismatchError."""
-        self.message = (
+        message = (
             "The timing of one or more waveforms does not match the timing of the current waveform."
         )
-        super().__init__(self.message)
+        super().__init__(message)
 
 
 class SignalCountMismatchError(ValueError):
@@ -204,9 +204,9 @@ class SignalCountMismatchError(ValueError):
             "port": "Port signal count",
             "waveform": "Waveform signal count",
         }
-        self.message = (
+        message = (
             f"The {arg_description} signal count must match the {other_description} signal count.\n\n"
             f"{arg_key[arg_description]}: {arg_signal_count}\n"
             f"{other_key[other_description]}: {other_signal_count}"
         )
-        super().__init__(self.message)
+        super().__init__(message)
