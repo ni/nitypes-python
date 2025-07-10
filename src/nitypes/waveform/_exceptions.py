@@ -2,211 +2,181 @@ from __future__ import annotations
 
 from typing_extensions import Literal
 
-
-class TimingMismatchError(RuntimeError):
-    """Exception used when appending waveforms with mismatched timing."""
-
-    pass
-
-
-class CapacityMismatchError(ValueError):
-    """An error for an invalid capacity."""
-
-    def __init__(self, capacity: int, array_length: int) -> None:
-        """Create a CapacityMismatchError."""
-        message = (
-            f"The capacity must match the input array length.\n\n"
-            f"Capacity: {capacity}\n"
-            f"Array length: {array_length}"
-        )
-        super().__init__(message)
+from nitypes.waveform.exceptions import (
+    CapacityMismatchError,
+    CapacityTooSmallError,
+    DatatypeMismatchError,
+    IrregularTimestampCountMismatchError,
+    StartIndexTooLargeError,
+    StartIndexOrSampleCountTooLargeError,
+    NoTimestampInformationError,
+    SampleIntervalModeMismatchError,
+    SignalCountMismatchError,
+)
 
 
-class CapacityTooSmallError(ValueError):
+def raise_capacity_mismatch_error(capacity: int, array_length: int) -> None:
+    """Raise an error for an invalid capacity."""
+    message = (
+        f"The capacity must match the input array length.\n\n"
+        f"Capacity: {capacity}\n"
+        f"Array length: {array_length}"
+    )
+    raise CapacityMismatchError(message)
+
+
+def raise_capacity_too_small_error(
+    capacity: int, min_capacity: int, object_description: str
+) -> None:
     """An error for an invalid capacity argument."""
+    message = (
+        f"The capacity must be equal to or greater than the number of samples in the {object_description}.\n\n"
+        f"Capacity: {capacity}\n"
+        f"Number of samples: {min_capacity}"
+    )
+    raise CapacityTooSmallError(message)
 
-    def __init__(self, capacity: int, min_capacity: int, object_description: str) -> None:
-        """Create a CapacityTooSmallError."""
+
+def raise_datatype_mismatch_error(
+    arg_description: Literal["input array", "input spectrum", "input waveform"],
+    arg_dtype: object,
+    other_description: Literal["requested", "spectrum", "waveform"],
+    other_dtype: object,
+) -> None:
+    """Raise an error for a data type mismatch."""
+    arg_key = {
+        "input array": "Input array data type",
+        "input spectrum": "Input spectrum data type",
+        "input waveform": "Input waveform data type",
+    }
+    other_key = {
+        "requested": "Requested data type",
+        "spectrum": "Spectrum data type",
+        "waveform": "Waveform data type",
+    }
+    message = (
+        f"The data type of the {arg_description} must match the {other_description} data type.\n\n"
+        f"{arg_key[arg_description]}: {arg_dtype}\n"
+        f"{other_key[other_description]}: {other_dtype}"
+    )
+    raise DatatypeMismatchError(message)
+
+
+def raise_irregular_timestamp_count_mismatch_error(
+    irregular_timestamp_count: int,
+    other_description: Literal["input array length", "number of samples in the waveform"],
+    other: int,
+    *,
+    reversed: bool = False,
+) -> None:
+    """Raise an error for an irregular timestamp count mismatch."""
+    other_key = {
+        "input array length": "Array length",
+        "number of samples in the waveform": "Number of samples",
+    }
+    if reversed:
         message = (
-            f"The capacity must be equal to or greater than the number of samples in the {object_description}.\n\n"
-            f"Capacity: {capacity}\n"
-            f"Number of samples: {min_capacity}"
+            "The input array length must be equal to the number of irregular timestamps.\n\n"
+            f"{other_key[other_description]}: {other}\n"
+            f"Number of timestamps: {irregular_timestamp_count}"
         )
-        super().__init__(message)
-
-
-class DatatypeMismatchError(TypeError):
-    """An error for a data type mismatch."""
-
-    def __init__(
-        self,
-        arg_description: Literal["input array", "input spectrum", "input waveform"],
-        arg_dtype: object,
-        other_description: Literal["requested", "spectrum", "waveform"],
-        other_dtype: object,
-    ) -> None:
-        """Create a TypeError for a data type mismatch."""
-        arg_key = {
-            "input array": "Input array data type",
-            "input spectrum": "Input spectrum data type",
-            "input waveform": "Input waveform data type",
-        }
-        other_key = {
-            "requested": "Requested data type",
-            "spectrum": "Spectrum data type",
-            "waveform": "Waveform data type",
-        }
+    else:
         message = (
-            f"The data type of the {arg_description} must match the {other_description} data type.\n\n"
-            f"{arg_key[arg_description]}: {arg_dtype}\n"
-            f"{other_key[other_description]}: {other_dtype}"
+            f"The number of irregular timestamps must be equal to the {other_description}.\n\n"
+            f"Number of timestamps: {irregular_timestamp_count}\n"
+            f"{other_key[other_description]}: {other}"
         )
-        super().__init__(message)
+    raise IrregularTimestampCountMismatchError(message)
 
 
-class IrregularTimestampCountMismatchError(ValueError):
-    """An error for an irregular timestamp count mismatch."""
-
-    def __init__(
-        self,
-        irregular_timestamp_count: int,
-        other_description: Literal["input array length", "number of samples in the waveform"],
-        other: int,
-        *,
-        reversed: bool = False,
-    ) -> None:
-        """Create a IrregularTimestampCountMismatchError."""
-        other_key = {
-            "input array length": "Array length",
-            "number of samples in the waveform": "Number of samples",
-        }
-        if reversed:
-            message = (
-                "The input array length must be equal to the number of irregular timestamps.\n\n"
-                f"{other_key[other_description]}: {other}\n"
-                f"Number of timestamps: {irregular_timestamp_count}"
-            )
-        else:
-            message = (
-                f"The number of irregular timestamps must be equal to the {other_description}.\n\n"
-                f"Number of timestamps: {irregular_timestamp_count}\n"
-                f"{other_key[other_description]}: {other}"
-            )
-
-        super().__init__(message)
+def raise_start_index_too_large_error(
+    start_index: int,
+    capacity_description: Literal[
+        "capacity",
+        "input array length",
+        "number of samples in the spectrum",
+        "number of samples in the waveform",
+    ],
+    capacity: int,
+) -> None:
+    """Raise an error for an invalid start index argument."""
+    capacity_key = {
+        "capacity": "Capacity",
+        "input array length": "Array length",
+        "number of samples in the spectrum": "Number of samples",
+        "number of samples in the waveform": "Number of samples",
+    }
+    message = (
+        f"The start index must be less than or equal to the {capacity_description}.\n\n"
+        f"Start index: {start_index}\n"
+        f"{capacity_key[capacity_description]}: {capacity}"
+    )
+    raise StartIndexTooLargeError(message)
 
 
-class StartIndexTooLargeError(ValueError):
-    """Create a ValueError for an invalid start index argument."""
-
-    def __init__(
-        self,
-        start_index: int,
-        capacity_description: Literal[
-            "capacity",
-            "input array length",
-            "number of samples in the spectrum",
-            "number of samples in the waveform",
-        ],
-        capacity: int,
-    ) -> None:
-        """Create a StartIndexTooLargeError."""
-        capacity_key = {
-            "capacity": "Capacity",
-            "input array length": "Array length",
-            "number of samples in the spectrum": "Number of samples",
-            "number of samples in the waveform": "Number of samples",
-        }
-        message = (
-            f"The start index must be less than or equal to the {capacity_description}.\n\n"
-            f"Start index: {start_index}\n"
-            f"{capacity_key[capacity_description]}: {capacity}"
-        )
-        super().__init__(message)
-
-
-class StartIndexOrSampleCountTooLargeError(ValueError):
-    """An error for an invalid start index or sample count argument."""
-
-    def __init__(
-        self,
-        start_index: int,
-        sample_count: int,
-        capacity_description: Literal[
-            "capacity",
-            "input array length",
-            "number of samples in the expected waveform",
-            "number of samples in the spectrum",
-            "number of samples in the waveform",
-        ],
-        capacity: int,
-    ) -> None:
-        """Create a StartIndexOrSampleCountTooLargeError."""
-        capacity_key = {
-            "capacity": "Capacity",
-            "input array length": "Array length",
-            "number of samples in the expected waveform": "Number of samples",
-            "number of samples in the spectrum": "Number of samples",
-            "number of samples in the waveform": "Number of samples",
-        }
-        message = (
-            f"The sum of the start index and sample count must be less than or equal to the {capacity_description}.\n\n"
-            f"Start index: {start_index}\n"
-            f"Sample count: {sample_count}\n"
-            f"{capacity_key[capacity_description]}: {capacity}"
-        )
-        super().__init__(message)
+def raise_start_index_or_sample_count_too_large_error(
+    start_index: int,
+    sample_count: int,
+    capacity_description: Literal[
+        "capacity",
+        "input array length",
+        "number of samples in the expected waveform",
+        "number of samples in the spectrum",
+        "number of samples in the waveform",
+    ],
+    capacity: int,
+) -> None:
+    """Raise an error for an invalid start index or sample count argument."""
+    capacity_key = {
+        "capacity": "Capacity",
+        "input array length": "Array length",
+        "number of samples in the expected waveform": "Number of samples",
+        "number of samples in the spectrum": "Number of samples",
+        "number of samples in the waveform": "Number of samples",
+    }
+    message = (
+        f"The sum of the start index and sample count must be less than or equal to the {capacity_description}.\n\n"
+        f"Start index: {start_index}\n"
+        f"Sample count: {sample_count}\n"
+        f"{capacity_key[capacity_description]}: {capacity}"
+    )
+    raise StartIndexOrSampleCountTooLargeError(message)
 
 
-class NoTimestampInformationError(RuntimeError):
-    """An error for waveform timing with no timestamp information."""
-
-    def __init__(self) -> None:
-        """Create a NoTimestampInformationError."""
-        message = (
-            "The waveform timing does not have valid timestamp information. "
-            "To obtain timestamps, the waveform must be irregular or must be initialized "
-            "with a valid time stamp and sample interval."
-        )
-        super().__init__(message)
+def raise_no_timestamp_information_error() -> None:
+    """Raise an error for waveform timing with no timestamp information."""
+    raise NoTimestampInformationError()
 
 
-class SampleIntervalModeMismatchError(TimingMismatchError):
-    """An error for mixing none/regular with irregular timing."""
-
-    def __init__(self) -> None:
-        """Create a SampleIntervalModeMismatchError."""
-        message = (
-            "The timing of one or more waveforms does not match the timing of the current waveform."
-        )
-        super().__init__(message)
+def raise_sample_interval_mode_mismatch_error() -> None:
+    """Raise an error for mixing none/regular with irregular timing."""
+    message = (
+        "The timing of one or more waveforms does not match the timing of the current waveform."
+    )
+    raise SampleIntervalModeMismatchError(message)
 
 
-class SignalCountMismatchError(ValueError):
+def raise_signal_count_mismatch_error(
+    arg_description: Literal["expected waveform", "input array", "input waveform", "provided"],
+    arg_signal_count: int,
+    other_description: Literal["array", "port", "waveform"],
+    other_signal_count: int,
+) -> None:
     """An error for a mismatched signal count."""
-
-    def __init__(
-        self,
-        arg_description: Literal["expected waveform", "input array", "input waveform", "provided"],
-        arg_signal_count: int,
-        other_description: Literal["array", "port", "waveform"],
-        other_signal_count: int,
-    ) -> None:
-        """Create a SignalCountMismatchError."""
-        arg_key = {
-            "expected waveform": "Expected waveform signal count",
-            "input array": "Input array signal count",
-            "input waveform": "Input waveform signal count",
-            "provided": "Signal count",
-        }
-        other_key = {
-            "array": "Array signal count",
-            "port": "Port signal count",
-            "waveform": "Waveform signal count",
-        }
-        message = (
-            f"The {arg_description} signal count must match the {other_description} signal count.\n\n"
-            f"{arg_key[arg_description]}: {arg_signal_count}\n"
-            f"{other_key[other_description]}: {other_signal_count}"
-        )
-        super().__init__(message)
+    arg_key = {
+        "expected waveform": "Expected waveform signal count",
+        "input array": "Input array signal count",
+        "input waveform": "Input waveform signal count",
+        "provided": "Signal count",
+    }
+    other_key = {
+        "array": "Array signal count",
+        "port": "Port signal count",
+        "waveform": "Waveform signal count",
+    }
+    message = (
+        f"The {arg_description} signal count must match the {other_description} signal count.\n\n"
+        f"{arg_key[arg_description]}: {arg_signal_count}\n"
+        f"{other_key[other_description]}: {other_signal_count}"
+    )
+    raise SignalCountMismatchError(message)

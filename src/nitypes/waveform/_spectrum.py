@@ -12,11 +12,11 @@ from nitypes._arguments import arg_to_float, arg_to_uint, validate_dtype
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray, long as _np_long, ulong as _np_ulong
 from nitypes.waveform._exceptions import (
-    CapacityMismatchError,
-    CapacityTooSmallError,
-    DatatypeMismatchError,
-    StartIndexOrSampleCountTooLargeError,
-    StartIndexTooLargeError,
+    raise_capacity_mismatch_error,
+    raise_capacity_too_small_error,
+    raise_datatype_mismatch_error,
+    raise_start_index_or_sample_count_too_large_error,
+    raise_start_index_too_large_error,
 )
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
@@ -411,9 +411,9 @@ class Spectrum(Generic[_TData]):
         validate_dtype(dtype, _DATA_DTYPES)
 
         if start_index > capacity:
-            raise StartIndexTooLargeError(start_index, "capacity", capacity)
+            raise_start_index_too_large_error(start_index, "capacity", capacity)
         if start_index + sample_count > capacity:
-            raise StartIndexOrSampleCountTooLargeError(
+            raise_start_index_or_sample_count_too_large_error(
                 start_index, sample_count, "capacity", capacity
             )
 
@@ -438,20 +438,20 @@ class Spectrum(Generic[_TData]):
         if dtype is None:
             dtype = data.dtype
         if dtype != data.dtype:
-            raise DatatypeMismatchError("input array", data.dtype, "requested", np.dtype(dtype))
+            raise_datatype_mismatch_error("input array", data.dtype, "requested", np.dtype(dtype))
         validate_dtype(dtype, _DATA_DTYPES)
 
         capacity = arg_to_uint("capacity", capacity, len(data))
         if capacity != len(data):
-            raise CapacityMismatchError(capacity, len(data))
+            raise_capacity_mismatch_error(capacity, len(data))
 
         start_index = arg_to_uint("start index", start_index, 0)
         if start_index > capacity:
-            raise StartIndexTooLargeError(start_index, "input array length", capacity)
+            raise_start_index_too_large_error(start_index, "input array length", capacity)
 
         sample_count = arg_to_uint("sample count", sample_count, len(data) - start_index)
         if start_index + sample_count > len(data):
-            raise StartIndexOrSampleCountTooLargeError(
+            raise_start_index_or_sample_count_too_large_error(
                 start_index, sample_count, "input array length", len(data)
             )
 
@@ -478,13 +478,13 @@ class Spectrum(Generic[_TData]):
         """
         start_index = arg_to_uint("start index", start_index, 0)
         if start_index > self.sample_count:
-            raise StartIndexTooLargeError(
+            raise_start_index_too_large_error(
                 start_index, "number of samples in the spectrum", self.sample_count
             )
 
         sample_count = arg_to_uint("sample count", sample_count, self.sample_count - start_index)
         if start_index + sample_count > self.sample_count:
-            raise StartIndexOrSampleCountTooLargeError(
+            raise_start_index_or_sample_count_too_large_error(
                 start_index, sample_count, "number of samples in the spectrum", self.sample_count
             )
 
@@ -512,7 +512,7 @@ class Spectrum(Generic[_TData]):
         value = arg_to_uint("capacity", value)
         min_capacity = self._start_index + self._sample_count
         if value < min_capacity:
-            raise CapacityTooSmallError(value, min_capacity, "spectrum")
+            raise_capacity_too_small_error(value, min_capacity, "spectrum")
         if value != len(self._data):
             self._data.resize(value, refcheck=False)
 
@@ -608,7 +608,7 @@ class Spectrum(Generic[_TData]):
         array: npt.NDArray[_TData],
     ) -> None:
         if array.dtype != self.dtype:
-            raise DatatypeMismatchError("input array", array.dtype, "spectrum", self.dtype)
+            raise_datatype_mismatch_error("input array", array.dtype, "spectrum", self.dtype)
         if array.ndim != 1:
             raise invalid_array_ndim("input array", "one-dimensional array", array.ndim)
 
@@ -624,7 +624,7 @@ class Spectrum(Generic[_TData]):
     def _append_spectrums(self, spectrums: Sequence[Spectrum[_TData]]) -> None:
         for spectrum in spectrums:
             if spectrum.dtype != self.dtype:
-                raise DatatypeMismatchError(
+                raise_datatype_mismatch_error(
                     "input spectrum", spectrum.dtype, "spectrum", self.dtype
                 )
 
@@ -672,7 +672,7 @@ class Spectrum(Generic[_TData]):
         sample_count: SupportsIndex | None = None,
     ) -> None:
         if array.dtype != self.dtype:
-            raise DatatypeMismatchError("input array", array.dtype, "spectrum", self.dtype)
+            raise_datatype_mismatch_error("input array", array.dtype, "spectrum", self.dtype)
         if array.ndim != 1:
             raise invalid_array_ndim("input array", "one-dimensional array", array.ndim)
 

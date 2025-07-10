@@ -9,7 +9,7 @@ import pytest
 from typing_extensions import assert_type
 
 import nitypes.bintime as bt
-import nitypes.waveform._exceptions as wfmex
+import nitypes.waveform.exceptions as wfmex
 from nitypes.waveform import SampleIntervalMode, Timing
 from tests.unit.waveform._timing._utils import assert_deep_copy, assert_shallow_copy
 

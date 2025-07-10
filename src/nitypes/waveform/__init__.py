@@ -362,7 +362,6 @@ from nitypes.waveform._digital import (
     DigitalWaveformSignalCollection,
     DigitalWaveformTestResult,
 )
-from nitypes.waveform._exceptions import TimingMismatchError
 from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
     ExtendedPropertyValue,
@@ -377,6 +376,7 @@ from nitypes.waveform._scaling import (
 from nitypes.waveform._spectrum import Spectrum
 from nitypes.waveform._timing import SampleIntervalMode, Timing
 from nitypes.waveform._warnings import ScalingMismatchWarning, TimingMismatchWarning
+from nitypes.waveform.exceptions import TimingMismatchError
 
 __all__ = [
     "AnalogWaveform",

@@ -18,7 +18,7 @@ from packaging.version import Version
 from typing_extensions import assert_type
 
 import nitypes.bintime as bt
-import nitypes.waveform._exceptions as wfmex
+import nitypes.waveform.exceptions as wfmex
 from nitypes.waveform import (
     NO_SCALING,
     AnalogWaveform,
