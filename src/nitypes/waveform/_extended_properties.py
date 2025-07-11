@@ -20,7 +20,7 @@ class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
     """A dictionary of extended properties.
 
     .. note::
-        Data stored in the extended properties dictionary is not encrypted when you send it
+        Data stored in the extended properties dictionary may not be encrypted when you send it
         over the network or write it to a TDMS file.
     """
 

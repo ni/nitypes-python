@@ -72,7 +72,7 @@ class Scalar(Generic[_ScalarType_co]):
         """The extended properties for the scalar.
 
         .. note::
-            Data stored in the extended properties dictionary is not encrypted when you send it
+            Data stored in the extended properties dictionary may not be encrypted when you send it
             over the network or write it to a TDMS file.
         """
         return self._extended_properties
