@@ -322,7 +322,7 @@ def test___invalid_array_subset___from_array_1d___raises_correct_error(
     start_index: SupportsIndex,
     sample_count: SupportsIndex | None,
     expected_message: str,
-    exception_type: type,
+    exception_type: type[Exception],
 ) -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
 
@@ -596,7 +596,7 @@ def test___invalid_array_subset___from_array_2d___raises_correct_error(
     start_index: SupportsIndex,
     sample_count: SupportsIndex | None,
     expected_message: str,
-    exception_type: type,
+    exception_type: type[Exception],
 ) -> None:
     data = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]], np.int32)
 
@@ -731,7 +731,7 @@ def test___spectrum___set_capacity___resizes_array_and_pads_with_zeros(
     ],
 )
 def test___invalid_capacity___set_capacity___raises_correct_error(
-    capacity: int, expected_message: str, exception_type: type
+    capacity: int, expected_message: str, exception_type: type[Exception]
 ) -> None:
     data = [1, 2, 3]
     spectrum = Spectrum.from_array_1d(data, np.int32)

@@ -541,7 +541,7 @@ def test___array_subset___get_data___returns_array_subset(
     ],
 )
 def test___invalid_array_subset___get_data___returns_array_subset(
-    start_index: int, sample_count: int, expected_message: str, exception_type: type
+    start_index: int, sample_count: int, expected_message: str, exception_type: type[Exception]
 ) -> None:
     waveform = DigitalWaveform.from_lines([0, 1, 2, 3], np.uint8)
 
@@ -593,7 +593,7 @@ def test___waveform___set_capacity___resizes_array_and_pads_with_zeros(
     ],
 )
 def test___invalid_capacity___set_capacity___raises_correct_error(
-    capacity: int, expected_message: str, exception_type: type
+    capacity: int, expected_message: str, exception_type: type[Exception]
 ) -> None:
     data = [1, 2, 3]
     waveform = DigitalWaveform.from_lines(data, np.uint8)

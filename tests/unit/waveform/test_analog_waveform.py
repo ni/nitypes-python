@@ -339,7 +339,7 @@ def test___invalid_array_subset___from_array_1d___raises_correct_error(
     start_index: SupportsIndex,
     sample_count: SupportsIndex | None,
     expected_message: str,
-    exception_type: type,
+    exception_type: type[Exception],
 ) -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
 
@@ -621,7 +621,7 @@ def test___invalid_array_subset___from_array_2d___raises_correct_error(
     start_index: SupportsIndex,
     sample_count: SupportsIndex | None,
     expected_message: str,
-    exception_type: type,
+    exception_type: type[Exception],
 ) -> None:
     data = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]], np.int32)
 
@@ -732,7 +732,7 @@ def test___array_subset___get_raw_data___returns_array_subset(
     ],
 )
 def test___invalid_array_subset___get_raw_data___returns_array_subset(
-    start_index: int, sample_count: int, expected_message: str, exception_type: type
+    start_index: int, sample_count: int, expected_message: str, exception_type: type[Exception]
 ) -> None:
     waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
     waveform.scale_mode = LinearScaleMode(2.0, 0.5)
@@ -891,7 +891,7 @@ def test___waveform___set_capacity___resizes_array_and_pads_with_zeros(
     ],
 )
 def test___invalid_capacity___set_capacity___raises_correct_error(
-    capacity: int, expected_message: str, exception_type: type
+    capacity: int, expected_message: str, exception_type: type[Exception]
 ) -> None:
     data = [1, 2, 3]
     waveform = AnalogWaveform.from_array_1d(data, np.int32)
