@@ -736,7 +736,7 @@ def test___invalid_capacity___set_capacity___raises_correct_error(
     data = [1, 2, 3]
     spectrum = Spectrum.from_array_1d(data, np.int32)
 
-    with pytest.raises((exception_type)) as exc:
+    with pytest.raises(exception_type) as exc:
         spectrum.capacity = capacity
 
     assert exc.value.args[0].startswith(expected_message)

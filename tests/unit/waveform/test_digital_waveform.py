@@ -545,7 +545,7 @@ def test___invalid_array_subset___get_data___returns_array_subset(
 ) -> None:
     waveform = DigitalWaveform.from_lines([0, 1, 2, 3], np.uint8)
 
-    with pytest.raises((exception_type)) as exc:
+    with pytest.raises(exception_type) as exc:
         _ = waveform.get_data(start_index=start_index, sample_count=sample_count)
 
     assert exc.value.args[0].startswith(expected_message)

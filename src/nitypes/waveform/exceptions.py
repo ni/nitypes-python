@@ -34,7 +34,7 @@ class IrregularTimestampCountMismatchError(ValueError):
 
 
 class StartIndexTooLargeError(ValueError):
-    """Create a ValueError for an invalid start index argument."""
+    """An error for an invalid start index argument."""
 
     pass
 
