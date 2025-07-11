@@ -14,7 +14,7 @@ import pytest
 from packaging.version import Version
 from typing_extensions import assert_type
 
-import nitypes.waveform.exceptions as wfmex
+import nitypes.waveform.errors as wfmex
 from nitypes.waveform import Spectrum
 
 

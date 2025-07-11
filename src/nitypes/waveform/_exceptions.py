@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing_extensions import Literal
 
-from nitypes.waveform.exceptions import (
+from nitypes.waveform.errors import (
     CapacityMismatchError,
     CapacityTooSmallError,
     DatatypeMismatchError,
@@ -15,35 +15,35 @@ from nitypes.waveform.exceptions import (
 )
 
 
-def raise_capacity_mismatch_error(capacity: int, array_length: int) -> None:
-    """Raise an error for an invalid capacity."""
+def create_capacity_mismatch_error(capacity: int, array_length: int) -> CapacityMismatchError:
+    """Create an error for a capacity-length mismatch."""
     message = (
         f"The capacity must match the input array length.\n\n"
         f"Capacity: {capacity}\n"
         f"Array length: {array_length}"
     )
-    raise CapacityMismatchError(message)
+    return CapacityMismatchError(message)
 
 
-def raise_capacity_too_small_error(
+def create_capacity_too_small_error(
     capacity: int, min_capacity: int, object_description: str
-) -> None:
-    """An error for an invalid capacity argument."""
+) -> CapacityTooSmallError:
+    """Create an error for when capacity is too small."""
     message = (
         f"The capacity must be equal to or greater than the number of samples in the {object_description}.\n\n"
         f"Capacity: {capacity}\n"
         f"Number of samples: {min_capacity}"
     )
-    raise CapacityTooSmallError(message)
+    return CapacityTooSmallError(message)
 
 
-def raise_datatype_mismatch_error(
+def create_datatype_mismatch_error(
     arg_description: Literal["input array", "input spectrum", "input waveform"],
     arg_dtype: object,
     other_description: Literal["requested", "spectrum", "waveform"],
     other_dtype: object,
-) -> None:
-    """Raise an error for a data type mismatch."""
+) -> DatatypeMismatchError:
+    """Create an error for a data type mismatch."""
     arg_key = {
         "input array": "Input array data type",
         "input spectrum": "Input spectrum data type",
@@ -59,17 +59,17 @@ def raise_datatype_mismatch_error(
         f"{arg_key[arg_description]}: {arg_dtype}\n"
         f"{other_key[other_description]}: {other_dtype}"
     )
-    raise DatatypeMismatchError(message)
+    return DatatypeMismatchError(message)
 
 
-def raise_irregular_timestamp_count_mismatch_error(
+def create_irregular_timestamp_count_mismatch_error(
     irregular_timestamp_count: int,
     other_description: Literal["input array length", "number of samples in the waveform"],
     other: int,
     *,
     reversed: bool = False,
-) -> None:
-    """Raise an error for an irregular timestamp count mismatch."""
+) -> IrregularTimestampCountMismatchError:
+    """Create an error for an irregular timestamp count mismatch."""
     other_key = {
         "input array length": "Array length",
         "number of samples in the waveform": "Number of samples",
@@ -86,10 +86,10 @@ def raise_irregular_timestamp_count_mismatch_error(
             f"Number of timestamps: {irregular_timestamp_count}\n"
             f"{other_key[other_description]}: {other}"
         )
-    raise IrregularTimestampCountMismatchError(message)
+    return IrregularTimestampCountMismatchError(message)
 
 
-def raise_start_index_too_large_error(
+def create_start_index_too_large_error(
     start_index: int,
     capacity_description: Literal[
         "capacity",
@@ -98,8 +98,8 @@ def raise_start_index_too_large_error(
         "number of samples in the waveform",
     ],
     capacity: int,
-) -> None:
-    """Raise an error for an invalid start index argument."""
+) -> StartIndexTooLargeError:
+    """Create an error for an invalid start index argument."""
     capacity_key = {
         "capacity": "Capacity",
         "input array length": "Array length",
@@ -111,10 +111,10 @@ def raise_start_index_too_large_error(
         f"Start index: {start_index}\n"
         f"{capacity_key[capacity_description]}: {capacity}"
     )
-    raise StartIndexTooLargeError(message)
+    return StartIndexTooLargeError(message)
 
 
-def raise_start_index_or_sample_count_too_large_error(
+def create_start_index_or_sample_count_too_large_error(
     start_index: int,
     sample_count: int,
     capacity_description: Literal[
@@ -125,8 +125,8 @@ def raise_start_index_or_sample_count_too_large_error(
         "number of samples in the waveform",
     ],
     capacity: int,
-) -> None:
-    """Raise an error for an invalid start index or sample count argument."""
+) -> StartIndexOrSampleCountTooLargeError:
+    """Create an error for an invalid start index or sample count argument."""
     capacity_key = {
         "capacity": "Capacity",
         "input array length": "Array length",
@@ -140,29 +140,34 @@ def raise_start_index_or_sample_count_too_large_error(
         f"Sample count: {sample_count}\n"
         f"{capacity_key[capacity_description]}: {capacity}"
     )
-    raise StartIndexOrSampleCountTooLargeError(message)
+    return StartIndexOrSampleCountTooLargeError(message)
 
 
-def raise_no_timestamp_information_error() -> None:
-    """Raise an error for waveform timing with no timestamp information."""
-    raise NoTimestampInformationError()
+def create_no_timestamp_information_error() -> NoTimestampInformationError:
+    """Create an error for waveform timing with no timestamp information."""
+    message = (
+        "The waveform timing does not have valid timestamp information. "
+        "To obtain timestamps, the waveform must be irregular or must be initialized "
+        "with a valid time stamp and sample interval."
+    )
+    return NoTimestampInformationError(message)
 
 
-def raise_sample_interval_mode_mismatch_error() -> None:
-    """Raise an error for mixing none/regular with irregular timing."""
+def create_sample_interval_mode_mismatch_error() -> SampleIntervalModeMismatchError:
+    """Create an error for mixing none/regular with irregular timing."""
     message = (
         "The timing of one or more waveforms does not match the timing of the current waveform."
     )
-    raise SampleIntervalModeMismatchError(message)
+    return SampleIntervalModeMismatchError(message)
 
 
-def raise_signal_count_mismatch_error(
+def create_signal_count_mismatch_error(
     arg_description: Literal["expected waveform", "input array", "input waveform", "provided"],
     arg_signal_count: int,
     other_description: Literal["array", "port", "waveform"],
     other_signal_count: int,
-) -> None:
-    """An error for a mismatched signal count."""
+) -> SignalCountMismatchError:
+    """Create an error for a mismatched signal count."""
     arg_key = {
         "expected waveform": "Expected waveform signal count",
         "input array": "Input array signal count",
@@ -179,4 +184,4 @@ def raise_signal_count_mismatch_error(
         f"{arg_key[arg_description]}: {arg_signal_count}\n"
         f"{other_key[other_description]}: {other_signal_count}"
     )
-    raise SignalCountMismatchError(message)
+    return SignalCountMismatchError(message)

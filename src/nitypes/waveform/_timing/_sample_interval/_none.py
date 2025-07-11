@@ -6,7 +6,10 @@ from typing import TYPE_CHECKING, final
 
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import add_note, invalid_arg_type
-from nitypes.waveform._exceptions import raise_sample_interval_mode_mismatch_error
+from nitypes.waveform._exceptions import (
+    create_no_timestamp_information_error,
+    create_sample_interval_mode_mismatch_error,
+)
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
 from nitypes.waveform._timing._types import (
@@ -17,7 +20,6 @@ from nitypes.waveform._timing._types import (
     _TTimestamp_co,
 )
 from nitypes.waveform._warnings import sample_interval_mismatch
-from nitypes.waveform.exceptions import NoTimestampInformationError
 
 if TYPE_CHECKING:
     from nitypes.waveform._timing._timing import Timing  # circular import
@@ -51,7 +53,7 @@ class NoneSampleIntervalStrategy(
         start_index: int,
         count: int,
     ) -> Iterable[_TTimestamp_co]:
-        raise NoTimestampInformationError()
+        raise create_no_timestamp_information_error()
 
     def append_timestamps(  # noqa: D102 - Missing docstring in public method - override
         self,
@@ -71,7 +73,7 @@ class NoneSampleIntervalStrategy(
         other: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
     ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
         if other._sample_interval_mode not in (SampleIntervalMode.NONE, SampleIntervalMode.REGULAR):
-            raise_sample_interval_mode_mismatch_error()
+            raise create_sample_interval_mode_mismatch_error()
         if timing._sample_interval != other._sample_interval:
             warnings.warn(sample_interval_mismatch())
         return timing

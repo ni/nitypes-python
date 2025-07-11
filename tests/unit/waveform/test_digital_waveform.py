@@ -15,7 +15,7 @@ import pytest
 from typing_extensions import assert_type
 
 import nitypes.bintime as bt
-import nitypes.waveform.exceptions as wfmex
+import nitypes.waveform.errors as wfmex
 from nitypes._numpy import bool as _np_bool
 from nitypes.waveform import (
     DigitalState,

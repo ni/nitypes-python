@@ -48,14 +48,7 @@ class StartIndexOrSampleCountTooLargeError(ValueError):
 class NoTimestampInformationError(RuntimeError):
     """An error for waveform timing with no timestamp information."""
 
-    def __init__(self) -> None:
-        """Create a NoTimestampInformationError."""
-        message = (
-            "The waveform timing does not have valid timestamp information. "
-            "To obtain timestamps, the waveform must be irregular or must be initialized "
-            "with a valid time stamp and sample interval."
-        )
-        super().__init__(message)
+    pass
 
 
 class SampleIntervalModeMismatchError(TimingMismatchError):
