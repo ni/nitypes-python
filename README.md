@@ -130,7 +130,7 @@ in the API Reference.
 ## Scalar
 
 `nitypes.scalar.Scalar` is a data type that represents a single scalar value with units
-information. Valid types for the scalar value are `bool`, `int`, `float`, and `str`. For more
-details, see
+information and extended properties. Valid types for the scalar value are `bool`, `int`, `float`,
+and `str`. For more details, see
 [Scalar](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/scalar/index.html#scalar) in the
 API Reference.

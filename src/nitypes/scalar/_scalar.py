@@ -69,7 +69,12 @@ class Scalar(Generic[_ScalarType_co]):
 
     @property
     def extended_properties(self) -> ExtendedPropertyDictionary:
-        """The extended properties for the scalar."""
+        """The extended properties for the scalar.
+
+        .. note::
+            Data stored in the extended properties dictionary may not be encrypted when you send it
+            over the network or write it to a TDMS file.
+        """
         return self._extended_properties
 
     def __eq__(self, value: object, /) -> bool:
