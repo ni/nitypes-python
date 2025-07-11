@@ -134,6 +134,10 @@ def test___dtype_str_with_tdata_hint___create___narrows_tdata() -> None:
         DigitalState.FORCE_DOWN,
         DigitalState.FORCE_UP,
         DigitalState.COMPARE_VALID,
+        DigitalState.EQUAL_0_L,
+        DigitalState.EQUAL_1_H,
+        DigitalState.NOT_EQUAL_0_1,
+        DigitalState.NOT_EQUAL_0_1_L_H,
     ],
 )
 def test___default_value___create___creates_waveform_with_default_value(
