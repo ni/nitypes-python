@@ -14,6 +14,7 @@ import pytest
 from packaging.version import Version
 from typing_extensions import assert_type
 
+import nitypes.waveform.errors as wfmex
 from nitypes.waveform import Spectrum
 
 
@@ -285,36 +286,47 @@ def test___array_subset___from_array_1d___creates_spectrum_with_array_subset(
 
 
 @pytest.mark.parametrize(
-    "start_index, sample_count, expected_message",
+    "start_index, sample_count, expected_message, exception_type",
     [
-        (-2, None, "The start index must be a non-negative integer."),
-        (-1, None, "The start index must be a non-negative integer."),
-        (6, None, "The start index must be less than or equal to the input array length."),
-        (0, -2, "The sample count must be a non-negative integer."),
-        (0, -1, "The sample count must be a non-negative integer."),
+        (-2, None, "The start index must be a non-negative integer.", ValueError),
+        (-1, None, "The start index must be a non-negative integer.", ValueError),
+        (
+            6,
+            None,
+            "The start index must be less than or equal to the input array length.",
+            wfmex.StartIndexTooLargeError,
+        ),
+        (0, -2, "The sample count must be a non-negative integer.", ValueError),
+        (0, -1, "The sample count must be a non-negative integer.", ValueError),
         (
             0,
             6,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
         (
             1,
             5,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
         (
             5,
             1,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
     ],
 )
-def test___invalid_array_subset___from_array_1d___raises_value_error(
-    start_index: SupportsIndex, sample_count: SupportsIndex | None, expected_message: str
+def test___invalid_array_subset___from_array_1d___raises_correct_error(
+    start_index: SupportsIndex,
+    sample_count: SupportsIndex | None,
+    expected_message: str,
+    exception_type: type[Exception],
 ) -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(exception_type) as exc:
         _ = Spectrum.from_array_1d(data, start_index=start_index, sample_count=sample_count)
 
     assert exc.value.args[0].startswith(expected_message)
@@ -548,36 +560,47 @@ def test___array_subset___from_array_2d___creates_spectrum_with_array_subset(
 
 
 @pytest.mark.parametrize(
-    "start_index, sample_count, expected_message",
+    "start_index, sample_count, expected_message, exception_type",
     [
-        (-2, None, "The start index must be a non-negative integer."),
-        (-1, None, "The start index must be a non-negative integer."),
-        (6, None, "The start index must be less than or equal to the input array length."),
-        (0, -2, "The sample count must be a non-negative integer."),
-        (0, -1, "The sample count must be a non-negative integer."),
+        (-2, None, "The start index must be a non-negative integer.", ValueError),
+        (-1, None, "The start index must be a non-negative integer.", ValueError),
+        (
+            6,
+            None,
+            "The start index must be less than or equal to the input array length.",
+            wfmex.StartIndexTooLargeError,
+        ),
+        (0, -2, "The sample count must be a non-negative integer.", ValueError),
+        (0, -1, "The sample count must be a non-negative integer.", ValueError),
         (
             0,
             6,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
         (
             1,
             5,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
         (
             5,
             1,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
     ],
 )
-def test___invalid_array_subset___from_array_2d___raises_value_error(
-    start_index: SupportsIndex, sample_count: SupportsIndex | None, expected_message: str
+def test___invalid_array_subset___from_array_2d___raises_correct_error(
+    start_index: SupportsIndex,
+    sample_count: SupportsIndex | None,
+    expected_message: str,
+    exception_type: type[Exception],
 ) -> None:
     data = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]], np.int32)
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(exception_type) as exc:
         _ = Spectrum.from_array_2d(data, start_index=start_index, sample_count=sample_count)
 
     assert exc.value.args[0].startswith(expected_message)
@@ -662,7 +685,9 @@ def test___invalid_array_subset___get_data___returns_array_subset(
 ) -> None:
     spectrum = Spectrum.from_array_1d([0, 1, 2, 3], np.int32)
 
-    with pytest.raises((TypeError, ValueError)) as exc:
+    with pytest.raises(
+        (wfmex.StartIndexTooLargeError, wfmex.StartIndexOrSampleCountTooLargeError)
+    ) as exc:
         _ = spectrum.get_data(start_index=start_index, sample_count=sample_count)
 
     assert exc.value.args[0].startswith(expected_message)
@@ -689,21 +714,29 @@ def test___spectrum___set_capacity___resizes_array_and_pads_with_zeros(
 
 
 @pytest.mark.parametrize(
-    "capacity, expected_message",
+    "capacity, expected_message, exception_type",
     [
-        (-2, "The capacity must be a non-negative integer."),
-        (-1, "The capacity must be a non-negative integer."),
-        (0, "The capacity must be equal to or greater than the number of samples in the spectrum."),
-        (2, "The capacity must be equal to or greater than the number of samples in the spectrum."),
+        (-2, "The capacity must be a non-negative integer.", ValueError),
+        (-1, "The capacity must be a non-negative integer.", ValueError),
+        (
+            0,
+            "The capacity must be equal to or greater than the number of samples in the spectrum.",
+            wfmex.CapacityTooSmallError,
+        ),
+        (
+            2,
+            "The capacity must be equal to or greater than the number of samples in the spectrum.",
+            wfmex.CapacityTooSmallError,
+        ),
     ],
 )
-def test___invalid_capacity___set_capacity___raises_value_error(
-    capacity: int, expected_message: str
+def test___invalid_capacity___set_capacity___raises_correct_error(
+    capacity: int, expected_message: str, exception_type: type[Exception]
 ) -> None:
     data = [1, 2, 3]
     spectrum = Spectrum.from_array_1d(data, np.int32)
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(exception_type) as exc:
         spectrum.capacity = capacity
 
     assert exc.value.args[0].startswith(expected_message)
@@ -843,11 +876,11 @@ def test___float64_ndarray___append___appends_array() -> None:
     assert list(spectrum.data) == [0, 1, 2, 3, 4, 5]
 
 
-def test___ndarray_with_mismatched_dtype___append___raises_type_error() -> None:
+def test___ndarray_with_mismatched_dtype___append___raises_correct_error() -> None:
     spectrum = Spectrum.from_array_1d([0, 1, 2], np.float64)
     array = np.array([3, 4, 5], np.int32)
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         spectrum.append(array)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
@@ -895,11 +928,11 @@ def test___float64_spectrum___append___appends_spectrum() -> None:
     assert list(spectrum.data) == [0, 1, 2, 3, 4, 5]
 
 
-def test___spectrum_with_mismatched_dtype___append___raises_type_error() -> None:
+def test___spectrum_with_mismatched_dtype___append___raises_correct_error() -> None:
     spectrum = Spectrum.from_array_1d([0, 1, 2], np.float64)
     other = Spectrum.from_array_1d([3, 4, 5], np.int32)
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         spectrum.append(other)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
@@ -944,7 +977,7 @@ def test___float64_spectrum_tuple___append___appends_spectrum() -> None:
     assert list(spectrum.data) == [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
 
-def test___spectrum_list_with_mismatched_dtype___append___raises_type_error_and_does_not_append() -> (
+def test___spectrum_list_with_mismatched_dtype___append___raises_correct_error_and_does_not_append() -> (
     None
 ):
     spectrum = Spectrum.from_array_1d([0, 1, 2], np.float64)
@@ -953,7 +986,7 @@ def test___spectrum_list_with_mismatched_dtype___append___raises_type_error_and_
         Spectrum.from_array_1d([6, 7, 8], np.int32),
     ]
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         spectrum.append(other)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
@@ -992,11 +1025,11 @@ def test___float64_ndarray___load_data___overwrites_data() -> None:
     assert list(spectrum.data) == [3, 4, 5]
 
 
-def test___ndarray_with_mismatched_dtype___load_data___raises_type_error() -> None:
+def test___ndarray_with_mismatched_dtype___load_data___raises_correct_error() -> None:
     spectrum = Spectrum.from_array_1d([0, 1, 2], np.float64)
     array = np.array([3, 4, 5], np.int32)
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         spectrum.load_data(array)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(

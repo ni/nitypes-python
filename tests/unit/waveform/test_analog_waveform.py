@@ -18,6 +18,7 @@ from packaging.version import Version
 from typing_extensions import assert_type
 
 import nitypes.bintime as bt
+import nitypes.waveform.errors as wfmex
 from nitypes.waveform import (
     NO_SCALING,
     AnalogWaveform,
@@ -302,36 +303,47 @@ def test___array_subset___from_array_1d___creates_waveform_with_array_subset(
 
 
 @pytest.mark.parametrize(
-    "start_index, sample_count, expected_message",
+    "start_index, sample_count, expected_message, exception_type",
     [
-        (-2, None, "The start index must be a non-negative integer."),
-        (-1, None, "The start index must be a non-negative integer."),
-        (6, None, "The start index must be less than or equal to the input array length."),
-        (0, -2, "The sample count must be a non-negative integer."),
-        (0, -1, "The sample count must be a non-negative integer."),
+        (-2, None, "The start index must be a non-negative integer.", ValueError),
+        (-1, None, "The start index must be a non-negative integer.", ValueError),
+        (
+            6,
+            None,
+            "The start index must be less than or equal to the input array length.",
+            wfmex.StartIndexTooLargeError,
+        ),
+        (0, -2, "The sample count must be a non-negative integer.", ValueError),
+        (0, -1, "The sample count must be a non-negative integer.", ValueError),
         (
             0,
             6,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
         (
             1,
             5,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
         (
             5,
             1,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
     ],
 )
-def test___invalid_array_subset___from_array_1d___raises_value_error(
-    start_index: SupportsIndex, sample_count: SupportsIndex | None, expected_message: str
+def test___invalid_array_subset___from_array_1d___raises_correct_error(
+    start_index: SupportsIndex,
+    sample_count: SupportsIndex | None,
+    expected_message: str,
+    exception_type: type[Exception],
 ) -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(exception_type) as exc:
         _ = AnalogWaveform.from_array_1d(data, start_index=start_index, sample_count=sample_count)
 
     assert exc.value.args[0].startswith(expected_message)
@@ -573,36 +585,47 @@ def test___array_subset___from_array_2d___creates_waveform_with_array_subset(
 
 
 @pytest.mark.parametrize(
-    "start_index, sample_count, expected_message",
+    "start_index, sample_count, expected_message, exception_type",
     [
-        (-2, None, "The start index must be a non-negative integer."),
-        (-1, None, "The start index must be a non-negative integer."),
-        (6, None, "The start index must be less than or equal to the input array length."),
-        (0, -2, "The sample count must be a non-negative integer."),
-        (0, -1, "The sample count must be a non-negative integer."),
+        (-2, None, "The start index must be a non-negative integer.", ValueError),
+        (-1, None, "The start index must be a non-negative integer.", ValueError),
+        (
+            6,
+            None,
+            "The start index must be less than or equal to the input array length.",
+            wfmex.StartIndexTooLargeError,
+        ),
+        (0, -2, "The sample count must be a non-negative integer.", ValueError),
+        (0, -1, "The sample count must be a non-negative integer.", ValueError),
         (
             0,
             6,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
         (
             1,
             5,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
         (
             5,
             1,
             "The sum of the start index and sample count must be less than or equal to the input array length.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
     ],
 )
-def test___invalid_array_subset___from_array_2d___raises_value_error(
-    start_index: SupportsIndex, sample_count: SupportsIndex | None, expected_message: str
+def test___invalid_array_subset___from_array_2d___raises_correct_error(
+    start_index: SupportsIndex,
+    sample_count: SupportsIndex | None,
+    expected_message: str,
+    exception_type: type[Exception],
 ) -> None:
     data = np.array([[1, 2, 3, 4, 5], [6, 7, 8, 9, 10]], np.int32)
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(exception_type) as exc:
         _ = AnalogWaveform.from_array_2d(data, start_index=start_index, sample_count=sample_count)
 
     assert exc.value.args[0].startswith(expected_message)
@@ -686,32 +709,35 @@ def test___array_subset___get_raw_data___returns_array_subset(
 
 
 @pytest.mark.parametrize(
-    "start_index, sample_count, expected_message",
+    "start_index, sample_count, expected_message, exception_type",
     [
         (
             5,
             None,
             "The start index must be less than or equal to the number of samples in the waveform.",
+            wfmex.StartIndexTooLargeError,
         ),
         (
             0,
             5,
             "The sum of the start index and sample count must be less than or equal to the number of samples in the waveform.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
         (
             4,
             1,
             "The sum of the start index and sample count must be less than or equal to the number of samples in the waveform.",
+            wfmex.StartIndexOrSampleCountTooLargeError,
         ),
     ],
 )
 def test___invalid_array_subset___get_raw_data___returns_array_subset(
-    start_index: int, sample_count: int, expected_message: str
+    start_index: int, sample_count: int, expected_message: str, exception_type: type[Exception]
 ) -> None:
     waveform = AnalogWaveform.from_array_1d([0, 1, 2, 3], np.int32)
     waveform.scale_mode = LinearScaleMode(2.0, 0.5)
 
-    with pytest.raises((TypeError, ValueError)) as exc:
+    with pytest.raises(exception_type) as exc:
         _ = waveform.get_raw_data(start_index=start_index, sample_count=sample_count)
 
     assert exc.value.args[0].startswith(expected_message)
@@ -848,21 +874,29 @@ def test___waveform___set_capacity___resizes_array_and_pads_with_zeros(
 
 
 @pytest.mark.parametrize(
-    "capacity, expected_message",
+    "capacity, expected_message, exception_type",
     [
-        (-2, "The capacity must be a non-negative integer."),
-        (-1, "The capacity must be a non-negative integer."),
-        (0, "The capacity must be equal to or greater than the number of samples in the waveform."),
-        (2, "The capacity must be equal to or greater than the number of samples in the waveform."),
+        (-2, "The capacity must be a non-negative integer.", ValueError),
+        (-1, "The capacity must be a non-negative integer.", ValueError),
+        (
+            0,
+            "The capacity must be equal to or greater than the number of samples in the waveform.",
+            wfmex.CapacityTooSmallError,
+        ),
+        (
+            2,
+            "The capacity must be equal to or greater than the number of samples in the waveform.",
+            wfmex.CapacityTooSmallError,
+        ),
     ],
 )
-def test___invalid_capacity___set_capacity___raises_value_error(
-    capacity: int, expected_message: str
+def test___invalid_capacity___set_capacity___raises_correct_error(
+    capacity: int, expected_message: str, exception_type: type[Exception]
 ) -> None:
     data = [1, 2, 3]
     waveform = AnalogWaveform.from_array_1d(data, np.int32)
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(exception_type) as exc:
         waveform.capacity = capacity
 
     assert exc.value.args[0].startswith(expected_message)
@@ -1081,11 +1115,11 @@ def test___float64_ndarray___append___appends_array() -> None:
     assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
 
 
-def test___ndarray_with_mismatched_dtype___append___raises_type_error() -> None:
+def test___ndarray_with_mismatched_dtype___append___raises_correct_error() -> None:
     waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
     array = np.array([3, 4, 5], np.int32)
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         waveform.append(array)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
@@ -1141,7 +1175,7 @@ def test___irregular_waveform_and_int32_ndarray_without_timestamps___append___ra
     assert waveform.timing._timestamps == waveform_timestamps
 
 
-def test___irregular_waveform_and_int32_ndarray_with_wrong_timestamp_count___append___raises_value_error_and_does_not_append() -> (
+def test___irregular_waveform_and_int32_ndarray_with_wrong_timestamp_count___append___raises_correct_error_and_does_not_append() -> (
     None
 ):
     start_time = dt.datetime.now(dt.timezone.utc)
@@ -1153,7 +1187,7 @@ def test___irregular_waveform_and_int32_ndarray_with_wrong_timestamp_count___app
     array_timestamps = [start_time + offset for offset in array_offsets]
     array = np.array([3, 4, 5], np.int32)
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(wfmex.IrregularTimestampCountMismatchError) as exc:
         waveform.append(array, array_timestamps)
 
     assert exc.value.args[0].startswith(
@@ -1164,7 +1198,7 @@ def test___irregular_waveform_and_int32_ndarray_with_wrong_timestamp_count___app
     assert waveform.timing._timestamps == waveform_timestamps
 
 
-def test___regular_waveform_and_int32_ndarray_with_timestamps___append___raises_runtime_error_and_does_not_append() -> (
+def test___regular_waveform_and_int32_ndarray_with_timestamps___append___raises_value_error_and_does_not_append() -> (
     None
 ):
     start_time = dt.datetime.now(dt.timezone.utc)
@@ -1213,11 +1247,11 @@ def test___float64_waveform___append___appends_waveform() -> None:
     assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
 
 
-def test___waveform_with_mismatched_dtype___append___raises_type_error() -> None:
+def test___waveform_with_mismatched_dtype___append___raises_correct_error() -> None:
     waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
     other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         waveform.append(other)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
@@ -1243,9 +1277,7 @@ def test___irregular_waveform_and_irregular_waveform___append___appends_waveform
     assert waveform.timing._timestamps == waveform_timestamps + other_timestamps
 
 
-def test___irregular_waveform_and_regular_waveform___append___raises_timing_mismatch_error() -> (
-    None
-):
+def test___irregular_waveform_and_regular_waveform___append___raises_correct_error() -> None:
     start_time = dt.datetime.now(dt.timezone.utc)
     waveform_offsets = [dt.timedelta(0), dt.timedelta(1), dt.timedelta(2)]
     waveform_timestamps = [start_time + offset for offset in waveform_offsets]
@@ -1253,7 +1285,7 @@ def test___irregular_waveform_and_regular_waveform___append___raises_timing_mism
     waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
     other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
 
-    with pytest.raises(TimingMismatchError) as exc:
+    with pytest.raises(wfmex.SampleIntervalModeMismatchError) as exc:
         waveform.append(other)
 
     assert exc.value.args[0].startswith(
@@ -1264,9 +1296,7 @@ def test___irregular_waveform_and_regular_waveform___append___raises_timing_mism
     assert waveform.timing._timestamps == waveform_timestamps
 
 
-def test___regular_waveform_and_irregular_waveform___append___raises_timing_mismatch_error() -> (
-    None
-):
+def test___regular_waveform_and_irregular_waveform___append___raises_correct_error() -> None:
     start_time = dt.datetime.now(dt.timezone.utc)
     waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.int32)
     waveform.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
@@ -1275,7 +1305,7 @@ def test___regular_waveform_and_irregular_waveform___append___raises_timing_mism
     other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
     other.timing = Timing.create_with_irregular_interval(other_timestamps)
 
-    with pytest.raises(TimingMismatchError) as exc:
+    with pytest.raises(wfmex.SampleIntervalModeMismatchError) as exc:
         waveform.append(other)
 
     assert exc.value.args[0].startswith(
@@ -1370,7 +1400,7 @@ def test___float64_waveform_tuple___append___appends_waveform() -> None:
     assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5, 6, 7, 8]
 
 
-def test___waveform_list_with_mismatched_dtype___append___raises_type_error_and_does_not_append() -> (
+def test___waveform_list_with_mismatched_dtype___append___raises_correct_error_and_does_not_append() -> (
     None
 ):
     waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
@@ -1379,7 +1409,7 @@ def test___waveform_list_with_mismatched_dtype___append___raises_type_error_and_
         AnalogWaveform.from_array_1d([6, 7, 8], np.int32),
     ]
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         waveform.append(other)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
@@ -1413,7 +1443,7 @@ def test___irregular_waveform_and_irregular_waveform_list___append___appends_wav
     )
 
 
-def test___irregular_waveform_and_regular_waveform_list___append___raises_timing_mismatch_error_and_does_not_append() -> (
+def test___irregular_waveform_and_regular_waveform_list___append___raises_correct_error_and_does_not_append() -> (
     None
 ):
     start_time = dt.datetime.now(dt.timezone.utc)
@@ -1429,7 +1459,7 @@ def test___irregular_waveform_and_regular_waveform_list___append___raises_timing
     other2.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=1))
     other = [other1, other2]
 
-    with pytest.raises(TimingMismatchError) as exc:
+    with pytest.raises(wfmex.SampleIntervalModeMismatchError) as exc:
         waveform.append(other)
 
     assert exc.value.args[0].startswith(
@@ -1440,7 +1470,7 @@ def test___irregular_waveform_and_regular_waveform_list___append___raises_timing
     assert waveform.timing._timestamps == waveform_timestamps
 
 
-def test___regular_waveform_and_irregular_waveform_list___append___raises_runtime_error_and_does_not_append() -> (
+def test___regular_waveform_and_irregular_waveform_list___append___raises_correct_error_and_does_not_append() -> (
     None
 ):
     start_time = dt.datetime.now(dt.timezone.utc)
@@ -1454,7 +1484,7 @@ def test___regular_waveform_and_irregular_waveform_list___append___raises_runtim
     other2.timing = Timing.create_with_irregular_interval(other2_timestamps)
     other = [other1, other2]
 
-    with pytest.raises(RuntimeError) as exc:
+    with pytest.raises(wfmex.SampleIntervalModeMismatchError) as exc:
         waveform.append(other)
 
     assert exc.value.args[0].startswith(
@@ -1495,11 +1525,11 @@ def test___float64_ndarray___load_data___overwrites_data() -> None:
     assert list(waveform.raw_data) == [3, 4, 5]
 
 
-def test___ndarray_with_mismatched_dtype___load_data___raises_type_error() -> None:
+def test___ndarray_with_mismatched_dtype___load_data___raises_correct_error() -> None:
     waveform = AnalogWaveform.from_array_1d([0, 1, 2], np.float64)
     array = np.array([3, 4, 5], np.int32)
 
-    with pytest.raises(TypeError) as exc:
+    with pytest.raises(wfmex.DatatypeMismatchError) as exc:
         waveform.load_data(array)  # type: ignore[arg-type]
 
     assert exc.value.args[0].startswith(
@@ -1608,7 +1638,7 @@ def test___irregular_waveform_and_int32_ndarray_with_timestamps___load_data___ov
     assert waveform.timing._timestamps == waveform_timestamps
 
 
-def test___irregular_waveform_and_int32_ndarray_with_wrong_sample_count___load_data___raises_value_error_and_does_not_overwrite_data() -> (
+def test___irregular_waveform_and_int32_ndarray_with_wrong_sample_count___load_data___raises_correct_error_and_does_not_overwrite_data() -> (
     None
 ):
     start_time = dt.datetime.now(dt.timezone.utc)
@@ -1618,7 +1648,7 @@ def test___irregular_waveform_and_int32_ndarray_with_wrong_sample_count___load_d
     waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
     array = np.array([3, 4], np.int32)
 
-    with pytest.raises(ValueError) as exc:
+    with pytest.raises(wfmex.IrregularTimestampCountMismatchError) as exc:
         waveform.load_data(array)
 
     assert exc.value.args[0].startswith(
