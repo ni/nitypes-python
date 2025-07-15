@@ -89,7 +89,7 @@ class Scalar(Generic[_ScalarType_co]):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
         if isinstance(self.value, _NUMERIC) and isinstance(value.value, _NUMERIC):
-            return self.value > value.value
+            return self.value > value.value  # type: ignore[no-any-return,operator]  # https://github.com/python/mypy/issues/19454
         elif isinstance(self.value, str) and isinstance(value.value, str):
             return self.value > value.value
         else:
@@ -101,7 +101,7 @@ class Scalar(Generic[_ScalarType_co]):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
         if isinstance(self.value, _NUMERIC) and isinstance(value.value, _NUMERIC):
-            return self.value >= value.value
+            return self.value >= value.value  # type: ignore[no-any-return,operator]  # https://github.com/python/mypy/issues/19454
         elif isinstance(self.value, str) and isinstance(value.value, str):
             return self.value >= value.value
         else:
@@ -113,7 +113,7 @@ class Scalar(Generic[_ScalarType_co]):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
         if isinstance(self.value, _NUMERIC) and isinstance(value.value, _NUMERIC):
-            return self.value < value.value
+            return self.value < value.value  # type: ignore[no-any-return,operator]  # https://github.com/python/mypy/issues/19454
         elif isinstance(self.value, str) and isinstance(value.value, str):
             return self.value < value.value
         else:
@@ -125,7 +125,7 @@ class Scalar(Generic[_ScalarType_co]):
             return NotImplemented
         self._check_units_equal_for_comparison(value.units)
         if isinstance(self.value, _NUMERIC) and isinstance(value.value, _NUMERIC):
-            return self.value <= value.value
+            return self.value <= value.value  # type: ignore[no-any-return,operator]  # https://github.com/python/mypy/issues/19454
         elif isinstance(self.value, str) and isinstance(value.value, str):
             return self.value <= value.value
         else:
