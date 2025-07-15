@@ -881,7 +881,7 @@ class DigitalWaveform(Generic[_TState]):
             self._append_array(other, timestamps)
         elif isinstance(other, DigitalWaveform):
             validate_unsupported_arg("timestamps", timestamps)
-            self._append_waveform(other)  # type: ignore[arg-type]  # https://github.com/python/mypy/issues/19221
+            self._append_waveform(other)
         elif isinstance(other, Sequence) and all(isinstance(x, DigitalWaveform) for x in other):
             validate_unsupported_arg("timestamps", timestamps)
             self._append_waveforms(other)
