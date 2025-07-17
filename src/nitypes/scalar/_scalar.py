@@ -16,7 +16,25 @@ _NUMERIC = (bool, int, float)
 
 @final
 class Scalar(Generic[_ScalarType_co]):
-    """A scalar data class, which encapsulates scalar data and units information."""
+    """A scalar data class, which encapsulates scalar data and units information.
+    
+    Constructing
+    ^^^^^^^^^^^^
+
+    To construct a scalar data object, use the :any:`Scalar` class:
+
+    >>> Scalar(False)
+    nitypes.scalar.Scalar(value=False, units='')
+    >>> Scalar(0)
+    nitypes.scalar.Scalar(value=0, units='')
+    >>> Scalar(5.0, 'volts')
+    nitypes.scalar.Scalar(value=5.0, units='volts')
+    >>> Scalar("value", "volts")
+    nitypes.scalar.Scalar(value='value', units='volts')
+
+    Class members
+    ^^^^^^^^^^^^^
+    """
 
     __slots__ = [
         "_value",

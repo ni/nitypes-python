@@ -36,7 +36,66 @@ _SCALED_DTYPES = (
 
 @final
 class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
-    """A complex waveform, which encapsulates complex data and timing information."""
+    """A complex waveform, which encapsulates complex data and timing information.
+    
+    Constructing
+    ^^^^^^^^^^^^
+
+    To construct a complex waveform, use the :any:`ComplexWaveform` class:
+
+    >>> ComplexWaveform()
+    nitypes.waveform.ComplexWaveform(0)
+    >>> ComplexWaveform(5)
+    nitypes.waveform.ComplexWaveform(5, raw_data=array([0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j, 0.+0.j]))
+
+    To construct a complex waveform from a NumPy array, use the :any:`ComplexWaveform.from_array_1d`
+    method.
+
+    >>> import numpy as np
+    >>> ComplexWaveform.from_array_1d(np.array([1+2j, 3+4j, 5+6j]))
+    nitypes.waveform.ComplexWaveform(3, raw_data=array([1.+2.j, 3.+4.j, 5.+6.j]))
+
+    You can also use :any:`ComplexWaveform.from_array_1d` to construct a complex waveform from a
+    sequence, such as a list. In this case, you must specify the NumPy data type.
+
+    >>> ComplexWaveform.from_array_1d([1+2j, 3+4j, 5+6j], np.complex128)
+    nitypes.waveform.ComplexWaveform(3, raw_data=array([1.+2.j, 3.+4.j, 5.+6.j]))
+
+    The 2D version, :any:`ComplexWaveform.from_array_2d`, returns multiple waveforms, one for each row of
+    data in the array or nested sequence.
+
+    >>> nested_list = [[1+2j, 3+4j, 5+6j], [7+8j, 9+10j, 11+12j]]
+    >>> ComplexWaveform.from_array_2d(nested_list, np.complex128)  # doctest: +NORMALIZE_WHITESPACE
+    [nitypes.waveform.ComplexWaveform(3, raw_data=array([1.+2.j, 3.+4.j, 5.+6.j])),
+    nitypes.waveform.ComplexWaveform(3, raw_data=array([ 7. +8.j,  9.+10.j, 11.+12.j]))]
+
+    Scaling complex-number data
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Complex waveforms support scaling raw integer data to floating-point. Python and NumPy do not have
+    native support for complex integers, so this uses the :any:`ComplexInt32DType` structured data type.
+
+    >>> from nitypes.complex import ComplexInt32DType
+    >>> scale_mode = LinearScaleMode(gain=2.0, offset=0.5)
+    >>> wfm = ComplexWaveform.from_array_1d([(1, 2), (3, 4)], ComplexInt32DType, scale_mode=scale_mode)
+    >>> wfm  # doctest: +NORMALIZE_WHITESPACE
+    nitypes.waveform.ComplexWaveform(2, void32, raw_data=array([(1, 2), (3, 4)],
+        dtype=[('real', '<i2'), ('imag', '<i2')]),
+        scale_mode=nitypes.waveform.LinearScaleMode(2.0, 0.5))
+    >>> wfm.raw_data
+    array([(1, 2), (3, 4)], dtype=[('real', '<i2'), ('imag', '<i2')])
+    >>> wfm.scaled_data
+    array([2.5+4.j, 6.5+8.j])
+
+    Timing information
+    ^^^^^^^^^^^^^^^^^^
+
+    Complex waveforms have the same timing information as analog waveforms. For more details, see
+    :any:`AnalogWaveform`.
+
+    Class members
+    ^^^^^^^^^^^^^
+    """
 
     @override
     @staticmethod
