@@ -54,7 +54,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
     Constructing
     ^^^^^^^^^^^^
 
-    To construct an analog waveform, use the :any:`AnalogWaveform` class:
+    To construct an analog waveform, use the :class:`AnalogWaveform` class:
 
     >>> AnalogWaveform()
     nitypes.waveform.AnalogWaveform(0)
@@ -88,7 +88,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
     Analog waveforms include timing information, such as the start time and sample interval, to support
     analyzing and visualizing the data.
 
-    You can specify timing information by constructing a :any:`Timing` object and passing it to the
+    You can specify timing information by constructing a :class:`Timing` object and passing it to the
     waveform constructor or factory method:
 
     >>> import datetime as dt
@@ -100,7 +100,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         timestamp=datetime.datetime(2024, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc),
         sample_interval=datetime.timedelta(microseconds=1000))
 
-    You can query the waveform's timing information using the :any:`Timing` object's properties:
+    You can query the waveform's timing information using the :class:`Timing` object's properties:
 
     >>> wfm.timing.start_time
     datetime.datetime(2024, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc)
@@ -125,7 +125,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         timestamp=datetime.datetime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
         sample_interval=datetime.timedelta(microseconds=1000))
 
-    Timing objects support time types from the :any:`datetime`, :any:`hightime`, and
+    Timing objects support time types from the :class:`DateTime`, :any:`hightime`, and
     :any:`nitypes.bintime` modules. If you need the timing information in a specific representation, use
     the conversion methods:
 

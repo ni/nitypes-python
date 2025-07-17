@@ -37,7 +37,7 @@ Waveforms
 Analog Waveforms
 ^^^^^^^^^^^^^^^^
 
-The :any:`AnalogWaveform` class represents a single analog signal with timing
+The :class:`AnalogWaveform` class represents a single analog signal with timing
 information and extended properties (such as channel name and units).
 Multi-channel analog data is represented using a collection of waveforms, such
 as ``list[AnalogWaveform]``.
@@ -45,21 +45,21 @@ as ``list[AnalogWaveform]``.
 Complex Waveforms
 ^^^^^^^^^^^^^^^^^
 
-The :any:`ComplexWaveform` class represents a complex-number signal, such as I/Q
+The :class:`ComplexWaveform` class represents a complex-number signal, such as I/Q
 data, with timing information and extended properties (such as channel name and
 units).
 
 Digital Waveforms
 ^^^^^^^^^^^^^^^^^
 
-The :any:`DigitalWaveform` class represents one or more digital signals with
+The :class:`DigitalWaveform` class represents one or more digital signals with
 timing information and extended properties (such as channel name and signal
 names).
 
 Frequency Spectrums
 ^^^^^^^^^^^^^^^^^^^
 
-The :any:`Spectrum` class represents a frequency spectrum with frequency range
+The :class:`Spectrum` class represents a frequency spectrum with frequency range
 information and extended properties (such as channel name and units).
 
 Complex Numbers
@@ -87,7 +87,7 @@ Time Conversion
 ^^^^^^^^^^^^^^^
 
 You can use the :any:`convert_datetime` and :any:`convert_timedelta` functions
-to convert time values between the standard :any:`datetime` library, the
+to convert time values between the standard :class:`DateTime` library, the
 high-precision :any:`hightime` library, and :any:`bintime`.
 
 Binary Time
@@ -104,6 +104,6 @@ Scalar Values
 Scalar
 ^^^^^^
 
-:any:`Scalar` is a data type that represents a single scalar value with units
+:class:`Scalar` is a data type that represents a single scalar value with units
 information. Valid types for the scalar value are :any:`bool`, :any:`int`,
 :any:`float`, and :any:`str`.

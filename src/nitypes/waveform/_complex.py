@@ -41,7 +41,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
     Constructing
     ^^^^^^^^^^^^
 
-    To construct a complex waveform, use the :any:`ComplexWaveform` class:
+    To construct a complex waveform, use the :class:`ComplexWaveform` class:
 
     >>> ComplexWaveform()
     nitypes.waveform.ComplexWaveform(0)
@@ -91,7 +91,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
     ^^^^^^^^^^^^^^^^^^
 
     Complex waveforms have the same timing information as analog waveforms. For more details, see
-    :any:`AnalogWaveform`.
+    :class:`AnalogWaveform`.
 
     Class members
     ^^^^^^^^^^^^^

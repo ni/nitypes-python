@@ -62,7 +62,7 @@ class Spectrum(Generic[_TData]):
     Constructing
     ^^^^^^^^^^^^
     
-    To construct a frequency spectrum, use the :any:`Spectrum` class:
+    To construct a frequency spectrum, use the :class:`Spectrum` class:
 
     >>> Spectrum()
     nitypes.waveform.Spectrum(0)

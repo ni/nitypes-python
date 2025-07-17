@@ -41,7 +41,7 @@ class DateTime:
     Constructing
     ^^^^^^^^^^^^
 
-    As with :any:`datetime.datetime`, you can construct a :any:`DateTime` by specifying the year,
+    As with :any:`datetime.datetime`, you can construct a :class:`DateTime` by specifying the year,
     month, day, etc.:
 
     >>> import datetime
@@ -49,10 +49,10 @@ class DateTime:
     nitypes.bintime.DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
 
     .. note::
-        :any:`DateTime` only supports :any:`datetime.timezone.utc`. It does not support time-zone-naive
+        :class:`DateTime` only supports :any:`datetime.timezone.utc`. It does not support time-zone-naive
         objects or time zones other than UTC.
 
-    You can also construct a :any:`DateTime` from a :any:`datetime.datetime` or
+    You can also construct a :class:`DateTime` from a :any:`datetime.datetime` or
     :any:`hightime.datetime`:
 
     >>> DateTime(datetime.datetime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc))
@@ -69,7 +69,7 @@ class DateTime:
     Properties
     ^^^^^^^^^^
 
-    Like other ``datetime`` objects, :any:`DateTime` has properties for the year, month, day, hour,
+    Like other ``datetime`` objects, :class:`DateTime` has properties for the year, month, day, hour,
     minute, second, and microsecond.
 
     >>> import datetime
@@ -94,12 +94,12 @@ class DateTime:
     Class                      Smallest Time Increment
     ========================   ================================
     :any:`datetime.datetime`   1 microsecond (1e-6 sec)
-    :any:`DateTime`            54210 yoctoseconds (5.4e-20 sec)
+    :class:`DateTime`            54210 yoctoseconds (5.4e-20 sec)
     :any:`hightime.datetime`   1 yoctosecond (1e-24 sec)
     ========================   ================================
 
     As a result, :any:`hightime.datetime` can represent the time down to the exact yoctosecond, but
-    :any:`DateTime` rounds the yoctosecond field.
+    :class:`DateTime` rounds the yoctosecond field.
 
     >>> import hightime
     >>> x = hightime.datetime(2025, 1, 1, yoctosecond=123456789, tzinfo=datetime.timezone.utc)
@@ -129,10 +129,10 @@ class DateTime:
     """
 
     min: ClassVar[DateTime]
-    """The earliest supported :any:`DateTime` object, midnight on Jan 1, 0001, UTC."""
+    """The earliest supported :class:`DateTime` object, midnight on Jan 1, 0001, UTC."""
 
     max: ClassVar[DateTime]
-    """The latest supported :any:`DateTime` object, before midnight on Dec 31, 9999, UTC."""
+    """The latest supported :class:`DateTime` object, before midnight on Dec 31, 9999, UTC."""
 
     __slots__ = ["_offset", "_hightime_cache"]
 

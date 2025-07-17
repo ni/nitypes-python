@@ -21,7 +21,7 @@ class Scalar(Generic[_ScalarType_co]):
     Constructing
     ^^^^^^^^^^^^
 
-    To construct a scalar data object, use the :any:`Scalar` class:
+    To construct a scalar data object, use the :class:`Scalar` class:
 
     >>> Scalar(False)
     nitypes.scalar.Scalar(value=False, units='')

@@ -60,8 +60,8 @@ _TOtherScaled = TypeVar("_TOtherScaled", bound=np.generic)
 class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
     """A numeric waveform, which encapsulates numeric data and timing information.
 
-    This is an abstract base class. To create a numeric waveform, use :any:`AnalogWaveform` or
-    :any:`ComplexWaveform`.
+    This is an abstract base class. To create a numeric waveform, use :class:`AnalogWaveform` or
+    :class:`ComplexWaveform`.
     """
 
     @staticmethod
@@ -376,8 +376,8 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         """The scaled waveform data.
 
         This property converts all of the waveform samples from the raw data type to the scaled
-        data type and scales them using :any:`scale_mode`. To scale a subset of the waveform or
-        scale to single-precision floating point, use the :any:`get_scaled_data` method
+        data type and scales them using :attr:`scale_mode`. To scale a subset of the waveform or
+        scale to single-precision floating point, use the :meth:`get_scaled_data` method
         instead.
         """
         return self.get_scaled_data()

@@ -3,13 +3,13 @@
 Waveform Data Types
 ===================
 
-* :any:`AnalogWaveform`: An analog waveform represents a single analog signal with timing
+* :class:`AnalogWaveform`: An analog waveform represents a single analog signal with timing
   information and extended properties such as units.
-* :any:`ComplexWaveform`: A complex waveform represents a single complex-number signal, such as
+* :class:`ComplexWaveform`: A complex waveform represents a single complex-number signal, such as
   I/Q data, with timing information and extended properties such as units.
-* :any:`DigitalWaveform`: A digital waveform represents one or more digital signals with timing
+* :class:`DigitalWaveform`: A digital waveform represents one or more digital signals with timing
   information and extended properties such as channel name and signal names.
-* :any:`Spectrum`: A frequency spectrum represents an analog signal with frequency information
+* :class:`Spectrum`: A frequency spectrum represents an analog signal with frequency information
   and extended properties such as units.
 """
 
@@ -36,8 +36,6 @@ from nitypes.waveform._scaling import (
 )
 from nitypes.waveform._spectrum import Spectrum
 from nitypes.waveform._timing import SampleIntervalMode, Timing
-from nitypes.waveform._warnings import ScalingMismatchWarning, TimingMismatchWarning
-from nitypes.waveform.errors import TimingMismatchError
 
 __all__ = [
     "AnalogWaveform",
@@ -56,13 +54,9 @@ __all__ = [
     "NumericWaveform",
     "SampleIntervalMode",
     "ScaleMode",
-    "ScalingMismatchWarning",
     "Spectrum",
     "Timing",
-    "TimingMismatchError",
-    "TimingMismatchWarning",
 ]
-__doctest_requires__ = {".": ["numpy>=2.0"]}
 
 
 # Hide that it was defined in a helper file
@@ -82,8 +76,6 @@ NoneScaleMode.__module__ = __name__
 NumericWaveform.__module__ = __name__
 SampleIntervalMode.__module__ = __name__
 ScaleMode.__module__ = __name__
-ScalingMismatchWarning.__module__ = __name__
 Spectrum.__module__ = __name__
 Timing.__module__ = __name__
-TimingMismatchError.__module__ = __name__
-TimingMismatchWarning.__module__ = __name__
+

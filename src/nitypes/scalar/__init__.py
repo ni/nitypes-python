@@ -3,7 +3,7 @@
 Scalar Data Types
 =================
 
-* :any:`Scalar`: A scalar data object represents a single scalar value with units information.
+* :class:`Scalar`: A scalar data object represents a single scalar value with units information.
   Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and :any:`str`.
 """
 

@@ -83,7 +83,7 @@ class DigitalWaveform(Generic[_TState]):
     Constructing
     ^^^^^^^^^^^^
     
-    To construct a digital waveform, use the :any:`DigitalWaveform` class:
+    To construct a digital waveform, use the :class:`DigitalWaveform` class:
 
     >>> DigitalWaveform()
     nitypes.waveform.DigitalWaveform(0, 1)
@@ -200,9 +200,9 @@ class DigitalWaveform(Generic[_TState]):
     Testing digital waveforms
     ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    You can use :any:`DigitalWaveform.test` to compare an acquired waveform against an expected
-    waveform. This returns a :any:`DigitalWaveformTestResult` object, which has a Boolean ``success``
-    property and a ``failures`` property containing a collection of :any:`DigitalWaveformFailure`
+    You can use :meth:`DigitalWaveform.test` to compare an acquired waveform against an expected
+    waveform. This returns a :class:`DigitalWaveformTestResult` object, which has a Boolean ``success``
+    property and a ``failures`` property containing a collection of :class:`DigitalWaveformFailure`
     objects, which indicate the location of each test failure.
 
     Here is an example. The expected waveform counts in binary using ``COMPARE_LOW`` (``L``) and
@@ -301,7 +301,7 @@ class DigitalWaveform(Generic[_TState]):
         Each element of the line data array represents a digital state, such as 1 for "on" or 0
         for "off". The line data should be in a 1D array indexed by sample or a 2D array indexed
         by (sample, signal). The line data may also use digital state values from the
-        :any:`DigitalState` enum.
+        :class:`DigitalState` enum.
 
         Args:
             array: The line data as a one or two-dimensional array or a sequence.
@@ -704,7 +704,7 @@ class DigitalWaveform(Generic[_TState]):
             sample_count: The number of samples in the waveform.
             signal_count: The number of signals in the waveform.
             dtype: The NumPy data type for the waveform data.
-            default_value: The :any:`DigitalState` to initialize the waveform with.
+            default_value: The :class:`DigitalState` to initialize the waveform with.
             data: A NumPy ndarray to use for sample storage. The waveform takes ownership
                 of this array. If not specified, an ndarray is created based on the specified dtype,
                 start index, sample count, and capacity.

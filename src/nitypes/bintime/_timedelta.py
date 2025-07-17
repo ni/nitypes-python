@@ -63,7 +63,7 @@ class TimeDelta:
     Constructing
     ^^^^^^^^^^^^
 
-    You can construct a :any:`TimeDelta` from a number of seconds, expressed as an :any:`int`,
+    You can construct a :class:`TimeDelta` from a number of seconds, expressed as an :any:`int`,
     :any:`float`, or :any:`decimal.Decimal`.
 
     >>> TimeDelta(100)
@@ -74,14 +74,14 @@ class TimeDelta:
     >>> TimeDelta(Decimal("100.125"))
     nitypes.bintime.TimeDelta(Decimal('100.125'))
 
-    :any:`TimeDelta` has the same resolution and rounding behavior as :any:`DateTime`.
+    :class:`TimeDelta` has the same resolution and rounding behavior as :class:`DateTime`.
 
     >>> TimeDelta(Decimal("100.01234567890123456789"))
     nitypes.bintime.TimeDelta(Decimal('100.012345678901234567889'))
 
-    Unlike other ``timedelta`` objects, you cannot construct a :any:`TimeDelta` from separate weeks,
+    Unlike other ``timedelta`` objects, you cannot construct a :class:`TimeDelta` from separate weeks,
     days, hours, etc. If you want to do that, construct a :any:`datetime.timedelta` or
-    :any:`hightime.timedelta` and then use it to construct a :any:`TimeDelta`.
+    :any:`hightime.timedelta` and then use it to construct a :class:`TimeDelta`.
 
     >>> import datetime, hightime
     >>> TimeDelta(datetime.timedelta(days=1, microseconds=1))
@@ -92,17 +92,17 @@ class TimeDelta:
     Math Operations
     ^^^^^^^^^^^^^^^
 
-    :any:`DateTime` and :any:`TimeDelta` support the same math operations as :any:`datetime.datetime`
+    :class:`DateTime` and :class:`TimeDelta` support the same math operations as :any:`datetime.datetime`
     and :any:`datetime.timedelta`.
 
-    For example, you can add or subtract :any:`TimeDelta` objects together:
+    For example, you can add or subtract :class:`TimeDelta` objects together:
 
     >>> TimeDelta(100.5) + TimeDelta(0.5)
     nitypes.bintime.TimeDelta(Decimal('101'))
     >>> TimeDelta(100.5) - TimeDelta(0.5)
     nitypes.bintime.TimeDelta(Decimal('100'))
 
-    Or add/subtract a :any:`DateTime` with a :any:`TimeDelta`, :any:`datetime.timedelta`, or
+    Or add/subtract a :class:`DateTime` with a :class:`TimeDelta`, :any:`datetime.timedelta`, or
     :any:`hightime.timedelta`:
 
     >>> DateTime(2025, 1, 1, tzinfo=datetime.timezone.utc) + TimeDelta(86400)
@@ -117,10 +117,10 @@ class TimeDelta:
     """
 
     min: ClassVar[TimeDelta]
-    """The most negative :any:`TimeDelta` object, approximately -292 million years."""
+    """The most negative :class:`TimeDelta` object, approximately -292 million years."""
 
     max: ClassVar[TimeDelta]
-    """The most positive :any:`TimeDelta` object, approximately 292 million years."""
+    """The most positive :class:`TimeDelta` object, approximately 292 million years."""
 
     __slots__ = ["_ticks"]
 

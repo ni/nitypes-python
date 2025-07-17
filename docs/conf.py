@@ -47,8 +47,11 @@ autoapi_options = list(autoapi.extension._DEFAULT_OPTIONS)
 autoapi_options.remove("private-members")  # note: remove this to include "_" members in docs
 autoapi_options.append("inherited-members")
 autoapi_dirs = [root_path / "src" / "nitypes"]
+autoapi_own_page_level = "class"
 autoapi_type = "python"
 autodoc_typehints = "description"
+# Uncomment for debugging
+# autoapi_keep_files = True
 
 # TODO: https://github.com/ni/nitypes-python/issues/47 - _numpy.py helper module generates autoapi
 # import warnings
