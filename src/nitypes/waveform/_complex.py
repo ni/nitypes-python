@@ -37,7 +37,7 @@ _SCALED_DTYPES = (
 @final
 class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
     """A complex waveform, which encapsulates complex data and timing information.
-    
+
     Constructing
     ^^^^^^^^^^^^
 
@@ -95,7 +95,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
 
     Class members
     ^^^^^^^^^^^^^
-    """
+    """  # noqa: W505 - doc line too long
 
     @override
     @staticmethod

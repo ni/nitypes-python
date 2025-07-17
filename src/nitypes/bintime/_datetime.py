@@ -9,7 +9,11 @@ from typing_extensions import Self, TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
 from nitypes.bintime._time_value_tuple import TimeValueTuple
-from nitypes.bintime._timedelta import _OTHER_TIMEDELTA_TUPLE, TimeDelta, _OtherTimeDelta
+from nitypes.bintime._timedelta import (
+    _OTHER_TIMEDELTA_TUPLE,
+    TimeDelta,
+    _OtherTimeDelta,
+)
 
 _DT_EPOCH_1904 = dt.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
 _HT_EPOCH_1904 = ht.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
@@ -126,7 +130,7 @@ class DateTime:
 
     Class members
     ^^^^^^^^^^^^^
-    """
+    """  # noqa: W505 - doc line too long
 
     min: ClassVar[DateTime]
     """The earliest supported :class:`DateTime` object, midnight on Jan 1, 0001, UTC."""

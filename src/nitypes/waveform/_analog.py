@@ -188,7 +188,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
 
     Class members
     ^^^^^^^^^^^^^
-    """
+    """  # noqa: W505 - doc line too long
 
     @override
     @staticmethod

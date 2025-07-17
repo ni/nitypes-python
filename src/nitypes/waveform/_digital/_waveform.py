@@ -82,7 +82,7 @@ class DigitalWaveform(Generic[_TState]):
 
     Constructing
     ^^^^^^^^^^^^
-    
+
     To construct a digital waveform, use the :class:`DigitalWaveform` class:
 
     >>> DigitalWaveform()
@@ -236,7 +236,7 @@ class DigitalWaveform(Generic[_TState]):
 
     Class members
     ^^^^^^^^^^^^^
-    """
+    """  # noqa: W505 - doc line too long
 
     @overload
     @classmethod

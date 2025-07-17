@@ -114,7 +114,7 @@ class TimeDelta:
 
     Class members
     ^^^^^^^^^^^^^
-    """
+    """  # noqa: W505 - doc line too long
 
     min: ClassVar[TimeDelta]
     """The most negative :class:`TimeDelta` object, approximately -292 million years."""

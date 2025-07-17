@@ -61,7 +61,7 @@ class Spectrum(Generic[_TData]):
 
     Constructing
     ^^^^^^^^^^^^
-    
+
     To construct a frequency spectrum, use the :class:`Spectrum` class:
 
     >>> Spectrum()

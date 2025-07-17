@@ -78,4 +78,3 @@ SampleIntervalMode.__module__ = __name__
 ScaleMode.__module__ = __name__
 Spectrum.__module__ = __name__
 Timing.__module__ = __name__
-
