@@ -151,15 +151,13 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
     False
     >>> a_type = np.dtype([('a', np.int32)])
     >>> b_type = np.dtype([('b', np.int32)])
-    >>> is_dtype(a_type, (np.float64, np.intc, a_type,))
+    >>> is_dtype(a_type, (np.float64, np.int32, a_type,))
     True
-    >>> is_dtype(b_type, (np.float64, np.intc, a_type,))
+    >>> is_dtype(b_type, (np.float64, np.int32, a_type,))
     False
-    >>> is_dtype("i2, i2", (np.float64, np.intc, a_type,))
+    >>> is_dtype("i2, i2", (np.float64, np.int32, a_type,))
     False
-    >>> is_dtype("i4", (np.float64, np.intc, a_type,))
-    False
-    >>> is_dtype("i4", (np.float64, np.intc, a_type, np.dtype("i4"),))
+    >>> is_dtype("i4", (np.float64, np.int32, a_type,))
     True
     """
     if not isinstance(dtype, (type, np.dtype)):
@@ -185,8 +183,8 @@ def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, 
     Supported data types: int8, int16, int32, int64
     >>> a_type = np.dtype([('a', np.int32)])
     >>> b_type = np.dtype([('b', np.int32)])
-    >>> validate_dtype(a_type, (np.float64, np.intc, a_type,))
-    >>> validate_dtype(b_type, (np.float64, np.intc, a_type,))
+    >>> validate_dtype(a_type, (np.float64, np.int32, a_type,))
+    >>> validate_dtype(b_type, (np.float64, np.int32, a_type,))
     Traceback (most recent call last):
     ...
     TypeError: The requested data type is not supported.
