@@ -5,13 +5,25 @@ from typing import Any, SupportsIndex, Union, overload
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import TypeVar, final, override
+from typing_extensions import TYPE_CHECKING, TypeVar, final, override
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType, convert_complex
-from nitypes.waveform._extended_properties import ExtendedPropertyValue
-from nitypes.waveform._numeric import NumericWaveform, _TOtherScaled
-from nitypes.waveform._scaling import ScaleMode
-from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
+from nitypes.waveform._numeric import _TOtherScaled
+from nitypes.waveform._timing import _AnyDateTime, _AnyTimeDelta
+
+if TYPE_CHECKING:
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.waveform import (
+        ExtendedPropertyValue,
+        NumericWaveform,
+        ScaleMode,
+        Timing,
+    )
+else:
+    from nitypes.waveform._extended_properties import ExtendedPropertyValue
+    from nitypes.waveform._numeric import NumericWaveform
+    from nitypes.waveform._scaling import ScaleMode
+    from nitypes.waveform._timing import Timing
 
 # _TRaw specifies the type of the raw_data array. ComplexWaveform accepts a narrower set of types
 # than NumericWaveform. Note that ComplexInt32Base is an alias for np.void, but other structured

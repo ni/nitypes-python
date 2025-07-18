@@ -1,8 +1,16 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy.typing as npt
 
-from nitypes.waveform._scaling._base import ScaleMode, _ScalarType
+from nitypes.waveform._scaling._base import _ScalarType
+
+if TYPE_CHECKING:
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.waveform import ScaleMode
+else:
+    from nitypes.waveform._scaling._base import ScaleMode
 
 
 class NoneScaleMode(ScaleMode):

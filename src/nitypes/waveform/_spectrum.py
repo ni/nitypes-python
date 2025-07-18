@@ -2,7 +2,16 @@ from __future__ import annotations
 
 import sys
 from collections.abc import Mapping, Sequence
-from typing import Any, Generic, SupportsFloat, SupportsIndex, Union, final, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generic,
+    SupportsFloat,
+    SupportsIndex,
+    Union,
+    final,
+    overload,
+)
 
 import numpy as np
 import numpy.typing as npt
@@ -18,16 +27,19 @@ from nitypes.waveform._exceptions import (
     create_start_index_or_sample_count_too_large_error,
     create_start_index_too_large_error,
 )
-from nitypes.waveform._extended_properties import (
-    CHANNEL_NAME,
-    UNIT_DESCRIPTION,
-    ExtendedPropertyDictionary,
-    ExtendedPropertyValue,
-)
+from nitypes.waveform._extended_properties import CHANNEL_NAME, UNIT_DESCRIPTION
 
 if sys.version_info < (3, 10):
     import array as std_array
 
+if TYPE_CHECKING:
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.waveform import ExtendedPropertyDictionary, ExtendedPropertyValue
+else:
+    from nitypes.waveform._extended_properties import (
+        ExtendedPropertyDictionary,
+        ExtendedPropertyValue,
+    )
 
 _TData = TypeVar("_TData", bound=Union[np.floating, np.integer])
 _TOtherData = TypeVar("_TOtherData", bound=Union[np.floating, np.integer])

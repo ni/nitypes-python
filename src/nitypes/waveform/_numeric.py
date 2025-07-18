@@ -5,7 +5,7 @@ import sys
 import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
-from typing import Any, Generic, SupportsIndex, overload
+from typing import TYPE_CHECKING, Any, Generic, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
@@ -23,18 +23,29 @@ from nitypes.waveform._exceptions import (
     create_start_index_or_sample_count_too_large_error,
     create_start_index_too_large_error,
 )
-from nitypes.waveform._extended_properties import (
-    CHANNEL_NAME,
-    UNIT_DESCRIPTION,
-    ExtendedPropertyDictionary,
-    ExtendedPropertyValue,
-)
-from nitypes.waveform._scaling import NO_SCALING, ScaleMode
-from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
+from nitypes.waveform._extended_properties import CHANNEL_NAME, UNIT_DESCRIPTION
+from nitypes.waveform._timing import _AnyDateTime, _AnyTimeDelta
 from nitypes.waveform._warnings import scale_mode_mismatch
 
 if sys.version_info < (3, 10):
     import array as std_array
+
+if TYPE_CHECKING:
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.waveform import (
+        NO_SCALING,
+        ExtendedPropertyDictionary,
+        ExtendedPropertyValue,
+        ScaleMode,
+        Timing,
+    )
+else:
+    from nitypes.waveform._extended_properties import (
+        ExtendedPropertyDictionary,
+        ExtendedPropertyValue,
+    )
+    from nitypes.waveform._scaling import NO_SCALING, ScaleMode
+    from nitypes.waveform._timing import Timing
 
 # _TRaw specifies the type of the raw_data array. It is not limited to supported types. Requesting
 # an unsupported type raises TypeError at run time. It is invariant because waveforms are mutable.

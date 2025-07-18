@@ -4,7 +4,7 @@ import datetime as dt
 import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Any, Generic, SupportsIndex, overload
+from typing import TYPE_CHECKING, Any, Generic, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
@@ -15,8 +15,6 @@ from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
 from nitypes.waveform._digital._port import bit_mask, get_port_dtype, port_to_line_data
-from nitypes.waveform._digital._signal_collection import DigitalWaveformSignalCollection
-from nitypes.waveform._digital._state import DigitalState
 from nitypes.waveform._digital._types import (
     _DIGITAL_PORT_DTYPES,
     _DIGITAL_STATE_DTYPES,
@@ -35,13 +33,31 @@ from nitypes.waveform._exceptions import (
 from nitypes.waveform._extended_properties import (
     CHANNEL_NAME,
     LINE_NAMES,
-    ExtendedPropertyDictionary,
-    ExtendedPropertyValue,
 )
-from nitypes.waveform._timing import Timing, _AnyDateTime, _AnyTimeDelta
+from nitypes.waveform._timing import _AnyDateTime, _AnyTimeDelta
 
 if sys.version_info < (3, 10):
     import array as std_array
+
+if TYPE_CHECKING:
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.waveform import (
+        DigitalState,
+        DigitalWaveformSignalCollection,
+        ExtendedPropertyDictionary,
+        ExtendedPropertyValue,
+        Timing,
+    )
+else:
+    from nitypes.waveform._digital._signal_collection import (
+        DigitalWaveformSignalCollection,
+    )
+    from nitypes.waveform._digital._state import DigitalState
+    from nitypes.waveform._extended_properties import (
+        ExtendedPropertyDictionary,
+        ExtendedPropertyValue,
+    )
+    from nitypes.waveform._timing import Timing
 
 
 @dataclass(frozen=True)

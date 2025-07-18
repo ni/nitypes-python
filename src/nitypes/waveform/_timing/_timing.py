@@ -3,7 +3,17 @@ from __future__ import annotations
 import datetime as dt
 import operator
 from collections.abc import Iterable, Sequence
-from typing import Any, ClassVar, Generic, SupportsIndex, TypeVar, Union, cast, final
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Generic,
+    SupportsIndex,
+    TypeVar,
+    Union,
+    cast,
+    final,
+)
 
 import hightime as ht
 from typing_extensions import Self
@@ -12,7 +22,6 @@ import nitypes.bintime as bt
 from nitypes._exceptions import add_note
 from nitypes.time import convert_datetime, convert_timedelta
 from nitypes.waveform._timing._sample_interval import (
-    SampleIntervalMode,
     SampleIntervalStrategy,
     create_sample_interval_strategy,
 )
@@ -24,6 +33,12 @@ from nitypes.waveform._timing._types import (
     _TTimestamp,
     _TTimestamp_co,
 )
+
+if TYPE_CHECKING:
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.waveform import SampleIntervalMode
+else:
+    from nitypes.waveform._timing._sample_interval import SampleIntervalMode
 
 _TOtherTimestamp = TypeVar("_TOtherTimestamp", bound=Union[bt.DateTime, dt.datetime, ht.datetime])
 _TOtherTimeOffset = TypeVar(
