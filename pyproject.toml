@@ -77,8 +77,9 @@ addopts = "--doctest-modules --doctest-plus --strict-markers"
 filterwarnings = [
   "error::DeprecationWarning",
   "error::PendingDeprecationWarning",
- ]
-testpaths = ["src/nitypes", "tests"]
+]
+# Exclude tests/benchmark by default.
+testpaths = ["src/nitypes", "tests/acceptance", "tests/unit"]
 
 [build-system]
 requires = ["poetry-core>=1.8"]
