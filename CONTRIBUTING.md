@@ -76,6 +76,9 @@ poetry run bandit -c pyproject.toml -r src/nitypes
 # Run the tests
 poetry run pytest -v
 
+# Run the benchmarks
+poetry run pytest -v tests/benchmark
+
 # Build and inspect the documentation
 poetry run sphinx-build docs docs/_build --builder html --fail-on-warning
 start docs\_build\index.html

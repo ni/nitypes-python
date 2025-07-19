@@ -48,6 +48,7 @@ pyright = { version = ">=1.1.400", extras = ["nodejs"] }
 
 [tool.poetry.group.test.dependencies]
 pytest = ">=7.2"
+pytest-benchmark = ">=5.1"
 pytest-cov = ">=4.0"
 pytest-doctestplus = ">=1.4"
 pytest-mock = ">=3.0"
@@ -76,8 +77,9 @@ addopts = "--doctest-modules --doctest-plus --strict-markers"
 filterwarnings = [
   "error::DeprecationWarning",
   "error::PendingDeprecationWarning",
- ]
-testpaths = ["src/nitypes", "tests"]
+]
+# Exclude tests/benchmark by default.
+testpaths = ["src/nitypes", "tests/acceptance", "tests/unit"]
 
 [build-system]
 requires = ["poetry-core>=1.8"]
@@ -87,6 +89,13 @@ build-backend = "poetry.core.masonry.api"
 files = "examples/,scripts/,src/,tests/"
 namespace_packages = true
 strict = true
+
+[[tool.mypy.overrides]]
+module = [
+  # https://github.com/ionelmc/pytest-benchmark/issues/212 - Add type annotations
+  "pytest_benchmark.*",
+]
+ignore_missing_imports = true
 
 [tool.bandit]
 skips = [
