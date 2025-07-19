@@ -6,14 +6,20 @@ import math
 import operator
 from decimal import Decimal
 from functools import singledispatchmethod
-from typing import Any, ClassVar, SupportsIndex, Union, final, overload
+from typing import TYPE_CHECKING, Any, ClassVar, SupportsIndex, Union, final, overload
 
 import hightime as ht
 from typing_extensions import Self, TypeAlias
 
 from nitypes._arguments import arg_to_int
 from nitypes._exceptions import int_out_of_range, invalid_arg_type
-from nitypes.bintime._time_value_tuple import TimeValueTuple
+
+if TYPE_CHECKING:
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.bintime import TimeValueTuple
+else:
+    from nitypes.bintime._time_value_tuple import TimeValueTuple
+
 
 _INT64_MAX = (1 << 63) - 1
 _INT64_MIN = -(1 << 63)

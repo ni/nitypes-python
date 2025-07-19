@@ -9,7 +9,11 @@ from nitypes._arguments import arg_to_uint
 from nitypes.waveform._digital._types import _TState
 
 if TYPE_CHECKING:
-    from nitypes.waveform._digital._waveform import DigitalWaveform  # circular import
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.waveform import DigitalWaveform
+else:
+    # DigitalWaveform is a circular import.
+    pass
 
 
 class DigitalWaveformSignal(Generic[_TState]):

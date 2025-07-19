@@ -2,18 +2,32 @@ from __future__ import annotations
 
 import datetime as dt
 from functools import singledispatchmethod
-from typing import Any, ClassVar, SupportsIndex, Union, cast, final, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    SupportsIndex,
+    Union,
+    cast,
+    final,
+    overload,
+)
 
 import hightime as ht
 from typing_extensions import Self, TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
-from nitypes.bintime._time_value_tuple import TimeValueTuple
 from nitypes.bintime._timedelta import (
     _OTHER_TIMEDELTA_TUPLE,
-    TimeDelta,
     _OtherTimeDelta,
 )
+
+if TYPE_CHECKING:
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.bintime import TimeDelta, TimeValueTuple
+else:
+    from nitypes.bintime._time_value_tuple import TimeValueTuple
+    from nitypes.bintime._timedelta import TimeDelta
 
 _DT_EPOCH_1904 = dt.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
 _HT_EPOCH_1904 = ht.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)

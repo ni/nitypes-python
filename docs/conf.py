@@ -49,7 +49,7 @@ autoapi_options.append("inherited-members")
 autoapi_dirs = [root_path / "src" / "nitypes"]
 autoapi_own_page_level = "class"
 autoapi_type = "python"
-autodoc_typehints = "description"
+autodoc_typehints = "both"
 # Uncomment for debugging
 # autoapi_keep_files = True
 
