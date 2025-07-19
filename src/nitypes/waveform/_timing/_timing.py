@@ -267,7 +267,7 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         return self._convert(bt.DateTime, bt.TimeDelta, bt.TimeDelta)
 
     def to_datetime(self) -> Timing[dt.datetime, dt.timedelta, dt.timedelta]:
-        """Convert the timing information to use :any:`datetime`."""
+        """Convert the timing information to use :class:`DateTime`."""
         return self._convert(dt.datetime, dt.timedelta, dt.timedelta)
 
     def to_hightime(self) -> Timing[ht.datetime, ht.timedelta, ht.timedelta]:

@@ -9,7 +9,11 @@ from typing_extensions import Self, TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
 from nitypes.bintime._time_value_tuple import TimeValueTuple
-from nitypes.bintime._timedelta import _OTHER_TIMEDELTA_TUPLE, TimeDelta, _OtherTimeDelta
+from nitypes.bintime._timedelta import (
+    _OTHER_TIMEDELTA_TUPLE,
+    TimeDelta,
+    _OtherTimeDelta,
+)
 
 _DT_EPOCH_1904 = dt.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
 _HT_EPOCH_1904 = ht.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
@@ -37,13 +41,102 @@ class DateTime:
 
     This class does not support the ``fold`` property for disambiguating repeated times for daylight
     saving time and time zone changes.
-    """
+
+    Constructing
+    ^^^^^^^^^^^^
+
+    As with :any:`datetime.datetime`, you can construct a :class:`DateTime` by specifying the year,
+    month, day, etc.:
+
+    >>> import datetime
+    >>> DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
+    nitypes.bintime.DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
+
+    .. note::
+        :class:`DateTime` only supports :any:`datetime.timezone.utc`. It does not support time-zone-naive
+        objects or time zones other than UTC.
+
+    You can also construct a :class:`DateTime` from a :any:`datetime.datetime` or
+    :any:`hightime.datetime`:
+
+    >>> DateTime(datetime.datetime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc))
+    nitypes.bintime.DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
+    >>> import hightime
+    >>> DateTime(hightime.datetime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc))
+    nitypes.bintime.DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
+
+    You can get the current time of day by calling :any:`DateTime.now`:
+
+    >>> DateTime.now(datetime.timezone.utc) # doctest: +ELLIPSIS
+    nitypes.bintime.DateTime(...)
+
+    Properties
+    ^^^^^^^^^^
+
+    Like other ``datetime`` objects, :class:`DateTime` has properties for the year, month, day, hour,
+    minute, second, and microsecond.
+
+    >>> import datetime
+    >>> x = DateTime(datetime.datetime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc))
+    >>> (x.year, x.month, x.day)
+    (2025, 5, 25)
+    >>> (x.hour, x.minute, x.second, x.microsecond)
+    (16, 45, 0, 0)
+
+    Like :any:`hightime.datetime`, it also supports the femtosecond and yoctosecond properties.
+
+    >>> (x.femtosecond, x.yoctosecond)
+    (0, 0)
+
+    Resolution
+    ^^^^^^^^^^
+
+    NI-BTF is a high-resolution time format, so it has significantly higher resolution than
+    :any:`datetime.datetime`. However, :any:`hightime.datetime` has even higher resolution:
+
+    ========================   ================================
+    Class                      Smallest Time Increment
+    ========================   ================================
+    :any:`datetime.datetime`   1 microsecond (1e-6 sec)
+    :class:`DateTime`            54210 yoctoseconds (5.4e-20 sec)
+    :any:`hightime.datetime`   1 yoctosecond (1e-24 sec)
+    ========================   ================================
+
+    As a result, :any:`hightime.datetime` can represent the time down to the exact yoctosecond, but
+    :class:`DateTime` rounds the yoctosecond field.
+
+    >>> import hightime
+    >>> x = hightime.datetime(2025, 1, 1, yoctosecond=123456789, tzinfo=datetime.timezone.utc)
+    >>> x
+    hightime.datetime(2025, 1, 1, 0, 0, 0, 0, 0, 123456789, tzinfo=datetime.timezone.utc)
+    >>> DateTime(x) # doctest: +NORMALIZE_WHITESPACE
+    nitypes.bintime.DateTime(2025, 1, 1, 0, 0, 0, 0, 0, 123436417, tzinfo=datetime.timezone.utc)
+
+    Rounding
+    ^^^^^^^^
+
+    NI-BTF represents fractional seconds as a binary fraction, which is a sum of inverse
+    powers of 2. Values that are not exactly representable as binary fractions will display
+    rounding error or "bruising" similar to a floating point number.
+
+    For example, it may round 100 microseconds down to 99.9999... microseconds.
+
+    >>> x = hightime.datetime(2025, 1, 1, microsecond=100, tzinfo=datetime.timezone.utc)
+    >>> x
+    hightime.datetime(2025, 1, 1, 0, 0, 0, 100, tzinfo=datetime.timezone.utc)
+    >>> DateTime(x) # doctest: +NORMALIZE_WHITESPACE
+    nitypes.bintime.DateTime(2025, 1, 1, 0, 0, 0, 99, 999999999, 999991239,
+        tzinfo=datetime.timezone.utc)
+
+    Class members
+    ^^^^^^^^^^^^^
+    """  # noqa: W505 - doc line too long
 
     min: ClassVar[DateTime]
-    """The earliest supported :any:`DateTime` object, midnight on Jan 1, 0001, UTC."""
+    """The earliest supported :class:`DateTime` object, midnight on Jan 1, 0001, UTC."""
 
     max: ClassVar[DateTime]
-    """The latest supported :any:`DateTime` object, before midnight on Dec 31, 9999, UTC."""
+    """The latest supported :class:`DateTime` object, before midnight on Dec 31, 9999, UTC."""
 
     __slots__ = ["_offset", "_hightime_cache"]
 

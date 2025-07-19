@@ -19,6 +19,7 @@ from typing_extensions import assert_type
 
 import nitypes.bintime as bt
 import nitypes.waveform.errors as wfmex
+import nitypes.waveform.warnings as wfmwarn
 from nitypes.waveform import (
     NO_SCALING,
     AnalogWaveform,
@@ -26,10 +27,7 @@ from nitypes.waveform import (
     NoneScaleMode,
     SampleIntervalMode,
     ScaleMode,
-    ScalingMismatchWarning,
     Timing,
-    TimingMismatchError,
-    TimingMismatchWarning,
 )
 
 
@@ -1164,7 +1162,7 @@ def test___irregular_waveform_and_int32_ndarray_without_timestamps___append___ra
     waveform.timing = Timing.create_with_irregular_interval(waveform_timestamps)
     array = np.array([3, 4, 5], np.int32)
 
-    with pytest.raises(TimingMismatchError) as exc:
+    with pytest.raises(wfmex.TimingMismatchError) as exc:
         waveform.append(array)
 
     assert exc.value.args[0].startswith(
@@ -1324,7 +1322,7 @@ def test___regular_waveform_and_regular_waveform_with_different_sample_interval_
     other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
     other.timing = Timing.create_with_regular_interval(dt.timedelta(milliseconds=2))
 
-    with pytest.warns(TimingMismatchWarning):
+    with pytest.warns(wfmwarn.TimingMismatchWarning):
         waveform.append(other)
 
     assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]
@@ -1356,7 +1354,7 @@ def test___regular_waveform_and_regular_waveform_with_different_scale_mode___app
     other = AnalogWaveform.from_array_1d([3, 4, 5], np.int32)
     other.scale_mode = LinearScaleMode(2.0, 0.0)
 
-    with pytest.warns(ScalingMismatchWarning):
+    with pytest.warns(wfmwarn.ScalingMismatchWarning):
         waveform.append(other)
 
     assert list(waveform.raw_data) == [0, 1, 2, 3, 4, 5]

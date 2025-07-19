@@ -59,13 +59,68 @@ class TimeDelta:
 
     TimeDelta instances are duck typing compatible with :any:`datetime.timedelta` and
     :any:`hightime.timedelta`.
-    """
+
+    Constructing
+    ^^^^^^^^^^^^
+
+    You can construct a :class:`TimeDelta` from a number of seconds, expressed as an :any:`int`,
+    :any:`float`, or :any:`decimal.Decimal`.
+
+    >>> TimeDelta(100)
+    nitypes.bintime.TimeDelta(Decimal('100'))
+    >>> TimeDelta(100.125)
+    nitypes.bintime.TimeDelta(Decimal('100.125'))
+    >>> from decimal import Decimal
+    >>> TimeDelta(Decimal("100.125"))
+    nitypes.bintime.TimeDelta(Decimal('100.125'))
+
+    :class:`TimeDelta` has the same resolution and rounding behavior as :class:`DateTime`.
+
+    >>> TimeDelta(Decimal("100.01234567890123456789"))
+    nitypes.bintime.TimeDelta(Decimal('100.012345678901234567889'))
+
+    Unlike other ``timedelta`` objects, you cannot construct a :class:`TimeDelta` from separate weeks,
+    days, hours, etc. If you want to do that, construct a :any:`datetime.timedelta` or
+    :any:`hightime.timedelta` and then use it to construct a :class:`TimeDelta`.
+
+    >>> import datetime, hightime
+    >>> TimeDelta(datetime.timedelta(days=1, microseconds=1))
+    nitypes.bintime.TimeDelta(Decimal('86400.0000010000000000000'))
+    >>> TimeDelta(hightime.timedelta(days=1, femtoseconds=1))
+    nitypes.bintime.TimeDelta(Decimal('86400.0000000000000010000'))
+
+    Math Operations
+    ^^^^^^^^^^^^^^^
+
+    :class:`DateTime` and :class:`TimeDelta` support the same math operations as :any:`datetime.datetime`
+    and :any:`datetime.timedelta`.
+
+    For example, you can add or subtract :class:`TimeDelta` objects together:
+
+    >>> TimeDelta(100.5) + TimeDelta(0.5)
+    nitypes.bintime.TimeDelta(Decimal('101'))
+    >>> TimeDelta(100.5) - TimeDelta(0.5)
+    nitypes.bintime.TimeDelta(Decimal('100'))
+
+    Or add/subtract a :class:`DateTime` with a :class:`TimeDelta`, :any:`datetime.timedelta`, or
+    :any:`hightime.timedelta`:
+
+    >>> DateTime(2025, 1, 1, tzinfo=datetime.timezone.utc) + TimeDelta(86400)
+    nitypes.bintime.DateTime(2025, 1, 2, 0, 0, tzinfo=datetime.timezone.utc)
+    >>> DateTime(2025, 1, 1, tzinfo=datetime.timezone.utc) + datetime.timedelta(days=1)
+    nitypes.bintime.DateTime(2025, 1, 2, 0, 0, tzinfo=datetime.timezone.utc)
+    >>> DateTime(2025, 1, 1, tzinfo=datetime.timezone.utc) + hightime.timedelta(femtoseconds=1)
+    nitypes.bintime.DateTime(2025, 1, 1, 0, 0, 0, 0, 1, 13873, tzinfo=datetime.timezone.utc)
+
+    Class members
+    ^^^^^^^^^^^^^
+    """  # noqa: W505 - doc line too long
 
     min: ClassVar[TimeDelta]
-    """The most negative :any:`TimeDelta` object, approximately -292 million years."""
+    """The most negative :class:`TimeDelta` object, approximately -292 million years."""
 
     max: ClassVar[TimeDelta]
-    """The most positive :any:`TimeDelta` object, approximately 292 million years."""
+    """The most positive :class:`TimeDelta` object, approximately 292 million years."""
 
     __slots__ = ["_ticks"]
 

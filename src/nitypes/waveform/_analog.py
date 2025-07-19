@@ -49,7 +49,146 @@ _SCALED_DTYPES = (
 
 @final
 class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
-    """An analog waveform, which encapsulates analog data and timing information."""
+    """An analog waveform, which encapsulates analog data and timing information.
+
+    Constructing
+    ^^^^^^^^^^^^
+
+    To construct an analog waveform, use the :class:`AnalogWaveform` class:
+
+    >>> AnalogWaveform()
+    nitypes.waveform.AnalogWaveform(0)
+    >>> AnalogWaveform(5)
+    nitypes.waveform.AnalogWaveform(5, raw_data=array([0., 0., 0., 0., 0.]))
+
+    To construct an analog waveform from a NumPy array, use the :any:`AnalogWaveform.from_array_1d`
+    method.
+
+    >>> import numpy as np
+    >>> AnalogWaveform.from_array_1d(np.array([1.0, 2.0, 3.0]))
+    nitypes.waveform.AnalogWaveform(3, raw_data=array([1., 2., 3.]))
+
+    You can also use :any:`AnalogWaveform.from_array_1d` to construct an analog waveform from a
+    sequence, such as a list. In this case, you must specify the NumPy data type.
+
+    >>> AnalogWaveform.from_array_1d([1.0, 2.0, 3.0], np.float64)
+    nitypes.waveform.AnalogWaveform(3, raw_data=array([1., 2., 3.]))
+
+    The 2D version, :any:`AnalogWaveform.from_array_2d`, returns multiple waveforms, one for each row of
+    data in the array or nested sequence.
+
+    >>> nested_list = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
+    >>> AnalogWaveform.from_array_2d(nested_list, np.float64)  # doctest: +NORMALIZE_WHITESPACE
+    [nitypes.waveform.AnalogWaveform(3, raw_data=array([1., 2., 3.])),
+    nitypes.waveform.AnalogWaveform(3, raw_data=array([4., 5., 6.]))]
+
+    Timing information
+    ^^^^^^^^^^^^^^^^^^
+
+    Analog waveforms include timing information, such as the start time and sample interval, to support
+    analyzing and visualizing the data.
+
+    You can specify timing information by constructing a :class:`Timing` object and passing it to the
+    waveform constructor or factory method:
+
+    >>> import datetime as dt
+    >>> wfm = AnalogWaveform(timing=Timing.create_with_regular_interval(
+    ...     dt.timedelta(seconds=1e-3), dt.datetime(2024, 12, 31, 23, 59, 59, tzinfo=dt.timezone.utc)
+    ... ))
+    >>> wfm.timing  # doctest: +NORMALIZE_WHITESPACE
+    nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
+        timestamp=datetime.datetime(2024, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc),
+        sample_interval=datetime.timedelta(microseconds=1000))
+
+    You can query the waveform's timing information using the :class:`Timing` object's properties:
+
+    >>> wfm.timing.start_time
+    datetime.datetime(2024, 12, 31, 23, 59, 59, tzinfo=datetime.timezone.utc)
+    >>> wfm.timing.sample_interval
+    datetime.timedelta(microseconds=1000)
+
+    Timing objects are immutable, so you cannot directly set their properties:
+
+    >>> wfm.timing.sample_interval = dt.timedelta(seconds=10e-3)  # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    AttributeError: ...
+
+    Instead, if you want to modify the timing information for an existing waveform, you can create a new
+    timing object and set the :any:`NumericWaveform.timing` property:
+
+    >>> wfm.timing = Timing.create_with_regular_interval(
+    ...     dt.timedelta(seconds=1e-3), dt.datetime(2025, 1, 1, tzinfo=dt.timezone.utc)
+    ... )
+    >>> wfm.timing  # doctest: +NORMALIZE_WHITESPACE
+    nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
+        timestamp=datetime.datetime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+        sample_interval=datetime.timedelta(microseconds=1000))
+
+    Timing objects support time types from the :class:`DateTime`, :any:`hightime`, and
+    :any:`nitypes.bintime` modules. If you need the timing information in a specific representation, use
+    the conversion methods:
+
+    >>> wfm.timing.to_datetime()  # doctest: +NORMALIZE_WHITESPACE
+    nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
+        timestamp=datetime.datetime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+        sample_interval=datetime.timedelta(microseconds=1000))
+    >>> wfm.timing.to_hightime()  # doctest: +NORMALIZE_WHITESPACE
+    nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
+        timestamp=hightime.datetime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+        sample_interval=hightime.timedelta(microseconds=1000))
+    >>> wfm.timing.to_bintime()  # doctest: +NORMALIZE_WHITESPACE
+    nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.REGULAR,
+        timestamp=nitypes.bintime.DateTime(2025, 1, 1, 0, 0, tzinfo=datetime.timezone.utc),
+        sample_interval=nitypes.bintime.TimeDelta(Decimal('0.000999999999999999966606573')))
+
+    If :any:`NumericWaveform.timing` is not specified for a given waveform, it defaults to the
+    :any:`Timing.empty` singleton object.
+
+    >>> AnalogWaveform().timing
+    nitypes.waveform.Timing(nitypes.waveform.SampleIntervalMode.NONE)
+    >>> AnalogWaveform().timing is Timing.empty
+    True
+
+    Accessing unspecified properties of the timing object raises an exception:
+
+    >>> Timing.empty.sample_interval
+    Traceback (most recent call last):
+    ...
+    RuntimeError: The waveform timing does not have a sample interval.
+
+    You can use :any:`Timing.sample_interval_mode` and ``has_*`` properties such as
+    :any:`Timing.has_timestamp` to query which properties of the timing object were specified:
+
+    >>> wfm.timing.sample_interval_mode
+    <SampleIntervalMode.REGULAR: 1>
+    >>> (wfm.timing.has_timestamp, wfm.timing.has_sample_interval)
+    (True, True)
+    >>> Timing.empty.sample_interval_mode
+    <SampleIntervalMode.NONE: 0>
+    >>> (Timing.empty.has_timestamp, Timing.empty.has_sample_interval)
+    (False, False)
+
+    Scaling analog data
+    ^^^^^^^^^^^^^^^^^^^
+
+    By default, analog waveforms contain floating point data in :any:`numpy.float64` format, but they
+    can also be used to scale raw integer data to floating-point:
+
+    >>> import numpy as np
+    >>> scale_mode = LinearScaleMode(gain=2.0, offset=0.5)
+    >>> wfm = AnalogWaveform.from_array_1d([1, 2, 3], np.int32, scale_mode=scale_mode)
+    >>> wfm  # doctest: +NORMALIZE_WHITESPACE
+    nitypes.waveform.AnalogWaveform(3, int32, raw_data=array([1, 2, 3], dtype=int32),
+        scale_mode=nitypes.waveform.LinearScaleMode(2.0, 0.5))
+    >>> wfm.raw_data
+    array([1, 2, 3], dtype=int32)
+    >>> wfm.scaled_data
+    array([2.5, 4.5, 6.5])
+
+    Class members
+    ^^^^^^^^^^^^^
+    """  # noqa: W505 - doc line too long
 
     @override
     @staticmethod

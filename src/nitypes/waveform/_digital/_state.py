@@ -22,21 +22,21 @@ _STATE_TEST_TABLE = [
 class DigitalState(IntEnum):
     """An IntEnum of the different digital states that a digital signal can represent.
 
-    You can use :any:`DigitalState` in place of an :any:`int`:
+    You can use :class:`DigitalState` in place of an :any:`int`:
 
     >>> DigitalState.FORCE_OFF
     <DigitalState.FORCE_OFF: 2>
     >>> DigitalState.FORCE_OFF == 2
     True
 
-    Use :any:`from_char` and :any:`to_char` to convert between states and characters:
+    Use :meth:`from_char` and :meth:`to_char` to convert between states and characters:
 
     >>> DigitalState.from_char("Z")
     <DigitalState.FORCE_OFF: 2>
     >>> DigitalState.to_char(2)
     'Z'
 
-    Use :any:`test` to compare actual vs. expected states, returning True on failure.
+    Use :meth:`test` to compare actual vs. expected states, returning True on failure.
 
     >>> DigitalState.test(DigitalState.FORCE_DOWN, DigitalState.COMPARE_LOW)
     False

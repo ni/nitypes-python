@@ -57,7 +57,42 @@ _DATA_DTYPES = (
 
 @final
 class Spectrum(Generic[_TData]):
-    """A frequency spectrum, which encapsulates analog data and frequency information."""
+    """A frequency spectrum, which encapsulates analog data and frequency information.
+
+    Constructing
+    ^^^^^^^^^^^^
+
+    To construct a frequency spectrum, use the :class:`Spectrum` class:
+
+    >>> Spectrum()
+    nitypes.waveform.Spectrum(0)
+    >>> Spectrum(5)
+    nitypes.waveform.Spectrum(5, data=array([0., 0., 0., 0., 0.]))
+
+    To construct a frequency spectrum from a NumPy array, use the :any:`Spectrum.from_array_1d`
+    method.
+
+    >>> import numpy as np
+    >>> Spectrum.from_array_1d(np.array([1.0, 2.0, 3.0]))
+    nitypes.waveform.Spectrum(3, data=array([1., 2., 3.]))
+
+    You can also use :any:`Spectrum.from_array_1d` to construct a frequency spectrum from a
+    sequence, such as a list. In this case, you must specify the NumPy data type.
+
+    >>> Spectrum.from_array_1d([1.0, 2.0, 3.0], np.float64)
+    nitypes.waveform.Spectrum(3, data=array([1., 2., 3.]))
+
+    The 2D version, :any:`Spectrum.from_array_2d`, returns multiple waveforms, one for each row of
+    data in the array or nested sequence.
+
+    >>> nested_list = [[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]]
+    >>> Spectrum.from_array_2d(nested_list, np.float64)  # doctest: +NORMALIZE_WHITESPACE
+    [nitypes.waveform.Spectrum(3, data=array([1., 2., 3.])),
+    nitypes.waveform.Spectrum(3, data=array([4., 5., 6.]))]
+
+    Class members
+    ^^^^^^^^^^^^^
+    """
 
     @overload
     @classmethod

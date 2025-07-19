@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Generic, Union
 
-from typing_extensions import final, TypeVar
+from typing_extensions import TypeVar, final
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
 from nitypes.waveform._extended_properties import (
@@ -16,7 +16,25 @@ _NUMERIC = (bool, int, float)
 
 @final
 class Scalar(Generic[_ScalarType_co]):
-    """A scalar data class, which encapsulates scalar data and units information."""
+    """A scalar data class, which encapsulates scalar data and units information.
+
+    Constructing
+    ^^^^^^^^^^^^
+
+    To construct a scalar data object, use the :class:`Scalar` class:
+
+    >>> Scalar(False)
+    nitypes.scalar.Scalar(value=False, units='')
+    >>> Scalar(0)
+    nitypes.scalar.Scalar(value=0, units='')
+    >>> Scalar(5.0, 'volts')
+    nitypes.scalar.Scalar(value=5.0, units='volts')
+    >>> Scalar("value", "volts")
+    nitypes.scalar.Scalar(value='value', units='volts')
+
+    Class members
+    ^^^^^^^^^^^^^
+    """
 
     __slots__ = [
         "_value",
