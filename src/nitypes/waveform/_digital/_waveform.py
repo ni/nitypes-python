@@ -14,6 +14,7 @@ from typing_extensions import Self
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
+from nitypes.time import AnyDateTime, AnyTimeDelta
 from nitypes.waveform._digital._port import bit_mask, get_port_dtype, port_to_line_data
 from nitypes.waveform._digital._types import (
     _DIGITAL_PORT_DTYPES,
@@ -30,11 +31,7 @@ from nitypes.waveform._exceptions import (
     create_start_index_or_sample_count_too_large_error,
     create_start_index_too_large_error,
 )
-from nitypes.waveform._extended_properties import (
-    CHANNEL_NAME,
-    LINE_NAMES,
-)
-from nitypes.waveform._timing import _AnyDateTime, _AnyTimeDelta
+from nitypes.waveform._extended_properties import CHANNEL_NAME, LINE_NAMES
 
 if sys.version_info < (3, 10):
     import array as std_array
@@ -266,7 +263,7 @@ class DigitalWaveform(Generic[_TState]):
         sample_count: SupportsIndex | None = ...,
         signal_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[_TOtherState]: ...
 
     @overload
@@ -281,7 +278,7 @@ class DigitalWaveform(Generic[_TState]):
         sample_count: SupportsIndex | None = ...,
         signal_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[_TOtherState]: ...
 
     @overload
@@ -296,7 +293,7 @@ class DigitalWaveform(Generic[_TState]):
         sample_count: SupportsIndex | None = ...,
         signal_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[Any]: ...
 
     @classmethod
@@ -310,7 +307,7 @@ class DigitalWaveform(Generic[_TState]):
         sample_count: SupportsIndex | None = None,
         signal_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = None,
     ) -> DigitalWaveform[Any]:
         """Construct a waveform from a one or two-dimensional array or sequence of line data.
 
@@ -367,7 +364,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[np.uint8]: ...
 
     @overload
@@ -383,7 +380,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[_TOtherState]: ...
 
     @overload
@@ -397,7 +394,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> DigitalWaveform[Any]: ...
 
     @classmethod
@@ -410,7 +407,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = None,
     ) -> DigitalWaveform[Any]:
         """Construct a waveform from a one-dimensional array or sequence of port data.
 
@@ -490,7 +487,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> Sequence[DigitalWaveform[np.uint8]]: ...
 
     @overload
@@ -506,7 +503,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> Sequence[DigitalWaveform[_TOtherState]]: ...
 
     @overload
@@ -520,7 +517,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> Sequence[DigitalWaveform[Any]]: ...
 
     @classmethod
@@ -533,7 +530,7 @@ class DigitalWaveform(Generic[_TState]):
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = None,
     ) -> Sequence[DigitalWaveform[Any]]:
         """Construct a waveform from a two-dimensional array or sequence of port data.
 
@@ -631,7 +628,7 @@ class DigitalWaveform(Generic[_TState]):
     _start_index: int
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
-    _timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]
+    _timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]
     _signals: DigitalWaveformSignalCollection[_TState] | None
     _signal_names: list[str] | None
 
@@ -649,7 +646,7 @@ class DigitalWaveform(Generic[_TState]):
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> None: ...
 
     @overload
@@ -665,7 +662,7 @@ class DigitalWaveform(Generic[_TState]):
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> None: ...
 
     @overload
@@ -681,7 +678,7 @@ class DigitalWaveform(Generic[_TState]):
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> None: ...
 
     @overload
@@ -697,7 +694,7 @@ class DigitalWaveform(Generic[_TState]):
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
     ) -> None: ...
 
     def __init__(
@@ -712,7 +709,7 @@ class DigitalWaveform(Generic[_TState]):
         capacity: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         copy_extended_properties: bool = True,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = None,
     ) -> None:
         """Initialize a new digital waveform.
 
@@ -987,18 +984,18 @@ class DigitalWaveform(Generic[_TState]):
         signal_names[signal_index] = value
         self._extended_properties[LINE_NAMES] = ", ".join(signal_names)
 
-    def _set_timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
+    def _set_timing(self, value: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]) -> None:
         if self._timing is not value:
             self._timing = value
 
-    def _validate_timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
+    def _validate_timing(self, value: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]) -> None:
         if value._timestamps is not None and len(value._timestamps) != self._sample_count:
             raise create_irregular_timestamp_count_mismatch_error(
                 len(value._timestamps), "number of samples in the waveform", self._sample_count
             )
 
     @property
-    def timing(self) -> Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]:
+    def timing(self) -> Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]:
         """The timing information of the waveform.
 
         The default value is Timing.empty.
@@ -1006,7 +1003,7 @@ class DigitalWaveform(Generic[_TState]):
         return self._timing
 
     @timing.setter
-    def timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
+    def timing(self, value: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]) -> None:
         if not isinstance(value, Timing):
             raise invalid_arg_type("timing information", "Timing object", value)
         self._validate_timing(value)

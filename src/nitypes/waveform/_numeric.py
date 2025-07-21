@@ -15,6 +15,7 @@ from typing_extensions import Self, TypeVar
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
+from nitypes.time import AnyDateTime, AnyTimeDelta
 from nitypes.waveform._exceptions import (
     create_capacity_mismatch_error,
     create_capacity_too_small_error,
@@ -24,7 +25,6 @@ from nitypes.waveform._exceptions import (
     create_start_index_too_large_error,
 )
 from nitypes.waveform._extended_properties import CHANNEL_NAME, UNIT_DESCRIPTION
-from nitypes.waveform._timing import _AnyDateTime, _AnyTimeDelta
 from nitypes.waveform._warnings import scale_mode_mismatch
 
 if sys.version_info < (3, 10):
@@ -105,7 +105,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> Self:
         """Construct a waveform from a one-dimensional array or sequence.
@@ -156,7 +156,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> Sequence[Self]:
         """Construct multiple waveforms from a two-dimensional array or nested sequence.
@@ -218,7 +218,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
     _start_index: int
     _sample_count: int
     _extended_properties: ExtendedPropertyDictionary
-    _timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]
+    _timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]
     _scale_mode: ScaleMode
 
     def __init__(
@@ -231,7 +231,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         capacity: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         copy_extended_properties: bool = True,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> None:
         """Initialize a new numeric waveform.
@@ -521,18 +521,18 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             raise invalid_arg_type("unit description", "str", value)
         self._extended_properties[UNIT_DESCRIPTION] = value
 
-    def _set_timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
+    def _set_timing(self, value: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]) -> None:
         if self._timing is not value:
             self._timing = value
 
-    def _validate_timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
+    def _validate_timing(self, value: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]) -> None:
         if value._timestamps is not None and len(value._timestamps) != self._sample_count:
             raise create_irregular_timestamp_count_mismatch_error(
                 len(value._timestamps), "number of samples in the waveform", self._sample_count
             )
 
     @property
-    def timing(self) -> Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]:
+    def timing(self) -> Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]:
         """The timing information of the waveform.
 
         The default value is Timing.empty.
@@ -540,7 +540,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         return self._timing
 
     @timing.setter
-    def timing(self, value: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta]) -> None:
+    def timing(self, value: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]) -> None:
         if not isinstance(value, Timing):
             raise invalid_arg_type("timing information", "Timing object", value)
         self._validate_timing(value)

@@ -5,15 +5,20 @@ from typing import Any, SupportsIndex, Union, overload
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import TypeVar, final, override, TYPE_CHECKING
+from typing_extensions import TYPE_CHECKING, TypeVar, final, override
 
 from nitypes._numpy import long as _np_long, ulong as _np_ulong
+from nitypes.time import AnyDateTime, AnyTimeDelta
 from nitypes.waveform._numeric import _TOtherScaled
-from nitypes.waveform._timing import _AnyDateTime, _AnyTimeDelta
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
-    from nitypes.waveform import ExtendedPropertyValue, NumericWaveform, ScaleMode, Timing
+    from nitypes.waveform import (
+        ExtendedPropertyValue,
+        NumericWaveform,
+        ScaleMode,
+        Timing,
+    )
 else:
     from nitypes.waveform._extended_properties import ExtendedPropertyValue
     from nitypes.waveform._numeric import NumericWaveform
@@ -231,7 +236,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> AnalogWaveform[_TOtherRaw]: ...
 
@@ -246,7 +251,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> AnalogWaveform[_TOtherRaw]: ...
 
@@ -261,7 +266,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> AnalogWaveform[Any]: ...
 
@@ -276,7 +281,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> AnalogWaveform[Any]:
         """Construct an analog waveform from a one-dimensional array or sequence.
@@ -317,7 +322,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> Sequence[AnalogWaveform[_TOtherRaw]]: ...
 
@@ -332,7 +337,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> Sequence[AnalogWaveform[_TOtherRaw]]: ...
 
@@ -347,7 +352,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> Sequence[AnalogWaveform[Any]]: ...
 
@@ -362,7 +367,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> Sequence[AnalogWaveform[Any]]:
         """Construct multiple analog waveforms from a two-dimensional array or nested sequence.
@@ -410,7 +415,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
 
@@ -425,7 +430,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
 
@@ -440,7 +445,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
 
@@ -455,7 +460,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         capacity: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
         copy_extended_properties: bool = ...,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = ...,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = ...,
         scale_mode: ScaleMode | None = ...,
     ) -> None: ...
 
@@ -469,7 +474,7 @@ class AnalogWaveform(NumericWaveform[_TRaw, np.float64]):
         capacity: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
         copy_extended_properties: bool = True,
-        timing: Timing[_AnyDateTime, _AnyTimeDelta, _AnyTimeDelta] | None = None,
+        timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta] | None = None,
         scale_mode: ScaleMode | None = None,
     ) -> None:
         """Initialize a new analog waveform.

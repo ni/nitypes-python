@@ -6,15 +6,15 @@ from typing import TYPE_CHECKING, final
 
 from nitypes._arguments import validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type
+from nitypes.time._types import ANY_DATETIME_TUPLE
 from nitypes.waveform._exceptions import create_sample_interval_mode_mismatch_error
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
 from nitypes.waveform._timing._types import (
-    _ANY_DATETIME_TUPLE,
-    _TSampleInterval_co,
-    _TTimeOffset_co,
-    _TTimestamp,
-    _TTimestamp_co,
+    TSampleInterval_co,
+    TTimeOffset_co,
+    TTimestamp,
+    TTimestamp_co,
 )
 from nitypes.waveform.errors import TimingMismatchError
 
@@ -28,7 +28,7 @@ class _Direction(Enum):
     DECREASING = 1
 
 
-def _are_timestamps_monotonic(timestamps: Sequence[_TTimestamp_co]) -> bool:
+def _are_timestamps_monotonic(timestamps: Sequence[TTimestamp_co]) -> bool:
     direction = _Direction.UNKNOWN
     for i in range(1, len(timestamps)):
         comparison = _get_direction(timestamps[i - 1], timestamps[i])
@@ -42,7 +42,7 @@ def _are_timestamps_monotonic(timestamps: Sequence[_TTimestamp_co]) -> bool:
     return True
 
 
-def _get_direction(left: _TTimestamp, right: _TTimestamp) -> _Direction:
+def _get_direction(left: TTimestamp, right: TTimestamp) -> _Direction:
     # Work around https://github.com/python/mypy/issues/18203
     if left < right:  # type: ignore[operator]
         return _Direction.INCREASING
@@ -53,24 +53,24 @@ def _get_direction(left: _TTimestamp, right: _TTimestamp) -> _Direction:
 
 @final
 class IrregularSampleIntervalStrategy(
-    SampleIntervalStrategy[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]
+    SampleIntervalStrategy[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]
 ):
     """Implements SampleIntervalMode.IRREGULAR specific behavior."""
 
     def validate_init_args(  # noqa: D102 - Missing docstring in public method - override
         self,
-        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
+        timing: Timing[TTimestamp_co, TTimeOffset_co, TSampleInterval_co],
         sample_interval_mode: SampleIntervalMode,
-        timestamp: _TTimestamp_co | None,
-        time_offset: _TTimeOffset_co | None,
-        sample_interval: _TSampleInterval_co | None,
-        timestamps: Sequence[_TTimestamp_co] | None,
+        timestamp: TTimestamp_co | None,
+        time_offset: TTimeOffset_co | None,
+        sample_interval: TSampleInterval_co | None,
+        timestamps: Sequence[TTimestamp_co] | None,
     ) -> None:
         validate_unsupported_arg("timestamp", timestamp)
         validate_unsupported_arg("time offset", time_offset)
         validate_unsupported_arg("sample interval", sample_interval)
         if not isinstance(timestamps, Sequence) or not all(
-            isinstance(ts, _ANY_DATETIME_TUPLE) for ts in timestamps
+            isinstance(ts, ANY_DATETIME_TUPLE) for ts in timestamps
         ):
             raise invalid_arg_type("timestamps", "sequence of datetime objects", timestamps)
         if not _are_timestamps_monotonic(timestamps):
@@ -78,10 +78,10 @@ class IrregularSampleIntervalStrategy(
 
     def get_timestamps(  # noqa: D102 - Missing docstring in public method - override
         self,
-        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
+        timing: Timing[TTimestamp_co, TTimeOffset_co, TSampleInterval_co],
         start_index: int,
         count: int,
-    ) -> Iterable[_TTimestamp_co]:
+    ) -> Iterable[TTimestamp_co]:
         assert timing._timestamps is not None
         if count > len(timing._timestamps):
             raise ValueError("The count must be less than or equal to the number of timestamps.")
@@ -89,9 +89,9 @@ class IrregularSampleIntervalStrategy(
 
     def append_timestamps(  # noqa: D102 - Missing docstring in public method - override
         self,
-        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
-        timestamps: Sequence[_TTimestamp_co] | None,
-    ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
+        timing: Timing[TTimestamp_co, TTimeOffset_co, TSampleInterval_co],
+        timestamps: Sequence[TTimestamp_co] | None,
+    ) -> Timing[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]:
         assert timing._timestamps is not None
 
         if timestamps is None:
@@ -99,7 +99,7 @@ class IrregularSampleIntervalStrategy(
                 "The timestamps argument is required when appending to a waveform with irregular timing."
             )
 
-        datetime_type = type(timing._timestamps[0]) if timing._timestamps else _ANY_DATETIME_TUPLE
+        datetime_type = type(timing._timestamps[0]) if timing._timestamps else ANY_DATETIME_TUPLE
         if not all(isinstance(ts, datetime_type) for ts in timestamps):
             raise TypeError(
                 "The timestamp data type must match the timing information of the current waveform."
@@ -115,9 +115,9 @@ class IrregularSampleIntervalStrategy(
 
     def append_timing(  # noqa: D102 - Missing docstring in public method - override
         self,
-        timing: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
-        other: Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co],
-    ) -> Timing[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]:
+        timing: Timing[TTimestamp_co, TTimeOffset_co, TSampleInterval_co],
+        other: Timing[TTimestamp_co, TTimeOffset_co, TSampleInterval_co],
+    ) -> Timing[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]:
         if other._sample_interval_mode != SampleIntervalMode.IRREGULAR:
             raise create_sample_interval_mode_mismatch_error()
 

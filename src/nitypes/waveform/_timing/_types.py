@@ -1,62 +1,57 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import Union
 
-import hightime as ht
-from typing_extensions import TypeAlias, TypeVar
+from typing_extensions import TypeVar
 
-import nitypes.bintime as bt
+from nitypes.time import AnyDateTime, AnyTimeDelta
 
-__all__ = [
-    "_AnyDateTime",
-    "_AnyTimeDelta",
-    "_ANY_DATETIME_TUPLE",
-    "_ANY_TIMEDELTA_TUPLE",
-    "_TTimestamp",
-    "_TTimestamp_co",
-    "_TTimeOffset",
-    "_TTimeOffset_co",
-    "_TSampleInterval",
-    "_TSampleInterval_co",
-]
+TTimestamp = TypeVar("TTimestamp", bound=AnyDateTime, default=dt.datetime)
+"""Type variable for a timestamp."""
 
-_AnyDateTime: TypeAlias = Union[bt.DateTime, dt.datetime, ht.datetime]
-_AnyTimeDelta: TypeAlias = Union[bt.TimeDelta, dt.timedelta, ht.timedelta]
-
-_ANY_DATETIME_TUPLE = (bt.DateTime, dt.datetime, ht.datetime)
-_ANY_TIMEDELTA_TUPLE = (bt.TimeDelta, dt.timedelta, ht.timedelta)
-
-_TTimestamp = TypeVar(
-    "_TTimestamp", bound=Union[bt.DateTime, dt.datetime, ht.datetime], default=dt.datetime
-)
-_TTimestamp_co = TypeVar(
-    "_TTimestamp_co",
-    bound=Union[bt.DateTime, dt.datetime, ht.datetime],
+TTimestamp_co = TypeVar(
+    "TTimestamp_co",
+    bound=AnyDateTime,
     covariant=True,
     default=dt.datetime,
 )
+"""Covariant type variable for a timestamp."""
 
-_TTimeOffset = TypeVar(
-    "_TTimeOffset",
-    bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta],
+TTimeOffset = TypeVar(
+    "TTimeOffset",
+    bound=AnyTimeDelta,
     default=dt.timedelta,
 )
-_TTimeOffset_co = TypeVar(
-    "_TTimeOffset_co",
-    bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta],
+"""Type variable for a time offset."""
+
+TTimeOffset_co = TypeVar(
+    "TTimeOffset_co",
+    bound=AnyTimeDelta,
     covariant=True,
     default=dt.timedelta,
 )
+"""Covariant type variable for a time offset."""
 
-_TSampleInterval = TypeVar(
-    "_TSampleInterval",
-    bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta],
+TSampleInterval = TypeVar(
+    "TSampleInterval",
+    bound=AnyTimeDelta,
     default=dt.timedelta,
 )
-_TSampleInterval_co = TypeVar(
-    "_TSampleInterval_co",
-    bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta],
+"""Type variable for a sample interval."""
+
+TSampleInterval_co = TypeVar(
+    "TSampleInterval_co",
+    bound=AnyTimeDelta,
     covariant=True,
     default=dt.timedelta,
 )
+"""Covariant type variable for a sample interval."""
+
+TOtherTimestamp = TypeVar("TOtherTimestamp", bound=AnyDateTime)
+"""Type variable for a timestamp."""
+
+TOtherTimeOffset = TypeVar("TOtherTimeOffset", bound=AnyTimeDelta)
+"""Type variable for a time offset."""
+
+TOtherSampleInterval = TypeVar("TOtherSampleInterval", bound=AnyTimeDelta)
+"""Type variable for a sample interval."""

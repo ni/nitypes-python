@@ -35,7 +35,19 @@ from nitypes.waveform._scaling import (
     ScaleMode,
 )
 from nitypes.waveform._spectrum import Spectrum
-from nitypes.waveform._timing import SampleIntervalMode, Timing
+from nitypes.waveform._timing import (
+    SampleIntervalMode,
+    Timing,
+    TOtherSampleInterval,
+    TOtherTimeOffset,
+    TOtherTimestamp,
+    TSampleInterval,
+    TSampleInterval_co,
+    TTimeOffset,
+    TTimeOffset_co,
+    TTimestamp,
+    TTimestamp_co,
+)
 
 __all__ = [
     "AnalogWaveform",
@@ -56,6 +68,15 @@ __all__ = [
     "ScaleMode",
     "Spectrum",
     "Timing",
+    "TSampleInterval",
+    "TSampleInterval_co",
+    "TOtherSampleInterval",
+    "TOtherTimeOffset",
+    "TOtherTimestamp",
+    "TTimeOffset",
+    "TTimeOffset_co",
+    "TTimestamp",
+    "TTimestamp_co",
 ]
 
 
