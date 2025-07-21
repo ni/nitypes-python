@@ -13,12 +13,8 @@ from nitypes.waveform._exceptions import (
 )
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
-from nitypes.waveform._timing._types import (
-    TSampleInterval_co,
-    TTimeOffset_co,
-    TTimestamp_co,
-)
 from nitypes.waveform._warnings import sample_interval_mismatch
+from nitypes.waveform.typing import TSampleInterval_co, TTimeOffset_co, TTimestamp_co
 
 if TYPE_CHECKING:
     from nitypes.waveform._timing._timing import Timing  # circular import

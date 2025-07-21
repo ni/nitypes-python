@@ -3,18 +3,13 @@ from __future__ import annotations
 import datetime as dt
 from collections.abc import Callable
 from functools import singledispatch
-from typing import TYPE_CHECKING, Any, cast
+from typing import Any, cast
 
 import hightime as ht
 
 import nitypes.bintime as bt
 from nitypes._exceptions import invalid_arg_type, invalid_requested_type
-
-if TYPE_CHECKING:
-    # Import from the public package so the docs don't reference private submodules.
-    from nitypes.time import AnyDateTime, AnyTimeDelta, TDateTime, TTimeDelta
-else:
-    from nitypes.time._types import AnyDateTime, AnyTimeDelta, TDateTime, TTimeDelta
+from nitypes.time.typing import AnyDateTime, AnyTimeDelta, TDateTime, TTimeDelta
 
 
 def convert_datetime(requested_type: type[TDateTime], value: AnyDateTime, /) -> TDateTime:

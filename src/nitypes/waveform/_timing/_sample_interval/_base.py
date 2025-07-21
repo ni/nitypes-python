@@ -5,11 +5,7 @@ from collections.abc import Iterable, Sequence
 from typing import TYPE_CHECKING, Generic
 
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
-from nitypes.waveform._timing._types import (
-    TSampleInterval_co,
-    TTimeOffset_co,
-    TTimestamp_co,
-)
+from nitypes.waveform.typing import TSampleInterval_co, TTimeOffset_co, TTimestamp_co
 
 if TYPE_CHECKING:
     from nitypes.waveform._timing._timing import Timing  # circular import

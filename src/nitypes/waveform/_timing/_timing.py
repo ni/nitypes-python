@@ -15,34 +15,24 @@ from nitypes.waveform._timing._sample_interval import (
     SampleIntervalStrategy,
     create_sample_interval_strategy,
 )
+from nitypes.waveform.typing import (
+    TOtherSampleInterval,
+    TOtherTimeOffset,
+    TOtherTimestamp,
+    TSampleInterval,
+    TSampleInterval_co,
+    TTimeOffset,
+    TTimeOffset_co,
+    TTimestamp,
+    TTimestamp_co,
+)
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
-    from nitypes.waveform import (
-        SampleIntervalMode,
-        TOtherSampleInterval,
-        TOtherTimeOffset,
-        TOtherTimestamp,
-        TSampleInterval,
-        TSampleInterval_co,
-        TTimeOffset,
-        TTimeOffset_co,
-        TTimestamp,
-        TTimestamp_co,
-    )
+    from nitypes.waveform import SampleIntervalMode
+
 else:
     from nitypes.waveform._timing._sample_interval import SampleIntervalMode
-    from nitypes.waveform._timing._types import (
-        TOtherSampleInterval,
-        TOtherTimeOffset,
-        TOtherTimestamp,
-        TSampleInterval,
-        TSampleInterval_co,
-        TTimeOffset,
-        TTimeOffset_co,
-        TTimestamp,
-        TTimestamp_co,
-    )
 
 
 @final

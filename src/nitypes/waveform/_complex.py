@@ -8,7 +8,7 @@ import numpy.typing as npt
 from typing_extensions import TYPE_CHECKING, TypeVar, final, override
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType, convert_complex
-from nitypes.time import AnyDateTime, AnyTimeDelta
+from nitypes.time.typing import AnyDateTime, AnyTimeDelta
 from nitypes.waveform._numeric import _TOtherScaled
 
 if TYPE_CHECKING:

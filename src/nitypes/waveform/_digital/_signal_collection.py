@@ -4,14 +4,14 @@ from collections.abc import Sequence
 from typing import TYPE_CHECKING, Generic, overload
 
 from nitypes._exceptions import invalid_arg_type
+from nitypes.waveform.typing import TDigitalState
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
-    from nitypes.waveform import DigitalWaveform, DigitalWaveformSignal, TDigitalState
+    from nitypes.waveform import DigitalWaveform, DigitalWaveformSignal
 else:
     # DigitalWaveform is a circular import.
     from nitypes.waveform._digital._signal import DigitalWaveformSignal
-    from nitypes.waveform._digital._types import TDigitalState
 
 
 class DigitalWaveformSignalCollection(

@@ -8,7 +8,7 @@ import numpy.typing as npt
 from typing_extensions import TYPE_CHECKING, TypeVar, final, override
 
 from nitypes._numpy import long as _np_long, ulong as _np_ulong
-from nitypes.time import AnyDateTime, AnyTimeDelta
+from nitypes.time.typing import AnyDateTime, AnyTimeDelta
 from nitypes.waveform._numeric import _TOtherScaled
 
 if TYPE_CHECKING:

@@ -15,7 +15,7 @@ from typing_extensions import Self, TypeVar
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
-from nitypes.time import AnyDateTime, AnyTimeDelta
+from nitypes.time.typing import AnyDateTime, AnyTimeDelta
 from nitypes.waveform._exceptions import (
     create_capacity_mismatch_error,
     create_capacity_too_small_error,

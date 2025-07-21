@@ -1,10 +1,42 @@
+"""Type aliases and type variables for waveforms."""
+
 from __future__ import annotations
 
 import datetime as dt
+from typing import Union
 
-from typing_extensions import TypeVar
+import numpy as np
+from typing_extensions import TypeAlias, TypeVar
 
-from nitypes.time import AnyDateTime, AnyTimeDelta
+from nitypes._numpy import bool as _np_bool
+from nitypes.time.typing import AnyDateTime, AnyTimeDelta
+
+AnyDigitalPort: TypeAlias = Union[np.uint8, np.uint16, np.uint32]
+"""Type alias for any digital port data type.
+
+This type alias is a union of the following types:
+
+* :class:`numpy.uint8`
+* :class:`numpy.uint16`
+* :class:`numpy.uint32`
+"""
+
+# np.byte == np.int8, np.ubyte == np.uint8
+AnyDigitalState: TypeAlias = Union[_np_bool, np.int8, np.uint8]
+"""Type alias for any digital state data type.
+
+This type alias is a union of the following types:
+
+* :class:`numpy.bool` (NumPy 2.x) or :class:`numpy.bool_` (NumPy 1.x)
+* :class:`numpy.int8`
+* :class:`numpy.uint8`
+"""
+
+TDigitalState = TypeVar("TDigitalState", bound=AnyDigitalState)
+"""Type variable with a bound of :any:`AnyDigitalState`."""
+
+TOtherDigitalState = TypeVar("TOtherDigitalState", bound=AnyDigitalState)
+"""Another type variable with a bound of :any:`AnyDigitalState`."""
 
 TTimestamp = TypeVar("TTimestamp", bound=AnyDateTime, default=dt.datetime)
 """Type variable for a timestamp."""

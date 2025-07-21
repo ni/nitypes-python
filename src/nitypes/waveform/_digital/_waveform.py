@@ -14,9 +14,8 @@ from typing_extensions import Self
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray
-from nitypes.time import AnyDateTime, AnyTimeDelta
+from nitypes.time.typing import AnyDateTime, AnyTimeDelta
 from nitypes.waveform._digital._port import bit_mask, get_port_dtype, port_to_line_data
-from nitypes.waveform._digital._types import DIGITAL_PORT_DTYPES, DIGITAL_STATE_DTYPES
 from nitypes.waveform._exceptions import (
     create_capacity_mismatch_error,
     create_capacity_too_small_error,
@@ -27,6 +26,8 @@ from nitypes.waveform._exceptions import (
     create_start_index_too_large_error,
 )
 from nitypes.waveform._extended_properties import CHANNEL_NAME, LINE_NAMES
+from nitypes.waveform._types import DIGITAL_PORT_DTYPES, DIGITAL_STATE_DTYPES
+from nitypes.waveform.typing import TDigitalState, TOtherDigitalState
 
 if sys.version_info < (3, 10):
     import array as std_array
@@ -38,16 +39,13 @@ if TYPE_CHECKING:
         DigitalWaveformSignalCollection,
         ExtendedPropertyDictionary,
         ExtendedPropertyValue,
-        TDigitalState,
         Timing,
-        TOtherDigitalState,
     )
 else:
     from nitypes.waveform._digital._signal_collection import (
         DigitalWaveformSignalCollection,
     )
     from nitypes.waveform._digital._state import DigitalState
-    from nitypes.waveform._digital._types import TDigitalState, TOtherDigitalState
     from nitypes.waveform._extended_properties import (
         ExtendedPropertyDictionary,
         ExtendedPropertyValue,

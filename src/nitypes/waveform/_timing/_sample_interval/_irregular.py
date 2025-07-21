@@ -10,13 +10,13 @@ from nitypes.time._types import ANY_DATETIME_TUPLE
 from nitypes.waveform._exceptions import create_sample_interval_mode_mismatch_error
 from nitypes.waveform._timing._sample_interval._base import SampleIntervalStrategy
 from nitypes.waveform._timing._sample_interval._mode import SampleIntervalMode
-from nitypes.waveform._timing._types import (
+from nitypes.waveform.errors import TimingMismatchError
+from nitypes.waveform.typing import (
     TSampleInterval_co,
     TTimeOffset_co,
     TTimestamp,
     TTimestamp_co,
 )
-from nitypes.waveform.errors import TimingMismatchError
 
 if TYPE_CHECKING:
     from nitypes.waveform._timing._timing import Timing  # circular import

@@ -5,7 +5,7 @@ from collections.abc import Sequence
 import numpy as np
 import numpy.typing as npt
 
-from nitypes.waveform._digital._types import AnyDigitalPort
+from nitypes.waveform.typing import AnyDigitalPort
 
 
 def bit_mask(n: int, /) -> int:

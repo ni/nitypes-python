@@ -6,13 +6,14 @@ import numpy as np
 import numpy.typing as npt
 
 from nitypes._arguments import arg_to_uint
+from nitypes.waveform.typing import TDigitalState
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
-    from nitypes.waveform import DigitalWaveform, TDigitalState
+    from nitypes.waveform import DigitalWaveform
 else:
     # DigitalWaveform is a circular import.
-    from nitypes.waveform._digital._types import TDigitalState
+    pass
 
 
 class DigitalWaveformSignal(Generic[TDigitalState]):
