@@ -48,10 +48,10 @@ TSampleInterval_co = TypeVar(
 """Covariant type variable for a sample interval."""
 
 TOtherTimestamp = TypeVar("TOtherTimestamp", bound=AnyDateTime)
-"""Type variable for a timestamp."""
+"""Another type variable for a timestamp."""
 
 TOtherTimeOffset = TypeVar("TOtherTimeOffset", bound=AnyTimeDelta)
-"""Type variable for a time offset."""
+"""Another type variable for a time offset."""
 
 TOtherSampleInterval = TypeVar("TOtherSampleInterval", bound=AnyTimeDelta)
-"""Type variable for a sample interval."""
+"""Another type variable for a sample interval."""

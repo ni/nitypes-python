@@ -16,12 +16,15 @@ Waveform Data Types
 from nitypes.waveform._analog import AnalogWaveform
 from nitypes.waveform._complex import ComplexWaveform
 from nitypes.waveform._digital import (
+    AnyDigitalState,
     DigitalState,
     DigitalWaveform,
     DigitalWaveformFailure,
     DigitalWaveformSignal,
     DigitalWaveformSignalCollection,
     DigitalWaveformTestResult,
+    TDigitalState,
+    TOtherDigitalState,
 )
 from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
@@ -51,6 +54,7 @@ from nitypes.waveform._timing import (
 
 __all__ = [
     "AnalogWaveform",
+    "AnyDigitalState",
     "ComplexWaveform",
     "DigitalState",
     "DigitalWaveform",
@@ -67,16 +71,18 @@ __all__ = [
     "SampleIntervalMode",
     "ScaleMode",
     "Spectrum",
+    "TDigitalState",
     "Timing",
-    "TSampleInterval",
-    "TSampleInterval_co",
+    "TOtherDigitalState",
     "TOtherSampleInterval",
     "TOtherTimeOffset",
     "TOtherTimestamp",
-    "TTimeOffset",
+    "TSampleInterval_co",
+    "TSampleInterval",
     "TTimeOffset_co",
-    "TTimestamp",
+    "TTimeOffset",
     "TTimestamp_co",
+    "TTimestamp",
 ]
 
 

@@ -6,17 +6,16 @@ import numpy as np
 import numpy.typing as npt
 
 from nitypes._arguments import arg_to_uint
-from nitypes.waveform._digital._types import _TState
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
-    from nitypes.waveform import DigitalWaveform
+    from nitypes.waveform import DigitalWaveform, TDigitalState
 else:
     # DigitalWaveform is a circular import.
-    pass
+    from nitypes.waveform._digital._types import TDigitalState
 
 
-class DigitalWaveformSignal(Generic[_TState]):
+class DigitalWaveformSignal(Generic[TDigitalState]):
     """A signal of a digital waveform.
 
     To construct this object, use the :any:`DigitalWaveform.signals` property and index the returned
@@ -25,16 +24,16 @@ class DigitalWaveformSignal(Generic[_TState]):
 
     __slots__ = ["_owner", "_signal_index", "__weakref__"]
 
-    _owner: DigitalWaveform[_TState]
+    _owner: DigitalWaveform[TDigitalState]
     _signal_index: int
 
-    def __init__(self, owner: DigitalWaveform[_TState], signal_index: SupportsIndex) -> None:
+    def __init__(self, owner: DigitalWaveform[TDigitalState], signal_index: SupportsIndex) -> None:
         """Initialize a new digital waveform signal."""
         self._owner = owner
         self._signal_index = arg_to_uint("signal index", signal_index)
 
     @property
-    def owner(self) -> DigitalWaveform[_TState]:
+    def owner(self) -> DigitalWaveform[TDigitalState]:
         """The waveform that owns this signal."""
         return self._owner
 
@@ -44,7 +43,7 @@ class DigitalWaveformSignal(Generic[_TState]):
         return self._signal_index
 
     @property
-    def data(self) -> npt.NDArray[_TState]:
+    def data(self) -> npt.NDArray[TDigitalState]:
         """The signal data, indexed by sample."""
         return self._owner.data[:, self._signal_index]
 
