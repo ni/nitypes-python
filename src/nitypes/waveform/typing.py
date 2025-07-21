@@ -1,5 +1,8 @@
 """Type aliases and type variables for waveforms."""
 
+# These types are in a submodule so they don't show up in autocomplete for "nitypes.waveform." and
+# overwhelm users.
+
 from __future__ import annotations
 
 import datetime as dt
