@@ -28,18 +28,16 @@ from nitypes.waveform._exceptions import (
     create_start_index_too_large_error,
 )
 from nitypes.waveform._extended_properties import CHANNEL_NAME, UNIT_DESCRIPTION
+from nitypes.waveform.typing import ExtendedPropertyValue
 
 if sys.version_info < (3, 10):
     import array as std_array
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
-    from nitypes.waveform import ExtendedPropertyDictionary, ExtendedPropertyValue
+    from nitypes.waveform import ExtendedPropertyDictionary
 else:
-    from nitypes.waveform._extended_properties import (
-        ExtendedPropertyDictionary,
-        ExtendedPropertyValue,
-    )
+    from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
 
 _TData = TypeVar("_TData", bound=Union[np.floating, np.integer])
 _TOtherData = TypeVar("_TOtherData", bound=Union[np.floating, np.integer])

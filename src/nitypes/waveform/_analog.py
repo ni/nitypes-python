@@ -10,17 +10,12 @@ from typing_extensions import TYPE_CHECKING, TypeVar, final, override
 from nitypes._numpy import long as _np_long, ulong as _np_ulong
 from nitypes.time.typing import AnyDateTime, AnyTimeDelta
 from nitypes.waveform._numeric import _TOtherScaled
+from nitypes.waveform.typing import ExtendedPropertyValue
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
-    from nitypes.waveform import (
-        ExtendedPropertyValue,
-        NumericWaveform,
-        ScaleMode,
-        Timing,
-    )
+    from nitypes.waveform import NumericWaveform, ScaleMode, Timing
 else:
-    from nitypes.waveform._extended_properties import ExtendedPropertyValue
     from nitypes.waveform._numeric import NumericWaveform
     from nitypes.waveform._scaling import ScaleMode
     from nitypes.waveform._timing import Timing

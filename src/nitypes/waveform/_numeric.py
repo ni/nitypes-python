@@ -26,6 +26,7 @@ from nitypes.waveform._exceptions import (
 )
 from nitypes.waveform._extended_properties import CHANNEL_NAME, UNIT_DESCRIPTION
 from nitypes.waveform._warnings import scale_mode_mismatch
+from nitypes.waveform.typing import ExtendedPropertyValue
 
 if sys.version_info < (3, 10):
     import array as std_array
@@ -35,15 +36,11 @@ if TYPE_CHECKING:
     from nitypes.waveform import (
         NO_SCALING,
         ExtendedPropertyDictionary,
-        ExtendedPropertyValue,
         ScaleMode,
         Timing,
     )
 else:
-    from nitypes.waveform._extended_properties import (
-        ExtendedPropertyDictionary,
-        ExtendedPropertyValue,
-    )
+    from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
     from nitypes.waveform._scaling import NO_SCALING, ScaleMode
     from nitypes.waveform._timing import Timing
 

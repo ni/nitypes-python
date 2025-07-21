@@ -27,7 +27,11 @@ from nitypes.waveform._exceptions import (
 )
 from nitypes.waveform._extended_properties import CHANNEL_NAME, LINE_NAMES
 from nitypes.waveform._types import DIGITAL_PORT_DTYPES, DIGITAL_STATE_DTYPES
-from nitypes.waveform.typing import TDigitalState, TOtherDigitalState
+from nitypes.waveform.typing import (
+    ExtendedPropertyValue,
+    TDigitalState,
+    TOtherDigitalState,
+)
 
 if sys.version_info < (3, 10):
     import array as std_array
@@ -38,7 +42,6 @@ if TYPE_CHECKING:
         DigitalState,
         DigitalWaveformSignalCollection,
         ExtendedPropertyDictionary,
-        ExtendedPropertyValue,
         Timing,
     )
 else:
@@ -46,10 +49,7 @@ else:
         DigitalWaveformSignalCollection,
     )
     from nitypes.waveform._digital._state import DigitalState
-    from nitypes.waveform._extended_properties import (
-        ExtendedPropertyDictionary,
-        ExtendedPropertyValue,
-    )
+    from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
     from nitypes.waveform._timing import Timing
 
 

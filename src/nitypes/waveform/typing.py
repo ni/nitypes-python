@@ -11,6 +11,16 @@ from typing_extensions import TypeAlias, TypeVar
 from nitypes._numpy import bool as _np_bool
 from nitypes.time.typing import AnyDateTime, AnyTimeDelta
 
+ExtendedPropertyValue: TypeAlias = Union[bool, float, int, str]
+"""Type alias for an ExtendedPropertyDictionary value.
+
+This type alias is a union of the following types:
+* :class:`bool`
+* :class:`float`
+* :class:`int`
+* :class:`str`
+"""
+
 AnyDigitalPort: TypeAlias = Union[np.uint8, np.uint16, np.uint32]
 """Type alias for any digital port data type.
 
