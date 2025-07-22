@@ -5,7 +5,7 @@ from collections.abc import Sequence
 import numpy as np
 import numpy.typing as npt
 
-from nitypes.waveform._digital._types import _AnyPort
+from nitypes.waveform.typing import AnyDigitalPort
 
 
 def bit_mask(n: int, /) -> int:
@@ -33,7 +33,7 @@ def bit_mask(n: int, /) -> int:
     return (1 << n) - 1
 
 
-def get_port_dtype(mask: int | Sequence[int]) -> np.dtype[_AnyPort]:
+def get_port_dtype(mask: int | Sequence[int]) -> np.dtype[AnyDigitalPort]:
     """Return the NumPy port dtype for the given mask.
 
     >>> get_port_dtype(0xF)
@@ -63,7 +63,7 @@ def get_port_dtype(mask: int | Sequence[int]) -> np.dtype[_AnyPort]:
         return _get_port_dtype(mask)
 
 
-def _get_port_dtype(mask: int) -> np.dtype[_AnyPort]:
+def _get_port_dtype(mask: int) -> np.dtype[AnyDigitalPort]:
     if (mask & 0xFF) == mask:
         return np.dtype(np.uint8)
     elif (mask & 0xFFFF) == mask:
@@ -76,7 +76,7 @@ def _get_port_dtype(mask: int) -> np.dtype[_AnyPort]:
         )
 
 
-def port_to_line_data(port_data: npt.NDArray[_AnyPort], mask: int) -> npt.NDArray[np.uint8]:
+def port_to_line_data(port_data: npt.NDArray[AnyDigitalPort], mask: int) -> npt.NDArray[np.uint8]:
     """Convert a 1D array of port data to a 2D array of line data, using the specified mask.
 
     >>> port_to_line_data(np.array([0,1,2,3], np.uint8), 0xFF)

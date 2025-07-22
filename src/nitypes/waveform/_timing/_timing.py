@@ -3,17 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import operator
 from collections.abc import Iterable, Sequence
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Generic,
-    SupportsIndex,
-    TypeVar,
-    Union,
-    cast,
-    final,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, SupportsIndex, cast, final
 
 import hightime as ht
 from typing_extensions import Self
@@ -25,32 +15,28 @@ from nitypes.waveform._timing._sample_interval import (
     SampleIntervalStrategy,
     create_sample_interval_strategy,
 )
-from nitypes.waveform._timing._types import (
-    _TSampleInterval,
-    _TSampleInterval_co,
-    _TTimeOffset,
-    _TTimeOffset_co,
-    _TTimestamp,
-    _TTimestamp_co,
+from nitypes.waveform.typing import (
+    TOtherSampleInterval,
+    TOtherTimeOffset,
+    TOtherTimestamp,
+    TSampleInterval,
+    TSampleInterval_co,
+    TTimeOffset,
+    TTimeOffset_co,
+    TTimestamp,
+    TTimestamp_co,
 )
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
     from nitypes.waveform import SampleIntervalMode
+
 else:
     from nitypes.waveform._timing._sample_interval import SampleIntervalMode
 
-_TOtherTimestamp = TypeVar("_TOtherTimestamp", bound=Union[bt.DateTime, dt.datetime, ht.datetime])
-_TOtherTimeOffset = TypeVar(
-    "_TOtherTimeOffset", bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta]
-)
-_TOtherSampleInterval = TypeVar(
-    "_TOtherSampleInterval", bound=Union[bt.TimeDelta, dt.timedelta, ht.timedelta]
-)
-
 
 @final
-class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
+class Timing(Generic[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]):
     """Waveform timing information.
 
     Waveform timing objects are immutable.
@@ -74,9 +60,9 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
     @classmethod
     def create_with_no_interval(
         cls,
-        timestamp: _TTimestamp | None = None,
-        time_offset: _TTimeOffset | None = None,
-    ) -> Timing[_TTimestamp, _TTimeOffset, _TSampleInterval_co]:
+        timestamp: TTimestamp | None = None,
+        time_offset: TTimeOffset | None = None,
+    ) -> Timing[TTimestamp, TTimeOffset, TSampleInterval_co]:
         """Create a waveform timing object with no sample interval.
 
         Args:
@@ -93,10 +79,10 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
     @classmethod
     def create_with_regular_interval(
         cls,
-        sample_interval: _TSampleInterval,
-        timestamp: _TTimestamp | None = None,
-        time_offset: _TTimeOffset | None = None,
-    ) -> Timing[_TTimestamp, _TTimeOffset, _TSampleInterval]:
+        sample_interval: TSampleInterval,
+        timestamp: TTimestamp | None = None,
+        time_offset: TTimeOffset | None = None,
+    ) -> Timing[TTimestamp, TTimeOffset, TSampleInterval]:
         """Create a waveform timing object with a regular sample interval.
 
         Args:
@@ -114,8 +100,8 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
     @classmethod
     def create_with_irregular_interval(
         cls,
-        timestamps: Sequence[_TTimestamp],
-    ) -> Timing[_TTimestamp, _TTimeOffset_co, _TSampleInterval_co]:
+        timestamps: Sequence[TTimestamp],
+    ) -> Timing[TTimestamp, TTimeOffset_co, TSampleInterval_co]:
         """Create a waveform timing object with an irregular sample interval.
 
         Args:
@@ -138,21 +124,21 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
     ]
 
     _sample_interval_strategy: SampleIntervalStrategy[
-        _TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co
+        TTimestamp_co, TTimeOffset_co, TSampleInterval_co
     ]
     _sample_interval_mode: SampleIntervalMode
-    _timestamp: _TTimestamp_co | None
-    _time_offset: _TTimeOffset_co | None
-    _sample_interval: _TSampleInterval_co | None
-    _timestamps: list[_TTimestamp_co] | None
+    _timestamp: TTimestamp_co | None
+    _time_offset: TTimeOffset_co | None
+    _sample_interval: TSampleInterval_co | None
+    _timestamps: list[TTimestamp_co] | None
 
     def __init__(
         self,
         sample_interval_mode: SampleIntervalMode,
-        timestamp: _TTimestamp_co | None = None,
-        time_offset: _TTimeOffset_co | None = None,
-        sample_interval: _TSampleInterval_co | None = None,
-        timestamps: Sequence[_TTimestamp_co] | None = None,
+        timestamp: TTimestamp_co | None = None,
+        time_offset: TTimeOffset_co | None = None,
+        sample_interval: TSampleInterval_co | None = None,
+        timestamps: Sequence[TTimestamp_co] | None = None,
         *,
         copy_timestamps: bool = True,
     ) -> None:
@@ -203,7 +189,7 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         return self._timestamp is not None
 
     @property
-    def timestamp(self) -> _TTimestamp_co:
+    def timestamp(self) -> TTimestamp_co:
         """A timestamp representing the start of an acquisition or a related occurrence."""
         value = self._timestamp
         if value is None:
@@ -216,7 +202,7 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         return self.has_timestamp
 
     @property
-    def start_time(self) -> _TTimestamp_co:
+    def start_time(self) -> TTimestamp_co:
         """The time that the first sample in the waveform was acquired."""
         value = self.timestamp
         if self.has_time_offset:
@@ -230,7 +216,7 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         return self._time_offset is not None
 
     @property
-    def time_offset(self) -> _TTimeOffset_co:
+    def time_offset(self) -> TTimeOffset_co:
         """The time difference between the timestamp and the first sample."""
         value = self._time_offset
         if value is None:
@@ -243,7 +229,7 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
         return self._sample_interval is not None
 
     @property
-    def sample_interval(self) -> _TSampleInterval_co:
+    def sample_interval(self) -> TSampleInterval_co:
         """The time interval between samples."""
         value = self._sample_interval
         if value is None:
@@ -257,7 +243,7 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
 
     def get_timestamps(
         self, start_index: SupportsIndex, count: SupportsIndex
-    ) -> Iterable[_TTimestamp_co]:
+    ) -> Iterable[TTimestamp_co]:
         """Retrieve the timestamps of the waveform samples.
 
         Args:
@@ -291,10 +277,10 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
 
     def _convert(
         self,
-        timestamp_type: type[_TOtherTimestamp],
-        time_offset_type: type[_TOtherTimeOffset],
-        sample_interval_type: type[_TOtherSampleInterval],
-    ) -> Timing[_TOtherTimestamp, _TOtherTimeOffset, _TOtherSampleInterval]:
+        timestamp_type: type[TOtherTimestamp],
+        time_offset_type: type[TOtherTimeOffset],
+        sample_interval_type: type[TOtherSampleInterval],
+    ) -> Timing[TOtherTimestamp, TOtherTimeOffset, TOtherSampleInterval]:
         # If the runtime type is correct, cast to the requested static type. Not a workaround.
         if (
             isinstance(self._timestamp, (timestamp_type, type(None)))
@@ -305,7 +291,7 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
                 or all(isinstance(ts, timestamp_type) for ts in self._timestamps)
             )
         ):
-            return cast(Timing[_TOtherTimestamp, _TOtherTimeOffset, _TOtherSampleInterval], self)
+            return cast(Timing[TOtherTimestamp, TOtherTimeOffset, TOtherSampleInterval], self)
 
         return Timing(
             self._sample_interval_mode,
@@ -371,7 +357,7 @@ class Timing(Generic[_TTimestamp_co, _TTimeOffset_co, _TSampleInterval_co]):
             args.append(f"timestamps={self._timestamps!r}")
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
-    def _append_timestamps(self, timestamps: Sequence[_TTimestamp_co] | None) -> Self:
+    def _append_timestamps(self, timestamps: Sequence[TTimestamp_co] | None) -> Self:
         new_timing = self._sample_interval_strategy.append_timestamps(self, timestamps)
         assert isinstance(new_timing, self.__class__)
         return new_timing

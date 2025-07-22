@@ -23,10 +23,7 @@ from nitypes.waveform._digital import (
     DigitalWaveformSignalCollection,
     DigitalWaveformTestResult,
 )
-from nitypes.waveform._extended_properties import (
-    ExtendedPropertyDictionary,
-    ExtendedPropertyValue,
-)
+from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
 from nitypes.waveform._numeric import NumericWaveform
 from nitypes.waveform._scaling import (
     NO_SCALING,
@@ -47,7 +44,6 @@ __all__ = [
     "DigitalWaveformSignalCollection",
     "DigitalWaveformTestResult",
     "ExtendedPropertyDictionary",
-    "ExtendedPropertyValue",
     "LinearScaleMode",
     "NO_SCALING",
     "NoneScaleMode",
@@ -69,7 +65,6 @@ DigitalWaveformSignal.__module__ = __name__
 DigitalWaveformSignalCollection.__module__ = __name__
 DigitalWaveformTestResult.__module__ = __name__
 ExtendedPropertyDictionary.__module__ = __name__
-# ExtendedPropertyValue is a TypeAlias
 LinearScaleMode.__module__ = __name__
 # NO_SCALING is a constant
 NoneScaleMode.__module__ = __name__

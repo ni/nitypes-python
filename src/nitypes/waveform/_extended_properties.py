@@ -2,18 +2,13 @@ from __future__ import annotations
 
 import operator
 from collections.abc import Iterator, Mapping, MutableMapping
-from typing import Union
 
-from typing_extensions import TypeAlias
+from nitypes.waveform.typing import ExtendedPropertyValue
 
 # Extended property keys
 CHANNEL_NAME = "NI_ChannelName"
 LINE_NAMES = "NI_LineNames"
 UNIT_DESCRIPTION = "NI_UnitDescription"
-
-
-ExtendedPropertyValue: TypeAlias = Union[bool, float, int, str]
-"""An ExtendedPropertyDictionary value."""
 
 
 class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):

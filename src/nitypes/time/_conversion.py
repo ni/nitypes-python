@@ -3,27 +3,21 @@ from __future__ import annotations
 import datetime as dt
 from collections.abc import Callable
 from functools import singledispatch
-from typing import Any, TypeVar, Union, cast
+from typing import Any, cast
 
 import hightime as ht
-from typing_extensions import TypeAlias
 
 import nitypes.bintime as bt
 from nitypes._exceptions import invalid_arg_type, invalid_requested_type
-
-_AnyDateTime: TypeAlias = Union[bt.DateTime, dt.datetime, ht.datetime]
-_TDateTime = TypeVar("_TDateTime", bound=_AnyDateTime)
-
-_AnyTimeDelta: TypeAlias = Union[bt.TimeDelta, dt.timedelta, ht.timedelta]
-_TTimeDelta = TypeVar("_TTimeDelta", bound=_AnyTimeDelta)
+from nitypes.time.typing import AnyDateTime, AnyTimeDelta, TDateTime, TTimeDelta
 
 
-def convert_datetime(requested_type: type[_TDateTime], value: _AnyDateTime, /) -> _TDateTime:
+def convert_datetime(requested_type: type[TDateTime], value: AnyDateTime, /) -> TDateTime:
     """Convert a datetime object to the specified type."""
     convert_func = _CONVERT_DATETIME_FOR_TYPE.get(requested_type)
     if convert_func is None:
         raise invalid_requested_type("datetime", requested_type)
-    return cast(_TDateTime, convert_func(value))
+    return cast(TDateTime, convert_func(value))
 
 
 @singledispatch
@@ -113,12 +107,12 @@ _CONVERT_DATETIME_FOR_TYPE: dict[type[Any], Callable[[object], object]] = {
 }
 
 
-def convert_timedelta(requested_type: type[_TTimeDelta], value: _AnyTimeDelta, /) -> _TTimeDelta:
+def convert_timedelta(requested_type: type[TTimeDelta], value: AnyTimeDelta, /) -> TTimeDelta:
     """Convert a timedelta object to the specified type."""
     convert_func = _CONVERT_TIMEDELTA_FOR_TYPE.get(requested_type)
     if convert_func is None:
         raise invalid_requested_type("timedelta", requested_type)
-    return cast(_TTimeDelta, convert_func(value))
+    return cast(TTimeDelta, convert_func(value))
 
 
 @singledispatch
