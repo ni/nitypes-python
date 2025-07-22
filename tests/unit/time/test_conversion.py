@@ -13,9 +13,6 @@ from nitypes.time import convert_datetime, convert_timedelta
 _BT_EPSILON = ht.timedelta(yoctoseconds=54210)
 _DT_EPSILON = ht.timedelta(microseconds=1)
 
-# Work around https://github.com/ni/hightime/issues/60
-_DT_EPSILON_AS_BT = bt.TimeDelta(1e-6)
-
 
 ###############################################################################
 # convert_datetime
@@ -54,7 +51,7 @@ def test___bt_to_dt___convert_datetime___returns_equivalent_dt_datetime() -> Non
 
     assert_type(value_out, dt.datetime)
     assert isinstance(value_out, dt.datetime)
-    assert abs(value_out - value_in) <= _DT_EPSILON_AS_BT
+    assert abs(value_out - value_in) <= _DT_EPSILON
     assert value_out.tzinfo is value_in.tzinfo
     assert value_out.fold == 0
 
