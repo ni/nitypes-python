@@ -370,8 +370,8 @@ class DigitalWaveform(Generic[TDigitalState]):
         array: npt.NDArray[Any] | Sequence[Any],
         mask: SupportsIndex | None = ...,
         dtype: (
-            type[TOtherDigitalState]
-            | np.dtype[TOtherDigitalState]  # pyright: ignore[reportInvalidTypeVarUse]
+            type[TOtherDigitalState]  # pyright: ignore[reportInvalidTypeVarUse]
+            | np.dtype[TOtherDigitalState]
         ) = ...,
         *,
         start_index: SupportsIndex | None = ...,
@@ -494,8 +494,8 @@ class DigitalWaveform(Generic[TDigitalState]):
         array: npt.NDArray[Any] | Sequence[Any],
         masks: Sequence[SupportsIndex] | None = ...,
         dtype: (
-            type[TOtherDigitalState]
-            | np.dtype[TOtherDigitalState]  # pyright: ignore[reportInvalidTypeVarUse]
+            type[TOtherDigitalState]  # pyright: ignore[reportInvalidTypeVarUse]
+            | np.dtype[TOtherDigitalState]
         ) = ...,
         *,
         start_index: SupportsIndex | None = ...,
