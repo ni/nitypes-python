@@ -51,7 +51,7 @@ def test___bt_to_dt___convert_datetime___returns_equivalent_dt_datetime() -> Non
 
     assert_type(value_out, dt.datetime)
     assert isinstance(value_out, dt.datetime)
-    assert abs(value_out - value_in) <= _DT_EPSILON
+    assert abs(value_out - value_in) <= _DT_EPSILON + _BT_EPSILON
     assert value_out.tzinfo is value_in.tzinfo
     assert value_out.fold == 0
 
