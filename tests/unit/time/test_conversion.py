@@ -237,7 +237,7 @@ def test___dt_to_bt___convert_timedelta___returns_equivalant_bt_timedelta() -> N
 
     assert_type(value_out, bt.TimeDelta)
     assert isinstance(value_out, bt.TimeDelta)
-    assert abs(value_out - value_in) <= _DT_EPSILON
+    assert abs(value_out - value_in) <= _BT_EPSILON
 
 
 def test___dt_to_ht___convert_timedelta___returns_equivalant_ht_timedelta() -> None:
