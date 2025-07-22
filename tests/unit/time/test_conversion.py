@@ -13,9 +13,6 @@ from nitypes.time import convert_datetime, convert_timedelta
 _BT_EPSILON = ht.timedelta(yoctoseconds=54210)
 _DT_EPSILON = ht.timedelta(microseconds=1)
 
-# Work around https://github.com/ni/hightime/issues/60
-_DT_EPSILON_AS_BT = bt.TimeDelta(1e-6)
-
 
 ###############################################################################
 # convert_datetime
@@ -47,19 +44,19 @@ def test___ht_to_ht___convert_datetime___returns_original_object() -> None:
     assert value_out is value_in
 
 
-def test___bt_to_dt___convert_datetime___returns_equivalant_dt_datetime() -> None:
+def test___bt_to_dt___convert_datetime___returns_equivalent_dt_datetime() -> None:
     value_in = bt.DateTime.now(dt.timezone.utc)
 
     value_out = convert_datetime(dt.datetime, value_in)
 
     assert_type(value_out, dt.datetime)
     assert isinstance(value_out, dt.datetime)
-    assert abs(value_out - value_in) <= _DT_EPSILON_AS_BT
+    assert abs(value_out - value_in) <= _DT_EPSILON + _BT_EPSILON
     assert value_out.tzinfo is value_in.tzinfo
     assert value_out.fold == 0
 
 
-def test___bt_to_ht___convert_datetime___returns_equivalant_ht_datetime() -> None:
+def test___bt_to_ht___convert_datetime___returns_equivalent_ht_datetime() -> None:
     value_in = bt.DateTime.now(dt.timezone.utc)
 
     value_out = convert_datetime(ht.datetime, value_in)
@@ -71,7 +68,7 @@ def test___bt_to_ht___convert_datetime___returns_equivalant_ht_datetime() -> Non
     assert value_out.fold == 0
 
 
-def test___dt_to_bt___convert_datetime___returns_equivalant_bt_datetime() -> None:
+def test___dt_to_bt___convert_datetime___returns_equivalent_bt_datetime() -> None:
     value_in = dt.datetime.now(dt.timezone.utc)
 
     value_out = convert_datetime(bt.DateTime, value_in)
@@ -82,7 +79,7 @@ def test___dt_to_bt___convert_datetime___returns_equivalant_bt_datetime() -> Non
     assert value_out.tzinfo is value_in.tzinfo
 
 
-def test___dt_to_ht___convert_datetime___returns_equivalant_ht_datetime() -> None:
+def test___dt_to_ht___convert_datetime___returns_equivalent_ht_datetime() -> None:
     value_in = dt.datetime.now(dt.timezone.utc)
 
     value_out = convert_datetime(ht.datetime, value_in)
@@ -94,7 +91,7 @@ def test___dt_to_ht___convert_datetime___returns_equivalant_ht_datetime() -> Non
     assert value_out.fold == value_in.fold
 
 
-def test___ht_to_bt___convert_datetime___returns_equivalant_bt_datetime() -> None:
+def test___ht_to_bt___convert_datetime___returns_equivalent_bt_datetime() -> None:
     value_in = ht.datetime.now(dt.timezone.utc)
 
     value_out = convert_datetime(bt.DateTime, value_in)
@@ -105,7 +102,7 @@ def test___ht_to_bt___convert_datetime___returns_equivalant_bt_datetime() -> Non
     assert value_out.tzinfo is value_in.tzinfo
 
 
-def test___ht_to_dt___convert_datetime___returns_equivalant_dt_datetime() -> None:
+def test___ht_to_dt___convert_datetime___returns_equivalent_dt_datetime() -> None:
     value_in = ht.datetime.now(dt.timezone.utc)
 
     value_out = convert_datetime(dt.datetime, value_in)
@@ -208,7 +205,7 @@ def test___ht_to_ht___convert_timedelta___returns_original_object() -> None:
     assert value_out is value_in
 
 
-def test___bt_to_dt___convert_timedelta___returns_equivalant_dt_timedelta() -> None:
+def test___bt_to_dt___convert_timedelta___returns_equivalent_dt_timedelta() -> None:
     # 1 << 124 ticks is 1 << 60 seconds, which is too big for dt.timedelta.
     value_in = bt.TimeDelta.from_ticks((1 << 92) + (2 << 64) + 3)
 
@@ -219,7 +216,7 @@ def test___bt_to_dt___convert_timedelta___returns_equivalant_dt_timedelta() -> N
     assert abs(value_out - value_in) <= _DT_EPSILON
 
 
-def test___bt_to_ht___convert_timedelta___returns_equivalant_ht_timedelta() -> None:
+def test___bt_to_ht___convert_timedelta___returns_equivalent_ht_timedelta() -> None:
     # 1 << 124 ticks is 1 << 60 seconds, which is too big for ht.timedelta too, apparently.
     value_in = bt.TimeDelta.from_ticks((1 << 92) + (2 << 64) + 3)
 
@@ -230,17 +227,17 @@ def test___bt_to_ht___convert_timedelta___returns_equivalant_ht_timedelta() -> N
     assert abs(value_out - value_in) <= _BT_EPSILON
 
 
-def test___dt_to_bt___convert_timedelta___returns_equivalant_bt_timedelta() -> None:
+def test___dt_to_bt___convert_timedelta___returns_equivalent_bt_timedelta() -> None:
     value_in = dt.timedelta(days=1, seconds=2, microseconds=3)
 
     value_out = convert_timedelta(bt.TimeDelta, value_in)
 
     assert_type(value_out, bt.TimeDelta)
     assert isinstance(value_out, bt.TimeDelta)
-    assert abs(value_out - value_in) <= _DT_EPSILON
+    assert abs(value_out - value_in) <= _BT_EPSILON
 
 
-def test___dt_to_ht___convert_timedelta___returns_equivalant_ht_timedelta() -> None:
+def test___dt_to_ht___convert_timedelta___returns_equivalent_ht_timedelta() -> None:
     value_in = dt.timedelta(days=1, seconds=2, microseconds=3)
 
     value_out = convert_timedelta(ht.timedelta, value_in)
@@ -250,7 +247,7 @@ def test___dt_to_ht___convert_timedelta___returns_equivalant_ht_timedelta() -> N
     assert value_out == value_in
 
 
-def test___ht_to_bt___convert_timedelta___returns_equivalant_bt_timedelta() -> None:
+def test___ht_to_bt___convert_timedelta___returns_equivalent_bt_timedelta() -> None:
     value_in = ht.timedelta(days=1, seconds=2, microseconds=3)
 
     value_out = convert_timedelta(bt.TimeDelta, value_in)
@@ -260,7 +257,7 @@ def test___ht_to_bt___convert_timedelta___returns_equivalant_bt_timedelta() -> N
     assert abs(value_out - value_in) <= _BT_EPSILON
 
 
-def test___ht_to_dt___convert_timedelta___returns_equivalant_dt_timedelta() -> None:
+def test___ht_to_dt___convert_timedelta___returns_equivalent_dt_timedelta() -> None:
     value_in = ht.timedelta(days=1, seconds=2, microseconds=3)
 
     value_out = convert_timedelta(dt.timedelta, value_in)

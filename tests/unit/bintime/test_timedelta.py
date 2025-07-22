@@ -1074,11 +1074,7 @@ def test___ht_timedelta___divmod___returns_int_and_timedelta(
         (TimeDelta(1), dt.timedelta(seconds=1)),
         (TimeDelta(1), ht.timedelta(seconds=1)),
         (dt.timedelta(seconds=1), TimeDelta(1)),
-        pytest.param(
-            ht.timedelta(seconds=1),
-            TimeDelta(1),
-            marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
-        ),
+        (ht.timedelta(seconds=1), TimeDelta(1)),
     ],
 )
 def test___same_value___comparison___equal(
@@ -1111,21 +1107,9 @@ def test___same_value___comparison___equal(
         (TimeDelta(1), ht.timedelta(seconds=1, femtoseconds=1)),
         (TimeDelta(1), ht.timedelta(seconds=1, yoctoseconds=1)),
         (dt.timedelta(seconds=1), TimeDelta(2)),
-        pytest.param(
-            ht.timedelta(seconds=1),
-            TimeDelta(2),
-            marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
-        ),
-        pytest.param(
-            ht.timedelta(seconds=1) - ht.timedelta(femtoseconds=1),
-            TimeDelta(1),
-            marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
-        ),
-        pytest.param(
-            ht.timedelta(seconds=1) - ht.timedelta(yoctoseconds=1),
-            TimeDelta(1),
-            marks=pytest.mark.xfail(reason="https://github.com/ni/hightime/issues/60"),
-        ),
+        (ht.timedelta(seconds=1), TimeDelta(2)),
+        (ht.timedelta(seconds=1) - ht.timedelta(femtoseconds=1), TimeDelta(1)),
+        (ht.timedelta(seconds=1) - ht.timedelta(yoctoseconds=1), TimeDelta(1)),
     ],
 )
 def test___lesser_value___comparison___lesser(
