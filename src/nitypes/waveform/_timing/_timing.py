@@ -206,7 +206,7 @@ class Timing(Generic[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]):
         """The time that the first sample in the waveform was acquired.
 
         This is equivalent to ``t0`` in a LabVIEW waveform.
-        This value is derived from :property:`timestamp` + :property:`time_offset`.
+        This value is derived from :attr:`timestamp` + :attr:`time_offset`.
         """
         value = self.timestamp
         if self.has_time_offset:
