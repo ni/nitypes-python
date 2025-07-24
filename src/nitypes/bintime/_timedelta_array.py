@@ -29,7 +29,8 @@ class TimeDeltaArray(Sequence[TimeDelta]):
             value = []
         self._array = np.zeros(len(value), dtype=CVITimeIntervalDType)
         for index, entry in enumerate(value):
-            self._array[index] = entry.to_tuple()
+            as_tuple = entry.to_tuple()
+            self._array[index] = (as_tuple.fractional_seconds, as_tuple.whole_seconds)
 
     @overload
     def __getitem__(  # noqa: D105 - missing docstring in magic method
@@ -45,13 +46,7 @@ class TimeDeltaArray(Sequence[TimeDelta]):
         """Return the TimeDelta at the specified location."""
         if isinstance(index, int):
             entry = self._array[index]
-            # Without casting via int(), local variable as_tuple holds
-            #   TimeValueTuple(whole_seconds=np.uint64(1), fractional_seconds=np.int64(0))
-            # and TimeDelta.from_tuple() raises
-            #   TypeError: ufunc 'bitwise_or' not supported for the input types, and the inputs
-            #   could not be safely coerced to any supported types according to the casting rule
-            #   ''safe''
-            as_tuple = TimeValueTuple(int(entry[0]), int(entry[1]))
+            as_tuple = TimeValueTuple(entry["msb"], entry["lsb"])
             return TimeDelta.from_tuple(as_tuple)
         elif isinstance(index, slice):
             raise NotImplementedError("TODO AB#3137071")
