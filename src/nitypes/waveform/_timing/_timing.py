@@ -205,7 +205,8 @@ class Timing(Generic[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]):
     def start_time(self) -> TTimestamp_co:
         """The time that the first sample in the waveform was acquired.
 
-        This is equivalent to 't0' in a LabVIEW waveform.
+        This is equivalent to ``t0`` in a LabVIEW waveform.
+        This value is derived from timestamp + time_offset.
         """
         value = self.timestamp
         if self.has_time_offset:
@@ -220,11 +221,7 @@ class Timing(Generic[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]):
 
     @property
     def time_offset(self) -> TTimeOffset_co:
-        """The time difference between the timestamp and the first sample.
-
-        This is equivalent to the time between the start of an acquisition
-        and 't0' in a LabVIEW waveform.
-        """
+        """The time difference between the timestamp and the first sample."""
         value = self._time_offset
         if value is None:
             raise RuntimeError("The waveform timing does not have a time offset.")
@@ -239,7 +236,7 @@ class Timing(Generic[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]):
     def sample_interval(self) -> TSampleInterval_co:
         """The time interval between samples.
 
-        This is equivalent to 'dt' in a LabVIEW waveform.
+        This is equivalent to ``dt`` in a LabVIEW waveform.
         """
         value = self._sample_interval
         if value is None:
