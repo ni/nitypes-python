@@ -28,7 +28,9 @@ class TimeDeltaArray(Sequence[TimeDelta]):
         """Initialize a new TimeDeltaArray."""
         if value is None:
             value = []
-        self._array = asarray((entry.to_tuple().to_cvi() for entry in value), dtype=CVITimeIntervalDType)
+        self._array = asarray(
+            (entry.to_tuple().to_cvi() for entry in value), dtype=CVITimeIntervalDType
+        )
 
     @overload
     def __getitem__(  # noqa: D105 - missing docstring in magic method
