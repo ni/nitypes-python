@@ -45,8 +45,8 @@ class TimeDeltaArray(Sequence[TimeDelta]):
     def __getitem__(self, index: int | slice) -> TimeDelta | Sequence[TimeDelta]:
         """Return the TimeDelta at the specified location."""
         if isinstance(index, int):
-            entry = self._array[index]
-            as_tuple = TimeValueTuple(entry["msb"], entry["lsb"])
+            entry = self._array[index].item()
+            as_tuple = TimeValueTuple.from_cvi(*entry)
             return TimeDelta.from_tuple(as_tuple)
         elif isinstance(index, slice):
             raise NotImplementedError("TODO AB#3137071")
