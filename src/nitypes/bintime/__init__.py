@@ -74,6 +74,7 @@ from nitypes.bintime._dtypes import (
 )
 from nitypes.bintime._time_value_tuple import TimeValueTuple
 from nitypes.bintime._timedelta import TimeDelta
+from nitypes.bintime._timedelta_array import TimeDeltaArray
 
 __all__ = [
     "DateTime",
@@ -82,6 +83,7 @@ __all__ = [
     "CVITimeIntervalBase",
     "CVITimeIntervalDType",
     "TimeDelta",
+    "TimeDeltaArray",
     "TimeValueTuple",
 ]
 
