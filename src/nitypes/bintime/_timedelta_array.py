@@ -27,9 +27,11 @@ class TimeDeltaArray(Sequence[TimeDelta]):
         """Initialize a new TimeDeltaArray."""
         if value is None:
             value = []
-        self._array = np.zeros(len(value), dtype=CVITimeIntervalDType)
-        for index, entry in enumerate(value):
-            self._array[index] = entry.to_tuple().to_cvi()
+        self._array = np.fromiter(
+            (entry.to_tuple().to_cvi() for entry in value),
+            dtype=CVITimeIntervalDType,
+            count=len(value),
+        )
 
     @overload
     def __getitem__(  # noqa: D105 - missing docstring in magic method
