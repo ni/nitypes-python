@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from typing import (
-    Union,
     final,
     overload,
 )
@@ -23,7 +22,7 @@ class TimeDeltaArray(Sequence[TimeDelta]):
 
     def __init__(
         self,
-        value: Union[Sequence[TimeDelta], None] = None,
+        value: Sequence[TimeDelta] | None = None,
     ) -> None:
         """Initialize a new TimeDeltaArray."""
         if value is None:
@@ -43,7 +42,7 @@ class TimeDeltaArray(Sequence[TimeDelta]):
         self, index: slice
     ) -> Sequence[TimeDelta]: ...
 
-    def __getitem__(self, index: Union[int, slice]) -> Union[TimeDelta, Sequence[TimeDelta]]:
+    def __getitem__(self, index: int | slice) -> TimeDelta | Sequence[TimeDelta]:
         """Return the TimeDelta at the specified location."""
         if isinstance(index, int):
             entry = self._array[index]
