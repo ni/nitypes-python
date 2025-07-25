@@ -28,7 +28,25 @@ def test___list_arg___construct___returns_matching_array() -> None:
 
 
 @pytest.mark.parametrize(
-    "timedelta_list,exception",
+    "timedelta_list,expected_length",
+    (
+        (None, 0),
+        ([TimeDelta(3.14)], 1),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], 3),
+    ),
+)
+def test___timedelta_array___get_len___returns_length(
+    timedelta_list: list[TimeDelta], expected_length: int
+) -> None:
+    value = TimeDeltaArray(timedelta_list)
+
+    length = len(value)
+
+    assert length == expected_length
+
+
+@pytest.mark.parametrize(
+    "timedelta_list,raised_exception",
     (
         (None, IndexError()),
         ([TimeDelta(3.14)], None),
@@ -36,12 +54,12 @@ def test___list_arg___construct___returns_matching_array() -> None:
     ),
 )
 def test__timedelta_array___index_first___returns_timedelta(
-    timedelta_list: list[TimeDelta], exception: BaseException | None
+    timedelta_list: list[TimeDelta], raised_exception: BaseException | None
 ) -> None:
     value = TimeDeltaArray(timedelta_list)
 
-    if exception:
-        with pytest.raises(type(exception)):
+    if raised_exception:
+        with pytest.raises(type(raised_exception)):
             entry = value[0]
     else:
         entry = value[0]
