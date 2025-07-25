@@ -9,7 +9,6 @@ from typing import (
 import numpy as np
 import numpy.typing as npt
 
-from nitypes._numpy import asarray
 from nitypes.bintime import CVITimeIntervalDType, TimeDelta, TimeValueTuple
 
 
@@ -28,9 +27,9 @@ class TimeDeltaArray(Sequence[TimeDelta]):
         """Initialize a new TimeDeltaArray."""
         if value is None:
             value = []
-        self._array = asarray(
-            (entry.to_tuple().to_cvi() for entry in value), dtype=CVITimeIntervalDType
-        )
+        self._array = np.zeros(len(value), dtype=CVITimeIntervalDType)
+        for index, entry in enumerate(value):
+            self._array[index] = entry.to_tuple().to_cvi()
 
     @overload
     def __getitem__(  # noqa: D105 - missing docstring in magic method
