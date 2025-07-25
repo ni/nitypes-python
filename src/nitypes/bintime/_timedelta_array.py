@@ -8,6 +8,7 @@ from typing import (
 )
 
 import numpy as np
+import numpy.typing as npt
 
 from nitypes.bintime import CVITimeIntervalDType, TimeDelta, TimeValueTuple
 
@@ -18,7 +19,7 @@ class TimeDeltaArray(Sequence[TimeDelta]):
 
     __slots__ = ["_array"]
 
-    _array: np.ndarray
+    _array: npt.NDArray[np.void]
 
     def __init__(
         self,
