@@ -11,3 +11,12 @@ class TimeValueTuple(NamedTuple):
 
     fractional_seconds: int
     """The fractional seconds portion of a binary time value. This should be a uint64."""
+
+    @staticmethod
+    def from_cvi(lsb: int, msb: int) -> TimeValueTuple:
+        """Create a :class:`TimeValueTuple` from a ``CVIAbsoluteTime`` representation."""
+        return TimeValueTuple(whole_seconds=msb, fractional_seconds=lsb)
+
+    def to_cvi(self) -> tuple[int, int]:
+        """Return a representation as ``CVIAbsoluteTime``."""
+        return (self.fractional_seconds, self.whole_seconds)
