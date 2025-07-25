@@ -55,4 +55,4 @@ class TimeDeltaArray(Sequence[TimeDelta]):
 
     def __len__(self) -> int:
         """Return the length of the array."""
-        return np.size(self._array)
+        return len(self._array)
