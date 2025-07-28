@@ -41,16 +41,22 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     @overload
     def __getitem__(  # noqa: D105 - missing docstring in magic method
         self, index: slice
-    ) -> MutableSequence[TimeDelta]: ...
+    ) -> TimeDeltaArray: ...
 
-    def __getitem__(self, index: int | slice) -> TimeDelta | MutableSequence[TimeDelta]:
+    def __getitem__(self, index: int | slice) -> TimeDelta | TimeDeltaArray:
         """Return the TimeDelta at the specified location."""
         if isinstance(index, int):
             entry = self._array[index].item()
             as_tuple = TimeValueTuple.from_cvi(*entry)
             return TimeDelta.from_tuple(as_tuple)
         elif isinstance(index, slice):
-            raise NotImplementedError("TODO AB#3137071")
+            sliced_entries = self._array[index]
+            return TimeDeltaArray(
+                [
+                    TimeDelta.from_tuple(TimeValueTuple.from_cvi(*entry.item()))
+                    for entry in sliced_entries
+                ]
+            )
         else:
             raise TypeError("Index must be an int or slice")
 

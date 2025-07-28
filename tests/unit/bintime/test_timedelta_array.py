@@ -64,3 +64,26 @@ def test__timedelta_array___index_first___returns_timedelta(
     else:
         entry = value[0]
         assert entry == timedelta_list[0]
+
+
+def test___timedelta_array___slice___returns_slice() -> None:
+    value = TimeDeltaArray(
+        [
+            TimeDelta(-1),
+            TimeDelta(3.14),
+            TimeDelta(20.26),
+            TimeDelta(500),
+            TimeDelta(0x12345678_90ABCDEF),
+        ]
+    )
+
+    selected = value[::2]
+
+    expected = TimeDeltaArray(
+        [
+            TimeDelta(-1),
+            TimeDelta(20.26),
+            TimeDelta(0x12345678_90ABCDEF),
+        ]
+    )
+    assert all(selected._array == expected._array)
