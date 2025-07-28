@@ -45,6 +45,8 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
     def __getitem__(self, index: int | slice) -> TimeDelta | TimeDeltaArray:
         """Return the TimeDelta at the specified location."""
+        if isinstance(index, bool):
+            raise TypeError("Index must be an int or slice")
         if isinstance(index, int):
             entry = self._array[index].item()
             as_tuple = TimeValueTuple.from_cvi(*entry)

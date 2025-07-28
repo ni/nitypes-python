@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 from typing_extensions import assert_type
 
@@ -28,7 +30,7 @@ def test___list_arg___construct___returns_matching_array() -> None:
 
 
 @pytest.mark.parametrize(
-    "timedelta_list,expected_length",
+    ("timedelta_list", "expected_length"),
     (
         (None, 0),
         ([TimeDelta(3.14)], 1),
@@ -46,7 +48,7 @@ def test___timedelta_array___get_len___returns_length(
 
 
 @pytest.mark.parametrize(
-    "timedelta_list,raised_exception",
+    ("timedelta_list", "raised_exception"),
     (
         (None, IndexError()),
         ([TimeDelta(3.14)], None),
@@ -87,3 +89,20 @@ def test___timedelta_array___slice___returns_slice() -> None:
         ]
     )
     assert all(selected._array == expected._array)
+
+
+@pytest.mark.parametrize(
+    "indexer",
+    (
+        "0",
+        1.0,
+        True,
+        None,
+        [1, 2, 3],
+    ),
+)
+def test___timedelta_array___index_unsupported___raises(indexer: Any) -> None:
+    value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(TypeError):
+        _ = value[indexer]
