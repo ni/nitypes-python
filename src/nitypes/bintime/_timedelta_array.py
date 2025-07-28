@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Collection, MutableSequence
+from collections.abc import Collection, Iterable, MutableSequence
 from typing import (
     final,
     overload,
@@ -57,3 +57,33 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __len__(self) -> int:
         """Return the length of the array."""
         return len(self._array)
+
+    @overload
+    def __setitem__(  # noqa: D105 - missing docstring in magic method
+        self, index: int, value: TimeDelta
+    ) -> None: ...
+
+    @overload
+    def __setitem__(  # noqa: D105 - missing docstring in magic method
+        self, index: slice, value: Iterable[TimeDelta]
+    ) -> None: ...
+
+    def __setitem__(self, index: int | slice, value: TimeDelta | Iterable[TimeDelta]) -> None:
+        """Set a new value for TimeDelta at the specified location."""
+        raise NotImplementedError("TODO AB#3137071")
+
+    @overload
+    def __delitem__(self, index: int) -> None: ...  # noqa: D105 - missing docstring in magic method
+
+    @overload
+    def __delitem__(  # noqa: D105 - missing docstring in magic method
+        self, index: slice
+    ) -> None: ...
+
+    def __delitem__(self, index: int | slice) -> None:
+        """Delete the value at the specified location."""
+        raise NotImplementedError("TODO AB#3137071")
+
+    def insert(self, index: int, value: TimeDelta) -> None:
+        """Insert the value before the specified index."""
+        raise NotImplementedError("TODO AB#3137071")
