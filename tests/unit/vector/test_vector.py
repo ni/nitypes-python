@@ -32,6 +32,7 @@ def test___no_data_values_no_type___create___raises_type_error() -> None:
 def test___no_data_values_bool_type___create___creates_with_bool_type() -> None:
     data = Vector([], values_type=bool)
 
+    assert_type(data._values, list[bool])
     assert data._values == []
     assert data.units == ""
     assert data._values_type == bool
@@ -40,6 +41,7 @@ def test___no_data_values_bool_type___create___creates_with_bool_type() -> None:
 def test___bool_data_values___create___creates_with_bool_data_and_default_units() -> None:
     data = Vector([True, False])
 
+    assert_type(data._values[0], bool)
     assert data._values == [True, False]
     assert data.units == ""
 
@@ -86,6 +88,13 @@ def test___invalid_data_value___create___raises_type_error(data_value: Any) -> N
         _ = Vector(data_value)
 
     assert exc.value.args[0].startswith("The vector input data must be a bool, int, float, or str.")
+
+
+def test___mixed_data_values___create___raises_type_error() -> None:
+    with pytest.raises(TypeError) as exc:
+        _ = Vector([True, "string", 1.0])
+
+    assert exc.value.args[0].startswith("All values in the values input must be of the same type.")
 
 
 ###############################################################################
