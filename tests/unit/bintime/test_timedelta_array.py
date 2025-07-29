@@ -126,7 +126,7 @@ def test___timedelta_array___slice___returns_slice() -> None:
         [1, 2, 3],
     ),
 )
-def test___timedelta_array___index_unsupported___raises(indexer: Any) -> None:
+def test___timedelta_array___invalid_index___raises(indexer: Any) -> None:
     value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
 
     with pytest.raises(TypeError):
@@ -222,7 +222,7 @@ def test___timedelta_array___set_by_slice___updates_array(
         [1, 2, 3],
     ),
 )
-def test___timedelta_array___set_unsupported_index___raises(indexer: Any) -> None:
+def test___timedelta_array___set_invalid_index___raises(indexer: Any) -> None:
     value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
     new_entry = TimeDelta(-100)
 
@@ -240,7 +240,7 @@ def test___timedelta_array___set_unsupported_index___raises(indexer: Any) -> Non
         [1, 2, 3],
     ),
 )
-def test___timedelta_array___set_unsupported_value___raises(new_entry: Any) -> None:
+def test___timedelta_array___set_invalid_value___raises(new_entry: Any) -> None:
     value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
 
     with pytest.raises(TypeError):
@@ -374,8 +374,82 @@ def test___timedelta_array___delete_by_slice___removes_items(
         [1, 2, 3],
     ),
 )
-def test___timedelta_array___delete_unsupported_index___raises(indexer: Any) -> None:
+def test___timedelta_array___delete_invalid_index___raises(indexer: Any) -> None:
     value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
 
     with pytest.raises(TypeError):
         del value[indexer]
+
+
+###############
+# insert()
+###############
+
+
+@pytest.mark.parametrize(
+    ("initial_value", "index"),
+    (
+        # Empty array
+        (None, 0),
+        (None, 1),
+        (None, 3),
+        (None, 10),
+        (None, -1),
+        (None, -2),
+        (None, -10),
+        # Existing entries
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], 0),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], 1),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], 3),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], 10),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], -1),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], -3),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], -10),
+    ),
+)
+def test___timedelta_array___insert_value___inserts(
+    initial_value: list[TimeDelta], index: int
+) -> None:
+    value = TimeDeltaArray(initial_value)
+    inserted_value = TimeDelta(0)
+
+    value.insert(index, inserted_value)
+
+    expected_value = initial_value.copy() if initial_value else []
+    expected_value.insert(index, inserted_value)
+    expected = TimeDeltaArray(expected_value)
+    assert np.array_equal(value._array, expected._array)
+
+
+@pytest.mark.parametrize(
+    ("index"),
+    (
+        "0",
+        1.0,
+        True,
+        None,
+        [1, 2, 3],
+    ),
+)
+def test___timedelta_array___insert_invalid_index___raises(index: int) -> None:
+    value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(TypeError):
+        value.insert(index, TimeDelta(0))
+
+
+@pytest.mark.parametrize(
+    ("value"),
+    (
+        "0",
+        1.0,
+        True,
+        None,
+        [1, 2, 3],
+    ),
+)
+def test___timedelta_array___insert_invalid_value___raises(value: Any) -> None:
+    value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(TypeError):
+        value.insert(0, value)

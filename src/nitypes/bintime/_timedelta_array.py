@@ -118,4 +118,14 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
     def insert(self, index: int, value: TimeDelta) -> None:
         """Insert the value before the specified index."""
-        raise NotImplementedError("TODO AB#3137071")
+        if isinstance(index, bool):
+            raise TypeError("Index must be an int")
+        if not isinstance(index, int):
+            raise TypeError("Index must be an int")
+        if not isinstance(value, TimeDelta):
+            raise TypeError("Cannot assign value that is not of type TimeDelta")
+        lower = -len(self._array)
+        upper = len(self._array)
+        index = min(max(index, lower), upper)
+        as_cvi = value.to_tuple().to_cvi()
+        self._array = np.insert(self._array, index, as_cvi)
