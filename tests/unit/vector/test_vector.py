@@ -14,39 +14,57 @@ from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
 )
 
+OUT_OF_RANGE_INT = 0x7FFFFFFF
+
 
 ###############################################################################
 # create
 ###############################################################################
-def test___bool_data_values___create___creates_with_bool_data_and_default_units() -> None:
-    data = Vector([True, False, True])
+def test___no_data_values_no_type___create___raises_type_error() -> None:
+    with pytest.raises(TypeError) as exc:
+        _ = Vector([])
 
-    assert_type(data.values[0], bool)
-    assert data.values == [True, False, True]
+    assert exc.value.args[0].startswith(
+        "You must specify values as non-empty or specify values_type."
+    )
+
+
+def test___no_data_values_bool_type___create___creates_with_bool_type() -> None:
+    data = Vector([], values_type=bool)
+
+    assert data._values == []
+    assert data.units == ""
+    assert data._values_type == bool
+
+
+def test___bool_data_values___create___creates_with_bool_data_and_default_units() -> None:
+    data = Vector([True, False])
+
+    assert data._values == [True, False]
     assert data.units == ""
 
 
 def test___int_data_values___create___creates_with_int_data_and_default_units() -> None:
     data = Vector([10, 20, 30])
 
-    assert_type(data.values[0], int)
-    assert data.values == [10, 20, 30]
+    assert_type(data._values[0], int)
+    assert data._values == [10, 20, 30]
     assert data.units == ""
 
 
 def test___float_data_value___create___creates_scalar_data_with_data_and_default_units() -> None:
     data = Vector([20.2, 30.3, 40.4])
 
-    assert_type(data.values[0], float)
-    assert data.values == [20.2, 30.3, 40.4]
+    assert_type(data._values[0], float)
+    assert data._values == [20.2, 30.3, 40.4]
     assert data.units == ""
 
 
 def test___str_data_value___create___creates_scalar_data_with_data_and_default_units() -> None:
     data = Vector(["one", "two"])
 
-    assert_type(data.values[0], str)
-    assert data.values == ["one", "two"]
+    assert_type(data._values[0], str)
+    assert data._values == ["one", "two"]
     assert data.units == ""
 
 
@@ -58,7 +76,7 @@ def test___data_value_and_units___create___creates_scalar_data_with_data_and_uni
     expected_data = [data_value] * 5
     data = Vector(expected_data, units)
 
-    assert data.values == expected_data
+    assert data._values == expected_data
     assert data.units == units
 
 
@@ -71,6 +89,66 @@ def test___invalid_data_value___create___raises_type_error(data_value: Any) -> N
 
 
 ###############################################################################
+# get_item
+###############################################################################
+def test___vector_with_data___get_item_at_index___returns_correct_value() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    assert vector[0] == 1
+    assert vector[1] == 2
+    assert vector[2] == 3
+
+
+def test___vector_with_data___get_item_at_slice___returns_correct_values() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    assert vector[0:2] == [1, 2]
+    assert vector[1:3] == [2, 3]
+    assert vector[0:] == [1, 2, 3]
+    assert vector[:1] == [1]
+
+
+###############################################################################
+# set_item
+###############################################################################
+def test___vector_with_data___set_item_at_index___value_set_correctly() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    vector[1] = 4
+
+    assert vector._values == [1, 4, 3]
+
+
+def test___vector_with_data___set_item_at_slice___values_set_correctly() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    vector[0:2] = [6, 7]
+    assert vector._values == [6, 7, 3]
+
+
+def test___vector_with_int_data___set_out_of_range_int_at_index___raises_value_error() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    with pytest.raises(ValueError) as exc:
+        vector[1] = OUT_OF_RANGE_INT
+
+    assert exc.value.args[0].startswith(
+        "The integer vector value must be a within the range of Int32."
+    )
+
+
+def test___vector_with_int_data___set_out_of_range_int_at_slice___raises_value_error() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    with pytest.raises(ValueError) as exc:
+        vector[0:2] = [OUT_OF_RANGE_INT, 7]
+
+    assert exc.value.args[0].startswith(
+        "The integer vector value must be a within the range of Int32."
+    )
+
+
+###############################################################################
 # append
 ###############################################################################
 def test___vector_with_data___append_same_type___values_appended() -> None:
@@ -78,7 +156,7 @@ def test___vector_with_data___append_same_type___values_appended() -> None:
 
     vector.append(4)
 
-    assert vector.values == [1, 2, 3, 4]
+    assert vector._values == [1, 2, 3, 4]
 
 
 def test___vector_with_data___append_different_type___raises_type_error() -> None:
@@ -87,9 +165,25 @@ def test___vector_with_data___append_different_type___raises_type_error() -> Non
     with pytest.raises(TypeError) as exc:
         vector.append(True)
 
+    assert exc.value.args[0].startswith("Input type does not match existing type.")
+
+
+def test___vector_with_int_data___append_value_out_of_range___raises_value_error() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    with pytest.raises(ValueError) as exc:
+        vector.append(OUT_OF_RANGE_INT)
+
     assert exc.value.args[0].startswith(
-        "The datatype of the appended value must match the type of the existing vector values"
+        "The integer vector value must be a within the range of Int32."
     )
+
+
+def test___no_data_values_bool_type___append___appends_bool_data() -> None:
+    data = Vector([], values_type=bool)
+    data.append(True)
+
+    assert data._values == [True]
 
 
 ###############################################################################
@@ -100,7 +194,7 @@ def test___vector_with_data___extend_same_type___values_extended() -> None:
 
     vector.extend([4, 5])
 
-    assert vector.values == [1, 2, 3, 4, 5]
+    assert vector._values == [1, 2, 3, 4, 5]
 
 
 def test___vector_with_data___extend_different_type___raises_type_error() -> None:
@@ -109,9 +203,73 @@ def test___vector_with_data___extend_different_type___raises_type_error() -> Non
     with pytest.raises(TypeError) as exc:
         vector.extend([True, False])
 
+    assert exc.value.args[0].startswith("Input type does not match existing type.")
+
+
+def test___vector_with_data___extend_mixed_type___raises_type_error() -> None:
+    vector = Vector([1.0, 2.0, 3.0], "volts")
+
+    with pytest.raises(TypeError) as exc:
+        vector.extend([4.0, False, 5.0])
+
+    assert exc.value.args[0].startswith("Input type does not match existing type.")
+
+
+def test___vector_with_int_data___extend_value_out_of_range___raises_value_error() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    with pytest.raises(ValueError) as exc:
+        vector.extend([5, 6, OUT_OF_RANGE_INT])
+
     assert exc.value.args[0].startswith(
-        "The datatype of the extended values must match the type of the existing vector values"
+        "The integer vector value must be a within the range of Int32."
     )
+
+
+def test___no_data_values_bool_type___extend___extends_bool_data() -> None:
+    data = Vector([], values_type=bool)
+    data.extend([True, False])
+
+    assert data._values == [True, False]
+
+
+###############################################################################
+# delete
+###############################################################################
+def test___vector_with_data___delete_at_index___value_deleted() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    del vector[1]
+
+    assert vector._values == [1, 3]
+
+
+def test___vector_with_data___delete_at_slice___values_deleted() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    del vector[1:3]
+
+    assert vector._values == [1]
+
+
+###############################################################################
+# remove
+###############################################################################
+def test___vector_with_data___remove_value___value_removed() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    vector.remove(2)
+
+    assert vector._values == [1, 3]
+
+
+###############################################################################
+# length
+###############################################################################
+def test___vector_with_data___check_length___length_correct() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    assert len(vector) == 3
 
 
 ###############################################################################
