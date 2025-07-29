@@ -1,3 +1,11 @@
+"""Vector data type for NI Python APIs.
+
+Vector Data Type
+=================
+* :class:`Vector`: A vector data object represents an array of scalar values with units information.
+  Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and :any:`str`.
+"""
+
 from __future__ import annotations
 
 from collections.abc import Iterable, MutableSequence
@@ -11,11 +19,11 @@ from nitypes.waveform._extended_properties import (
     ExtendedPropertyDictionary,
 )
 
-_VectorType = TypeVar("_VectorType", bound=Union[bool, int, float, str])
+VectorType = TypeVar("VectorType", bound=Union[bool, int, float, str])
 
 
 @final
-class Vector(MutableSequence[_VectorType]):
+class Vector(MutableSequence[VectorType]):
     """A Vector of scalar values with units information.
 
     Constructing
@@ -39,16 +47,16 @@ class Vector(MutableSequence[_VectorType]):
         "_extended_properties",
     ]
 
-    _values: list[_VectorType]
-    _values_type: type[_VectorType]
+    _values: list[VectorType]
+    _values_type: type[VectorType]
     _extended_properties: ExtendedPropertyDictionary
 
     def __init__(
         self,
-        values: Iterable[_VectorType],
+        values: Iterable[VectorType],
         units: str = "",
         *,
-        values_type: type[_VectorType] | None = None,
+        values_type: type[VectorType] | None = None,
     ) -> None:
         """Initialize a new vector.
 
@@ -109,30 +117,30 @@ class Vector(MutableSequence[_VectorType]):
     @overload
     def __getitem__(  # noqa: D105 - missing docstring in magic method
         self, index: int
-    ) -> _VectorType: ...
+    ) -> VectorType: ...
 
     @overload
     def __getitem__(  # noqa: D105 - missing docstring in magic method
         self, index: slice
-    ) -> MutableSequence[_VectorType]: ...
+    ) -> MutableSequence[VectorType]: ...
 
     @override
-    def __getitem__(self, index: int | slice) -> _VectorType | MutableSequence[_VectorType]:
+    def __getitem__(self, index: int | slice) -> VectorType | MutableSequence[VectorType]:
         """Return the TimeDelta at the specified location."""
         return self._values[index]
 
     @overload
     def __setitem__(  # noqa: D105 - missing docstring in magic method
-        self, index: int, value: _VectorType
+        self, index: int, value: VectorType
     ) -> None: ...
 
     @overload
     def __setitem__(  # noqa: D105 - missing docstring in magic method
-        self, index: slice, value: Iterable[_VectorType]
+        self, index: slice, value: Iterable[VectorType]
     ) -> None: ...
 
     @override
-    def __setitem__(self, index: int | slice, value: _VectorType | Iterable[_VectorType]) -> None:
+    def __setitem__(self, index: int | slice, value: VectorType | Iterable[VectorType]) -> None:
         """Set value(s) at the specified location."""
         if isinstance(index, int):
             if not isinstance(value, self._values_type):
@@ -164,7 +172,7 @@ class Vector(MutableSequence[_VectorType]):
         """Return the length of the Vector."""
         return len(self._values)
 
-    def insert(self, index: int, value: _VectorType) -> None:
+    def insert(self, index: int, value: VectorType) -> None:
         """Insert a value at the specified location."""
         if not isinstance(value, self._values_type):
             raise self._create_value_mismatch_exception(value)
@@ -204,7 +212,7 @@ class Vector(MutableSequence[_VectorType]):
             raise invalid_arg_value("integer vector value", "within the range of Int32", value)
 
     def _create_value_mismatch_exception(
-        self, value: _VectorType | Iterable[_VectorType]
+        self, value: VectorType | Iterable[VectorType]
     ) -> TypeError:
         input_type = type(value)
         if isinstance(value, Iterable) and not isinstance(value, str):

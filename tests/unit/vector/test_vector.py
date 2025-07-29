@@ -8,7 +8,7 @@ import pytest
 from typing_extensions import assert_type
 
 from nitypes.vector import Vector
-from nitypes.vector._vector import _VectorType
+from nitypes.vector import VectorType
 from nitypes.waveform._extended_properties import (
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
@@ -285,7 +285,7 @@ def test___vector_with_data___check_length___length_correct() -> None:
     ],
 )
 def test___same_value___comparison___equal(
-    left: Vector[_VectorType], right: Vector[_VectorType]
+    left: Vector[VectorType], right: Vector[VectorType]
 ) -> None:
     assert left == right
 
@@ -300,7 +300,7 @@ def test___same_value___comparison___equal(
     ],
 )
 def test___different_values___comparison___not_equal(
-    left: Vector[_VectorType], right: Vector[_VectorType]
+    left: Vector[VectorType], right: Vector[VectorType]
 ) -> None:
     assert left != right
 
@@ -374,7 +374,7 @@ def test___vector_with_units___get_extended_properties___returns_correct_diction
         Vector(["a", "b"], ""),
     ],
 )
-def test___various_values___copy___makes_copy(value: Vector[_VectorType]) -> None:
+def test___various_values___copy___makes_copy(value: Vector[VectorType]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
@@ -393,7 +393,7 @@ def test___various_values___copy___makes_copy(value: Vector[_VectorType]) -> Non
         Vector(["a", "b"], ""),
     ],
 )
-def test___various_values___pickle_unpickle___makes_copy(value: Vector[_VectorType]) -> None:
+def test___various_values___pickle_unpickle___makes_copy(value: Vector[VectorType]) -> None:
     new_value = pickle.loads(pickle.dumps(value))
     assert new_value is not value
     assert new_value == value
