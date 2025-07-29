@@ -78,7 +78,26 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
     def __setitem__(self, index: int | slice, value: TimeDelta | Iterable[TimeDelta]) -> None:
         """Set a new value for TimeDelta at the specified location."""
-        raise NotImplementedError("TODO AB#3137071")
+        if isinstance(index, bool):
+            raise TypeError("Index must be an int or slice")
+        if isinstance(index, int):
+            if not isinstance(value, TimeDelta):
+                raise TypeError("Cannot assign value that is not of type TimeDelta")
+            self._array[index] = value.to_tuple().to_cvi()
+        elif isinstance(index, slice):
+            if not isinstance(value, Iterable):
+                raise TypeError("Cannot assign a slice with a non-iterable")
+            if not all(isinstance(item, TimeDelta) for item in value):
+                raise TypeError("Cannot assign values that are not of type TimeDelta")
+            selected_count = len(range(*index.indices(len(self))))
+            values = list(value)
+            new_entry_count = len(values)
+            if new_entry_count != selected_count:
+                message = f"Cannot assign slice with unmatched length. Expected {selected_count} but received {new_entry_count})"
+                raise ValueError(message)
+            self._array[index] = [item.to_tuple().to_cvi() for item in values]
+        else:
+            raise TypeError("Index must be an int or slice")
 
     @overload
     def __delitem__(self, index: int) -> None: ...  # noqa: D105 - missing docstring in magic method
