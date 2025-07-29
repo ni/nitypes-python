@@ -9,15 +9,18 @@ Vector Data Type
 from __future__ import annotations
 
 from collections.abc import Iterable, MutableSequence
-from typing import overload, Any, Union
+from typing import TYPE_CHECKING, overload, Any, Union
 
 from typing_extensions import TypeVar, final, override
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
-from nitypes.waveform._extended_properties import (
-    UNIT_DESCRIPTION,
-    ExtendedPropertyDictionary,
-)
+from nitypes.waveform._extended_properties import UNIT_DESCRIPTION
+
+if TYPE_CHECKING:
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.waveform import ExtendedPropertyDictionary
+else:
+    from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
 
 VectorType = TypeVar("VectorType", bound=Union[bool, int, float, str])
 
