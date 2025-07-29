@@ -109,7 +109,12 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
     def __delitem__(self, index: int | slice) -> None:
         """Delete the value at the specified location."""
-        raise NotImplementedError("TODO AB#3137071")
+        if isinstance(index, bool):
+            raise TypeError("Index must be an int or slice")
+        if isinstance(index, (int, slice)):
+            self._array = np.delete(self._array, index)
+        else:
+            raise TypeError("Index must be an int or slice")
 
     def insert(self, index: int, value: TimeDelta) -> None:
         """Insert the value before the specified index."""

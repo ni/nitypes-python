@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
 import pytest
 from typing_extensions import assert_type
 
@@ -112,7 +113,7 @@ def test___timedelta_array___slice___returns_slice() -> None:
             TimeDelta(0x12345678_90ABCDEF),
         ]
     )
-    assert all(selected._array == expected._array)
+    assert np.array_equal(selected._array, expected._array)
 
 
 @pytest.mark.parametrize(
@@ -208,7 +209,7 @@ def test___timedelta_array___set_by_slice___updates_array(
 
     value[indexer] = new_entries
 
-    assert all(value._array == expected_result._array)
+    assert np.array_equal(value._array, expected_result._array)
 
 
 @pytest.mark.parametrize(
@@ -282,3 +283,99 @@ def test___timedelta_array___set_mixed_slice___raises(new_entries: list[Any]) ->
 
     with pytest.raises(TypeError):
         value[::2] = new_entries
+
+
+###############
+# __delitem__()
+###############
+
+
+@pytest.mark.parametrize(
+    ("timedelta_list", "indexer", "raised_exception"),
+    (
+        # First index
+        (None, 0, IndexError()),
+        ([TimeDelta(3.14)], 0, None),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], 0, None),
+        # Last index
+        (None, -1, IndexError()),
+        ([TimeDelta(3.14)], -1, None),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], -1, None),
+        # Out of bounds index
+        (None, 10, IndexError()),
+        ([TimeDelta(3.14)], 10, IndexError()),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], 10, IndexError()),
+    ),
+)
+def test___timedelta_array___delete_by_index___removes_item(
+    timedelta_list: list[TimeDelta], indexer: int, raised_exception: BaseException | None
+) -> None:
+    value = TimeDeltaArray(timedelta_list)
+
+    if raised_exception:
+        with pytest.raises(type(raised_exception)):
+            del value[indexer]
+    else:
+        modified = timedelta_list.copy()
+        del modified[indexer]
+        del value[indexer]
+        expected = TimeDeltaArray(modified)
+        assert np.array_equal(value._array, expected._array)
+
+
+@pytest.mark.parametrize(
+    ("indexer", "expected_result"),
+    (
+        (
+            slice(1, 4),
+            TimeDeltaArray(
+                [
+                    TimeDelta(-1),
+                    TimeDelta(0x12345678_90ABCDEF),
+                ]
+            ),
+        ),
+        (
+            slice(None, None, 2),
+            TimeDeltaArray(
+                [
+                    TimeDelta(3.14),
+                    TimeDelta(500),
+                ]
+            ),
+        ),
+    ),
+)
+def test___timedelta_array___delete_by_slice___removes_items(
+    indexer: slice, expected_result: TimeDeltaArray
+) -> None:
+    value = TimeDeltaArray(
+        [
+            TimeDelta(-1),
+            TimeDelta(3.14),
+            TimeDelta(20.26),
+            TimeDelta(500),
+            TimeDelta(0x12345678_90ABCDEF),
+        ]
+    )
+
+    del value[indexer]
+
+    assert np.array_equal(value._array, expected_result._array)
+
+
+@pytest.mark.parametrize(
+    "indexer",
+    (
+        "0",
+        1.0,
+        True,
+        None,
+        [1, 2, 3],
+    ),
+)
+def test___timedelta_array___delete_unsupported_index___raises(indexer: Any) -> None:
+    value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(TypeError):
+        del value[indexer]
