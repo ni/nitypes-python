@@ -48,24 +48,33 @@ def test___timedelta_array___get_len___returns_length(
 
 
 @pytest.mark.parametrize(
-    ("timedelta_list", "raised_exception"),
+    ("timedelta_list", "indexer", "raised_exception"),
     (
-        (None, IndexError()),
-        ([TimeDelta(3.14)], None),
-        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], None),
+        # First index
+        (None, 0, IndexError()),
+        ([TimeDelta(3.14)], 0, None),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], 0, None),
+        # Last index
+        (None, -1, IndexError()),
+        ([TimeDelta(3.14)], -1, None),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], -1, None),
+        # Out of bounds index
+        (None, 10, IndexError()),
+        ([TimeDelta(3.14)], 10, IndexError()),
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], 10, IndexError()),
     ),
 )
-def test__timedelta_array___index_first___returns_timedelta(
-    timedelta_list: list[TimeDelta], raised_exception: BaseException | None
+def test__timedelta_array___index___returns_timedelta(
+    timedelta_list: list[TimeDelta], indexer: int, raised_exception: BaseException | None
 ) -> None:
     value = TimeDeltaArray(timedelta_list)
 
     if raised_exception:
         with pytest.raises(type(raised_exception)):
-            entry = value[0]
+            entry = value[indexer]
     else:
-        entry = value[0]
-        assert entry == timedelta_list[0]
+        entry = value[indexer]
+        assert entry == timedelta_list[indexer]
 
 
 def test___timedelta_array___slice___returns_slice() -> None:
