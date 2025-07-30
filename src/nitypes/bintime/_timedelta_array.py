@@ -138,3 +138,17 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         if not isinstance(other, TimeDeltaArray):
             return NotImplemented
         return np.array_equal(self._array, other._array)
+
+    def __reduce__(self) -> tuple[Any, ...]:
+        """Return object state for pickling."""
+        return (self.__class__, (list(iter(self)), ))
+
+    def __repr__(self) -> str:
+        """Return repr(self)."""
+        ctor_args = list(iter(self))
+        return f"{self.__class__.__module__}.{self.__class__.__name__}({ctor_args})"
+
+    def __str__(self) -> str:
+        """Return str(self)."""
+        values = list(iter(self))
+        return f"[{'; '.join(str(v) for v in values)}]"

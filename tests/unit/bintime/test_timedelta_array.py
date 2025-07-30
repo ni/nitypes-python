@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import copy
+import pickle
 from typing import Any, Sequence
 
 import numpy as np
@@ -756,6 +758,11 @@ def test___timedelta_array___contains___returns_presence() -> None:
     assert TimeDelta(12.34) not in array
 
 
+#########
+# Buitins
+#########
+
+
 def test___same_values___equals___returns_equal() -> None:
     array1 = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
     array2 = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
@@ -770,3 +777,83 @@ def test___different_values___not_equals___returns_not_equal() -> None:
 
     assert array1 != array2
     assert array1 != None
+
+
+def test___timedelta_array___min___returns_minimum() -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    assert min(array) == TimeDelta(-1)
+
+
+def test___timedelta_array___max___returns_maximum() -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    assert max(array) == TimeDelta(500)
+
+
+def test___timedelta_array___copy___returns_copy() -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    copied = copy.copy(array)
+
+    assert array == copied
+    assert array is not copied
+
+
+def test___timedelta_array___sort___sorts_array() -> None:
+    array = TimeDeltaArray([TimeDelta(20.26), TimeDelta(-1), TimeDelta(500)])
+
+    ordered = sorted(array)
+
+    expected = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
+    assert ordered == expected
+
+
+@pytest.mark.parametrize(
+    ("value", "expected_str"),
+    (
+        (TimeDeltaArray(), "[]"),
+        (TimeDeltaArray([TimeDelta(-1)]), "[-1 day, 23:59:59]"),
+        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26)]), "[-1 day, 23:59:59; 0:00:20.260000000000001563]"),
+        (TimeDeltaArray([TimeDelta(20.26), TimeDelta(-1), TimeDelta(500)]), "[0:00:20.260000000000001563; -1 day, 23:59:59; 0:08:20]")
+    ),
+)
+def test___timedelta_array___str___looks_ok(value: TimeDeltaArray, expected_str: str) -> None:
+    assert str(value) == expected_str
+
+
+@pytest.mark.parametrize(
+    ("value", "expected_repr"),
+    (
+        (TimeDeltaArray(), "nitypes.bintime.TimeDeltaArray([])"),
+        (TimeDeltaArray([TimeDelta(-1)]), "nitypes.bintime.TimeDeltaArray([nitypes.bintime.TimeDelta(Decimal('-1'))])"),
+        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26)]), "nitypes.bintime.TimeDeltaArray([nitypes.bintime.TimeDelta(Decimal('-1')), nitypes.bintime.TimeDelta(Decimal('20.2600000000000015631940'))])"),
+        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]), "nitypes.bintime.TimeDeltaArray([nitypes.bintime.TimeDelta(Decimal('-1')), nitypes.bintime.TimeDelta(Decimal('20.2600000000000015631940')), nitypes.bintime.TimeDelta(Decimal('500'))])")
+    ),
+)
+def test___timedelta_array___repr___looks_ok(value: TimeDeltaArray, expected_repr: str) -> None:
+    assert repr(value) == expected_repr
+
+
+def test___timedelta_array___pickle___references_public_modules() -> None:
+    value = TimeDeltaArray([TimeDelta(20.26), TimeDelta(-1), TimeDelta(500)])
+
+    pickled = pickle.dumps(value)
+
+    assert b"nitypes.bintime" in pickled
+    assert b"nitypes.bintime._timedelta_array" not in pickled
+
+
+@pytest.mark.parametrize(
+    ("value"),
+    (
+        (TimeDeltaArray()),
+        (TimeDeltaArray([TimeDelta(-1)])),
+        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26)])),
+        (TimeDeltaArray([TimeDelta(20.26), TimeDelta(-1), TimeDelta(500)]))
+    ),
+)
+def test___timedelta_array___pickle_unpickle___makes_copy(value: TimeDeltaArray) -> None:
+    new_value = pickle.loads(pickle.dumps(value))
+    assert new_value == value
+    assert new_value is not value

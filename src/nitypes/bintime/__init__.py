@@ -90,4 +90,5 @@ __all__ = [
 # Hide that it was defined in a helper file
 DateTime.__module__ = __name__
 TimeDelta.__module__ = __name__
+TimeDeltaArray.__module__ = __name__
 TimeValueTuple.__module__ = __name__
