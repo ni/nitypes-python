@@ -474,3 +474,299 @@ def test___timedelta_array___insert_invalid_value___raises(value: Any) -> None:
 
     with pytest.raises(TypeError):
         value.insert(0, value)
+
+
+#################
+# MutableSequence
+#################
+
+
+@pytest.mark.parametrize(
+    ("array", "item", "expected_count"),
+    (
+        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]), TimeDelta(12.34), 0),
+        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]), TimeDelta(-1), 1),
+        (TimeDeltaArray([TimeDelta(20.26), TimeDelta(20.26), TimeDelta(500)]), TimeDelta(20.26), 2),
+    ),
+)
+def test___timedelta_array___count___returns_matching_count(
+    array: TimeDeltaArray, item: TimeDelta, expected_count: int
+) -> None:
+    item_count = array.count(item)
+
+    assert item_count == expected_count
+
+
+@pytest.mark.parametrize(
+    ("array", "item", "expected_index"),
+    (
+        (TimeDeltaArray([TimeDelta(20.26), TimeDelta(20.26), TimeDelta(500)]), TimeDelta(20.26), 0),
+        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]), TimeDelta(20.26), 1),
+    ),
+)
+def test___timedelta_array___index___returns_matching_index(
+    array: TimeDeltaArray, item: TimeDelta, expected_index: int
+) -> None:
+    item_index = array.index(item)
+
+    assert item_index == expected_index
+
+
+def test___timedelta_array_no_item___index___raises() -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(ValueError):
+        _ = array.index(TimeDelta(12.34))
+
+
+def test___timedelta_array___append___adds_to_end() -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+    new_entry = TimeDelta(12.34)
+
+    array.append(new_entry)
+
+    expected = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500), TimeDelta(12.34)])
+    assert np.array_equal(array._array, expected._array)
+
+
+@pytest.mark.parametrize(
+    ("new_entry"),
+    (
+        (),
+        (True),
+        (13),
+        (12.34),
+        ("abc"),
+        ([]),
+        ([TimeDelta(-100)]),
+    ),
+)
+def test___timedelta_array___append_invalid_value___raises(new_entry: Any) -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(TypeError):
+        array.append(new_entry)
+
+
+@pytest.mark.parametrize(
+    ("new_entries"),
+    (
+        (),
+        ([]),
+        ([TimeDelta(12.34)]),
+        ([TimeDelta(12.34), TimeDelta(55.77)]),
+        (TimeDeltaArray()),
+        (TimeDeltaArray([TimeDelta(12.34)])),
+        (TimeDeltaArray([TimeDelta(12.34), TimeDelta(55.77)])),
+    ),
+)
+def test___timedelta_array___extend___adds_to_end(new_entries: Sequence[TimeDelta]) -> None:
+    original_items = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
+    array = TimeDeltaArray(original_items)
+
+    array.extend(new_entries)
+
+    assert len(array) == len(original_items) + len(new_entries)
+    separate_items = [*original_items, *new_entries]
+    expected_array = TimeDeltaArray(separate_items)
+    assert np.array_equal(array._array, expected_array._array)
+
+
+@pytest.mark.parametrize(
+    ("new_entries"),
+    (
+        (),
+        ([]),
+        ([TimeDelta(12.34)]),
+        ([TimeDelta(12.34), TimeDelta(55.77)]),
+        (TimeDeltaArray()),
+        (TimeDeltaArray([TimeDelta(12.34)])),
+        (TimeDeltaArray([TimeDelta(12.34), TimeDelta(55.77)])),
+    ),
+)
+def test___timedelta_array___plus_equals___adds_to_end(new_entries: Sequence[TimeDelta]) -> None:
+    original_items = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
+    array = TimeDeltaArray(original_items)
+
+    array += new_entries
+
+    assert len(array) == len(original_items) + len(new_entries)
+    separate_items = [*original_items, *new_entries]
+    expected_array = TimeDeltaArray(separate_items)
+    assert np.array_equal(array._array, expected_array._array)
+
+
+@pytest.mark.parametrize(
+    ("new_entries"),
+    (
+        (None),
+        (True),
+        (13),
+        (12.34),
+        ("abc"),
+        ([None]),
+        ([True]),
+        ([13]),
+        ([12.34]),
+        (["abc"]),
+    ),
+)
+def test___timedelta_array___extend_invalid_values___raises(new_entries: Any) -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(TypeError):
+        array.extend(new_entries)
+
+
+@pytest.mark.parametrize(
+    ("new_entries"),
+    (
+        (None),
+        (True),
+        (13),
+        (12.34),
+        ("abc"),
+        ([None]),
+        ([True]),
+        ([13]),
+        ([12.34]),
+        (["abc"]),
+    ),
+)
+def test___timedelta_array___plus_equals_invalid_values___raises(new_entries: Any) -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(TypeError):
+        array += new_entries
+
+
+# s *= n -- updates s with its contents repeated n times
+# From https://docs.python.org/3/library/stdtypes.html#mutable-sequence-types
+@pytest.mark.xfail(reason="not implemented", strict=True, raises=TypeError)
+def test___timedelta_array___times_equals___adds_repeated_to_end() -> None:
+    original_items = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
+    array = TimeDeltaArray(original_items)
+
+    # TypeError: unsupported operand type(s) for *=: 'TimeDeltaArray' and 'int'
+    array *= 2  # type:ignore
+
+
+# Zero and negative values of n clear the sequence.
+# From https://docs.python.org/3/library/stdtypes.html#mutable-sequence-types
+@pytest.mark.xfail(reason="not implemented", strict=True, raises=TypeError)
+def test___timedelta_array___times_equals_non_positive___empties_array() -> None:
+    original_items = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
+    array = TimeDeltaArray(original_items)
+
+    # TypeError: unsupported operand type(s) for *=: 'TimeDeltaArray' and 'int'
+    array *= 0  # type:ignore
+
+
+def test___timedelta_array___remove___removes_first_match() -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(20.26)])
+
+    array.remove(TimeDelta(20.26))
+
+    assert len(array) == 2
+    expected_array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26)])
+    assert np.array_equal(array._array, expected_array._array)
+
+
+@pytest.mark.parametrize(
+    ("item_to_remove"),
+    (
+        (),
+        (None),
+        (True),
+        (13),
+        (12.34),
+        ("abc"),
+        (TimeDelta(0)),
+    ),
+)
+def test___timedelta_array_no_item___remove___raises(item_to_remove: Any) -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(ValueError):
+        array.remove(item_to_remove)
+
+
+def test___timedelta_array___pop___removes_from_location() -> None:
+    original_values = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
+    array = TimeDeltaArray(original_values)
+
+    popped = array.pop()
+    assert popped == original_values[-1]
+    assert len(array) == 2
+    assert np.array_equal(array._array, TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26)])._array)
+
+    popped = array.pop(0)
+    assert popped == TimeDelta(-1)
+    assert len(array) == 1
+    assert np.array_equal(array._array, TimeDeltaArray([TimeDelta(20.26)])._array)
+
+
+def test___empty_timedelta_array___pop___raises() -> None:
+    array = TimeDeltaArray()
+
+    with pytest.raises(IndexError):
+        array.pop()
+
+
+def test___timedelta_array___pop_out_of_bounds___raises() -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(IndexError):
+        array.pop(10)
+
+
+def test___timedelta_array___reverse___reverses() -> None:
+    original_values = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
+    array = TimeDeltaArray(original_values)
+
+    array.reverse()
+
+    expected_order = original_values.copy()
+    expected_order.reverse()
+    expected_array = TimeDeltaArray(expected_order)
+    assert np.array_equal(array._array, expected_array._array)
+
+
+def test___timedelta_array___clear___empties_array() -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    array.clear()
+
+    assert len(array) == 0
+
+
+def test___timedelta_array___iterate___visits_entries() -> None:
+    original_values = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
+    array = TimeDeltaArray(original_values)
+
+    iterated = list(iter(array))
+
+    assert original_values == iterated
+
+
+def test___timedelta_array___contains___returns_presence() -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    assert TimeDelta(20.26) in array
+    assert TimeDelta(12.34) not in array
+
+
+def test___same_values___equals___returns_equal() -> None:
+    array1 = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+    array2 = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    assert array1 == array2
+    assert array2 == array1
+
+
+def test___different_values___not_equals___returns_not_equal() -> None:
+    array1 = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+    array2 = TimeDeltaArray([TimeDelta(-10), TimeDelta(200.26), TimeDelta(1500)])
+
+    assert array1 != array2
+    assert array1 != None

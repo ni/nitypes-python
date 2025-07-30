@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Collection, Iterable, MutableSequence
 from typing import (
+    Any,
     final,
     overload,
 )
@@ -131,3 +132,9 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         index = min(max(index, lower), upper)
         as_cvi = value.to_tuple().to_cvi()
         self._array = np.insert(self._array, index, as_cvi)
+
+    def __eq__(self, other: Any) -> bool:
+        """Return True if other is equal to this object."""
+        if not isinstance(other, TimeDeltaArray):
+            return NotImplemented
+        return np.array_equal(self._array, other._array)
