@@ -7,14 +7,11 @@ from typing import Any
 import pytest
 from typing_extensions import assert_type
 
-from nitypes.vector import Vector
-from nitypes.vector import VectorType
+from nitypes.vector import TScalar, Vector
 from nitypes.waveform._extended_properties import (
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
 )
-
-OUT_OF_RANGE_INT = 0x7FFFFFFF
 
 
 ###############################################################################
@@ -135,26 +132,11 @@ def test___vector_with_data___set_item_at_slice___values_set_correctly() -> None
     assert vector._values == [6, 7, 3]
 
 
-def test___vector_with_int_data___set_out_of_range_int_at_index___raises_value_error() -> None:
+def test___vector_with_data___set_item_at_slice_to_empty_list___values_set_correctly() -> None:
     vector = Vector([1, 2, 3], "volts")
 
-    with pytest.raises(ValueError) as exc:
-        vector[1] = OUT_OF_RANGE_INT
-
-    assert exc.value.args[0].startswith(
-        "The integer vector value must be a within the range of Int32."
-    )
-
-
-def test___vector_with_int_data___set_out_of_range_int_at_slice___raises_value_error() -> None:
-    vector = Vector([1, 2, 3], "volts")
-
-    with pytest.raises(ValueError) as exc:
-        vector[0:2] = [OUT_OF_RANGE_INT, 7]
-
-    assert exc.value.args[0].startswith(
-        "The integer vector value must be a within the range of Int32."
-    )
+    vector[0:2] = []
+    assert vector._values == [3]
 
 
 ###############################################################################
@@ -175,17 +157,6 @@ def test___vector_with_data___append_different_type___raises_type_error() -> Non
         vector.append(True)
 
     assert exc.value.args[0].startswith("Input type does not match existing type.")
-
-
-def test___vector_with_int_data___append_value_out_of_range___raises_value_error() -> None:
-    vector = Vector([1, 2, 3], "volts")
-
-    with pytest.raises(ValueError) as exc:
-        vector.append(OUT_OF_RANGE_INT)
-
-    assert exc.value.args[0].startswith(
-        "The integer vector value must be a within the range of Int32."
-    )
 
 
 def test___no_data_values_bool_type___append___appends_bool_data() -> None:
@@ -224,22 +195,19 @@ def test___vector_with_data___extend_mixed_type___raises_type_error() -> None:
     assert exc.value.args[0].startswith("Input type does not match existing type.")
 
 
-def test___vector_with_int_data___extend_value_out_of_range___raises_value_error() -> None:
-    vector = Vector([1, 2, 3], "volts")
-
-    with pytest.raises(ValueError) as exc:
-        vector.extend([5, 6, OUT_OF_RANGE_INT])
-
-    assert exc.value.args[0].startswith(
-        "The integer vector value must be a within the range of Int32."
-    )
-
-
 def test___no_data_values_bool_type___extend___extends_bool_data() -> None:
     data = Vector([], value_type=bool)
     data.extend([True, False])
 
     assert data._values == [True, False]
+
+
+def test___vector_with_data___extend_with_empty_list___values_unchanged() -> None:
+    vector = Vector([1, 2, 3], "volts")
+
+    vector.extend([])
+
+    assert vector._values == [1, 2, 3]
 
 
 ###############################################################################
@@ -293,9 +261,7 @@ def test___vector_with_data___check_length___length_correct() -> None:
         (Vector(["value"]), Vector(["value"])),
     ],
 )
-def test___same_value___comparison___equal(
-    left: Vector[VectorType], right: Vector[VectorType]
-) -> None:
+def test___same_value___comparison___equal(left: Vector[TScalar], right: Vector[TScalar]) -> None:
     assert left == right
 
 
@@ -309,7 +275,7 @@ def test___same_value___comparison___equal(
     ],
 )
 def test___different_values___comparison___not_equal(
-    left: Vector[VectorType], right: Vector[VectorType]
+    left: Vector[TScalar], right: Vector[TScalar]
 ) -> None:
     assert left != right
 
@@ -344,14 +310,18 @@ def test___various_values___repr___looks_ok(value: Vector[Any], expected_repr: s
 @pytest.mark.parametrize(
     "value, expected_str",
     [
-        (Vector([False, True]), "False, True"),
-        (Vector([10, 20]), "10, 20"),
-        (Vector([20.0, 20.1]), "20.0, 20.1"),
-        (Vector(["a", "b"]), "a, b"),
-        (Vector([False, True], "amps"), "False amps, True amps"),
-        (Vector([10, 20], "volts"), "10 volts, 20 volts"),
-        (Vector([20.0, 20.1], "watts"), "20.0 watts, 20.1 watts"),
-        (Vector(["a", "b"], ""), "a, b"),
+        (Vector([], value_type=bool), "[]"),
+        (Vector([], "volts", value_type=int), "[]"),
+        (Vector([10]), "[10]"),
+        (Vector([False, True]), "[False, True]"),
+        (Vector([10, 20]), "[10, 20]"),
+        (Vector([20.0, 20.1]), "[20.0, 20.1]"),
+        (Vector(["a", "b"]), "[a, b]"),
+        (Vector([10], "volts"), "[10 volts]"),
+        (Vector([False, True], "amps"), "[False amps, True amps]"),
+        (Vector([10, 20], "volts"), "[10 volts, 20 volts]"),
+        (Vector([20.0, 20.1], "watts"), "[20.0 watts, 20.1 watts]"),
+        (Vector(["a", "b"], ""), "[a, b]"),
     ],
 )
 def test___various_values___str___looks_ok(value: Vector[Any], expected_str: str) -> None:
@@ -391,7 +361,7 @@ def test___vector_with_units___set_units___units_updated_correctly() -> None:
         Vector(["a", "b"], ""),
     ],
 )
-def test___various_values___copy___makes_copy(value: Vector[VectorType]) -> None:
+def test___various_values___copy___makes_copy(value: Vector[TScalar]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
@@ -410,7 +380,7 @@ def test___various_values___copy___makes_copy(value: Vector[VectorType]) -> None
         Vector(["a", "b"], ""),
     ],
 )
-def test___various_values___pickle_unpickle___makes_copy(value: Vector[VectorType]) -> None:
+def test___various_values___pickle_unpickle___makes_copy(value: Vector[TScalar]) -> None:
     new_value = pickle.loads(pickle.dumps(value))
     assert new_value is not value
     assert new_value == value

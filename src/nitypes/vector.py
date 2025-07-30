@@ -2,8 +2,8 @@
 
 Vector Data Type
 =================
-* :class:`Vector`: A vector data object represents an array of scalar values with units information.
-  Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and :any:`str`.
+:class:`Vector`: A vector data object represents an array of scalar values with units information.
+Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and :any:`str`.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, overload, Any, Union
 
 from typing_extensions import TypeVar, final, override
 
-from nitypes._exceptions import invalid_arg_type, invalid_arg_value
+from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform._extended_properties import UNIT_DESCRIPTION
 
 if TYPE_CHECKING:
@@ -22,12 +22,12 @@ if TYPE_CHECKING:
 else:
     from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
 
-VectorType = TypeVar("VectorType", bound=Union[bool, int, float, str])
+TScalar = TypeVar("TScalar", bound=Union[bool, int, float, str])
 
 
 @final
-class Vector(MutableSequence[VectorType]):
-    """A Vector of scalar values with units information.
+class Vector(MutableSequence[TScalar]):
+    """A sequence of scalar values with units information.
 
     Constructing
     ^^^^^^^^^^^^
@@ -50,16 +50,16 @@ class Vector(MutableSequence[VectorType]):
         "_extended_properties",
     ]
 
-    _values: list[VectorType]
-    _value_type: type[VectorType]
+    _values: list[TScalar]
+    _value_type: type[TScalar]
     _extended_properties: ExtendedPropertyDictionary
 
     def __init__(
         self,
-        values: Iterable[VectorType],
+        values: Iterable[TScalar],
         units: str = "",
         *,
-        value_type: type[VectorType] | None = None,
+        value_type: type[TScalar] | None = None,
     ) -> None:
         """Initialize a new vector.
 
@@ -68,7 +68,7 @@ class Vector(MutableSequence[VectorType]):
             units: The units string associated with this data.
             value_type: The type of values that will be added to this Vector.
                 This parameter should only be used when creating a Vector with
-                an empty Iterable
+                an empty Iterable.
 
         Returns:
             A vector data object.
@@ -89,9 +89,6 @@ class Vector(MutableSequence[VectorType]):
 
                 if not isinstance(value, self._value_type):
                     raise TypeError("All values in the values input must be of the same type.")
-
-                if isinstance(value, int):
-                    self._validate_int_value(value)
 
         if not isinstance(units, str):
             raise invalid_arg_type("units", "str", units)
@@ -126,37 +123,36 @@ class Vector(MutableSequence[VectorType]):
     @overload
     def __getitem__(  # noqa: D105 - missing docstring in magic method
         self, index: int
-    ) -> VectorType: ...
+    ) -> TScalar: ...
 
     @overload
     def __getitem__(  # noqa: D105 - missing docstring in magic method
         self, index: slice
-    ) -> MutableSequence[VectorType]: ...
+    ) -> MutableSequence[TScalar]: ...
 
     @override
-    def __getitem__(self, index: int | slice) -> VectorType | MutableSequence[VectorType]:
+    def __getitem__(self, index: int | slice) -> TScalar | MutableSequence[TScalar]:
         """Return the TimeDelta at the specified location."""
         return self._values[index]
 
     @overload
     def __setitem__(  # noqa: D105 - missing docstring in magic method
-        self, index: int, value: VectorType
+        self, index: int, value: TScalar
     ) -> None: ...
 
     @overload
     def __setitem__(  # noqa: D105 - missing docstring in magic method
-        self, index: slice, value: Iterable[VectorType]
+        self, index: slice, value: Iterable[TScalar]
     ) -> None: ...
 
     @override
-    def __setitem__(self, index: int | slice, value: VectorType | Iterable[VectorType]) -> None:
+    def __setitem__(self, index: int | slice, value: TScalar | Iterable[TScalar]) -> None:
         """Set value(s) at the specified location."""
         if isinstance(index, int):
-            if not isinstance(value, self._value_type):
+            if isinstance(value, Iterable) and not isinstance(value, str):
+                raise TypeError("You cannot assign an Iterable to a vector index.")
+            elif not isinstance(value, self._value_type):
                 raise self._create_value_mismatch_exception(value)
-
-            if isinstance(value, int):
-                self._validate_int_value(value)
 
             self._values[index] = value
         else:  # slice
@@ -165,11 +161,11 @@ class Vector(MutableSequence[VectorType]):
             elif isinstance(value, str):  # Narrow the type to exclude string.
                 raise TypeError("You cannot assign a string to Vector slice.")
             else:
+                # Assigning an empty Iterable to a slice is valid, so we don't check for empty.
+                # If an empty Iterable is assigned to a slice, that slice is deleted.
                 for subval in value:
                     if not isinstance(subval, self._value_type):
                         raise self._create_value_mismatch_exception(subval)
-                    elif isinstance(subval, int):
-                        self._validate_int_value(subval)
 
             self._values[index] = value
 
@@ -181,14 +177,10 @@ class Vector(MutableSequence[VectorType]):
         """Return the length of the Vector."""
         return len(self._values)
 
-    def insert(self, index: int, value: VectorType) -> None:
+    def insert(self, index: int, value: TScalar) -> None:
         """Insert a value at the specified location."""
         if not isinstance(value, self._value_type):
             raise self._create_value_mismatch_exception(value)
-
-        if isinstance(value, int):
-            self._validate_int_value(value)
-
         self._values.insert(index, value)
 
     def __eq__(self, value: object, /) -> bool:
@@ -210,26 +202,15 @@ class Vector(MutableSequence[VectorType]):
         """Return str(self)."""
         if self.units:
             values_with_units = [f"{value} {self.units}" for value in self._values]
-            return ", ".join(values_with_units)
+            comma_delimited_str = ", ".join(values_with_units)
         else:
             values = [f"{value}" for value in self._values]
-            return ", ".join(values)
+            comma_delimited_str = ", ".join(values)
 
-    def _validate_int_value(self, value: int) -> None:
-        # The Vector proto type only supports 32 bit integers. Make sure we're in range.
-        if value <= -0x80000000 or value >= 0x7FFFFFFF:
-            raise invalid_arg_value("integer vector value", "within the range of Int32", value)
+        return f"[{comma_delimited_str}]"
 
-    def _create_value_mismatch_exception(
-        self, value: VectorType | Iterable[VectorType]
-    ) -> TypeError:
-        input_type = type(value)
-        if isinstance(value, Iterable) and not isinstance(value, str):
-            for subval in value:
-                input_type = type(subval)
-                break  # Checking one is enough.
-
+    def _create_value_mismatch_exception(self, value: Any) -> TypeError:
         return TypeError(
-            f"Input type does not match existing type. Input Type: {input_type} "
+            f"Input type does not match existing type. Input Type: {type(value)} "
             f"Existing Type: {self._value_type}"
         )
