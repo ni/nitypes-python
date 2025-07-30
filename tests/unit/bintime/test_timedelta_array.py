@@ -35,6 +35,21 @@ def test___list_arg___construct___returns_matching_array() -> None:
     assert (value._array[2]["msb"], value._array[2]["lsb"]) == TimeDelta(500).to_tuple()
 
 
+@pytest.mark.parametrize(
+    ("constructor_arg"),
+    (
+        ([TimeDelta(0), TimeDelta(15).to_tuple()]),
+        ([True, False]),
+        ([1, 2]),
+        ([10.0, 20.0]),
+        (["abc", "xyz"]),
+    ),
+)
+def test___mixed_arg___construct___raises(constructor_arg: list[Any]) -> None:
+    with pytest.raises(TypeError):
+        _ = TimeDeltaArray(constructor_arg)
+
+
 #######
 # len()
 #######

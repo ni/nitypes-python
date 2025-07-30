@@ -27,6 +27,8 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         """Initialize a new TimeDeltaArray."""
         if value is None:
             value = []
+        if not all(isinstance(item, TimeDelta) for item in value):
+            raise TypeError("Cannot assign values that are not of type TimeDelta")
         self._array = np.fromiter(
             (entry.to_tuple().to_cvi() for entry in value),
             dtype=CVITimeIntervalDType,
