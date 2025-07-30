@@ -1,21 +1,33 @@
+"""Scalar data types for NI Python APIs.
+
+Scalar Data Type
+=================
+
+:class:`Scalar`: A scalar data object represents a single scalar value with units information.
+Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and :any:`str`.
+"""
+
 from __future__ import annotations
 
-from typing import Any, Generic, Union
+from typing import TYPE_CHECKING, Any, Generic, Union
 
 from typing_extensions import TypeVar, final
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
-from nitypes.waveform._extended_properties import (
-    UNIT_DESCRIPTION,
-    ExtendedPropertyDictionary,
-)
+from nitypes.waveform._extended_properties import UNIT_DESCRIPTION
 
-_ScalarType_co = TypeVar("_ScalarType_co", bound=Union[bool, int, float, str], covariant=True)
+if TYPE_CHECKING:
+    # Import from the public package so the docs don't reference private submodules.
+    from nitypes.waveform import ExtendedPropertyDictionary
+else:
+    from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
+
+TScalar_co = TypeVar("TScalar_co", bound=Union[bool, int, float, str], covariant=True)
 _NUMERIC = (bool, int, float)
 
 
 @final
-class Scalar(Generic[_ScalarType_co]):
+class Scalar(Generic[TScalar_co]):
     """A scalar data class, which encapsulates scalar data and units information.
 
     Constructing
@@ -41,12 +53,12 @@ class Scalar(Generic[_ScalarType_co]):
         "_extended_properties",
     ]
 
-    _value: _ScalarType_co
+    _value: TScalar_co
     _extended_properties: ExtendedPropertyDictionary
 
     def __init__(
         self,
-        value: _ScalarType_co,
+        value: TScalar_co,
         units: str = "",
     ) -> None:
         """Initialize a new scalar.
@@ -74,7 +86,7 @@ class Scalar(Generic[_ScalarType_co]):
         self._extended_properties[UNIT_DESCRIPTION] = units
 
     @property
-    def value(self) -> _ScalarType_co:
+    def value(self) -> TScalar_co:
         """The scalar value."""
         return self._value
 
@@ -84,6 +96,12 @@ class Scalar(Generic[_ScalarType_co]):
         value = self._extended_properties.get(UNIT_DESCRIPTION, "")
         assert isinstance(value, str)
         return value
+
+    @units.setter
+    def units(self, value: str) -> None:
+        if not isinstance(value, str):
+            raise invalid_arg_type("units", "str", value)
+        self._extended_properties[UNIT_DESCRIPTION] = value
 
     @property
     def extended_properties(self) -> ExtendedPropertyDictionary:
@@ -101,7 +119,7 @@ class Scalar(Generic[_ScalarType_co]):
             return NotImplemented
         return self.value == value.value and self.units == value.units
 
-    def __gt__(self, value: Scalar[_ScalarType_co]) -> bool:
+    def __gt__(self, value: Scalar[TScalar_co]) -> bool:
         """Return self > value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
@@ -113,7 +131,7 @@ class Scalar(Generic[_ScalarType_co]):
         else:
             raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
-    def __ge__(self, value: Scalar[_ScalarType_co]) -> bool:
+    def __ge__(self, value: Scalar[TScalar_co]) -> bool:
         """Return self >= value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
@@ -125,7 +143,7 @@ class Scalar(Generic[_ScalarType_co]):
         else:
             raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
-    def __lt__(self, value: Scalar[_ScalarType_co]) -> bool:
+    def __lt__(self, value: Scalar[TScalar_co]) -> bool:
         """Return self < value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
@@ -137,7 +155,7 @@ class Scalar(Generic[_ScalarType_co]):
         else:
             raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
-    def __le__(self, value: Scalar[_ScalarType_co]) -> bool:
+    def __le__(self, value: Scalar[TScalar_co]) -> bool:
         """Return self <= value."""
         if not isinstance(value, self.__class__):
             return NotImplemented

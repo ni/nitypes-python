@@ -7,8 +7,7 @@ from typing import Any
 import pytest
 from typing_extensions import assert_type
 
-from nitypes.scalar import Scalar
-from nitypes.scalar._scalar import _ScalarType_co
+from nitypes.scalar import Scalar, TScalar_co
 from nitypes.waveform._extended_properties import (
     UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
@@ -82,7 +81,7 @@ def test___invalid_data_value___create___raises_type_error(data_value: Any) -> N
     ],
 )
 def test___same_value___comparison___equal(
-    left: Scalar[_ScalarType_co], right: Scalar[_ScalarType_co]
+    left: Scalar[TScalar_co], right: Scalar[TScalar_co]
 ) -> None:
     assert not (left < right)
     assert left <= right
@@ -102,7 +101,7 @@ def test___same_value___comparison___equal(
     ],
 )
 def test___lesser_value___comparison___lesser(
-    left: Scalar[_ScalarType_co], right: Scalar[_ScalarType_co]
+    left: Scalar[TScalar_co], right: Scalar[TScalar_co]
 ) -> None:
     assert left < right
     assert left <= right
@@ -121,7 +120,7 @@ def test___lesser_value___comparison___lesser(
     ],
 )
 def test___mixed_numeric_types___comparison___lesser(
-    left: Scalar[_ScalarType_co], right: Scalar[_ScalarType_co]
+    left: Scalar[TScalar_co], right: Scalar[TScalar_co]
 ) -> None:
     assert left < right
     assert left <= right
@@ -138,7 +137,7 @@ def test___mixed_numeric_types___comparison___lesser(
     ],
 )
 def test___numeric_and_string___comparison___throws_exception(
-    left: Scalar[_ScalarType_co], right: Scalar[_ScalarType_co]
+    left: Scalar[TScalar_co], right: Scalar[TScalar_co]
 ) -> None:
     expected_message = "Comparing Scalar objects of numeric and string types is not permitted"
 
@@ -226,6 +225,14 @@ def test___scalar_with_units___get_extended_properties___returns_correct_diction
     assert prop_dict.get(UNIT_DESCRIPTION) == "watts"
 
 
+def test___scalar_with_units___set_units___units_updated_correctly() -> None:
+    value = Scalar(20.0, "watts")
+
+    value.units = "volts"
+
+    assert value.units == "volts"
+
+
 @pytest.mark.parametrize(
     "value",
     [
@@ -239,7 +246,7 @@ def test___scalar_with_units___get_extended_properties___returns_correct_diction
         Scalar("value", ""),
     ],
 )
-def test___various_values___copy___makes_copy(value: Scalar[_ScalarType_co]) -> None:
+def test___various_values___copy___makes_copy(value: Scalar[TScalar_co]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
@@ -258,7 +265,7 @@ def test___various_values___copy___makes_copy(value: Scalar[_ScalarType_co]) -> 
         Scalar("value", ""),
     ],
 )
-def test___various_values___pickle_unpickle___makes_copy(value: Scalar[_ScalarType_co]) -> None:
+def test___various_values___pickle_unpickle___makes_copy(value: Scalar[TScalar_co]) -> None:
     new_value = pickle.loads(pickle.dumps(value))
     assert new_value is not value
     assert new_value == value
