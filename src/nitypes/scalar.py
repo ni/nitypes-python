@@ -1,10 +1,10 @@
 """Scalar data types for NI Python APIs.
 
-Scalar Data Types
+Scalar Data Type
 =================
 
-* :class:`Scalar`: A scalar data object represents a single scalar value with units information.
-  Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and :any:`str`.
+:class:`Scalar`: A scalar data object represents a single scalar value with units information.
+Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and :any:`str`.
 """
 
 from __future__ import annotations
@@ -22,12 +22,12 @@ if TYPE_CHECKING:
 else:
     from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
 
-ScalarType_co = TypeVar("ScalarType_co", bound=Union[bool, int, float, str], covariant=True)
+TScalar_co = TypeVar("TScalar_co", bound=Union[bool, int, float, str], covariant=True)
 _NUMERIC = (bool, int, float)
 
 
 @final
-class Scalar(Generic[ScalarType_co]):
+class Scalar(Generic[TScalar_co]):
     """A scalar data class, which encapsulates scalar data and units information.
 
     Constructing
@@ -53,12 +53,12 @@ class Scalar(Generic[ScalarType_co]):
         "_extended_properties",
     ]
 
-    _value: ScalarType_co
+    _value: TScalar_co
     _extended_properties: ExtendedPropertyDictionary
 
     def __init__(
         self,
-        value: ScalarType_co,
+        value: TScalar_co,
         units: str = "",
     ) -> None:
         """Initialize a new scalar.
@@ -86,7 +86,7 @@ class Scalar(Generic[ScalarType_co]):
         self._extended_properties[UNIT_DESCRIPTION] = units
 
     @property
-    def value(self) -> ScalarType_co:
+    def value(self) -> TScalar_co:
         """The scalar value."""
         return self._value
 
@@ -119,7 +119,7 @@ class Scalar(Generic[ScalarType_co]):
             return NotImplemented
         return self.value == value.value and self.units == value.units
 
-    def __gt__(self, value: Scalar[ScalarType_co]) -> bool:
+    def __gt__(self, value: Scalar[TScalar_co]) -> bool:
         """Return self > value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
@@ -131,7 +131,7 @@ class Scalar(Generic[ScalarType_co]):
         else:
             raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
-    def __ge__(self, value: Scalar[ScalarType_co]) -> bool:
+    def __ge__(self, value: Scalar[TScalar_co]) -> bool:
         """Return self >= value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
@@ -143,7 +143,7 @@ class Scalar(Generic[ScalarType_co]):
         else:
             raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
-    def __lt__(self, value: Scalar[ScalarType_co]) -> bool:
+    def __lt__(self, value: Scalar[TScalar_co]) -> bool:
         """Return self < value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
@@ -155,7 +155,7 @@ class Scalar(Generic[ScalarType_co]):
         else:
             raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
 
-    def __le__(self, value: Scalar[ScalarType_co]) -> bool:
+    def __le__(self, value: Scalar[TScalar_co]) -> bool:
         """Return self <= value."""
         if not isinstance(value, self.__class__):
             return NotImplemented
