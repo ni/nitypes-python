@@ -141,7 +141,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        return (self.__class__, (list(iter(self)), ))
+        return (self.__class__, (list(iter(self)),))
 
     def __repr__(self) -> str:
         """Return repr(self)."""

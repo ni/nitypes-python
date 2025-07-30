@@ -32,7 +32,9 @@ def test___no_args___construct___returns_empty_array() -> None:
         (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])),
     ),
 )
-def test___sequence_arg___construct___returns_matching_array(constructor_arg: Sequence[TimeDelta]) -> None:
+def test___sequence_arg___construct___returns_matching_array(
+    constructor_arg: Sequence[TimeDelta],
+) -> None:
     value = TimeDeltaArray(constructor_arg)
 
     assert_type(value, TimeDeltaArray)
@@ -776,7 +778,6 @@ def test___different_values___not_equals___returns_not_equal() -> None:
     array2 = TimeDeltaArray([TimeDelta(-10), TimeDelta(200.26), TimeDelta(1500)])
 
     assert array1 != array2
-    assert array1 != None
 
 
 def test___timedelta_array___min___returns_minimum() -> None:
@@ -814,8 +815,14 @@ def test___timedelta_array___sort___sorts_array() -> None:
     (
         (TimeDeltaArray(), "[]"),
         (TimeDeltaArray([TimeDelta(-1)]), "[-1 day, 23:59:59]"),
-        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26)]), "[-1 day, 23:59:59; 0:00:20.260000000000001563]"),
-        (TimeDeltaArray([TimeDelta(20.26), TimeDelta(-1), TimeDelta(500)]), "[0:00:20.260000000000001563; -1 day, 23:59:59; 0:08:20]")
+        (
+            TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26)]),
+            "[-1 day, 23:59:59; 0:00:20.260000000000001563]",
+        ),
+        (
+            TimeDeltaArray([TimeDelta(20.26), TimeDelta(-1), TimeDelta(500)]),
+            "[0:00:20.260000000000001563; -1 day, 23:59:59; 0:08:20]",
+        ),
     ),
 )
 def test___timedelta_array___str___looks_ok(value: TimeDeltaArray, expected_str: str) -> None:
@@ -826,9 +833,18 @@ def test___timedelta_array___str___looks_ok(value: TimeDeltaArray, expected_str:
     ("value", "expected_repr"),
     (
         (TimeDeltaArray(), "nitypes.bintime.TimeDeltaArray([])"),
-        (TimeDeltaArray([TimeDelta(-1)]), "nitypes.bintime.TimeDeltaArray([nitypes.bintime.TimeDelta(Decimal('-1'))])"),
-        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26)]), "nitypes.bintime.TimeDeltaArray([nitypes.bintime.TimeDelta(Decimal('-1')), nitypes.bintime.TimeDelta(Decimal('20.2600000000000015631940'))])"),
-        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]), "nitypes.bintime.TimeDeltaArray([nitypes.bintime.TimeDelta(Decimal('-1')), nitypes.bintime.TimeDelta(Decimal('20.2600000000000015631940')), nitypes.bintime.TimeDelta(Decimal('500'))])")
+        (
+            TimeDeltaArray([TimeDelta(-1)]),
+            "nitypes.bintime.TimeDeltaArray([nitypes.bintime.TimeDelta(Decimal('-1'))])",
+        ),
+        (
+            TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26)]),
+            "nitypes.bintime.TimeDeltaArray([nitypes.bintime.TimeDelta(Decimal('-1')), nitypes.bintime.TimeDelta(Decimal('20.2600000000000015631940'))])",
+        ),
+        (
+            TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]),
+            "nitypes.bintime.TimeDeltaArray([nitypes.bintime.TimeDelta(Decimal('-1')), nitypes.bintime.TimeDelta(Decimal('20.2600000000000015631940')), nitypes.bintime.TimeDelta(Decimal('500'))])",
+        ),
     ),
 )
 def test___timedelta_array___repr___looks_ok(value: TimeDeltaArray, expected_repr: str) -> None:
@@ -850,7 +866,7 @@ def test___timedelta_array___pickle___references_public_modules() -> None:
         (TimeDeltaArray()),
         (TimeDeltaArray([TimeDelta(-1)])),
         (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26)])),
-        (TimeDeltaArray([TimeDelta(20.26), TimeDelta(-1), TimeDelta(500)]))
+        (TimeDeltaArray([TimeDelta(20.26), TimeDelta(-1), TimeDelta(500)])),
     ),
 )
 def test___timedelta_array___pickle_unpickle___makes_copy(value: TimeDeltaArray) -> None:
