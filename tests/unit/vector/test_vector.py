@@ -25,17 +25,17 @@ def test___no_data_values_no_type___create___raises_type_error() -> None:
         _ = Vector([])
 
     assert exc.value.args[0].startswith(
-        "You must specify values as non-empty or specify values_type."
+        "You must specify values as non-empty or specify value_type."
     )
 
 
 def test___no_data_values_bool_type___create___creates_with_bool_type() -> None:
-    data = Vector([], values_type=bool)
+    data = Vector([], value_type=bool)
 
     assert_type(data._values, list[bool])
     assert data._values == []
     assert data.units == ""
-    assert data._values_type == bool
+    assert data._value_type == bool
 
 
 def test___bool_data_values___create___creates_with_bool_data_and_default_units() -> None:
@@ -189,7 +189,7 @@ def test___vector_with_int_data___append_value_out_of_range___raises_value_error
 
 
 def test___no_data_values_bool_type___append___appends_bool_data() -> None:
-    data = Vector([], values_type=bool)
+    data = Vector([], value_type=bool)
     data.append(True)
 
     assert data._values == [True]
@@ -236,7 +236,7 @@ def test___vector_with_int_data___extend_value_out_of_range___raises_value_error
 
 
 def test___no_data_values_bool_type___extend___extends_bool_data() -> None:
-    data = Vector([], values_type=bool)
+    data = Vector([], value_type=bool)
     data.extend([True, False])
 
     assert data._values == [True, False]
@@ -368,6 +368,14 @@ def test___vector_with_units___get_extended_properties___returns_correct_diction
 
     assert isinstance(prop_dict, ExtendedPropertyDictionary)
     assert prop_dict.get(UNIT_DESCRIPTION) == "watts"
+
+
+def test___vector_with_units___set_units___units_updated_correctly() -> None:
+    value = Vector([20.0], "watts")
+
+    value.units = "volts"
+
+    assert value.units == "volts"
 
 
 @pytest.mark.parametrize(

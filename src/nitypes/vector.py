@@ -46,12 +46,12 @@ class Vector(MutableSequence[VectorType]):
 
     __slots__ = [
         "_values",
-        "_values_type",
+        "_value_type",
         "_extended_properties",
     ]
 
     _values: list[VectorType]
-    _values_type: type[VectorType]
+    _value_type: type[VectorType]
     _extended_properties: ExtendedPropertyDictionary
 
     def __init__(
@@ -59,35 +59,35 @@ class Vector(MutableSequence[VectorType]):
         values: Iterable[VectorType],
         units: str = "",
         *,
-        values_type: type[VectorType] | None = None,
+        value_type: type[VectorType] | None = None,
     ) -> None:
         """Initialize a new vector.
 
         Args:
             values: The scalar values to store in this object.
             units: The units string associated with this data.
-            values_type: The type of values that will be added to this Vector.
+            value_type: The type of values that will be added to this Vector.
                 This parameter should only be used when creating a Vector with
-                a blank Iterable
+                an empty Iterable
 
         Returns:
             A vector data object.
         """
         if not values:
-            if not values_type:
-                raise TypeError("You must specify values as non-empty or specify values_type.")
-            self._values_type = values_type
+            if not value_type:
+                raise TypeError("You must specify values as non-empty or specify value_type.")
+            self._value_type = value_type
         else:
-            # Validate the input values...
+            # Validate the values input
             for index, value in enumerate(values):
-                # Only set _values_type once.
+                # Only set _value_type once.
                 if not index:
-                    self._values_type = type(value)
+                    self._value_type = type(value)
 
                 if not isinstance(value, (bool, int, float, str)):
                     raise invalid_arg_type("vector input data", "bool, int, float, or str", values)
 
-                if not isinstance(value, self._values_type):
+                if not isinstance(value, self._value_type):
                     raise TypeError("All values in the values input must be of the same type.")
 
                 if isinstance(value, int):
@@ -106,6 +106,12 @@ class Vector(MutableSequence[VectorType]):
         value = self._extended_properties.get(UNIT_DESCRIPTION, "")
         assert isinstance(value, str)
         return value
+
+    @units.setter
+    def units(self, value: str) -> None:
+        if not isinstance(value, str):
+            raise invalid_arg_type("units", "str", value)
+        self._extended_properties[UNIT_DESCRIPTION] = value
 
     @property
     def extended_properties(self) -> ExtendedPropertyDictionary:
@@ -146,7 +152,7 @@ class Vector(MutableSequence[VectorType]):
     def __setitem__(self, index: int | slice, value: VectorType | Iterable[VectorType]) -> None:
         """Set value(s) at the specified location."""
         if isinstance(index, int):
-            if not isinstance(value, self._values_type):
+            if not isinstance(value, self._value_type):
                 raise self._create_value_mismatch_exception(value)
 
             if isinstance(value, int):
@@ -160,7 +166,7 @@ class Vector(MutableSequence[VectorType]):
                 raise TypeError("You cannot assign a string to Vector slice.")
             else:
                 for subval in value:
-                    if not isinstance(subval, self._values_type):
+                    if not isinstance(subval, self._value_type):
                         raise self._create_value_mismatch_exception(subval)
                     elif isinstance(subval, int):
                         self._validate_int_value(subval)
@@ -177,7 +183,7 @@ class Vector(MutableSequence[VectorType]):
 
     def insert(self, index: int, value: VectorType) -> None:
         """Insert a value at the specified location."""
-        if not isinstance(value, self._values_type):
+        if not isinstance(value, self._value_type):
             raise self._create_value_mismatch_exception(value)
 
         if isinstance(value, int):
@@ -225,5 +231,5 @@ class Vector(MutableSequence[VectorType]):
 
         return TypeError(
             f"Input type does not match existing type. Input Type: {input_type} "
-            f"Existing Type: {self._values_type}"
+            f"Existing Type: {self._value_type}"
         )
