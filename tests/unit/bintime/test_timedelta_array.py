@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Sequence
 
 import numpy as np
 import pytest
@@ -23,13 +23,19 @@ def test___no_args___construct___returns_empty_array() -> None:
     assert len(value._array) == 0
 
 
-def test___list_arg___construct___returns_matching_array() -> None:
-    arg = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
-    value = TimeDeltaArray(arg)
+@pytest.mark.parametrize(
+    ("constructor_arg"),
+    (
+        ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]),
+        (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])),
+    ),
+)
+def test___sequence_arg___construct___returns_matching_array(constructor_arg: Sequence[TimeDelta]) -> None:
+    value = TimeDeltaArray(constructor_arg)
 
     assert_type(value, TimeDeltaArray)
     assert isinstance(value, TimeDeltaArray)
-    assert len(value._array) == len(arg)
+    assert len(value._array) == len(constructor_arg)
     assert (value._array[0]["msb"], value._array[0]["lsb"]) == TimeDelta(-1).to_tuple()
     assert (value._array[1]["msb"], value._array[1]["lsb"]) == TimeDelta(20.26).to_tuple()
     assert (value._array[2]["msb"], value._array[2]["lsb"]) == TimeDelta(500).to_tuple()
@@ -396,9 +402,9 @@ def test___timedelta_array___delete_invalid_index___raises(indexer: Any) -> None
         del value[indexer]
 
 
-###############
+##########
 # insert()
-###############
+##########
 
 
 @pytest.mark.parametrize(
