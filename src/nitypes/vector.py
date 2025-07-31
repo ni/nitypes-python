@@ -209,7 +209,7 @@ class Vector(MutableSequence[TScalar]):
 
         return f"[{comma_delimited_str}]"
 
-    def _create_value_mismatch_exception(self, value: Any) -> TypeError:
+    def _create_value_mismatch_exception(self, value: object) -> TypeError:
         return TypeError(
             f"Input type does not match existing type. Input Type: {type(value)} "
             f"Existing Type: {self._value_type}"
