@@ -56,12 +56,9 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
             return TimeDelta.from_tuple(as_tuple)
         elif isinstance(index, slice):
             sliced_entries = self._array[index]
-            return TimeDeltaArray(
-                [
-                    TimeDelta.from_tuple(TimeValueTuple.from_cvi(*entry.item()))
-                    for entry in sliced_entries
-                ]
-            )
+            new_array = TimeDeltaArray()
+            new_array._array = sliced_entries
+            return new_array
         else:
             raise TypeError("Index must be an int or slice")
 
