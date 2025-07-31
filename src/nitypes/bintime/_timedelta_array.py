@@ -49,7 +49,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __getitem__(self, index: int | slice) -> TimeDelta | TimeDeltaArray:
         """Return the TimeDelta at the specified location."""
         if isinstance(index, bool):
-            raise TypeError("Index must be an int or slice")
+            raise TypeError("Cannot index with bool")
         if isinstance(index, int):
             entry = self._array[index].item()
             as_tuple = TimeValueTuple.from_cvi(*entry)
@@ -79,7 +79,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __setitem__(self, index: int | slice, value: TimeDelta | Iterable[TimeDelta]) -> None:
         """Set a new value for TimeDelta at the specified location."""
         if isinstance(index, bool):
-            raise TypeError("Index must be an int or slice")
+            raise TypeError("Cannot index with bool")
         if isinstance(index, int):
             if not isinstance(value, TimeDelta):
                 raise TypeError("Cannot assign value that is not of type TimeDelta")
@@ -93,7 +93,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
             values = list(value)
             new_entry_count = len(values)
             if new_entry_count != selected_count:
-                message = f"Cannot assign slice with unmatched length. Expected {selected_count} but received {new_entry_count})"
+                message = f"Cannot assign slice with unmatched length. Expected {selected_count} but received {new_entry_count}"
                 raise ValueError(message)
             self._array[index] = [item.to_tuple().to_cvi() for item in values]
         else:
@@ -110,7 +110,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __delitem__(self, index: int | slice) -> None:
         """Delete the value at the specified location."""
         if isinstance(index, bool):
-            raise TypeError("Index must be an int or slice")
+            raise TypeError("Cannot index with bool")
         if isinstance(index, (int, slice)):
             self._array = np.delete(self._array, index)
         else:
@@ -119,7 +119,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def insert(self, index: int, value: TimeDelta) -> None:
         """Insert the value before the specified index."""
         if isinstance(index, bool):
-            raise TypeError("Index must be an int")
+            raise TypeError("Cannot insert with bool")
         if not isinstance(index, int):
             raise TypeError("Index must be an int")
         if not isinstance(value, TimeDelta):
