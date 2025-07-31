@@ -134,3 +134,11 @@ information and extended properties. Valid types for the scalar value are `bool`
 and `str`. For more details, see
 [Scalar](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/scalar/index.html#scalar) in the
 API Reference.
+
+## Vector
+
+`nitypes.vector.Vector` is a data type that represents an array of scalar values with units
+information and extended properties. Valid types for the scalar values are `bool`, `int`, `float`,
+and `str`. For more details, see
+[Scalar](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/vector/index.html#vector) in the
+API Reference.
