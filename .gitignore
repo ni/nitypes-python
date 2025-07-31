@@ -4,6 +4,7 @@ __pycache__/
 # Unit tests
 .tox/
 test_results/
+.benchmarks/
 
 # Coverage output
 .coverage
