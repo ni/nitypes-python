@@ -60,11 +60,9 @@ def test___sample_count_signal_count_and_dtype___create___creates_waveform_with_
     assert waveform.sample_count == waveform.capacity == len(waveform.data) == 10
     assert waveform.signal_count == 3
     assert waveform.dtype == _np_bool
-    # https://github.com/numpy/numpy/issues/29245 - TYP: mypy returns dtype of
-    # _np_bool[Literal[False]] for array of bools
-    # Update: This no longer errors in mypy, but it does in pyright, so I had
-    # to ignore the unused-ignore error from mypy.
-    assert_type(waveform, DigitalWaveform[_np_bool])  # type: ignore[assert-type,unused-ignore]
+    # https://github.com/microsoft/pyright/issues/10631 - Passing a generic type via a parameter of
+    # type type[T] can leak an unsolved type variable
+    assert_type(waveform, DigitalWaveform[_np_bool])  # pyright: ignore[reportAssertTypeFailure]
 
 
 def test___sample_count_and_dtype_str___create___creates_waveform_with_sample_count_and_dtype() -> (
