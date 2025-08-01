@@ -172,8 +172,6 @@ def test___bool_ndarray___from_lines___creates_waveform_with_bool_dtype() -> Non
 
     waveform = DigitalWaveform.from_lines(array)
 
-    # https://github.com/numpy/numpy/issues/29245 - TYP: mypy returns dtype of
-    # _np_bool[Literal[False]] for array of bools
     assert_type(waveform, DigitalWaveform[_np_bool])
     assert isinstance(waveform, DigitalWaveform) and waveform.dtype == _np_bool
     assert waveform.data.tolist() == [[False], [True], [False]]
