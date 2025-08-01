@@ -62,7 +62,9 @@ def test___sample_count_signal_count_and_dtype___create___creates_waveform_with_
     assert waveform.dtype == _np_bool
     # https://github.com/numpy/numpy/issues/29245 - TYP: mypy returns dtype of
     # _np_bool[Literal[False]] for array of bools
-    assert_type(waveform, DigitalWaveform[_np_bool])  # type: ignore[assert-type]
+    # Update: This no longer errors in mypy, but it does in pyright, so I had
+    # to ignore the unused-ignore error from mypy.
+    assert_type(waveform, DigitalWaveform[_np_bool])  # type: ignore[assert-type,unused-ignore]
 
 
 def test___sample_count_and_dtype_str___create___creates_waveform_with_sample_count_and_dtype() -> (
@@ -172,7 +174,7 @@ def test___bool_ndarray___from_lines___creates_waveform_with_bool_dtype() -> Non
 
     # https://github.com/numpy/numpy/issues/29245 - TYP: mypy returns dtype of
     # _np_bool[Literal[False]] for array of bools
-    assert_type(waveform, DigitalWaveform[_np_bool])  # type: ignore[assert-type]
+    assert_type(waveform, DigitalWaveform[_np_bool])
     assert isinstance(waveform, DigitalWaveform) and waveform.dtype == _np_bool
     assert waveform.data.tolist() == [[False], [True], [False]]
 
