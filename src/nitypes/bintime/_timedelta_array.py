@@ -25,13 +25,10 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     """An array of :class:`TimeDelta` values in NI Binary Time Format (NI-BTF).
 
     The TimeDeltaArray class provides a mutable sequence container for storing
-    multiple :class:`TimeDelta` objects efficiently using the NI Binary Time Format.
-    NI-BTF is a high-resolution time format consisting of a 128-bit fixed point
-    number with 64-bit whole seconds and 64-bit fractional seconds parts.
+    multiple :class:`TimeDelta` objects efficiently.
 
     This class implements the MutableSequence interface, providing familiar
-    list-like operations for time delta manipulation. The underlying storage
-    uses NumPy arrays with :data:`CVITimeIntervalDType` for optimal performance.
+    list-like operations for time delta collections.
 
     :param value: Initial collection of TimeDelta objects, defaults to empty array
     :type value: Collection[TimeDelta] | None, optional
@@ -63,9 +60,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         TimeDelta(seconds=3.0)
 
     See Also:
-        :class:`TimeDelta`: Individual time delta values
-        :data:`CVITimeIntervalDType`: Underlying NumPy data type
-        :class:`TimeValueTuple`: Time value representation
+        * :class:`TimeDelta`: Individual time delta values
     """
 
     __slots__ = ["_array"]
@@ -116,9 +111,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __getitem__(self, index: int | slice) -> TimeDelta | TimeDeltaArray:
         """Return the TimeDelta at the specified location or a slice of values.
 
-        Supports both single index access returning a :class:`TimeDelta` and
-        slice access returning a new :class:`TimeDeltaArray`.
-
         :param index: Array index (int) or slice object
         :type index: int | slice
 
@@ -127,18 +119,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
         :raises TypeError: If index is bool or unsupported type
         :raises IndexError: If index is out of range
-
-        Examples:
-            Single element access:
-
-            >>> arr = TimeDeltaArray([TimeDelta(seconds=1), TimeDelta(seconds=2)])
-            >>> arr[0]
-            TimeDelta(seconds=1.0)
-
-            Slice access:
-
-            >>> arr[0:1]
-            TimeDeltaArray([TimeDelta(seconds=1.0)])
         """
         if isinstance(index, bool):
             raise TypeError("Cannot index with bool")
@@ -159,11 +139,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
         :returns: Number of elements in the array
         :rtype: int
-
-        Examples:
-            >>> arr = TimeDeltaArray([TimeDelta(seconds=1), TimeDelta(seconds=2)])
-            >>> len(arr)
-            2
         """
         return len(self._array)
 
@@ -194,9 +169,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __setitem__(self, index: int | slice, value: TimeDelta | Iterable[TimeDelta]) -> None:
         """Set a new value for TimeDelta at the specified location or slice.
 
-        Supports both single element assignment and slice assignment with
-        length validation for slices.
-
         :param index: Array index (int) or slice object
         :type index: int | slice
         :param value: TimeDelta for single assignment or iterable for slice
@@ -205,20 +177,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         :raises TypeError: If index is bool, value type is invalid, or slice value is not iterable
         :raises ValueError: If slice assignment length doesn't match selected range
         :raises IndexError: If index is out of range
-
-        Examples:
-            Single element assignment:
-
-            >>> arr = TimeDeltaArray([TimeDelta(seconds=1)])
-            >>> arr[0] = TimeDelta(seconds=2)
-            >>> arr[0]
-            TimeDelta(seconds=2.0)
-
-            Slice assignment:
-
-            >>> arr[0:1] = [TimeDelta(seconds=3)]
-            >>> arr[0]
-            TimeDelta(seconds=3.0)
         """
         if isinstance(index, bool):
             raise TypeError("Cannot index with bool")
@@ -265,27 +223,12 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         """Delete the value at the specified location or slice.
 
         Removes elements from the array and adjusts the array size accordingly.
-        Supports both single element deletion and slice deletion.
 
         :param index: Array index (int) or slice object
         :type index: int | slice
 
         :raises TypeError: If index is bool or unsupported type
         :raises IndexError: If index is out of range
-
-        Examples:
-            Delete single element:
-
-            >>> arr = TimeDeltaArray([TimeDelta(seconds=1), TimeDelta(seconds=2)])
-            >>> del arr[0]
-            >>> len(arr)
-            1
-
-            Delete slice:
-
-            >>> del arr[0:1]
-            >>> len(arr)
-            0
         """
         if isinstance(index, bool):
             raise TypeError("Cannot index with bool")
@@ -306,22 +249,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         :type value: TimeDelta
 
         :raises TypeError: If index is not int or value is not TimeDelta
-
-        Examples:
-            Insert at beginning:
-
-            >>> arr = TimeDeltaArray([TimeDelta(seconds=2)])
-            >>> arr.insert(0, TimeDelta(seconds=1))
-            >>> len(arr)
-            2
-            >>> arr[0]
-            TimeDelta(seconds=1.0)
-
-            Insert at end:
-
-            >>> arr.insert(len(arr), TimeDelta(seconds=3))
-            >>> arr[-1]
-            TimeDelta(seconds=3.0)
         """
         if isinstance(index, bool):
             raise TypeError("Cannot insert with bool")
@@ -348,20 +275,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         :rtype: TimeDeltaArray
 
         :raises TypeError: If multiplier is not an integer
-
-        Examples:
-            Repeat array contents:
-
-            >>> arr = TimeDeltaArray([TimeDelta(seconds=1)])
-            >>> arr *= 3
-            >>> len(arr)
-            3
-
-            Clear with zero multiplier:
-
-            >>> arr *= 0
-            >>> len(arr)
-            0
         """
         if isinstance(multiplier, bool):
             raise TypeError("Cannot multiply with bool")
@@ -384,14 +297,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
         :returns: True if arrays are equal, NotImplemented for other types
         :rtype: bool | NotImplemented
-
-        Examples:
-            >>> arr1 = TimeDeltaArray([TimeDelta(seconds=1)])
-            >>> arr2 = TimeDeltaArray([TimeDelta(seconds=1)])
-            >>> arr1 == arr2
-            True
-            >>> arr1 == "not an array"
-            False
         """
         if not isinstance(other, TimeDeltaArray):
             return NotImplemented
@@ -405,14 +310,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
         :returns: Tuple containing class and constructor arguments
         :rtype: tuple[Any, ...]
-
-        Examples:
-            >>> import pickle
-            >>> arr = TimeDeltaArray([TimeDelta(seconds=1)])
-            >>> data = pickle.dumps(arr)
-            >>> restored = pickle.loads(data)
-            >>> arr == restored
-            True
         """
         return (self.__class__, (list(iter(self)),))
 
@@ -424,11 +321,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
         :returns: Detailed string representation
         :rtype: str
-
-        Examples:
-            >>> arr = TimeDeltaArray([TimeDelta(seconds=1)])
-            >>> repr(arr)
-            'nitypes.bintime._timedelta_array.TimeDeltaArray([TimeDelta(seconds=1.0)])'
         """
         ctor_args = list(iter(self))
         return f"{self.__class__.__module__}.{self.__class__.__name__}({ctor_args})"
@@ -441,11 +333,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
         :returns: Human-readable string representation
         :rtype: str
-
-        Examples:
-            >>> arr = TimeDeltaArray([TimeDelta(seconds=1), TimeDelta(seconds=2)])
-            >>> str(arr)
-            '[TimeDelta(seconds=1.0); TimeDelta(seconds=2.0)]'
         """
         values = list(iter(self))
         return f"[{'; '.join(str(v) for v in values)}]"
