@@ -89,24 +89,14 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         )
 
     @overload
-    def __getitem__(self, index: int) -> TimeDelta:
-        """Get a single TimeDelta by index.
-
-        :param index: Array index
-        :type index: int
-        :rtype: TimeDelta
-        """
-        ...
+    def __getitem__(  # noqa: D105 - missing docstring in magic method
+        self, index: int
+    ) -> TimeDelta: ...
 
     @overload
-    def __getitem__(self, index: slice) -> TimeDeltaArray:
-        """Get a slice of TimeDelta objects as a new TimeDeltaArray.
-
-        :param index: Slice object
-        :type index: slice
-        :rtype: TimeDeltaArray
-        """
-        ...
+    def __getitem__(  # noqa: D105 - missing docstring in magic method
+        self, index: slice
+    ) -> TimeDeltaArray: ...
 
     def __getitem__(self, index: int | slice) -> TimeDelta | TimeDeltaArray:
         """Return the TimeDelta at the specified location or a slice of values.
@@ -143,28 +133,14 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         return len(self._array)
 
     @overload
-    def __setitem__(self, index: int, value: TimeDelta) -> None:
-        """Set a single TimeDelta by index.
-
-        :param index: Array index
-        :type index: int
-        :param value: TimeDelta value to assign
-        :type value: TimeDelta
-        :rtype: None
-        """
-        ...
+    def __setitem__(  # noqa: D105 - missing docstring in magic method
+        self, index: int, value: TimeDelta
+    ) -> None: ...
 
     @overload
-    def __setitem__(self, index: slice, value: Iterable[TimeDelta]) -> None:
-        """Set multiple TimeDelta objects by slice.
-
-        :param index: Slice object
-        :type index: slice
-        :param value: Iterable of TimeDelta objects
-        :type value: Iterable[TimeDelta]
-        :rtype: None
-        """
-        ...
+    def __setitem__(  # noqa: D105 - missing docstring in magic method
+        self, index: slice, value: Iterable[TimeDelta]
+    ) -> None: ...
 
     def __setitem__(self, index: int | slice, value: TimeDelta | Iterable[TimeDelta]) -> None:
         """Set a new value for TimeDelta at the specified location or slice.
@@ -200,24 +176,12 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
             raise TypeError("Index must be an int or slice")
 
     @overload
-    def __delitem__(self, index: int) -> None:
-        """Delete a single TimeDelta by index.
-
-        :param index: Array index
-        :type index: int
-        :rtype: None
-        """
-        ...
+    def __delitem__(self, index: int) -> None: ...  # noqa: D105 - missing docstring in magic method
 
     @overload
-    def __delitem__(self, index: slice) -> None:
-        """Delete multiple TimeDelta objects by slice.
-
-        :param index: Slice object
-        :type index: slice
-        :rtype: None
-        """
-        ...
+    def __delitem__(  # noqa: D105 - missing docstring in magic method
+        self, index: slice
+    ) -> None: ...
 
     def __delitem__(self, index: int | slice) -> None:
         """Delete the value at the specified location or slice.
