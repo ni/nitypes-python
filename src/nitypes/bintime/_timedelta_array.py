@@ -26,30 +26,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
     Raises:
         TypeError: If any item in value is not a TimeDelta instance.
-
-    Examples:
-        Create an empty array:
-
-        >>> arr = TimeDeltaArray()
-        >>> len(arr)
-        0
-
-        Create with initial values:
-
-        >>> from nitypes.bintime import TimeDelta
-        >>> td1 = TimeDelta(seconds=1.5)
-        >>> td2 = TimeDelta(seconds=2.5)
-        >>> arr = TimeDeltaArray([td1, td2])
-        >>> len(arr)
-        2
-
-        Access and modify elements:
-
-        >>> arr[0]
-        nitypes.bintime.TimeDelta(Decimal('1.5'))
-        >>> arr[0] = TimeDelta(seconds=3.0)
-        >>> arr[0]
-        nitypes.bintime.TimeDelta(Decimal('3'))
     """
 
     __slots__ = ["_array"]
