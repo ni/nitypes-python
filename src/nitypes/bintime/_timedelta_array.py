@@ -22,16 +22,7 @@ else:
 
 @final
 class TimeDeltaArray(MutableSequence[TimeDelta]):
-    """An array of :class:`TimeDelta` values in NI Binary Time Format (NI-BTF).
-
-    The TimeDeltaArray class provides a mutable sequence container for storing
-    multiple TimeDelta objects efficiently.
-
-    This class implements the MutableSequence interface, providing familiar
-    list-like operations for time delta collections.
-
-    Args:
-        value: Initial collection of TimeDelta objects. Defaults to empty array.
+    """A mutable array of :class:`TimeDelta` values in NI Binary Time Format (NI-BTF).
 
     Raises:
         TypeError: If any item in value is not a TimeDelta instance.
@@ -69,14 +60,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         self,
         value: Collection[TimeDelta] | None = None,
     ) -> None:
-        """Initialize a new TimeDeltaArray.
-
-        Args:
-            value: Initial collection of TimeDelta objects.
-
-        Raises:
-            TypeError: If any item in value is not a TimeDelta instance.
-        """
+        """Initialize a new TimeDeltaArray."""
         if value is None:
             value = []
         if not all(isinstance(item, TimeDelta) for item in value):
@@ -98,16 +82,10 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     ) -> TimeDeltaArray: ...
 
     def __getitem__(self, index: int | slice) -> TimeDelta | TimeDeltaArray:
-        """Return the TimeDelta at the specified location or a slice of values.
-
-        Args:
-            index: Array index (int) or slice object.
-
-        Returns:
-            Single TimeDelta for int index, TimeDeltaArray for slice.
+        """Return self[index].
 
         Raises:
-            TypeError: If index is bool or unsupported type.
+            TypeError: If index is an invalid type.
             IndexError: If index is out of range.
         """
         if isinstance(index, bool):
@@ -125,11 +103,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
             raise TypeError("Index must be an int or slice")
 
     def __len__(self) -> int:
-        """Return the number of TimeDelta objects in the array.
-
-        Returns:
-            Number of elements in the array.
-        """
+        """Return len(self)."""
         return len(self._array)
 
     @overload
@@ -145,13 +119,9 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __setitem__(self, index: int | slice, value: TimeDelta | Iterable[TimeDelta]) -> None:
         """Set a new value for TimeDelta at the specified location or slice.
 
-        Args:
-            index: Array index (int) or slice object.
-            value: TimeDelta for single assignment or iterable for slice.
-
         Raises:
-            TypeError: If index is bool, value type is invalid, or slice value is not iterable.
-            ValueError: If slice assignment length doesn't match selected range.
+            TypeError: If index is an invalid type, or slice value is not iterable.
+            ValueError: If slice assignment length doesn't match the selected range.
             IndexError: If index is out of range.
         """
         if isinstance(index, bool):
@@ -186,13 +156,8 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __delitem__(self, index: int | slice) -> None:
         """Delete the value at the specified location or slice.
 
-        Removes elements from the array and adjusts the array size accordingly.
-
-        Args:
-            index: Array index (int) or slice object.
-
         Raises:
-            TypeError: If index is bool or unsupported type.
+            TypeError: If index is an invalid type.
             IndexError: If index is out of range.
         """
         if isinstance(index, bool):
@@ -204,13 +169,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
     def insert(self, index: int, value: TimeDelta) -> None:
         """Insert the TimeDelta value before the specified index.
-
-        Inserts the value at the given position, shifting existing elements
-        to the right. Index is clamped to valid range [-len, len].
-
-        Args:
-            index: Position to insert at (0-based).
-            value: TimeDelta object to insert.
 
         Raises:
             TypeError: If index is not int or value is not TimeDelta.
@@ -228,16 +186,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         self._array = np.insert(self._array, index, as_cvi)
 
     def __imul__(self, multiplier: int) -> TimeDeltaArray:
-        """Repeat the array contents n times in place.
-
-        Modifies the array by repeating its current contents the specified
-        number of times. Zero or negative multipliers result in an empty array.
-
-        Args:
-            multiplier: Number of times to repeat the array contents.
-
-        Returns:
-            Reference to self for method chaining.
+        """Return self *= multiplier.
 
         Raises:
             TypeError: If multiplier is not an integer.
@@ -253,52 +202,21 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         return self
 
     def __eq__(self, other: Any) -> bool:
-        """Return True if other is equal to this TimeDeltaArray.
-
-        Compares arrays element-wise for equality. Only returns True if
-        other is also a TimeDeltaArray with identical contents.
-
-        Args:
-            other: Object to compare with.
-
-        Returns:
-            True if arrays are equal, NotImplemented for other types.
-        """
+        """Return self == other."""
         if not isinstance(other, TimeDeltaArray):
             return NotImplemented
         return np.array_equal(self._array, other._array)
 
     def __reduce__(self) -> tuple[Any, ...]:
-        """Return object state for pickling support.
-
-        Enables serialization of TimeDeltaArray objects using Python's
-        pickle module by returning constructor arguments.
-
-        Returns:
-            Tuple containing class and constructor arguments.
-        """
+        """Return object state for pickling."""
         return (self.__class__, (list(iter(self)),))
 
     def __repr__(self) -> str:
-        """Return repr(self) - detailed string representation for debugging.
-
-        Returns a string that could be used to recreate the object,
-        including the full module path and constructor arguments.
-
-        Returns:
-            Detailed string representation.
-        """
+        """Return repr(self)."""
         ctor_args = list(iter(self))
         return f"{self.__class__.__module__}.{self.__class__.__name__}({ctor_args})"
 
     def __str__(self) -> str:
-        """Return str(self) - human-readable string representation.
-
-        Returns a concise, readable representation of the array contents
-        in bracket notation with semicolon separators.
-
-        Returns:
-            Human-readable string representation.
-        """
+        """Return str(self)."""
         values = list(iter(self))
         return f"[{'; '.join(str(v) for v in values)}]"
