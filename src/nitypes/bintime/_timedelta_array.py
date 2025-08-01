@@ -54,10 +54,10 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         Access and modify elements:
 
         >>> arr[0]
-        TimeDelta(seconds=1.5)
+        nitypes.bintime.TimeDelta(Decimal('1.5'))
         >>> arr[0] = TimeDelta(seconds=3.0)
         >>> arr[0]
-        TimeDelta(seconds=3.0)
+        nitypes.bintime.TimeDelta(Decimal('3'))
 
     See Also:
         * :class:`TimeDelta`: Individual time delta values
