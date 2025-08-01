@@ -24,6 +24,7 @@ NI-BTF Python Data Types
 
 * :class:`DateTime`: represents an NI-BTF absolute time as a Python object.
 * :class:`TimeDelta`: represents a NI-BTF time interval as a Python object.
+* :class:`TimeDeltaArray`: an array of :class:`TimeDelta` values.
 
 NI-BTF NumPy Structured Data Types
 ==================================
