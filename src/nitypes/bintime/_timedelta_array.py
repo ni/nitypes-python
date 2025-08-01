@@ -25,15 +25,16 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     """An array of :class:`TimeDelta` values in NI Binary Time Format (NI-BTF).
 
     The TimeDeltaArray class provides a mutable sequence container for storing
-    multiple :class:`TimeDelta` objects efficiently.
+    multiple TimeDelta objects efficiently.
 
     This class implements the MutableSequence interface, providing familiar
     list-like operations for time delta collections.
 
-    :param value: Initial collection of TimeDelta objects, defaults to empty array
-    :type value: Collection[TimeDelta] | None, optional
+    Args:
+        value: Initial collection of TimeDelta objects. Defaults to empty array.
 
-    :raises TypeError: If any item in value is not a TimeDelta instance
+    Raises:
+        TypeError: If any item in value is not a TimeDelta instance.
 
     Examples:
         Create an empty array:
@@ -58,9 +59,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         >>> arr[0] = TimeDelta(seconds=3.0)
         >>> arr[0]
         nitypes.bintime.TimeDelta(Decimal('3'))
-
-    See Also:
-        * :class:`TimeDelta`: Individual time delta values
     """
 
     __slots__ = ["_array"]
@@ -73,10 +71,11 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     ) -> None:
         """Initialize a new TimeDeltaArray.
 
-        :param value: Initial collection of TimeDelta objects
-        :type value: Collection[TimeDelta] | None, optional
+        Args:
+            value: Initial collection of TimeDelta objects.
 
-        :raises TypeError: If any item in value is not a TimeDelta instance
+        Raises:
+            TypeError: If any item in value is not a TimeDelta instance.
         """
         if value is None:
             value = []
@@ -101,14 +100,15 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __getitem__(self, index: int | slice) -> TimeDelta | TimeDeltaArray:
         """Return the TimeDelta at the specified location or a slice of values.
 
-        :param index: Array index (int) or slice object
-        :type index: int | slice
+        Args:
+            index: Array index (int) or slice object.
 
-        :returns: Single TimeDelta for int index, TimeDeltaArray for slice
-        :rtype: TimeDelta | TimeDeltaArray
+        Returns:
+            Single TimeDelta for int index, TimeDeltaArray for slice.
 
-        :raises TypeError: If index is bool or unsupported type
-        :raises IndexError: If index is out of range
+        Raises:
+            TypeError: If index is bool or unsupported type.
+            IndexError: If index is out of range.
         """
         if isinstance(index, bool):
             raise TypeError("Cannot index with bool")
@@ -127,8 +127,8 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __len__(self) -> int:
         """Return the number of TimeDelta objects in the array.
 
-        :returns: Number of elements in the array
-        :rtype: int
+        Returns:
+            Number of elements in the array.
         """
         return len(self._array)
 
@@ -145,14 +145,14 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
     def __setitem__(self, index: int | slice, value: TimeDelta | Iterable[TimeDelta]) -> None:
         """Set a new value for TimeDelta at the specified location or slice.
 
-        :param index: Array index (int) or slice object
-        :type index: int | slice
-        :param value: TimeDelta for single assignment or iterable for slice
-        :type value: TimeDelta | Iterable[TimeDelta]
+        Args:
+            index: Array index (int) or slice object.
+            value: TimeDelta for single assignment or iterable for slice.
 
-        :raises TypeError: If index is bool, value type is invalid, or slice value is not iterable
-        :raises ValueError: If slice assignment length doesn't match selected range
-        :raises IndexError: If index is out of range
+        Raises:
+            TypeError: If index is bool, value type is invalid, or slice value is not iterable.
+            ValueError: If slice assignment length doesn't match selected range.
+            IndexError: If index is out of range.
         """
         if isinstance(index, bool):
             raise TypeError("Cannot index with bool")
@@ -188,11 +188,12 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
         Removes elements from the array and adjusts the array size accordingly.
 
-        :param index: Array index (int) or slice object
-        :type index: int | slice
+        Args:
+            index: Array index (int) or slice object.
 
-        :raises TypeError: If index is bool or unsupported type
-        :raises IndexError: If index is out of range
+        Raises:
+            TypeError: If index is bool or unsupported type.
+            IndexError: If index is out of range.
         """
         if isinstance(index, bool):
             raise TypeError("Cannot index with bool")
@@ -207,12 +208,12 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         Inserts the value at the given position, shifting existing elements
         to the right. Index is clamped to valid range [-len, len].
 
-        :param index: Position to insert at (0-based)
-        :type index: int
-        :param value: TimeDelta object to insert
-        :type value: TimeDelta
+        Args:
+            index: Position to insert at (0-based).
+            value: TimeDelta object to insert.
 
-        :raises TypeError: If index is not int or value is not TimeDelta
+        Raises:
+            TypeError: If index is not int or value is not TimeDelta.
         """
         if isinstance(index, bool):
             raise TypeError("Cannot insert with bool")
@@ -232,13 +233,14 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         Modifies the array by repeating its current contents the specified
         number of times. Zero or negative multipliers result in an empty array.
 
-        :param multiplier: Number of times to repeat the array contents
-        :type multiplier: int
+        Args:
+            multiplier: Number of times to repeat the array contents.
 
-        :returns: Reference to self for method chaining
-        :rtype: TimeDeltaArray
+        Returns:
+            Reference to self for method chaining.
 
-        :raises TypeError: If multiplier is not an integer
+        Raises:
+            TypeError: If multiplier is not an integer.
         """
         if isinstance(multiplier, bool):
             raise TypeError("Cannot multiply with bool")
@@ -256,11 +258,11 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         Compares arrays element-wise for equality. Only returns True if
         other is also a TimeDeltaArray with identical contents.
 
-        :param other: Object to compare with
-        :type other: Any
+        Args:
+            other: Object to compare with.
 
-        :returns: True if arrays are equal, NotImplemented for other types
-        :rtype: bool | NotImplemented
+        Returns:
+            True if arrays are equal, NotImplemented for other types.
         """
         if not isinstance(other, TimeDeltaArray):
             return NotImplemented
@@ -272,8 +274,8 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         Enables serialization of TimeDeltaArray objects using Python's
         pickle module by returning constructor arguments.
 
-        :returns: Tuple containing class and constructor arguments
-        :rtype: tuple[Any, ...]
+        Returns:
+            Tuple containing class and constructor arguments.
         """
         return (self.__class__, (list(iter(self)),))
 
@@ -283,8 +285,8 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         Returns a string that could be used to recreate the object,
         including the full module path and constructor arguments.
 
-        :returns: Detailed string representation
-        :rtype: str
+        Returns:
+            Detailed string representation.
         """
         ctor_args = list(iter(self))
         return f"{self.__class__.__module__}.{self.__class__.__name__}({ctor_args})"
@@ -295,8 +297,8 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         Returns a concise, readable representation of the array contents
         in bracket notation with semicolon separators.
 
-        :returns: Human-readable string representation
-        :rtype: str
+        Returns:
+            Human-readable string representation.
         """
         values = list(iter(self))
         return f"[{'; '.join(str(v) for v in values)}]"
