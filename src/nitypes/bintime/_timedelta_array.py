@@ -162,7 +162,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         self._array = np.insert(self._array, index, as_cvi)
 
     def __imul__(self, multiplier: int) -> TimeDeltaArray:
-        """Return self *= multiplier.
+        """Return self*=multiplier.
 
         Raises:
             TypeError: If multiplier is not an integer.
