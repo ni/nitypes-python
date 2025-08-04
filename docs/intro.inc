@@ -107,3 +107,10 @@ Scalar
 :class:`Scalar` is a data type that represents a single scalar value with units
 information. Valid types for the scalar value are :any:`bool`, :any:`int`,
 :any:`float`, and :any:`str`.
+
+Vector
+^^^^^^
+
+:class:`Vector` is a data type that represents an array of scalar values with units
+information. Valid types for the scalar values are :any:`bool`, :any:`int`,
+:any:`float`, and :any:`str`.
