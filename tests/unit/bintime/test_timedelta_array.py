@@ -146,7 +146,6 @@ def test___timedelta_array___slice___returns_slice() -> None:
     (
         "0",
         1.0,
-        True,
         None,
         [1, 2, 3],
     ),
@@ -242,7 +241,6 @@ def test___timedelta_array___set_by_slice___updates_array(
     (
         "0",
         1.0,
-        True,
         None,
         [1, 2, 3],
     ),
@@ -394,7 +392,6 @@ def test___timedelta_array___delete_by_slice___removes_items(
     (
         "0",
         1.0,
-        True,
         None,
         [1, 2, 3],
     ),
@@ -451,7 +448,6 @@ def test___timedelta_array___insert_value___inserts(
     (
         "0",
         1.0,
-        True,
         None,
         [1, 2, 3],
     ),
@@ -675,7 +671,6 @@ def test___timedelta_array___times_equals_non_positive___empties_array(multiplie
     ("multiplier"),
     (
         (None),
-        (True),
         (1.0),
         ("abc"),
         ([]),

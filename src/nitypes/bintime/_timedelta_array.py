@@ -64,8 +64,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
             TypeError: If index is an invalid type.
             IndexError: If index is out of range.
         """
-        if isinstance(index, bool):
-            raise TypeError("Cannot index with bool")
         if isinstance(index, int):
             entry = self._array[index].item()
             as_tuple = TimeValueTuple.from_cvi(*entry)
@@ -100,8 +98,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
             ValueError: If slice assignment length doesn't match the selected range.
             IndexError: If index is out of range.
         """
-        if isinstance(index, bool):
-            raise TypeError("Cannot index with bool")
         if isinstance(index, int):
             if not isinstance(value, TimeDelta):
                 raise TypeError("Cannot assign value that is not of type TimeDelta")
@@ -136,8 +132,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
             TypeError: If index is an invalid type.
             IndexError: If index is out of range.
         """
-        if isinstance(index, bool):
-            raise TypeError("Cannot index with bool")
         if isinstance(index, (int, slice)):
             self._array = np.delete(self._array, index)
         else:
@@ -149,8 +143,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         Raises:
             TypeError: If index is not int or value is not TimeDelta.
         """
-        if isinstance(index, bool):
-            raise TypeError("Cannot insert with bool")
         if not isinstance(index, int):
             raise TypeError("Index must be an int")
         if not isinstance(value, TimeDelta):
@@ -167,8 +159,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         Raises:
             TypeError: If multiplier is not an integer.
         """
-        if isinstance(multiplier, bool):
-            raise TypeError("Cannot multiply with bool")
         if not isinstance(multiplier, int):
             raise TypeError("Multiplier must be an int")
         if multiplier <= 0:
