@@ -26,7 +26,7 @@ def test___no_args___construct___returns_empty_array() -> None:
 
 
 @pytest.mark.parametrize(
-    ("constructor_arg"),
+    "constructor_arg",
     (
         ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]),
         (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])),
@@ -46,7 +46,7 @@ def test___sequence_arg___construct___returns_matching_array(
 
 
 @pytest.mark.parametrize(
-    ("constructor_arg"),
+    "constructor_arg",
     (
         ([TimeDelta(0), TimeDelta(15).to_tuple()]),
         ([True, False]),
@@ -66,7 +66,7 @@ def test___mixed_arg___construct___raises(constructor_arg: list[Any]) -> None:
 
 
 @pytest.mark.parametrize(
-    ("timedelta_list", "expected_length"),
+    "timedelta_list, expected_length",
     (
         (None, 0),
         ([TimeDelta(3.14)], 1),
@@ -89,7 +89,7 @@ def test___timedelta_array___get_len___returns_length(
 
 
 @pytest.mark.parametrize(
-    ("timedelta_list", "indexer", "raised_exception"),
+    "timedelta_list, indexer, raised_exception",
     (
         # First index
         (None, 0, IndexError()),
@@ -163,7 +163,7 @@ def test___timedelta_array___invalid_index___raises(indexer: Any) -> None:
 
 
 @pytest.mark.parametrize(
-    ("timedelta_list", "indexer", "raised_exception"),
+    "timedelta_list, indexer, raised_exception",
     (
         # First index
         (None, 0, IndexError()),
@@ -194,7 +194,7 @@ def test___timedelta_array___set_by_index___updates_array(
 
 
 @pytest.mark.parametrize(
-    ("indexer", "new_entries", "expected_result"),
+    "indexer, new_entries, expected_result",
     (
         (
             slice(1, 4),
@@ -237,7 +237,7 @@ def test___timedelta_array___set_by_slice___updates_array(
 
 
 @pytest.mark.parametrize(
-    ("indexer"),
+    "indexer",
     (
         "0",
         1.0,
@@ -278,7 +278,7 @@ def test___timedelta_array___set_with_not_iterable___raises() -> None:
 
 
 @pytest.mark.parametrize(
-    ("indexer"),
+    "indexer",
     (
         slice(1, None, None),  # Slice is too long for set values
         slice(None, None, 4),  # Slice is too short for set values
@@ -292,7 +292,7 @@ def test___timedelta_array___set_slice_wrong_length___raises(indexer: slice) -> 
 
 
 @pytest.mark.parametrize(
-    ("new_entries"),
+    "new_entries",
     (
         ["ab", "cd"],
         [1.0, 2.0],
@@ -314,7 +314,7 @@ def test___timedelta_array___set_mixed_slice___raises(new_entries: list[Any]) ->
 
 
 @pytest.mark.parametrize(
-    ("timedelta_list", "indexer", "raised_exception"),
+    "timedelta_list, indexer, raised_exception",
     (
         # First index
         (None, 0, IndexError()),
@@ -347,7 +347,7 @@ def test___timedelta_array___delete_by_index___removes_item(
 
 
 @pytest.mark.parametrize(
-    ("indexer", "expected_result"),
+    "indexer, expected_result",
     (
         (
             slice(1, 4),
@@ -409,7 +409,7 @@ def test___timedelta_array___delete_invalid_index___raises(indexer: Any) -> None
 
 
 @pytest.mark.parametrize(
-    ("initial_value", "index"),
+    "initial_value, index",
     (
         # Empty array
         (None, 0),
@@ -444,7 +444,7 @@ def test___timedelta_array___insert_value___inserts(
 
 
 @pytest.mark.parametrize(
-    ("index"),
+    "index",
     (
         "0",
         1.0,
@@ -460,7 +460,7 @@ def test___timedelta_array___insert_invalid_index___raises(index: int) -> None:
 
 
 @pytest.mark.parametrize(
-    ("value"),
+    "value",
     (
         "0",
         1.0,
@@ -482,7 +482,7 @@ def test___timedelta_array___insert_invalid_value___raises(value: Any) -> None:
 
 
 @pytest.mark.parametrize(
-    ("array", "item", "expected_count"),
+    "array, item, expected_count",
     (
         (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]), TimeDelta(12.34), 0),
         (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]), TimeDelta(-1), 1),
@@ -498,7 +498,7 @@ def test___timedelta_array___count___returns_matching_count(
 
 
 @pytest.mark.parametrize(
-    ("array", "item", "expected_index"),
+    "array, item, expected_index",
     (
         (TimeDeltaArray([TimeDelta(20.26), TimeDelta(20.26), TimeDelta(500)]), TimeDelta(20.26), 0),
         (TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]), TimeDelta(20.26), 1),
@@ -530,7 +530,7 @@ def test___timedelta_array___append___adds_to_end() -> None:
 
 
 @pytest.mark.parametrize(
-    ("new_entry"),
+    "new_entry",
     (
         (),
         (True),
@@ -549,7 +549,7 @@ def test___timedelta_array___append_invalid_value___raises(new_entry: Any) -> No
 
 
 @pytest.mark.parametrize(
-    ("new_entries"),
+    "new_entries",
     (
         (),
         ([]),
@@ -573,7 +573,7 @@ def test___timedelta_array___extend___adds_to_end(new_entries: Sequence[TimeDelt
 
 
 @pytest.mark.parametrize(
-    ("new_entries"),
+    "new_entries",
     (
         (),
         ([]),
@@ -597,7 +597,7 @@ def test___timedelta_array___plus_equals___adds_to_end(new_entries: Sequence[Tim
 
 
 @pytest.mark.parametrize(
-    ("new_entries"),
+    "new_entries",
     (
         (None),
         (True),
@@ -619,7 +619,7 @@ def test___timedelta_array___extend_invalid_values___raises(new_entries: Any) ->
 
 
 @pytest.mark.parametrize(
-    ("new_entries"),
+    "new_entries",
     (
         (None),
         (True),
@@ -651,7 +651,7 @@ def test___timedelta_array___times_equals___adds_repeated_to_end() -> None:
 
 
 @pytest.mark.parametrize(
-    ("multiplier"),
+    "multiplier",
     (
         (0),
         (-1),
@@ -668,7 +668,7 @@ def test___timedelta_array___times_equals_non_positive___empties_array(multiplie
 
 
 @pytest.mark.parametrize(
-    ("multiplier"),
+    "multiplier",
     (
         (None),
         (1.0),
@@ -696,7 +696,7 @@ def test___timedelta_array___remove___removes_first_match() -> None:
 
 
 @pytest.mark.parametrize(
-    ("item_to_remove"),
+    "item_to_remove",
     (
         (),
         (None),
@@ -830,7 +830,7 @@ def test___timedelta_array___sort___sorts_array() -> None:
 
 
 @pytest.mark.parametrize(
-    ("value", "expected_str"),
+    "value, expected_str",
     (
         (TimeDeltaArray(), "[]"),
         (TimeDeltaArray([TimeDelta(-1)]), "[-1 day, 23:59:59]"),
@@ -849,7 +849,7 @@ def test___timedelta_array___str___looks_ok(value: TimeDeltaArray, expected_str:
 
 
 @pytest.mark.parametrize(
-    ("value", "expected_repr"),
+    "value, expected_repr",
     (
         (TimeDeltaArray(), "nitypes.bintime.TimeDeltaArray([])"),
         (
@@ -880,7 +880,7 @@ def test___timedelta_array___pickle___references_public_modules() -> None:
 
 
 @pytest.mark.parametrize(
-    ("value"),
+    "value",
     (
         (TimeDeltaArray()),
         (TimeDeltaArray([TimeDelta(-1)])),
