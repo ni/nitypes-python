@@ -167,7 +167,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
             self._array = np.tile(self._array, multiplier)
         return self
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Return self == other."""
         if not isinstance(other, TimeDeltaArray):
             return NotImplemented
