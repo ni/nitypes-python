@@ -11,6 +11,8 @@ from typing import (
 import numpy as np
 import numpy.typing as npt
 
+from nitypes._exceptions import invalid_arg_value, invalid_arg_type
+
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
     from nitypes.bintime import CVITimeIntervalDType, TimeDelta, TimeValueTuple
@@ -40,7 +42,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         if value is None:
             value = []
         if not all(isinstance(item, TimeDelta) for item in value):
-            raise TypeError("Cannot assign values that are not of type TimeDelta")
+            raise invalid_arg_type("value", "iterable of TimeDelta", value)
         self._array = np.fromiter(
             (entry.to_tuple().to_cvi() for entry in value),
             dtype=CVITimeIntervalDType,
@@ -74,7 +76,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
             new_array._array = sliced_entries
             return new_array
         else:
-            raise TypeError("Index must be an int or slice")
+            raise invalid_arg_type("index", "int or slice", index)
 
     def __len__(self) -> int:
         """Return len(self)."""
@@ -100,22 +102,23 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         """
         if isinstance(index, int):
             if not isinstance(value, TimeDelta):
-                raise TypeError("Cannot assign value that is not of type TimeDelta")
+                raise invalid_arg_type("value", "TimeDelta", value)
             self._array[index] = value.to_tuple().to_cvi()
         elif isinstance(index, slice):
             if not isinstance(value, Iterable):
-                raise TypeError("Cannot assign a slice with a non-iterable")
+                raise invalid_arg_type("value", "iterable", value)
             if not all(isinstance(item, TimeDelta) for item in value):
-                raise TypeError("Cannot assign values that are not of type TimeDelta")
+                raise invalid_arg_type("value", "iterable of TimeDelta", value)
             selected_count = len(range(*index.indices(len(self))))
             values = list(value)
             new_entry_count = len(values)
             if new_entry_count != selected_count:
-                message = f"Cannot assign slice with unmatched length. Expected {selected_count} but received {new_entry_count}"
-                raise ValueError(message)
+                raise invalid_arg_value(
+                    "value", "iterable with the same length as the slice", value
+                )
             self._array[index] = [item.to_tuple().to_cvi() for item in values]
         else:
-            raise TypeError("Index must be an int or slice")
+            raise invalid_arg_type("index", "int or slice", index)
 
     @overload
     def __delitem__(self, index: int) -> None: ...  # noqa: D105 - missing docstring in magic method
@@ -135,7 +138,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         if isinstance(index, (int, slice)):
             self._array = np.delete(self._array, index)
         else:
-            raise TypeError("Index must be an int or slice")
+            raise invalid_arg_type("index", "int or slice", index)
 
     def insert(self, index: int, value: TimeDelta) -> None:
         """Insert the TimeDelta value before the specified index.
@@ -144,9 +147,9 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
             TypeError: If index is not int or value is not TimeDelta.
         """
         if not isinstance(index, int):
-            raise TypeError("Index must be an int")
+            raise invalid_arg_type("index", "int", index)
         if not isinstance(value, TimeDelta):
-            raise TypeError("Cannot assign value that is not of type TimeDelta")
+            raise invalid_arg_type("value", "TimeDelta", value)
         lower = -len(self._array)
         upper = len(self._array)
         index = min(max(index, lower), upper)
