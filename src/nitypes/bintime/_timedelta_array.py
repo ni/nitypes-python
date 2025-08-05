@@ -153,20 +153,6 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         as_cvi = value.to_tuple().to_cvi()
         self._array = np.insert(self._array, index, as_cvi)
 
-    def __imul__(self, multiplier: int) -> TimeDeltaArray:
-        """Return self*=multiplier.
-
-        Raises:
-            TypeError: If multiplier is not an integer.
-        """
-        if not isinstance(multiplier, int):
-            raise TypeError("Multiplier must be an int")
-        if multiplier <= 0:
-            self._array = np.array([], dtype=CVITimeIntervalDType)
-        else:
-            self._array = np.tile(self._array, multiplier)
-        return self
-
     def __eq__(self, other: object) -> bool:
         """Return self == other."""
         if not isinstance(other, TimeDeltaArray):

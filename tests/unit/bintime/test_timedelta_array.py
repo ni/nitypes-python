@@ -626,51 +626,6 @@ def test___timedelta_array___plus_equals_invalid_values___raises(new_entries: An
         array += new_entries
 
 
-def test___timedelta_array___times_equals___adds_repeated_to_end() -> None:
-    original_items = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
-    array = TimeDeltaArray(original_items)
-
-    array *= 2
-
-    expected = TimeDeltaArray(original_items * 2)
-    assert np.array_equal(array._array, expected._array)
-
-
-@pytest.mark.parametrize(
-    "multiplier",
-    (
-        (0),
-        (-1),
-    ),
-)
-def test___timedelta_array___times_equals_non_positive___empties_array(multiplier: int) -> None:
-    original_items = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
-    array = TimeDeltaArray(original_items)
-
-    array *= multiplier
-
-    empty = TimeDeltaArray()
-    assert np.array_equal(array._array, empty._array)
-
-
-@pytest.mark.parametrize(
-    "multiplier",
-    (
-        (None),
-        (1.0),
-        ("abc"),
-        ([]),
-        ([1]),
-    ),
-)
-def test___timedelta_array___times_equals_invalid_multiplier___raises(multiplier: Any) -> None:
-    original_items = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
-    array = TimeDeltaArray(original_items)
-
-    with pytest.raises(TypeError):
-        array *= multiplier
-
-
 def test___timedelta_array___remove___removes_first_match() -> None:
     array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(20.26)])
 
