@@ -26,9 +26,9 @@ _BT_EPSILON = ht.timedelta(yoctoseconds=54210)
 _DT_EPSILON = ht.timedelta(microseconds=1)
 
 
-#############
+###############################################################################
 # Constructor
-#############
+###############################################################################
 def test___no_args___construct___returns_zero_timedelta() -> None:
     value = TimeDelta()
 
@@ -127,9 +127,9 @@ def test___invalid_seconds_type___construct___raises_type_error() -> None:
     assert exc.value.args[0].startswith("The seconds must be a number or timedelta.")
 
 
-############
+###############################################################################
 # from_ticks
-############
+###############################################################################
 def test___int_ticks___from_ticks___returns_timedelta() -> None:
     value = TimeDelta.from_ticks(0x12345678_90ABCDEF_FEDCBA09_87654321)
 
@@ -153,9 +153,9 @@ def test___unsupported_type___from_ticks___raises_type_error() -> None:
     assert exc.value.args[0].startswith("The ticks must be an integer.")
 
 
-#########################################################
+###############################################################################
 # days, seconds, microseconds, femtoseconds, yoctoseconds
-#########################################################
+###############################################################################
 @pytest.mark.parametrize(
     "value, expected",
     [
@@ -202,9 +202,9 @@ def test___various_values___unit_properties___return_unit_values(
     ) == expected
 
 
-###############
+###############################################################################
 # total_seconds
-###############
+###############################################################################
 @pytest.mark.parametrize(
     "seconds",
     [0.0, 1.0, 3.14159, -3.14159, 1.23456789e18, -1.23456789e18, 1.23456789e-18, -1.23456789e-18],
@@ -217,9 +217,9 @@ def test___float_seconds___total_seconds___approximate_match(seconds: float) -> 
     assert total_seconds == pytest.approx(seconds)
 
 
-#########################
+###############################################################################
 # precision_total_seconds
-#########################
+###############################################################################
 @pytest.mark.parametrize(
     "seconds",
     [
@@ -311,9 +311,9 @@ def _random_state() -> Generator[tuple[Any, ...]]:
         random.setstate(state)
 
 
-##################
+###############################################################################
 # Unary arithmetic
-##################
+###############################################################################
 @pytest.mark.parametrize(
     "value, expected",
     [
@@ -370,9 +370,9 @@ def test___timedeltas___abs___returns_absolute_value(value: TimeDelta, expected:
     assert abs(value) == expected
 
 
-###################
+###############################################################################
 # Binary arithmetic
-###################
+###############################################################################
 @pytest.mark.parametrize(
     "left, right, expected",
     [
@@ -1054,9 +1054,9 @@ def test___ht_timedelta___divmod___returns_int_and_timedelta(
     assert divmod(left, right) == expected
 
 
-############
+###############################################################################
 # Comparison
-############
+###############################################################################
 @pytest.mark.parametrize(
     "left, right",
     [
@@ -1123,9 +1123,9 @@ def test___lesser_value___comparison___lesser(
     assert not (left >= right)
 
 
-###############
+###############################################################################
 # Miscellaneous
-###############
+###############################################################################
 @pytest.mark.parametrize(
     "value, expected",
     [

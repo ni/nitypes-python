@@ -12,11 +12,9 @@ from nitypes.bintime import TimeDelta
 from nitypes.bintime import TimeDeltaArray
 
 
-#############
+###############################################################################
 # Constructor
-#############
-
-
+###############################################################################
 def test___no_args___construct___returns_empty_array() -> None:
     value = TimeDeltaArray()
 
@@ -60,11 +58,9 @@ def test___mixed_arg___construct___raises(constructor_arg: list[Any]) -> None:
         _ = TimeDeltaArray(constructor_arg)
 
 
-#######
-# len()
-#######
-
-
+###############################################################################
+# len
+###############################################################################
 @pytest.mark.parametrize(
     "timedelta_list, expected_length",
     (
@@ -83,11 +79,9 @@ def test___timedelta_array___get_len___returns_length(
     assert length == expected_length
 
 
-###############
-# __getitem__()
-###############
-
-
+###############################################################################
+# __getitem__
+###############################################################################
 @pytest.mark.parametrize(
     "timedelta_list, indexer, raised_exception",
     (
@@ -157,11 +151,9 @@ def test___timedelta_array___invalid_index___raises(indexer: Any) -> None:
         _ = value[indexer]
 
 
-###############
-# __setitem__()
-###############
-
-
+###############################################################################
+# __setitem__
+###############################################################################
 @pytest.mark.parametrize(
     "timedelta_list, indexer, raised_exception",
     (
@@ -308,11 +300,9 @@ def test___timedelta_array___set_mixed_slice___raises(new_entries: list[Any]) ->
         value[::2] = new_entries
 
 
-###############
-# __delitem__()
-###############
-
-
+###############################################################################
+# __delitem__
+###############################################################################
 @pytest.mark.parametrize(
     "timedelta_list, indexer, raised_exception",
     (
@@ -403,11 +393,9 @@ def test___timedelta_array___delete_invalid_index___raises(indexer: Any) -> None
         del value[indexer]
 
 
-##########
-# insert()
-##########
-
-
+###############################################################################
+# insert
+###############################################################################
 @pytest.mark.parametrize(
     "initial_value, index",
     (
@@ -476,11 +464,9 @@ def test___timedelta_array___insert_invalid_value___raises(value: Any) -> None:
         value.insert(0, value)
 
 
-#################
+###############################################################################
 # MutableSequence
-#################
-
-
+###############################################################################
 @pytest.mark.parametrize(
     "array, item, expected_count",
     (
@@ -779,11 +765,9 @@ def test___timedelta_array___contains___returns_presence() -> None:
     assert TimeDelta(12.34) not in array
 
 
-#########
-# Buitins
-#########
-
-
+###############################################################################
+# Builtins
+###############################################################################
 def test___same_values___equals___returns_equal() -> None:
     array1 = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
     array2 = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])

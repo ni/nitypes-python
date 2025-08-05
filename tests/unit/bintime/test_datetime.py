@@ -14,9 +14,9 @@ from nitypes.bintime._time_value_tuple import TimeValueTuple
 from nitypes.bintime._timedelta import _BITS_PER_SECOND, _FRACTIONAL_SECONDS_MASK
 
 
-#############
+###############################################################################
 # Constructor
-#############
+###############################################################################
 def test___no_args___construct___returns_epoch() -> None:
     value = DateTime()
 
@@ -124,9 +124,9 @@ def test___local_unit_args___construct___raises_value_error() -> None:
     assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
 
 
-############
+###############################################################################
 # from_ticks
-############
+###############################################################################
 def test___int_ticks___from_ticks___returns_time_value() -> None:
     value = DateTime.from_ticks(0x12345678_90ABCDEF_FEDCBA09_87654321)
 
@@ -135,9 +135,9 @@ def test___int_ticks___from_ticks___returns_time_value() -> None:
     assert value._offset._ticks == 0x12345678_90ABCDEF_FEDCBA09_87654321
 
 
-#############
+###############################################################################
 # from_offset
-#############
+###############################################################################
 def test___time_value___from_offset___returns_time_value() -> None:
     value = DateTime.from_offset(TimeDelta.from_ticks(0x12345678_90ABCDEF_FEDCBA09_87654321))
 
@@ -146,9 +146,9 @@ def test___time_value___from_offset___returns_time_value() -> None:
     assert value._offset._ticks == 0x12345678_90ABCDEF_FEDCBA09_87654321
 
 
-##############################################
+###############################################################################
 # year, month, day, hour, minute, second, etc.
-##############################################
+###############################################################################
 @pytest.mark.parametrize(
     "other, expected",
     [
@@ -210,9 +210,9 @@ def test___various_values___unit_properties___return_unit_values(
     ) == expected
 
 
-###################
+###############################################################################
 # Binary arithmetic
-###################
+###############################################################################
 @pytest.mark.parametrize(
     "left, right, expected",
     [
@@ -304,9 +304,9 @@ def test___datetime___sub___returns_time_value(
     assert left - right == expected
 
 
-############
+###############################################################################
 # Comparison
-############
+###############################################################################
 @pytest.mark.parametrize(
     "left, right",
     [
@@ -395,9 +395,9 @@ def test___lesser_value___comparison___lesser(
     assert not (left >= right)
 
 
-###############
+###############################################################################
 # Miscellaneous
-###############
+###############################################################################
 _VARIOUS_VALUES = [
     DateTime(dt.MINYEAR, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc),
     DateTime(1850, 12, 25, 8, 15, 30, 123_456, 234_567_789, 345_567_890, dt.timezone.utc),
