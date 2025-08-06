@@ -99,7 +99,7 @@ def test___timedelta_array___get_len___returns_length(
         ([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)], 10, IndexError()),
     ),
 )
-def test__timedelta_array___index___returns_timedelta(
+def test___timedelta_array___index___returns_timedelta(
     timedelta_list: list[TimeDelta], indexer: int, raised_exception: BaseException | None
 ) -> None:
     value = TimeDeltaArray(timedelta_list)
