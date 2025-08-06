@@ -723,19 +723,33 @@ def test___timedelta_array___contains___returns_presence() -> None:
 ###############################################################################
 # Builtins
 ###############################################################################
-def test___same_values___equals___returns_equal() -> None:
-    array1 = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
-    array2 = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (
+            TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]),
+            TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]),
+        ),
+    ],
+)
+def test___same_value___equality___equal(left: TimeDeltaArray, right: TimeDeltaArray) -> None:
+    assert left == right
+    assert right == left
 
-    assert array1 == array2
-    assert array2 == array1
 
-
-def test___different_values___not_equals___returns_not_equal() -> None:
-    array1 = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
-    array2 = TimeDeltaArray([TimeDelta(-10), TimeDelta(200.26), TimeDelta(1500)])
-
-    assert array1 != array2
+@pytest.mark.parametrize(
+    "left, right",
+    [
+        (
+            TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]),
+            TimeDeltaArray([TimeDelta(-10), TimeDelta(200.26), TimeDelta(1500)]),
+        ),
+    ],
+)
+def test___different_value___equality___not_equal(
+    left: TimeDeltaArray, right: TimeDeltaArray
+) -> None:
+    assert left != right
 
 
 def test___timedelta_array___min___returns_minimum() -> None:
