@@ -828,6 +828,7 @@ def test___timedelta_array___pickle___references_public_modules() -> None:
     ),
 )
 def test___timedelta_array___pickle_unpickle___makes_copy(value: TimeDeltaArray) -> None:
-    new_value = pickle.loads(pickle.dumps(value))
+    new_value: TimeDeltaArray = pickle.loads(pickle.dumps(value))
     assert new_value == value
     assert new_value is not value
+    assert new_value._array is not value._array
