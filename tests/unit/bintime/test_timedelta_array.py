@@ -757,6 +757,21 @@ def test___timedelta_array___copy___returns_copy() -> None:
 
     assert array == copied
     assert array is not copied
+    assert array._array is not copied._array
+    for original_entry, copied_entry in zip(array, copied):
+        assert original_entry is not copied_entry
+
+
+def test___timedelta_array___deepcopy___returns_deepcopy() -> None:
+    array = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    copied = copy.deepcopy(array)
+
+    assert array == copied
+    assert array is not copied
+    assert array._array is not copied._array
+    for original_entry, copied_entry in zip(array, copied):
+        assert original_entry is not copied_entry
 
 
 @pytest.mark.parametrize(
