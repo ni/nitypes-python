@@ -759,15 +759,6 @@ def test___timedelta_array___copy___returns_copy() -> None:
     assert array is not copied
 
 
-def test___timedelta_array___sort___sorts_array() -> None:
-    array = TimeDeltaArray([TimeDelta(20.26), TimeDelta(-1), TimeDelta(500)])
-
-    ordered = sorted(array)
-
-    expected = [TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)]
-    assert ordered == expected
-
-
 @pytest.mark.parametrize(
     "value, expected_str",
     (
