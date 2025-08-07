@@ -216,21 +216,54 @@ def test___timedelta_array___set_by_index___updates_array(
                 [TimeDelta(0), TimeDelta(3.14), TimeDelta(1), TimeDelta(500), TimeDelta(2)]
             ),
         ),
-        (  # Replaces many from length-1 list
+        # len(selected entries) > len(incoming entries)
+        (  # Shrinks array, replacing many from length-2 list
+            slice(1, 4),
+            [TimeDelta(0), TimeDelta(10)],
+            TimeDeltaArray(
+                [TimeDelta(-1), TimeDelta(0), TimeDelta(10), TimeDelta(0x12345678_90ABCDEF)]
+            ),
+        ),
+        (  # Shrinks array, replacing many from length-1 list
             slice(1, 4),
             [TimeDelta(0)],
             TimeDeltaArray([TimeDelta(-1), TimeDelta(0), TimeDelta(0x12345678_90ABCDEF)]),
         ),
-        (  # Deletes when assigning empty list
+        (  # Shrinks array, deleting when assigning empty list
             slice(1, 4),
             [],
             TimeDeltaArray([TimeDelta(-1), TimeDelta(0x12345678_90ABCDEF)]),
         ),
-        (  # Replaces one-for-one with step from same-sized list
-            slice(None, None, 2),
-            [TimeDelta(0), TimeDelta(1), TimeDelta(2)],
+        # len(selected entries) < len(incoming entries)
+        (  # Grows array, replacing then inserting when slice is too short for incoming values
+            slice(1, 2),
+            [TimeDelta(0), TimeDelta(10), TimeDelta(100)],
             TimeDeltaArray(
-                [TimeDelta(0), TimeDelta(3.14), TimeDelta(1), TimeDelta(500), TimeDelta(2)]
+                [
+                    TimeDelta(-1),
+                    TimeDelta(0),
+                    TimeDelta(10),
+                    TimeDelta(100),
+                    TimeDelta(20.26),
+                    TimeDelta(500),
+                    TimeDelta(0x12345678_90ABCDEF),
+                ]
+            ),
+        ),
+        (  # Grows array, inserting when slice is empty
+            slice(1, 1),
+            [TimeDelta(0), TimeDelta(10), TimeDelta(100)],
+            TimeDeltaArray(
+                [
+                    TimeDelta(-1),
+                    TimeDelta(0),
+                    TimeDelta(10),
+                    TimeDelta(100),
+                    TimeDelta(3.14),
+                    TimeDelta(20.26),
+                    TimeDelta(500),
+                    TimeDelta(0x12345678_90ABCDEF),
+                ]
             ),
         ),
     ),
