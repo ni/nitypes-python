@@ -105,8 +105,8 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
                 raise invalid_arg_type("value", "TimeDelta", value)
             self._array[index] = value.to_tuple().to_cvi()
         elif isinstance(index, slice):
-            selection = index.indices(len(self))
-            selected_count = len(range(*selection))
+            start, stop, step = index.indices(len(self))
+            selected_count = len(range(start, stop, step))
             if selected_count == 0:
                 return
 
@@ -117,8 +117,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
             values = list(value)
             new_entry_count = len(values)
-            step_size = selection[-1]
-            if step_size > 1:
+            if step > 1:
                 if new_entry_count <= 1:
                     raise invalid_arg_value("index", "slice with step size 1", index)
                 elif new_entry_count != selected_count:
@@ -130,7 +129,7 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
                 return self.__delitem__(index)
             if new_entry_count == 1:
                 self.__delitem__(index)
-                return self.insert(selection[0], values[0])
+                return self.insert(start, values[0])
             self._array[index] = [item.to_tuple().to_cvi() for item in values]
         else:
             raise invalid_arg_type("index", "int or slice", index)
