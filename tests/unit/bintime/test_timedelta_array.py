@@ -249,11 +249,21 @@ def test___timedelta_array___set_by_slice___updates_array(
     "indexer, new_entries, raised_exception",
     (
         (  # Slice is too long for incoming values
+            slice(1, 2),
+            [TimeDelta(0), TimeDelta(10), TimeDelta(100)],
+            ValueError(),
+        ),
+        (  # Slice is too short for incoming values
+            slice(1, 4),
+            [TimeDelta(0), TimeDelta(10)],
+            ValueError(),
+        ),
+        (  # Strided slice is too long for incoming values
             slice(None, None, 2),
             [TimeDelta(0)],
             ValueError(),
         ),
-        (  # Slice is too short for incoming values
+        (  # Strided slice is too short for incoming values
             slice(None, None, 4),
             [TimeDelta(0), TimeDelta(10)],
             ValueError(),
