@@ -117,13 +117,12 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
             values = list(value)
             new_entry_count = len(values)
-            if step > 1:
-                if new_entry_count <= 1:
-                    raise invalid_arg_value("index", "slice with step size 1", index)
-                elif new_entry_count != selected_count:
-                    raise invalid_arg_value(
-                        "value", "iterable with the same length as the slice", value
-                    )
+            if step > 1 and new_entry_count <= 1:
+                raise invalid_arg_value("index", "slice with step size 1", index)
+            if new_entry_count > selected_count:
+                raise invalid_arg_value(
+                    "value", "iterable with the same length as the slice", value
+                )
 
             if new_entry_count == 0:
                 del self[index]
