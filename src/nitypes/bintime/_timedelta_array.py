@@ -105,16 +105,13 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
                 raise invalid_arg_type("value", "TimeDelta", value)
             self._array[index] = value.to_tuple().to_cvi()
         elif isinstance(index, slice):
-            start, stop, step = index.indices(len(self))
-            selected_count = len(range(start, stop, step))
-            if selected_count == 0:
-                return
-
             if not isinstance(value, Iterable):
                 raise invalid_arg_type("value", "iterable of TimeDelta", value)
             if not all(isinstance(item, TimeDelta) for item in value):
                 raise invalid_arg_type("value", "iterable of TimeDelta", value)
 
+            start, stop, step = index.indices(len(self))
+            selected_count = len(range(start, stop, step))
             values = list(value)
             new_entry_count = len(values)
             if step > 1 and new_entry_count != selected_count:
@@ -122,16 +119,23 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
                     "value", "iterable with the same length as the slice", value
                 )
 
-            if new_entry_count == 0:
-                del self[index]
-                return
-            if new_entry_count == 1:
-                if selected_count == 1:
-                    self[start] = values[0]
-                    return
-                del self[index]
-                return self.insert(start, values[0])
-            self._array[index] = [item.to_tuple().to_cvi() for item in values]
+            if new_entry_count < selected_count:
+                # Shrink
+                replaced = slice(start, start + new_entry_count)
+                removed = slice(start + new_entry_count, stop)
+                self._array[replaced] = [item.to_tuple().to_cvi() for item in values]
+                del self[removed]
+            elif new_entry_count > selected_count:
+                # Grow
+                replaced = slice(start, stop)
+                self._array[replaced] = [
+                    item.to_tuple().to_cvi() for item in values[:selected_count]
+                ]
+                for offset, entry in enumerate(values[selected_count:]):
+                    self.insert(stop + offset, entry)
+            else:
+                # Replace, accounting for strides
+                self._array[index] = [item.to_tuple().to_cvi() for item in values]
         else:
             raise invalid_arg_type("index", "int or slice", index)
 
