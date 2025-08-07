@@ -188,6 +188,7 @@ def test___timedelta_array___set_by_index___updates_array(
 @pytest.mark.parametrize(
     "indexer, new_entries, expected_result",
     (
+        # len(selected entries) == len(incoming entries)
         (  # Replaces one-for-one from list
             slice(1, 4),
             [TimeDelta(0), TimeDelta(1), TimeDelta(2)],
@@ -202,10 +203,17 @@ def test___timedelta_array___set_by_index___updates_array(
             ),
         ),
         (  # Replaces one from length-1 list
-            slice(4, None),
+            slice(3, 4),
             [TimeDelta(0)],
             TimeDeltaArray(
-                [TimeDelta(-1), TimeDelta(3.14), TimeDelta(20.26), TimeDelta(500), TimeDelta(0)]
+                [TimeDelta(-1), TimeDelta(3.14), TimeDelta(20.26), TimeDelta(0), TimeDelta(0x12345678_90ABCDEF)]
+            ),
+        ),
+        (  # With strided selection, replaces one-for-one from same-sized list
+            slice(None, None, 2),
+            [TimeDelta(0), TimeDelta(1), TimeDelta(2)],
+            TimeDeltaArray(
+                [TimeDelta(0), TimeDelta(3.14), TimeDelta(1), TimeDelta(500), TimeDelta(2)]
             ),
         ),
         (  # Replaces many from length-1 list
