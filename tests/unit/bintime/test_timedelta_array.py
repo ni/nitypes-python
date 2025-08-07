@@ -246,40 +246,6 @@ def test___timedelta_array___set_by_slice___updates_array(
 
 
 @pytest.mark.parametrize(
-    "indexer",
-    (
-        "0",
-        1.0,
-        None,
-        [1, 2, 3],
-    ),
-)
-def test___timedelta_array___set_invalid_index___raises(indexer: Any) -> None:
-    value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
-    new_entry = TimeDelta(-100)
-
-    with pytest.raises(TypeError):
-        value[indexer] = new_entry
-
-
-@pytest.mark.parametrize(
-    "new_entry",
-    (
-        "0",
-        1.0,
-        True,
-        None,
-        [1, 2, 3],
-    ),
-)
-def test___timedelta_array___set_invalid_value___raises(new_entry: Any) -> None:
-    value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
-
-    with pytest.raises(TypeError):
-        value[0] = new_entry
-
-
-@pytest.mark.parametrize(
     "indexer, new_entries, raised_exception",
     (
         (  # Slice is too long for incoming values
@@ -316,6 +282,40 @@ def test___timedelta_array___set_slice_wrong_value___raises(
 
     with pytest.raises(type(raised_exception)):
         value[indexer] = new_entries  # type: ignore # validating incompatible types
+
+
+@pytest.mark.parametrize(
+    "indexer",
+    (
+        "0",
+        1.0,
+        None,
+        [1, 2, 3],
+    ),
+)
+def test___timedelta_array___set_invalid_index___raises(indexer: Any) -> None:
+    value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+    new_entry = TimeDelta(-100)
+
+    with pytest.raises(TypeError):
+        value[indexer] = new_entry
+
+
+@pytest.mark.parametrize(
+    "new_entry",
+    (
+        "0",
+        1.0,
+        True,
+        None,
+        [1, 2, 3],
+    ),
+)
+def test___timedelta_array___set_invalid_value___raises(new_entry: Any) -> None:
+    value = TimeDeltaArray([TimeDelta(-1), TimeDelta(20.26), TimeDelta(500)])
+
+    with pytest.raises(TypeError):
+        value[0] = new_entry
 
 
 @pytest.mark.parametrize(
