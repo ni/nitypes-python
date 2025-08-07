@@ -206,7 +206,13 @@ def test___timedelta_array___set_by_index___updates_array(
             slice(3, 4),
             [TimeDelta(0)],
             TimeDeltaArray(
-                [TimeDelta(-1), TimeDelta(3.14), TimeDelta(20.26), TimeDelta(0), TimeDelta(0x12345678_90ABCDEF)]
+                [
+                    TimeDelta(-1),
+                    TimeDelta(3.14),
+                    TimeDelta(20.26),
+                    TimeDelta(0),
+                    TimeDelta(0x12345678_90ABCDEF),
+                ]
             ),
         ),
         (  # With strided selection, replaces one-for-one from same-sized list
