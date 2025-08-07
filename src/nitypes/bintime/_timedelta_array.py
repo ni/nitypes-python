@@ -126,9 +126,10 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
                     )
 
             if new_entry_count == 0:
-                return self.__delitem__(index)
+                del self[index]
+                return
             if new_entry_count == 1:
-                self.__delitem__(index)
+                del self[index]
                 return self.insert(start, values[0])
             self._array[index] = [item.to_tuple().to_cvi() for item in values]
         else:
