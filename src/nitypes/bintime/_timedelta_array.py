@@ -128,6 +128,9 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
                 del self[index]
                 return
             if new_entry_count == 1:
+                if selected_count == 1:
+                    self[start] = values[0]
+                    return
                 del self[index]
                 return self.insert(start, values[0])
             self._array[index] = [item.to_tuple().to_cvi() for item in values]
