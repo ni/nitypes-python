@@ -23,6 +23,7 @@ NI-BTF Python Data Types
 ========================
 
 * :class:`DateTime`: represents an NI-BTF absolute time as a Python object.
+* :class:`DateTimeArray`: an array of :class:`DateTime` values.
 * :class:`TimeDelta`: represents a NI-BTF time interval as a Python object.
 * :class:`TimeDeltaArray`: an array of :class:`TimeDelta` values.
 
@@ -67,6 +68,7 @@ NI-BTF.
 from __future__ import annotations
 
 from nitypes.bintime._datetime import DateTime
+from nitypes.bintime._datetime_array import DateTimeArray
 from nitypes.bintime._dtypes import (
     CVIAbsoluteTimeBase,
     CVIAbsoluteTimeDType,
@@ -79,6 +81,7 @@ from nitypes.bintime._timedelta_array import TimeDeltaArray
 
 __all__ = [
     "DateTime",
+    "DateTimeArray",
     "CVIAbsoluteTimeBase",
     "CVIAbsoluteTimeDType",
     "CVITimeIntervalBase",
@@ -90,6 +93,7 @@ __all__ = [
 
 # Hide that it was defined in a helper file
 DateTime.__module__ = __name__
+DateTimeArray.__module__ = __name__
 TimeDelta.__module__ = __name__
 TimeDeltaArray.__module__ = __name__
 TimeValueTuple.__module__ = __name__
