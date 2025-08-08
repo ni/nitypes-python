@@ -131,8 +131,11 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
                 self._array[replaced] = [
                     item.to_tuple().to_cvi() for item in values[:selected_count]
                 ]
-                for offset, entry in enumerate(values[selected_count:]):
-                    self.insert(stop + offset, entry)
+                self._array = np.insert(
+                    self._array,
+                    stop,
+                    [item.to_tuple().to_cvi() for item in values[selected_count:]],
+                )
             else:
                 # Replace, accounting for strides
                 self._array[index] = [item.to_tuple().to_cvi() for item in values]
