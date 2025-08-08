@@ -9,8 +9,6 @@ from pytest_benchmark.fixture import BenchmarkFixture
 
 import nitypes.bintime as bt
 
-pytestmark = pytest.mark.benchmark
-
 
 @pytest.mark.benchmark(group="timedelta_construct")
 def test___bt_timedelta___construct(

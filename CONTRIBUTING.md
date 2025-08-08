@@ -77,6 +77,10 @@ poetry run bandit -c pyproject.toml -r src/nitypes
 poetry run pytest -v
 
 # Run the benchmarks
+#   Compare benchmark before/after a change
+#     see https://pytest-benchmark.readthedocs.io/en/latest/comparing.html
+#   Run 1:  --benchmark-save=some-name
+#   Run N:  --benchmark-compare=0001
 poetry run pytest -v tests/benchmark
 
 # Build and inspect the documentation
