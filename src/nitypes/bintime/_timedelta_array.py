@@ -107,12 +107,12 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         elif isinstance(index, slice):
             if not isinstance(value, Iterable):
                 raise invalid_arg_type("value", "iterable of TimeDelta", value)
-            if not all(isinstance(item, TimeDelta) for item in value):
+            values = list(value)
+            if not all(isinstance(item, TimeDelta) for item in values):
                 raise invalid_arg_type("value", "iterable of TimeDelta", value)
 
             start, stop, step = index.indices(len(self))
             selected_count = len(range(start, stop, step))
-            values = list(value)
             new_entry_count = len(values)
             if step > 1 and new_entry_count != selected_count:
                 raise invalid_arg_value(
