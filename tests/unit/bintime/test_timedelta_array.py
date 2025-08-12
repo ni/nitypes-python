@@ -106,7 +106,7 @@ def test___timedelta_array___index___returns_timedelta(
 
     if raised_exception:
         with pytest.raises(type(raised_exception)):
-            entry = value[indexer]
+            _ = value[indexer]
     else:
         entry = value[indexer]
         assert entry == timedelta_list[indexer]
@@ -172,7 +172,7 @@ def test___timedelta_array___invalid_index___raises(indexer: Any) -> None:
     ),
 )
 def test___timedelta_array___set_by_index___updates_array(
-    timedelta_list: list[TimeDelta], indexer: int, raised_exception: BaseException | None
+    timedelta_list: list[TimeDelta] | None, indexer: int, raised_exception: BaseException | None
 ) -> None:
     value = TimeDeltaArray(timedelta_list)
     new_entry = TimeDelta(-123.456)
@@ -403,7 +403,7 @@ def test___timedelta_array___set_mixed_slice___raises(new_entries: list[Any]) ->
     ),
 )
 def test___timedelta_array___delete_by_index___removes_item(
-    timedelta_list: list[TimeDelta], indexer: int, raised_exception: BaseException | None
+    timedelta_list: list[TimeDelta] | None, indexer: int, raised_exception: BaseException | None
 ) -> None:
     value = TimeDeltaArray(timedelta_list)
 
@@ -411,7 +411,7 @@ def test___timedelta_array___delete_by_index___removes_item(
         with pytest.raises(type(raised_exception)):
             del value[indexer]
     else:
-        modified = timedelta_list.copy()
+        modified = timedelta_list.copy() if timedelta_list else []
         del modified[indexer]
         del value[indexer]
         expected = TimeDeltaArray(modified)
