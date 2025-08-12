@@ -39,8 +39,7 @@ class DateTimeArray(MutableSequence[DateTime]):
         value: Iterable[DateTime] | None = None,
     ) -> None:
         """Initialize a new DateTimeArray."""
-        if value is None:
-            value = []
+        value = [] if value is None else list(value)
         if not all(isinstance(item, DateTime) for item in value):
             raise invalid_arg_type("value", "iterable of DateTime", value)
         self._array = np.fromiter(
@@ -177,6 +176,13 @@ class DateTimeArray(MutableSequence[DateTime]):
         index = min(max(index, lower), upper)
         as_cvi = value.to_tuple().to_cvi()
         self._array = np.insert(self._array, index, as_cvi)
+
+    def extend(self, values: Iterable[DateTime]) -> None:
+        """Extend the array by appending the elements from values."""
+        if values is None:
+            raise invalid_arg_type("values", "iterable of DateTime", values)
+        new_array = DateTimeArray(values)
+        self._array = np.append(self._array, new_array._array)
 
     def __eq__(self, other: object) -> bool:
         """Return self == other."""
