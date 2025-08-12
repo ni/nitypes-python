@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Collection, Iterable, MutableSequence
+from collections.abc import Iterable, MutableSequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -36,11 +36,10 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
 
     def __init__(
         self,
-        value: Collection[TimeDelta] | None = None,
+        value: Iterable[TimeDelta] | None = None,
     ) -> None:
         """Initialize a new TimeDeltaArray."""
-        if value is None:
-            value = []
+        value = [] if value is None else list(value)
         if not all(isinstance(item, TimeDelta) for item in value):
             raise invalid_arg_type("value", "iterable of TimeDelta", value)
         self._array = np.fromiter(
