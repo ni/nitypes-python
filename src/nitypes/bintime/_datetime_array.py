@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Collection, Iterable, MutableSequence
+from collections.abc import Iterable, MutableSequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -36,7 +36,7 @@ class DateTimeArray(MutableSequence[DateTime]):
 
     def __init__(
         self,
-        value: Collection[DateTime] | None = None,
+        value: Iterable[DateTime] | None = None,
     ) -> None:
         """Initialize a new DateTimeArray."""
         if value is None:
