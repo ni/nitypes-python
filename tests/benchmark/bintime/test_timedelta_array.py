@@ -24,3 +24,13 @@ def test___bt_timedelta_array___construct(
     constructor_list: list[bt.TimeDelta],
 ) -> None:
     benchmark(bt.TimeDeltaArray, constructor_list)
+
+
+@pytest.mark.benchmark(group="timedelta_array_extend", min_rounds=100)
+@pytest.mark.parametrize("extend_list", (LIST_10, LIST_100, LIST_1000, LIST_10000))
+def test___bt_timedelta_array___extend(
+    benchmark: BenchmarkFixture,
+    extend_list: list[bt.TimeDelta],
+) -> None:
+    empty_array = bt.TimeDeltaArray()
+    benchmark(empty_array.extend, extend_list)
