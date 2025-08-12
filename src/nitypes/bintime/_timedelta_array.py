@@ -177,6 +177,13 @@ class TimeDeltaArray(MutableSequence[TimeDelta]):
         as_cvi = value.to_tuple().to_cvi()
         self._array = np.insert(self._array, index, as_cvi)
 
+    def extend(self, values: Iterable[TimeDelta]) -> None:
+        """Extend the array by appending the elements from values."""
+        if values is None:
+            raise invalid_arg_type("values", "iterable of DateTime", values)
+        new_array = TimeDeltaArray(values)
+        self._array = np.append(self._array, new_array._array)
+
     def __eq__(self, other: object) -> bool:
         """Return self == other."""
         if not isinstance(other, TimeDeltaArray):
