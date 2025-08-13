@@ -20,7 +20,7 @@ def main(args: list[str]) -> int | str | None:
     assert isinstance(poetry_deps, AbstractTable)
     _pin_oldest_for_deps_list(poetry_deps)
 
-    dev_deps = pyproject["tool"]["poetry"]["group"]["dev"]["dependencies"]
+    dev_deps = pyproject["tool"]["poetry"]["group"]["dev"]["dependencies"]  # type: ignore[index]
     assert isinstance(dev_deps, AbstractTable)
     _pin_oldest_for_deps_list(dev_deps)
 
