@@ -30,8 +30,6 @@ def main(args: list[str]) -> int | str | None:
 
 
 def _pin_oldest_for_deps_list(deps_list: AbstractTable) -> None:
-    assert isinstance(deps_list, AbstractTable)
-
     for dep, value in deps_list.items():
         if dep == "python":
             continue
