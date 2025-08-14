@@ -22,7 +22,7 @@ def main(args: list[str]) -> int | str | None:
 
     dev_deps = pyproject["tool"]["poetry"]["group"]["dev"]["dependencies"]  # type: ignore[index]
     assert isinstance(dev_deps, AbstractTable)
-    _pin_oldest_for_deps_list(dev_deps)
+    _remove_duplicate_dev_deps(poetry_deps, dev_deps)
 
     pyproject_path.write_text(tomlkit.dumps(pyproject))
     print("Updated pyproject.toml with pinned dependencies.")
@@ -47,6 +47,12 @@ def _pin_oldest_for_deps_list(deps_list: AbstractTable) -> None:
                     or constraint["version"].startswith(">=")
                 ):
                     constraint["version"] = "==" + constraint["version"].lstrip("^~>=")
+
+
+def _remove_duplicate_dev_deps(poetry_deps: AbstractTable, dev_deps: AbstractTable) -> None:
+    for dep, _ in poetry_deps.items():
+        if dep in dev_deps:
+            del dev_deps[dep]
 
 
 if __name__ == "__main__":
