@@ -15,16 +15,28 @@ def main(args: list[str]) -> int | str | None:
     if args:
         return f"Unsupported arguments: {args!r}"
     pyproject = tomlkit.loads(pyproject_path.read_text())
+
     poetry_deps = pyproject["tool"]["poetry"]["dependencies"]  # type: ignore[index]
     assert isinstance(poetry_deps, AbstractTable)
+    _pin_oldest_for_deps_list(poetry_deps)
 
-    for dep, value in poetry_deps.items():
+    dev_deps = pyproject["tool"]["poetry"]["group"]["dev"]["dependencies"]  # type: ignore[index]
+    assert isinstance(dev_deps, AbstractTable)
+    _remove_duplicate_dev_deps(poetry_deps, dev_deps)
+
+    pyproject_path.write_text(tomlkit.dumps(pyproject))
+    print("Updated pyproject.toml with pinned dependencies.")
+    return None
+
+
+def _pin_oldest_for_deps_list(deps_list: AbstractTable) -> None:
+    for dep, value in deps_list.items():
         if dep == "python":
             continue
         if isinstance(value, str) and (
             value.startswith("^") or value.startswith("~") or value.startswith(">=")
         ):
-            poetry_deps[dep] = "==" + value.lstrip("^~>=")
+            deps_list[dep] = "==" + value.lstrip("^~>=")
         elif isinstance(value, Array):
             for constraint in value:
                 if "version" in constraint and (
@@ -34,9 +46,11 @@ def main(args: list[str]) -> int | str | None:
                 ):
                     constraint["version"] = "==" + constraint["version"].lstrip("^~>=")
 
-    pyproject_path.write_text(tomlkit.dumps(pyproject))
-    print("Updated pyproject.toml with pinned dependencies.")
-    return None
+
+def _remove_duplicate_dev_deps(poetry_deps: AbstractTable, dev_deps: AbstractTable) -> None:
+    for dep, _ in poetry_deps.items():
+        if dep in dev_deps:
+            del dev_deps[dep]
 
 
 if __name__ == "__main__":
