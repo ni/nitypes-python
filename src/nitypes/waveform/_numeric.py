@@ -240,7 +240,6 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
                 of this array. If not specified, an ndarray is created based on the specified dtype,
                 start index, sample count, and capacity.
             start_index: The sample index at which the waveform data begins.
-            sample_count: The number of samples in the waveform.
             capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
                 appending samples to the waveform.
             extended_properties: The extended properties of the waveform.
@@ -514,14 +513,14 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         self._extended_properties[CHANNEL_NAME] = value
 
     @property
-    def unit_description(self) -> str:
+    def units(self) -> str:
         """The unit of measurement, such as volts, of the waveform."""
         value = self._extended_properties.get(UNIT_DESCRIPTION, "")
         assert isinstance(value, str)
         return value
 
-    @unit_description.setter
-    def unit_description(self, value: str) -> None:
+    @units.setter
+    def units(self, value: str) -> None:
         if not isinstance(value, str):
             raise invalid_arg_type("unit description", "str", value)
         self._extended_properties[UNIT_DESCRIPTION] = value
