@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nitypes"
-version = "0.1.0-dev8"
+version = "0.1.0-dev9"
 license = "MIT"
 description = "Data types for NI Python APIs"
 authors = ["NI <opensource@ni.com>"]
@@ -30,6 +30,11 @@ packages = [{ include = "nitypes", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+numpy = ">=1.22"
+hightime = { version = ">=0.2.2", allow-prereleases = true }
+typing-extensions = ">=4.13.2"
+
+[tool.poetry.group.dev.dependencies]
 numpy = [
   { version = ">=1.22", python = ">=3.9,<3.12", markers = "implementation_name != 'pypy'" },
   { version = ">=1.26", python = ">=3.12,<3.13", markers = "implementation_name != 'pypy'" },
@@ -37,8 +42,6 @@ numpy = [
   { version = ">=2.1", python = ">=3.10,<3.11", markers = "implementation_name == 'pypy'" },
   { version = ">=2.3", python = "^3.11", markers = "implementation_name == 'pypy'" },
 ]
-hightime = { version = ">=0.2.2", allow-prereleases = true }
-typing-extensions = ">=4.13.2"
 
 [tool.poetry.group.lint.dependencies]
 bandit = { version = ">=1.7", extras = ["toml"] }
