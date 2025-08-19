@@ -609,14 +609,14 @@ class Spectrum(Generic[_TData]):
         self._extended_properties[CHANNEL_NAME] = value
 
     @property
-    def unit_description(self) -> str:
+    def units(self) -> str:
         """The unit of measurement, such as volts, of the spectrum."""
         value = self._extended_properties.get(UNIT_DESCRIPTION, "")
         assert isinstance(value, str)
         return value
 
-    @unit_description.setter
-    def unit_description(self, value: str) -> None:
+    @units.setter
+    def units(self, value: str) -> None:
         if not isinstance(value, str):
             raise invalid_arg_type("unit description", "str", value)
         self._extended_properties[UNIT_DESCRIPTION] = value
