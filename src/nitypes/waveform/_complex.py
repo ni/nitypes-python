@@ -386,7 +386,6 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
                 of this array. If not specified, an ndarray is created based on the specified dtype,
                 start index, sample count, and capacity.
             start_index: The sample index at which the waveform data begins.
-            sample_count: The number of samples in the waveform.
             capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
                 appending samples to the waveform.
             extended_properties: The extended properties of the waveform.
