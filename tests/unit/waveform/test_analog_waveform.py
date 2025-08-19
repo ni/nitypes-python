@@ -959,7 +959,7 @@ def test___invalid_type___set_units___raises_type_error() -> None:
     with pytest.raises(TypeError) as exc:
         waveform.units = None  # type: ignore[assignment]
 
-    assert exc.value.args[0].startswith("The unit description must be a str.")
+    assert exc.value.args[0].startswith("The units must be a str.")
 
 
 def test___waveform___set_undefined_property___raises_attribute_error() -> None:

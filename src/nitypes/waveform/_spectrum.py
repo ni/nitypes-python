@@ -618,7 +618,7 @@ class Spectrum(Generic[_TData]):
     @units.setter
     def units(self, value: str) -> None:
         if not isinstance(value, str):
-            raise invalid_arg_type("unit description", "str", value)
+            raise invalid_arg_type("units", "str", value)
         self._extended_properties[UNIT_DESCRIPTION] = value
 
     def append(
