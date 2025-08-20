@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any, Generic, Union
 
 from typing_extensions import TypeVar, final
 
-from nitypes._exceptions import invalid_arg_type, invalid_arg_value
+from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform._extended_properties import UNIT_DESCRIPTION
 
 if TYPE_CHECKING:
@@ -75,11 +75,6 @@ class Scalar(Generic[TScalar_co]):
 
         if not isinstance(units, str):
             raise invalid_arg_type("units", "str", units)
-
-        # The ScalarData proto type only supports 32 bit integers. Make sure we're in range.
-        if isinstance(value, int):
-            if value <= -0x80000000 or value >= 0x7FFFFFFF:
-                raise invalid_arg_value("integer scalar value", "within the range of Int32", value)
 
         self._value = value
         self._extended_properties = ExtendedPropertyDictionary()
