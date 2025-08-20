@@ -870,7 +870,10 @@ def test___waveform___set_sample_count_exceeds_capacity___raises_value_error() -
     with pytest.raises(ValueError) as exc:
         waveform.sample_count = 15
 
-    assert exc.value.args[0] == "Sample count exceeds capacity."
+    assert exc.value.args[0].startswith(
+        "The sum of the start index and sample count must be less than or equal to the capacity."
+    )
+
     assert waveform.sample_count == 5  # Original sample count preserved
 
 
