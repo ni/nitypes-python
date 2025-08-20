@@ -456,6 +456,16 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
         """The number of samples in the waveform."""
         return self._sample_count
 
+    @sample_count.setter
+    def sample_count(self, value: int) -> None:
+        """Set the number of samples in the waveform."""
+        value = arg_to_uint("sample count", value)
+        if self._start_index + value > self.capacity:
+            raise create_start_index_or_sample_count_too_large_error(
+                self._start_index, value, "capacity", self.capacity
+            )
+        self._sample_count = value
+
     @property
     def capacity(self) -> int:
         """The total capacity available for waveform data.
