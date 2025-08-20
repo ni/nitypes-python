@@ -904,7 +904,7 @@ class DigitalWaveform(Generic[TDigitalState]):
     def sample_count(self) -> int:
         """The number of samples in the waveform."""
         return self._sample_count
-    
+
     @sample_count.setter
     def sample_count(self, value: int) -> None:
         """Set the number of samples in the waveform."""

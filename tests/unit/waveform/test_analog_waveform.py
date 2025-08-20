@@ -852,6 +852,29 @@ def test___array_subset___get_scaled_data___returns_array_subset() -> None:
 
 
 ###############################################################################
+# sample count
+###############################################################################
+def test___waveform___set_sample_count___updates_sample_count() -> None:
+    waveform = AnalogWaveform(10, np.float64)
+
+    waveform.sample_count = 5
+
+    assert waveform.sample_count == 5
+    assert waveform.capacity == 10  # Capacity should remain unchanged
+    assert len(waveform.raw_data) == 5  # Raw data length should reflect new sample count
+
+
+def test___waveform___set_sample_count_exceeds_capacity___raises_value_error() -> None:
+    waveform = AnalogWaveform(5, np.float64, capacity=10)
+
+    with pytest.raises(ValueError) as exc:
+        waveform.sample_count = 15
+
+    assert exc.value.args[0] == "Sample count exceeds capacity."
+    assert waveform.sample_count == 5  # Original sample count preserved
+
+
+###############################################################################
 # capacity
 ###############################################################################
 @pytest.mark.parametrize(

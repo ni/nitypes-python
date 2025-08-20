@@ -549,6 +549,40 @@ def test___invalid_array_subset___get_data___returns_array_subset(
 
 
 ###############################################################################
+# sample_count
+###############################################################################
+def test___waveform___set_sample_count___updates_sample_count() -> None:
+    waveform = DigitalWaveform(10, 2, np.uint8)
+
+    waveform.sample_count = 5
+
+    assert waveform.sample_count == 5
+    assert waveform.capacity == 10  # Capacity should remain unchanged
+    assert waveform.signal_count == 2  # Signal count should remain unchanged
+    assert waveform.data.shape == (5, 2)  # Data shape should reflect new sample count
+
+
+def test___waveform___set_sample_count_to_zero___creates_empty_waveform() -> None:
+    waveform = DigitalWaveform.from_lines([[1, 2], [3, 4]], np.uint8)
+
+    waveform.sample_count = 0
+
+    assert waveform.sample_count == 0
+    assert waveform.data.tolist() == []
+    assert waveform.capacity == 2  # Capacity preserved
+
+
+def test___waveform___set_sample_count_exceeds_capacity___raises_value_error() -> None:
+    waveform = DigitalWaveform(5, 2, np.uint8, capacity=10)
+
+    with pytest.raises(ValueError) as exc:
+        waveform.sample_count = 15
+
+    assert exc.value.args[0] == "Sample count exceeds capacity."
+    assert waveform.sample_count == 5  # Original sample count preserved
+
+
+###############################################################################
 # capacity
 ###############################################################################
 @pytest.mark.parametrize(
