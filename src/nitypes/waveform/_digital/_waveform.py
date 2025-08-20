@@ -904,6 +904,14 @@ class DigitalWaveform(Generic[TDigitalState]):
     def sample_count(self) -> int:
         """The number of samples in the waveform."""
         return self._sample_count
+    
+    @sample_count.setter
+    def sample_count(self, value: int) -> None:
+        """Set the number of samples in the waveform."""
+        value = arg_to_uint("sample count", value)
+        if value > self.capacity:
+            raise ValueError("Sample count exceeds capacity.")
+        self._sample_count = value
 
     @property
     def signal_count(self) -> int:
