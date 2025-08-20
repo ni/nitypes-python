@@ -30,11 +30,16 @@ packages = [{ include = "nitypes", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-numpy = ">=1.22"
+# NumPy 2.0.x is the last version that supports Python 3.9, but it crashes with Python 3.13.
+numpy = [
+  { version = ">=1.22", python = ">=3.9,<3.13" },
+  { version = ">=2.1", python = "^3.13" }
+]
 hightime = { version = ">=0.2.2", allow-prereleases = true }
 typing-extensions = ">=4.13.2"
 
 [tool.poetry.group.dev.dependencies]
+# Specify additional NumPy version constraints to speed up locking and test with binary wheels that support PyPy.
 numpy = [
   { version = ">=1.22", python = ">=3.9,<3.12", markers = "implementation_name != 'pypy'" },
   { version = ">=1.26", python = ">=3.12,<3.13", markers = "implementation_name != 'pypy'" },
