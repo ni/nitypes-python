@@ -460,7 +460,8 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
     def sample_count(self, value: int) -> None:
         """Set the number of samples in the waveform."""
         value = arg_to_uint("sample count", value)
-
+        if value > self.capacity:
+            raise ValueError("Sample count exceeds capacity.")
         self._sample_count = value
 
     @property
