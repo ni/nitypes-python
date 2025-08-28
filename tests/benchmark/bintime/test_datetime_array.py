@@ -7,22 +7,24 @@ from pytest_benchmark.fixture import BenchmarkFixture
 import nitypes.bintime as bt
 
 
-LIST_10: list[bt.DateTime] = [
-    bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10, 0.3)
-]
-LIST_100: list[bt.DateTime] = [
+LIST_1 = [bt.DateTime.from_offset(bt.TimeDelta(0.3))]
+LIST_10 = [bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10, 0.3)]
+LIST_100 = [
     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 100, 0.3)
 ]
-LIST_1000: list[bt.DateTime] = [
+LIST_1000 = [
     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 1000, 0.3)
 ]
-LIST_10000: list[bt.DateTime] = [
+LIST_10000 = [
     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10000, 0.3)
 ]
 
+FAST_CASES = (LIST_1,)
+BIG_O_CASES = (LIST_1, LIST_10, LIST_100, LIST_1000, LIST_10000)
 
-@pytest.mark.benchmark(group="datetime_array_construct", min_rounds=100)
-@pytest.mark.parametrize("constructor_list", (LIST_10, LIST_100, LIST_1000, LIST_10000))
+
+@pytest.mark.benchmark(group="datetime_array_construct")
+@pytest.mark.parametrize("constructor_list", FAST_CASES)
 def test___bt_datetime_array___construct(
     benchmark: BenchmarkFixture,
     constructor_list: list[bt.DateTime],
@@ -30,8 +32,8 @@ def test___bt_datetime_array___construct(
     benchmark(bt.DateTimeArray, constructor_list)
 
 
-@pytest.mark.benchmark(group="datetime_array_extend", min_rounds=100)
-@pytest.mark.parametrize("extend_list", (LIST_10, LIST_100, LIST_1000, LIST_10000))
+@pytest.mark.benchmark(group="datetime_array_extend")
+@pytest.mark.parametrize("extend_list", FAST_CASES)
 def test___bt_datetime_array___extend(
     benchmark: BenchmarkFixture,
     extend_list: list[bt.DateTime],
