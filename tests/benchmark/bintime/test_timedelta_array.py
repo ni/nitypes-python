@@ -17,7 +17,7 @@ LIST_10000: list[bt.TimeDelta] = [
 ]
 
 
-@pytest.mark.benchmark(group="timedelta_array_construct")
+@pytest.mark.benchmark(group="timedelta_array_construct", min_rounds=1)
 @pytest.mark.parametrize("constructor_list", (LIST_10, LIST_100, LIST_1000, LIST_10000))
 def test___bt_timedelta_array___construct(
     benchmark: BenchmarkFixture,
@@ -26,7 +26,7 @@ def test___bt_timedelta_array___construct(
     benchmark(bt.TimeDeltaArray, constructor_list)
 
 
-@pytest.mark.benchmark(group="timedelta_array_extend")
+@pytest.mark.benchmark(group="timedelta_array_extend", min_rounds=1)
 @pytest.mark.parametrize("extend_list", (LIST_10, LIST_100, LIST_1000, LIST_10000))
 def test___bt_timedelta_array___extend(
     benchmark: BenchmarkFixture,
