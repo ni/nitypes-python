@@ -7,6 +7,7 @@ from pytest_benchmark.fixture import BenchmarkFixture
 import nitypes.bintime as bt
 
 
+LIST_1: list[bt.DateTime] = [bt.DateTime.from_offset(bt.TimeDelta(0.3))]
 LIST_10: list[bt.DateTime] = [
     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10, 0.3)
 ]
@@ -20,9 +21,12 @@ LIST_10000: list[bt.DateTime] = [
     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10000, 0.3)
 ]
 
+FAST_CASES = (LIST_1,)
+BIG_O_CASES = (LIST_1, LIST_10, LIST_100, LIST_1000, LIST_10000)
+
 
 @pytest.mark.benchmark(group="datetime_array_construct", min_rounds=1, max_time=0.5)
-@pytest.mark.parametrize("constructor_list", (LIST_10,))
+@pytest.mark.parametrize("constructor_list", FAST_CASES)
 def test___bt_datetime_array___construct(
     benchmark: BenchmarkFixture,
     constructor_list: list[bt.DateTime],
@@ -31,7 +35,7 @@ def test___bt_datetime_array___construct(
 
 
 @pytest.mark.benchmark(group="datetime_array_extend", min_rounds=1, max_time=0.5)
-@pytest.mark.parametrize("extend_list", (LIST_10,))
+@pytest.mark.parametrize("extend_list", FAST_CASES)
 def test___bt_datetime_array___extend(
     benchmark: BenchmarkFixture,
     extend_list: list[bt.DateTime],
