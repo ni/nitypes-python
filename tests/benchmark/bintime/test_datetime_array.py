@@ -22,7 +22,7 @@ LIST_10: list[bt.DateTime] = [
 
 
 @pytest.mark.benchmark(group="datetime_array_construct", min_rounds=1, max_time=0.5)
-@pytest.mark.parametrize("constructor_list", (LIST_10))
+@pytest.mark.parametrize("constructor_list", (LIST_10,))
 def test___bt_datetime_array___construct(
     benchmark: BenchmarkFixture,
     constructor_list: list[bt.DateTime],
@@ -31,7 +31,7 @@ def test___bt_datetime_array___construct(
 
 
 @pytest.mark.benchmark(group="datetime_array_extend", min_rounds=1, max_time=0.5)
-@pytest.mark.parametrize("extend_list", (LIST_10))
+@pytest.mark.parametrize("extend_list", (LIST_10,))
 def test___bt_datetime_array___extend(
     benchmark: BenchmarkFixture,
     extend_list: list[bt.DateTime],

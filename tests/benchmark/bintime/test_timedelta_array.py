@@ -18,7 +18,7 @@ LIST_10: list[bt.TimeDelta] = [bt.TimeDelta(float(value)) for value in np.arange
 
 
 @pytest.mark.benchmark(group="timedelta_array_construct", min_rounds=1, max_time=0.5)
-@pytest.mark.parametrize("constructor_list", (LIST_10))
+@pytest.mark.parametrize("constructor_list", (LIST_10,))
 def test___bt_timedelta_array___construct(
     benchmark: BenchmarkFixture,
     constructor_list: list[bt.TimeDelta],
@@ -27,7 +27,7 @@ def test___bt_timedelta_array___construct(
 
 
 @pytest.mark.benchmark(group="timedelta_array_extend", min_rounds=1, max_time=0.5)
-@pytest.mark.parametrize("extend_list", (LIST_10))
+@pytest.mark.parametrize("extend_list", (LIST_10,))
 def test___bt_timedelta_array___extend(
     benchmark: BenchmarkFixture,
     extend_list: list[bt.TimeDelta],
