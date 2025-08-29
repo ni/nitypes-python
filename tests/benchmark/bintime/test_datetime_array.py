@@ -19,7 +19,7 @@ LIST_10000 = [
     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10000, 0.3)
 ]
 
-FAST_CASES = (LIST_1,)
+FAST_CASES = (LIST_1, LIST_10, LIST_100)
 BIG_O_CASES = (LIST_1, LIST_10, LIST_100, LIST_1000, LIST_10000)
 
 

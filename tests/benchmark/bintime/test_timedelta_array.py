@@ -13,7 +13,7 @@ LIST_100 = [bt.TimeDelta(float(value)) for value in np.arange(-100, 100, 0.3)]
 LIST_1000 = [bt.TimeDelta(float(value)) for value in np.arange(-1000, 1000, 0.3)]
 LIST_10000 = [bt.TimeDelta(float(value)) for value in np.arange(-10000, 10000, 0.3)]
 
-FAST_CASES = (LIST_1,)
+FAST_CASES = (LIST_1, LIST_10)
 BIG_O_CASES = (LIST_1, LIST_10, LIST_100, LIST_1000, LIST_10000)
 
 
