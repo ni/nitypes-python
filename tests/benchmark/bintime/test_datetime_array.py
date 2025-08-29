@@ -10,15 +10,15 @@ import nitypes.bintime as bt
 LIST_10: list[bt.DateTime] = [
     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10, 0.3)
 ]
-# LIST_100: list[bt.DateTime] = [
-#     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 100, 0.3)
-# ]
-# LIST_1000: list[bt.DateTime] = [
-#     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 1000, 0.3)
-# ]
-# LIST_10000: list[bt.DateTime] = [
-#     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10000, 0.3)
-# ]
+LIST_100: list[bt.DateTime] = [
+    bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 100, 0.3)
+]
+LIST_1000: list[bt.DateTime] = [
+    bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 1000, 0.3)
+]
+LIST_10000: list[bt.DateTime] = [
+    bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10000, 0.3)
+]
 
 
 @pytest.mark.benchmark(group="datetime_array_construct", min_rounds=1, max_time=0.5)
