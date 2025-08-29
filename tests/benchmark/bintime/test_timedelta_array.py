@@ -7,6 +7,7 @@ from pytest_benchmark.fixture import BenchmarkFixture
 import nitypes.bintime as bt
 
 
+LIST_1 = [bt.TimeDelta(0.3)]
 LIST_10: list[bt.TimeDelta] = [bt.TimeDelta(float(value)) for value in np.arange(-10, 10, 0.3)]
 # LIST_100: list[bt.TimeDelta] = [bt.TimeDelta(float(value)) for value in np.arange(-100, 100, 0.3)]
 # LIST_1000: list[bt.TimeDelta] = [
@@ -27,7 +28,7 @@ def test___bt_timedelta_array___construct(
 
 
 @pytest.mark.benchmark(group="timedelta_array_extend", min_rounds=1, max_time=0.5)
-@pytest.mark.parametrize("extend_list", (LIST_10,))
+@pytest.mark.parametrize("extend_list", (LIST_1,))
 def test___bt_timedelta_array___extend(
     benchmark: BenchmarkFixture,
     extend_list: list[bt.TimeDelta],
