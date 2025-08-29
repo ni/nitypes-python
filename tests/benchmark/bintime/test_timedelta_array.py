@@ -17,7 +17,7 @@ FAST_CASES = (LIST_1,)
 BIG_O_CASES = (LIST_1, LIST_10, LIST_100, LIST_1000, LIST_10000)
 
 
-@pytest.mark.benchmark(group="timedelta_array_construct")
+@pytest.mark.benchmark(group="timedelta_array_construct", warmup="off")
 @pytest.mark.parametrize("constructor_list", FAST_CASES)
 def test___bt_timedelta_array___construct(
     benchmark: BenchmarkFixture,

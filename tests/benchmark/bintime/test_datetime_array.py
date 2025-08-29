@@ -23,7 +23,7 @@ FAST_CASES = (LIST_1,)
 BIG_O_CASES = (LIST_1, LIST_10, LIST_100, LIST_1000, LIST_10000)
 
 
-@pytest.mark.benchmark(group="datetime_array_construct")
+@pytest.mark.benchmark(group="datetime_array_construct", warmup=False)
 @pytest.mark.parametrize("constructor_list", FAST_CASES)
 def test___bt_datetime_array___construct(
     benchmark: BenchmarkFixture,
