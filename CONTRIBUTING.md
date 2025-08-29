@@ -90,14 +90,14 @@ start docs\_build\index.html
 
 # Publishing on PyPI
 
-You can publish the nipanel package by creating a GitHub release
-in the nipanel-python repo. Here are the steps to follow to publish the package:
+You can publish the `nitypes` package by creating a GitHub release
+in the `nitypes-python` repo. Here are the steps to follow to publish the package:
 
 1. From the main GitHub repo page, select "Create a new release".
 2. On the "New Release" page, create a new tag using the "Select Tag" drop down. The tag must be the package version, matching the
 value found in pyproject.toml. Example: `0.1.0-dev0`.
 3. Enter a title in the "Release title" field. The title should contain the package name and
-version in the format `nipanel <package-version>`. For example: `nipanel 0.1.0-dev0`.
+version in the format `nitypes <package-version>`. For example: `nitypes 0.1.0-dev0`.
 4. Click "Generate release notes" and edit the release notes.
   - Delete entries for PRs that do not affect users, such as "chore(deps):" and "fix(deps):" PRs.
   - Consider grouping related entries.
