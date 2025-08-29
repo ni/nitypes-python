@@ -26,7 +26,7 @@ def test___bt_timedelta_array___construct(
     benchmark(bt.TimeDeltaArray, constructor_list)
 
 
-@pytest.mark.benchmark(group="timedelta_array_extend")
+@pytest.mark.benchmark(group="timedelta_array_extend", warmup="off")
 @pytest.mark.parametrize("extend_list", FAST_CASES)
 def test___bt_timedelta_array___extend(
     benchmark: BenchmarkFixture,
