@@ -106,9 +106,9 @@ version in the format `nitypes <package-version>`. For example: `nitypes 0.1.0-d
 6. Click "Publish release".
 7. Creating a release will start the publish workflow. You can track the
 progress of this workflow in the "Actions" page of the GitHub repo.
-8. The workflow job that publishes a package to pypi requires code owner approval. This job will automatically send code owners a notification email, then it will wait for them to log in and approve the deployment.
+8. The workflow job that publishes a package to PyPI requires code owner approval. This job will automatically send code owners a notification email, then it will wait for them to log in and approve the deployment.
 9. After receiving code owner approval, the publish workflow will resume.
-10. Once the publish workflow has finished, you should see your release on pypi.
+10. Once the publish workflow has finished, you should see your release on PyPI.
 
 # Developer Certificate of Origin (DCO)
 
