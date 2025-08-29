@@ -7,17 +7,15 @@ from pytest_benchmark.fixture import BenchmarkFixture
 import nitypes.bintime as bt
 
 
-LIST_1: list[bt.DateTime] = [bt.DateTime.from_offset(bt.TimeDelta(0.3))]
-LIST_10: list[bt.DateTime] = [
-    bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10, 0.3)
-]
-LIST_100: list[bt.DateTime] = [
+LIST_1 = [bt.DateTime.from_offset(bt.TimeDelta(0.3))]
+LIST_10 = [bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10, 0.3)]
+LIST_100 = [
     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 100, 0.3)
 ]
-LIST_1000: list[bt.DateTime] = [
+LIST_1000 = [
     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 1000, 0.3)
 ]
-LIST_10000: list[bt.DateTime] = [
+LIST_10000 = [
     bt.DateTime.from_offset(bt.TimeDelta(float(offset))) for offset in np.arange(0, 10000, 0.3)
 ]
 
