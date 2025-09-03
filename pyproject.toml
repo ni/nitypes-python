@@ -1,14 +1,9 @@
-[tool.poetry]
+[project]
 name = "nitypes"
-version = "0.1.0-dev10"
-license = "MIT"
 description = "Data types for NI Python APIs"
-authors = ["NI <opensource@ni.com>"]
-maintainers = ["Brad Keryan <brad.keryan@ni.com>"]
-readme = "README.md"
-repository = "https://github.com/ni/nitypes-python"
-documentation = "https://nitypes.readthedocs.io/"
+license = "MIT"
 keywords = ["nitypes"]
+version = "0.1.0-dev10"
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -26,17 +21,24 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
+dynamic = ["dependencies"]
+readme = "README.md"
+authors = [{name = "NI", email = "opensource@ni.com"}]
+maintainers = [{name = "Brad Keryan", email = "brad.keryan@ni.com"}]
+requires-python = '>=3.9,<4.0'
+
+[project.urls]
+repository = "https://github.com/ni/nitypes-python"
+documentation = "https://nitypes.readthedocs.io/"
+
+[tool.poetry]
 packages = [{ include = "nitypes", from = "src" }]
+requires-poetry = '>=2.1,<3.0'
 
 [tool.poetry.dependencies]
-python = "^3.9"
 # NumPy 2.0.x is the last version that supports Python 3.9, but it crashes with Python 3.13.
-numpy = [
-  { version = ">=1.22", python = ">=3.9,<3.13" },
-  { version = ">=2.1", python = "^3.13" }
-]
-hightime = { version = ">=0.2.2", allow-prereleases = true }
-typing-extensions = ">=4.13.2"
+hightime = {  allow-prereleases = true }
+numpy = [{  python = ">=3.9,<3.13" }, {  python = "^3.13" }]
 
 [tool.poetry.group.dev.dependencies]
 # Specify additional NumPy version constraints to speed up locking and test with binary wheels that support PyPy.
@@ -70,12 +72,20 @@ optional = true
 
 [tool.poetry.group.docs.dependencies]
 # The latest Sphinx requires a recent Python version.
-Sphinx = { version = ">=8.2", python = "^3.11" }
+Sphinx = [
+  { version = ">=7.4", python = ">=3.9,<3.10" },
+  { version = ">=8.1", python = ">=3.10,<3.11" },
+  { version = ">=8.2", python = "^3.11" },
+]
 sphinx-rtd-theme = ">=1.0.0"
 sphinx-autoapi = ">=1.8.4"
 m2r2 = ">=0.3.2"
 toml = ">=0.10.2"
 tomlkit = ">=0.11.0"
+
+[tool.ni-python-styleguide]
+extend_exclude = ".tox,docs"
+application-import-names = "nitypes,tests"
 
 [tool.black]
 line-length = 100
@@ -90,7 +100,7 @@ filterwarnings = [
 testpaths = ["src/nitypes", "tests/acceptance", "tests/unit"]
 
 [build-system]
-requires = ["poetry-core>=1.8"]
+requires = ["poetry-core>=2.1.0,<3.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
