@@ -38,7 +38,7 @@ jobs:
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: |
           poetry run python scripts/pin_oldest_deps.py pyproject.toml
-          poetry lock --no-update
+          poetry lock
       - name: Install nitypes (oldest deps)
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: poetry install -v
