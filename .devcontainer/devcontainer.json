@@ -3,10 +3,10 @@
 {
 	"name": "Python 3",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/python:1-3.12-bullseye",
+	"image": "mcr.microsoft.com/devcontainers/python:2-3.11-trixie",
 	"features": {
 		"ghcr.io/devcontainers-extra/features/poetry:2": {
-			"version": "1.8.2"
+			"version": "2.1.4"
 		}
 	}
 	// Features to add to the dev container. More info: https://containers.dev/features.
