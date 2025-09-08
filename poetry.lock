@@ -7,7 +7,7 @@ description = "A light, configurable Sphinx theme"
 optional = false
 python-versions = ">=3.9"
 groups = ["docs"]
-markers = "python_version == \"3.9\" or python_version != \"3.10\" and python_version < \"3.11\" and implementation_name == \"pypy\""
+markers = "python_version == \"3.9\""
 files = [
     {file = "alabaster-0.7.16-py3-none-any.whl", hash = "sha256:b46733c07dce03ae4e150330b975c75737fa60f0a7c591b6c8bf4928a28e2c92"},
     {file = "alabaster-0.7.16.tar.gz", hash = "sha256:75a8b99c28a5dad50dd7f8ccdd447a121ddb3892da9e53d1ca5cca3106d58d65"},
@@ -237,7 +237,7 @@ description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.7"
 groups = ["lint"]
-markers = "python_version == \"3.9\" or python_version != \"3.10\" and python_version < \"3.11\" and implementation_name == \"pypy\""
+markers = "python_version == \"3.9\""
 files = [
     {file = "click-8.1.8-py3-none-any.whl", hash = "sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2"},
     {file = "click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a"},
@@ -417,7 +417,7 @@ description = "the modular source code checker: pep8 pyflakes and co"
 optional = false
 python-versions = ">=3.6.1"
 groups = ["lint"]
-markers = "python_version <= \"3.11\""
+markers = "python_version < \"3.13\" and python_version != \"3.12\" and (python_version < \"3.12\" or implementation_name != \"pypy\")"
 files = [
     {file = "flake8-5.0.4-py2.py3-none-any.whl", hash = "sha256:7a1cf6b73744f5806ab95e526f6f0d8c01c66d7bbe349562d22dfca20610b248"},
     {file = "flake8-5.0.4.tar.gz", hash = "sha256:6fbe320aad8d6b95cec8b8e47bc933004678dc63095be98528b7bdd2a9f510db"},
@@ -631,7 +631,7 @@ description = "Python port of markdown-it. Markdown parsing, done right!"
 optional = false
 python-versions = ">=3.8"
 groups = ["lint"]
-markers = "python_version == \"3.9\" or python_version != \"3.10\" and python_version < \"3.11\" and implementation_name == \"pypy\""
+markers = "python_version == \"3.9\""
 files = [
     {file = "markdown-it-py-3.0.0.tar.gz", hash = "sha256:e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb"},
     {file = "markdown_it_py-3.0.0-py3-none-any.whl", hash = "sha256:355216845c60bd96232cd8d8c40e8f9765cc86f46880e43a8fd22dc1a1a8cab1"},
@@ -922,7 +922,7 @@ description = "Fundamental package for array computing in Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main", "dev"]
-markers = "python_version == \"3.9\" or python_version != \"3.10\" and python_version < \"3.11\" and implementation_name == \"pypy\""
+markers = "python_version == \"3.9\""
 files = [
     {file = "numpy-2.0.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:51129a29dbe56f9ca83438b706e2e69a39892b5eda6cedcb6b0c9fdc9b0d3ece"},
     {file = "numpy-2.0.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:f15975dfec0cf2239224d80e32c3170b1d168335eaedee69da84fbe9f1f9cd04"},
@@ -1213,7 +1213,7 @@ description = "Python style guide checker"
 optional = false
 python-versions = ">=3.6"
 groups = ["lint"]
-markers = "python_version <= \"3.11\""
+markers = "python_version < \"3.13\" and python_version != \"3.12\" and (python_version < \"3.12\" or implementation_name != \"pypy\")"
 files = [
     {file = "pycodestyle-2.9.1-py2.py3-none-any.whl", hash = "sha256:d1735fc58b418fd7c5f658d28d943854f8a849b01a5d0a1e6f3f3fdd0166804b"},
     {file = "pycodestyle-2.9.1.tar.gz", hash = "sha256:2c9607871d58c76354b697b42f5d57e1ada7d261c261efac224b664affdc5785"},
@@ -1257,7 +1257,7 @@ description = "passive checker of Python programs"
 optional = false
 python-versions = ">=3.6"
 groups = ["lint"]
-markers = "python_version <= \"3.11\""
+markers = "python_version < \"3.13\" and python_version != \"3.12\" and (python_version < \"3.12\" or implementation_name != \"pypy\")"
 files = [
     {file = "pyflakes-2.5.0-py2.py3-none-any.whl", hash = "sha256:4579f67d887f804e67edb544428f264b7b24f435b263c4614f384135cea553d2"},
     {file = "pyflakes-2.5.0.tar.gz", hash = "sha256:491feb020dca48ccc562a8c0cbe8df07ee13078df59813b83959cbdada312ea3"},
@@ -1576,7 +1576,7 @@ description = "Python documentation generator"
 optional = false
 python-versions = ">=3.9"
 groups = ["docs"]
-markers = "python_version == \"3.9\" or python_version != \"3.10\" and python_version < \"3.11\" and implementation_name == \"pypy\""
+markers = "python_version == \"3.9\""
 files = [
     {file = "sphinx-7.4.7-py3-none-any.whl", hash = "sha256:c2419e2135d11f1951cd994d6eb18a1835bd8fdd8429f9ca375dc1f3281bd239"},
     {file = "sphinx-7.4.7.tar.gz", hash = "sha256:242f92a7ea7e6c5b406fdc2615413890ba9f699114a9c09192d7dfead2ee9cfe"},
@@ -2023,4 +2023,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "180902b7512f65fede6202e0c94dae1d0bfb34cb5b97fbeb7d4d48097138bad8"
+content-hash = "741864716565298bae1dfd67d4f6c5d50d6663142daf87e20ca41defca76f672"
