@@ -580,6 +580,7 @@ def test___array_subset___from_array_2d___creates_waveform_with_array_subset(
     assert len(waveforms) == 2
     for i in range(len(waveforms)):
         assert waveforms[i].raw_data.tolist() == expected_data[i]
+        assert waveforms[i].start_index == (start_index if start_index is not None else 0)
 
 
 @pytest.mark.parametrize(
@@ -1595,13 +1596,13 @@ def test___waveform_with_start_index___load_data___clears_start_index() -> None:
     waveform = AnalogWaveform.from_array_1d(
         np.array([0, 1, 2], np.int32), np.int32, copy=False, start_index=1, sample_count=1
     )
-    assert waveform._start_index == 1
+    assert waveform.start_index == 1
     array = np.array([3], np.int32)
 
     waveform.load_data(array)
 
     assert list(waveform.raw_data) == [3]
-    assert waveform._start_index == 0
+    assert waveform.start_index == 0
 
 
 def test___ndarray_subset___load_data___overwrites_data() -> None:
@@ -1611,7 +1612,7 @@ def test___ndarray_subset___load_data___overwrites_data() -> None:
     waveform.load_data(array, start_index=1, sample_count=1)
 
     assert list(waveform.raw_data) == [4]
-    assert waveform._start_index == 0
+    assert waveform.start_index == 0
     assert waveform.capacity == 3
 
 
