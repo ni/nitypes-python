@@ -3,7 +3,7 @@ name = "nitypes"
 description = "Data types for NI Python APIs"
 license = "MIT"
 keywords = ["nitypes"]
-version = "0.1.0-dev10"
+version = "0.1.0-dev11"
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
