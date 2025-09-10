@@ -1943,7 +1943,7 @@ version = "4.15.0"
 description = "Backported and Experimental Type Hints for Python 3.9+"
 optional = false
 python-versions = ">=3.9"
-groups = ["docs", "lint", "test"]
+groups = ["main", "docs", "lint", "test"]
 files = [
     {file = "typing_extensions-4.15.0-py3-none-any.whl", hash = "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548"},
     {file = "typing_extensions-4.15.0.tar.gz", hash = "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466"},
@@ -2023,4 +2023,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "741864716565298bae1dfd67d4f6c5d50d6663142daf87e20ca41defca76f672"
+content-hash = "d4cfa03a4e1ff9a74b4e26d646fb75dd6e4284362f2a116af72961cf7befec77"
