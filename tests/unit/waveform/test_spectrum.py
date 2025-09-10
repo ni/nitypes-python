@@ -1071,13 +1071,13 @@ def test___spectrum_with_start_index___load_data___clears_start_index() -> None:
     spectrum = Spectrum.from_array_1d(
         np.array([0, 1, 2], np.int32), np.int32, copy=False, start_index=1, sample_count=1
     )
-    assert spectrum._start_index == 1
+    assert spectrum.start_index == 1
     array = np.array([3], np.int32)
 
     spectrum.load_data(array)
 
     assert list(spectrum.data) == [3]
-    assert spectrum._start_index == 0
+    assert spectrum.start_index == 0
 
 
 def test___ndarray_subset___load_data___overwrites_data() -> None:
@@ -1087,7 +1087,7 @@ def test___ndarray_subset___load_data___overwrites_data() -> None:
     spectrum.load_data(array, start_index=1, sample_count=1)
 
     assert list(spectrum.data) == [4]
-    assert spectrum._start_index == 0
+    assert spectrum.start_index == 0
     assert spectrum.capacity == 3
 
 
