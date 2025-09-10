@@ -544,7 +544,7 @@ class Spectrum(Generic[_TData]):
 
     @property
     def start_index(self) -> int:
-        """The sample index of the underlying array at which the waveform data begins."""
+        """The sample index of the underlying array at which the spectrum data begins."""
         return self._start_index
 
     @property
