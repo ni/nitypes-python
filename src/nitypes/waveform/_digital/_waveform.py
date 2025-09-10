@@ -923,6 +923,11 @@ class DigitalWaveform(Generic[TDigitalState]):
         return shape[1]
 
     @property
+    def start_index(self) -> int:
+        """The sample index of the underlying array at which the waveform data begins."""
+        return self._start_index
+
+    @property
     def capacity(self) -> int:
         """The total capacity available for waveform data.
 

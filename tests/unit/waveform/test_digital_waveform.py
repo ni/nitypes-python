@@ -321,6 +321,7 @@ def test___array_subset___from_port___creates_waveform_with_array_subset() -> No
 
     waveform = DigitalWaveform.from_port(array, start_index=2, sample_count=4)
 
+    assert waveform.start_index == 2
     assert waveform.sample_count == 4
     assert waveform.signal_count == 8
     assert waveform.data.tolist() == [
@@ -448,11 +449,13 @@ def test___array_subset___from_ports___creates_waveform_with_array_subset() -> N
     waveforms = DigitalWaveform.from_ports(array, start_index=1, sample_count=1)
 
     assert len(waveforms) == 2
+    assert waveforms[0].start_index == 1
     assert waveforms[0].sample_count == 1
     assert waveforms[0].signal_count == 8
     assert waveforms[0].data.tolist() == [
         [1, 0, 0, 0, 0, 0, 0, 0],
     ]
+    assert waveforms[1].start_index == 1
     assert waveforms[1].sample_count == 1
     assert waveforms[1].signal_count == 8
     assert waveforms[1].data.tolist() == [
@@ -1270,13 +1273,13 @@ def test___waveform_with_start_index___load_data___clears_start_index() -> None:
     waveform = DigitalWaveform.from_lines(
         np.array([[0], [1], [2]], np.uint8), np.uint8, copy=False, start_index=1, sample_count=1
     )
-    assert waveform._start_index == 1
+    assert waveform.start_index == 1
     array = np.array([[3]], np.uint8)
 
     waveform.load_data(array)
 
     assert waveform.data.tolist() == [[3]]
-    assert waveform._start_index == 0
+    assert waveform.start_index == 0
 
 
 def test___ndarray_subset___load_data___overwrites_data() -> None:
@@ -1286,7 +1289,7 @@ def test___ndarray_subset___load_data___overwrites_data() -> None:
     waveform.load_data(array, start_index=1, sample_count=1)
 
     assert waveform.data.tolist() == [[4]]
-    assert waveform._start_index == 0
+    assert waveform.start_index == 0
     assert waveform.capacity == 3
 
 
