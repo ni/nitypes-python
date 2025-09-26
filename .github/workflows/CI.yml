@@ -12,6 +12,19 @@ jobs:
   check_nitypes:
     name: Check nitypes
     uses: ./.github/workflows/check_nitypes.yml
+  aggregate:
+    runs-on: ubuntu-latest
+    needs: check_nitypes
+    steps:
+      - run: exit 0
+  check_nitypes_results:
+    runs-on: ubuntu-latest
+    needs: [aggregate]
+    if: ${{ !cancelled() }}
+    steps:
+      - if: ${{ needs.aggregate.result != 'success' }}
+        run: exit 1
+      - run: exit 0
   check_docs:
     name: Check docs
     uses: ./.github/workflows/check_docs.yml
