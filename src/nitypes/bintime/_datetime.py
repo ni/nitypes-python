@@ -17,10 +17,7 @@ import hightime as ht
 from typing_extensions import Self, TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
-from nitypes.bintime._timedelta import (
-    _OTHER_TIMEDELTA_TUPLE,
-    _OtherTimeDelta,
-)
+from nitypes.bintime._timedelta import _OTHER_TIMEDELTA_TUPLE, _OtherTimeDelta
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
@@ -396,9 +393,7 @@ class DateTime:
         self, value: TimeDelta | _OtherTimeDelta, /
     ) -> DateTime: ...
 
-    # AB#3153350 - nitypes.bintime.DateTime signatures of __sub__ and __rsub__ are unsafely
-    # overlapping
-    def __rsub__(  # type: ignore[misc]
+    def __rsub__(
         self, value: DateTime | _OtherDateTime | TimeDelta | _OtherTimeDelta, /
     ) -> TimeDelta | DateTime:
         """Return value-self."""
