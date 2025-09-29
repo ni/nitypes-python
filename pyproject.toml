@@ -57,7 +57,7 @@ numpy = [
 [tool.poetry.group.lint.dependencies]
 bandit = { version = ">=1.7", extras = ["toml"] }
 ni-python-styleguide = ">=0.4.1"
-mypy = ">=1.0"
+mypy = ">=1.18.1"
 pyright = { version = ">=1.1.400", extras = ["nodejs"] }
 
 [tool.poetry.group.test.dependencies]
