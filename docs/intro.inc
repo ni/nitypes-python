@@ -118,5 +118,5 @@ information. Valid types for the scalar values are :any:`bool`, :any:`int`,
 XYData
 ^^^^^^
 
-:class:`XYData` is a data type that represents a two dimensional sequence of numeric values with
+:class:`XYData` is a data type that represents a two axes (sequences) of numeric values with
 units information. Valid types for the numeric values are :any:`int` and :any:`float`.

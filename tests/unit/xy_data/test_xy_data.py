@@ -7,11 +7,8 @@ from typing import Any
 import pytest
 from typing_extensions import assert_type
 
-from nitypes.waveform._extended_properties import (
-    UNIT_DESCRIPTION,
-    ExtendedPropertyDictionary,
-)
-from nitypes.xy_data import TNumeric, XYData
+from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
+from nitypes.xy_data import TNumeric, UNIT_DESCRIPTION_X, UNIT_DESCRIPTION_Y, XYData
 
 
 ###############################################################################
@@ -278,7 +275,8 @@ def test___xy_data_with_units___get_extended_properties___returns_correct_dictio
     prop_dict = value.extended_properties
 
     assert isinstance(prop_dict, ExtendedPropertyDictionary)
-    assert prop_dict.get(UNIT_DESCRIPTION) == "watts,hr"
+    assert prop_dict.get(UNIT_DESCRIPTION_X) == "watts"
+    assert prop_dict.get(UNIT_DESCRIPTION_Y) == "hr"
 
 
 def test___xy_data_with_units___set_units___units_updated_correctly() -> None:

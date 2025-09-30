@@ -2,8 +2,8 @@
 
 XYData Data Type
 =================
-:class:`XYData`: An XYData object represents a two dimensional sequence of numeric values with
-units information. Valid types for the numeric values are :any:`int` and :any:`float`.
+:class:`XYData`: An XYData object represents two axes (sequences) of numeric values with units
+information. Valid types for the numeric values are :any:`int` and :any:`float`.
 """
 
 from __future__ import annotations
@@ -14,7 +14,6 @@ from typing import TYPE_CHECKING, Any, Generic, Union
 from typing_extensions import TypeVar, final
 
 from nitypes._exceptions import invalid_arg_type
-from nitypes.waveform._extended_properties import UNIT_DESCRIPTION
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
@@ -22,12 +21,20 @@ if TYPE_CHECKING:
 else:
     from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
 
+# Extended property keys for X and Y units.
+UNIT_DESCRIPTION_X = "NI_UnitDescription_x"
+UNIT_DESCRIPTION_Y = "NI_UnitDescription_y"
+
+# Constants for indexing into the underlying list of lists
+X_INDEX = 0
+Y_INDEX = 1
+
 TNumeric = TypeVar("TNumeric", bound=Union[int, float])
 
 
 @final
 class XYData(Generic[TNumeric]):
-    """A 2D sequence of numeric data with units and extended properties.
+    """Two axes (sequences) of numeric values with units information.
 
     Constructing
     ^^^^^^^^^^^^
@@ -73,19 +80,25 @@ class XYData(Generic[TNumeric]):
         Returns:
             An XYData object.
         """
-        if not x_values and not y_values:
+        x_list = list(x_values)
+        y_list = list(y_values)
+
+        # Determine _value_type
+        if not x_list or not y_list:
             if not value_type:
                 raise TypeError(
                     "You must specify x_values and y_values as non-empty or specify value_type."
                 )
             self._value_type = value_type
         else:
-            # Use the first x_value to determine _value_type.
-            self._value_type = type(next(iter(x_values)))
+            # Use the first x value to determine _value_type.
+            self._value_type = type(x_list[0])
 
-            # Validate the values inputs
-            self._validate_axis_data(x_values)
-            self._validate_axis_data(y_values)
+        # Validate the values inputs
+        if len(x_list) != len(y_list):
+            raise ValueError("x_values and y_values must be the same length.")
+        self._validate_axis_data(x_list)
+        self._validate_axis_data(y_list)
 
         if not isinstance(x_units, str):
             raise invalid_arg_type("x_units", "str", x_units)
@@ -93,49 +106,47 @@ class XYData(Generic[TNumeric]):
         if not isinstance(y_units, str):
             raise invalid_arg_type("y_units", "str", y_units)
 
-        self._values = [list(x_values), list(y_values)]
-        if len(self._values[0]) != len(self._values[1]):
-            raise ValueError("x_values and y_values must be the same length.")
+        self._values = [x_list, y_list]
 
-        # X units and Y units are combined since there is only one units key.
         self._extended_properties = ExtendedPropertyDictionary()
-        self._extended_properties[UNIT_DESCRIPTION] = ",".join([x_units, y_units])
+        self._extended_properties[UNIT_DESCRIPTION_X] = x_units
+        self._extended_properties[UNIT_DESCRIPTION_Y] = y_units
 
     @property
     def x_data(self) -> MutableSequence[TNumeric]:
         """The x-axis data of this XYData."""
-        return self._values[0]
+        return self._values[X_INDEX]
 
     @property
     def y_data(self) -> MutableSequence[TNumeric]:
         """The y-axis data of this XYData."""
-        return self._values[1]
+        return self._values[Y_INDEX]
 
     @property
     def x_units(self) -> str:
         """The unit of measurement, such as volts, of x_data."""
-        value = self._extended_properties.get(UNIT_DESCRIPTION, "")
+        value = self._extended_properties.get(UNIT_DESCRIPTION_X, "")
         assert isinstance(value, str)
-        return value.split(",")[0] if value else ""
+        return value
 
     @x_units.setter
     def x_units(self, value: str) -> None:
         if not isinstance(value, str):
             raise invalid_arg_type("x_units", "str", value)
-        self._extended_properties[UNIT_DESCRIPTION] = ",".join([value, self.y_units])
+        self._extended_properties[UNIT_DESCRIPTION_X] = value
 
     @property
     def y_units(self) -> str:
         """The unit of measurement, such as volts, of y_data."""
-        value = self._extended_properties.get(UNIT_DESCRIPTION, "")
+        value = self._extended_properties.get(UNIT_DESCRIPTION_Y, "")
         assert isinstance(value, str)
-        return value.split(",")[1] if value else ""
+        return value
 
     @y_units.setter
     def y_units(self, value: str) -> None:
         if not isinstance(value, str):
             raise invalid_arg_type("y_units", "str", value)
-        self._extended_properties[UNIT_DESCRIPTION] = ",".join([self.x_units, value])
+        self._extended_properties[UNIT_DESCRIPTION_Y] = value
 
     @property
     def extended_properties(self) -> ExtendedPropertyDictionary:
@@ -196,22 +207,8 @@ class XYData(Generic[TNumeric]):
 
     def __str__(self) -> str:
         """Return str(self)."""
-        if self.x_units:
-            x_values_with_units = [f"{value} {self.x_units}" for value in self.x_data]
-            x_str = ", ".join(x_values_with_units)
-        else:
-            x_values = [f"{value}" for value in self.x_data]
-            x_str = ", ".join(x_values)
-        x_str = f"[{x_str}]"
-
-        if self.y_units:
-            y_values_with_units = [f"{value} {self.y_units}" for value in self.y_data]
-            y_str = ", ".join(y_values_with_units)
-        else:
-            y_values = [f"{value}" for value in self.y_data]
-            y_str = ", ".join(y_values)
-        y_str = f"[{y_str}]"
-
+        x_str = XYData._format_values_with_units(self.x_data, self.x_units)
+        y_str = XYData._format_values_with_units(self.y_data, self.y_units)
         return f"[{x_str}, {y_str}]"
 
     def _validate_axis_data(self, values: Iterable[TNumeric]) -> None:
@@ -227,3 +224,14 @@ class XYData(Generic[TNumeric]):
             f"Input data does not match expected type. Input Type: {type(value)} "
             f"Expected Type: {self._value_type}"
         )
+
+    @staticmethod
+    def _format_values_with_units(values: MutableSequence[TNumeric], units: str) -> str:
+        if units:
+            values_with_units = [f"{value} {units}" for value in values]
+            values_str = ", ".join(values_with_units)
+        else:
+            values_without_units = [f"{value}" for value in values]
+            values_str = ", ".join(values_without_units)
+
+        return f"[{values_str}]"
