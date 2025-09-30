@@ -103,6 +103,16 @@ def test___xy_data___append_same_type___values_appended() -> None:
     assert data.y_data == [7, 6, 5, 4]
 
 
+def test___xy_data___append_multiple_times___values_appended() -> None:
+    data = XYData([1, 2, 3], [7, 6, 5])
+
+    data.append(4, 4)
+    data.append(20, 21)
+
+    assert data.x_data == [1, 2, 3, 4, 20]
+    assert data.y_data == [7, 6, 5, 4, 21]
+
+
 def test___xy_data___append_different_type___raises_type_error() -> None:
     data = XYData([1.0, 2.0, 3.0], [4.0, 5.0, 6.0])
 
@@ -130,6 +140,16 @@ def test___xy_data___extend_same_type___values_extended() -> None:
 
     assert data.x_data == [1, 2, 3, 4, 5]
     assert data.y_data == [4, 5, 6, 7, 8]
+
+
+def test___xy_data___extend_multiple_times___values_extended() -> None:
+    data = XYData([1, 2, 3], [4, 5, 6])
+
+    data.extend([4, 5], [7, 8])
+    data.extend([10], [11])
+
+    assert data.x_data == [1, 2, 3, 4, 5, 10]
+    assert data.y_data == [4, 5, 6, 7, 8, 11]
 
 
 def test___xy_data___extend_different_type___raises_type_error() -> None:
@@ -307,3 +327,36 @@ def test___xy_data___pickle___references_public_modules() -> None:
 
     assert b"nitypes.xy_data" in value_bytes
     assert b"nitypes.xy_data._xy_data" not in value_bytes
+
+
+def test___various_units_values___change_units___updates_units_correctly() -> None:
+    data = XYData([1], [2])
+
+    # Because x and y units are stored as a single string in the ExtendedPropertiesDictionary,
+    # I want to test an assortment of unit assignments (blank strings, order, etc.) to make sure
+    # the code that updates/reads the units from the single string is correct.
+    data.x_units = "volts"
+
+    assert data.x_units == "volts"
+    assert data.y_units == ""
+
+    data.y_units = "seconds"
+
+    assert data.x_units == "volts"
+    assert data.y_units == "seconds"
+
+    data.x_units = ""
+    data.y_units = "hours"
+
+    assert data.x_units == ""
+    assert data.y_units == "hours"
+
+    data.y_units = ""
+
+    assert data.x_units == data.y_units == ""
+
+    data.y_units = "A"
+    data.x_units = "B"
+
+    assert data.x_units == "B"
+    assert data.y_units == "A"
