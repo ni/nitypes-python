@@ -114,3 +114,9 @@ Vector
 :class:`Vector` is a data type that represents an array of scalar values with units
 information. Valid types for the scalar values are :any:`bool`, :any:`int`,
 :any:`float`, and :any:`str`.
+
+XYData
+^^^^^^
+
+:class:`XYData` is a data type that represents a two dimensional sequence of numeric values with
+units information. Valid types for the numeric values are :any:`int` and :any:`float`.

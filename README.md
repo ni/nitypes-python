@@ -149,5 +149,5 @@ API Reference.
 
 `nitypes.xy_data.XYData` is a data type that represents a two dimensional sequence of numeric values with
 units information. Valid types for the numeric values are `int` and `float`. For more details, see
-[XYData](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/xy_data/index.html#xy_data) in the
+[XYData](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/xy_data/index.html) in the
 API Reference.
