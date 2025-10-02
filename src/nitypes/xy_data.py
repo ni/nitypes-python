@@ -32,12 +32,8 @@ else:
     from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
 
 # Extended property keys for X and Y units.
-UNIT_DESCRIPTION_X = "NI_UnitDescription_X"
-UNIT_DESCRIPTION_Y = "NI_UnitDescription_Y"
-
-# Constants for indexing into the underlying list of lists
-X_INDEX = 0
-Y_INDEX = 1
+_UNIT_DESCRIPTION_X = "NI_UnitDescription_X"
+_UNIT_DESCRIPTION_Y = "NI_UnitDescription_Y"
 
 _TData = TypeVar("_TData", bound=Union[np.floating, np.integer])
 _TOtherData = TypeVar("_TOtherData", bound=Union[np.floating, np.integer])
@@ -245,10 +241,10 @@ class XYData(Generic[_TData]):
 
         # If x and y units are not already in extended properties, set them.
         # If the caller specifies a non-blank x or y units, overwrite the existing entry.
-        if UNIT_DESCRIPTION_X not in self._extended_properties or x_units:
-            self._extended_properties[UNIT_DESCRIPTION_X] = x_units
-        if UNIT_DESCRIPTION_Y not in self._extended_properties or y_units:
-            self._extended_properties[UNIT_DESCRIPTION_Y] = y_units
+        if _UNIT_DESCRIPTION_X not in self._extended_properties or x_units:
+            self._extended_properties[_UNIT_DESCRIPTION_X] = x_units
+        if _UNIT_DESCRIPTION_Y not in self._extended_properties or y_units:
+            self._extended_properties[_UNIT_DESCRIPTION_Y] = y_units
 
     def _init_with_provided_arrays(
         self,
@@ -298,7 +294,7 @@ class XYData(Generic[_TData]):
     @property
     def x_units(self) -> str:
         """The unit of measurement, such as volts, of x_data."""
-        value = self._extended_properties.get(UNIT_DESCRIPTION_X, "")
+        value = self._extended_properties.get(_UNIT_DESCRIPTION_X, "")
         assert isinstance(value, str)
         return value
 
@@ -306,12 +302,12 @@ class XYData(Generic[_TData]):
     def x_units(self, value: str) -> None:
         if not isinstance(value, str):
             raise invalid_arg_type("x_units", "str", value)
-        self._extended_properties[UNIT_DESCRIPTION_X] = value
+        self._extended_properties[_UNIT_DESCRIPTION_X] = value
 
     @property
     def y_units(self) -> str:
         """The unit of measurement, such as volts, of y_data."""
-        value = self._extended_properties.get(UNIT_DESCRIPTION_Y, "")
+        value = self._extended_properties.get(_UNIT_DESCRIPTION_Y, "")
         assert isinstance(value, str)
         return value
 
@@ -319,7 +315,7 @@ class XYData(Generic[_TData]):
     def y_units(self, value: str) -> None:
         if not isinstance(value, str):
             raise invalid_arg_type("y_units", "str", value)
-        self._extended_properties[UNIT_DESCRIPTION_Y] = value
+        self._extended_properties[_UNIT_DESCRIPTION_Y] = value
 
     @property
     def dtype(self) -> np.dtype[_TData]:
