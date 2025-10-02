@@ -1,196 +1,220 @@
 from __future__ import annotations
 
+import array
 import copy
+import itertools
 import pickle
 from typing import Any
 
+import numpy as np
 import pytest
 from typing_extensions import assert_type
 
 from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
-from nitypes.xy_data import TNumeric, UNIT_DESCRIPTION_X, UNIT_DESCRIPTION_Y, XYData
+from nitypes.xy_data import _TData, UNIT_DESCRIPTION_X, UNIT_DESCRIPTION_Y, XYData
 
 
 ###############################################################################
 # create
 ###############################################################################
-def test___no_data_values_no_type___create___raises_type_error() -> None:
+def test___data_and_dtype___create___creates_xydata_with_data_and_dtype() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    xydata = XYData(data, data)
+
+    assert xydata.dtype == np.int32
+    assert_type(xydata, XYData[np.int32])
+
+
+def test___mismatched_dtypes___create___raises_type_error() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    data2 = np.array([1, 2, 3, 4, 5], np.float64)
+
     with pytest.raises(TypeError) as exc:
-        _ = XYData([], [])
+        _ = XYData(data, data2)
+
+    assert exc.value.args[0].startswith("x_values and y_values must have the same type.")
+
+
+# TODO: Fix this test to pass in arrays of the invalid types.
+# @pytest.mark.parametrize("dtype", [np.complex128, np.str_, np.void, "i2, i2"])
+# def test___unsupported_dtype___create___raises_type_error(
+#     dtype: npt.DTypeLike,
+# ) -> None:
+#     data = np.array([1, 2, 3, 4, 5], dtype)
+#     with pytest.raises(TypeError) as exc:
+#         _ = XYData(data, data)
+
+#     assert exc.value.args[0].startswith("The requested data type is not supported.")
+
+
+###############################################################################
+# from_arrays_1d
+###############################################################################
+def test___float64_ndarray___from_array_1d___creates_spectrum_with_float64_dtype() -> None:
+    data = np.array([1.1, 2.2, 3.3, 4.4, 5.5], np.float64)
+
+    xydata = XYData.from_arrays_1d(data, data)
+
+    assert xydata.x_data.tolist() == data.tolist()
+    assert xydata.y_data.tolist() == data.tolist()
+    assert xydata.dtype == np.float64
+    assert_type(xydata, XYData[np.float64])
+
+
+def test___int32_ndarray___from_array_1d___creates_spectrum_with_int32_dtype() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+
+    xydata = XYData.from_arrays_1d(data, data)
+
+    assert xydata.x_data.tolist() == data.tolist()
+    assert xydata.y_data.tolist() == data.tolist()
+    assert xydata.dtype == np.int32
+    assert_type(xydata, XYData[np.int32])
+
+
+def test___int32_array_with_dtype___from_array_1d___creates_spectrum_with_specified_dtype() -> None:
+    data = array.array("i", [1, 2, 3, 4, 5])
+
+    xydata = XYData.from_arrays_1d(data, data, np.int32)
+
+    assert xydata.x_data.tolist() == data.tolist()
+    assert xydata.y_data.tolist() == data.tolist()
+    assert xydata.dtype == np.int32
+    assert_type(xydata, XYData[np.int32])
+
+
+def test___int16_ndarray_with_mismatched_dtype___from_array_1d___creates_spectrum_with_specified_dtype() -> (
+    None
+):
+    data = np.array([1, 2, 3, 4, 5], np.int16)
+
+    xydata = XYData.from_arrays_1d(data, data, np.int32)
+
+    assert xydata.x_data.tolist() == data.tolist()
+    assert xydata.y_data.tolist() == data.tolist()
+    assert xydata.dtype == np.int32
+    assert_type(xydata, XYData[np.int32])
+
+
+def test___int_list_with_dtype___from_array_1d___creates_spectrum_with_specified_dtype() -> None:
+    data = [1, 2, 3, 4, 5]
+
+    xydata = XYData.from_arrays_1d(data, data, np.int32)
+
+    assert xydata.x_data.tolist() == data
+    assert xydata.y_data.tolist() == data
+    assert xydata.dtype == np.int32
+    assert_type(xydata, XYData[np.int32])
+
+
+def test___int_list_with_dtype_str___from_array_1d___creates_spectrum_with_specified_dtype() -> (
+    None
+):
+    data = [1, 2, 3, 4, 5]
+
+    xydata = XYData.from_arrays_1d(data, data, "int32")
+
+    assert xydata.x_data.tolist() == data
+    assert xydata.y_data.tolist() == data
+    assert xydata.dtype == np.int32
+    assert_type(xydata, XYData[Any])  # dtype not inferred from string
+
+
+def test___int32_ndarray_2d___from_array_1d___raises_value_error() -> None:
+    data = np.array([[1, 2, 3], [4, 5, 6]], np.int32)
+
+    with pytest.raises(ValueError) as exc:
+        _ = XYData.from_arrays_1d(data, data)
 
     assert exc.value.args[0].startswith(
-        "You must specify x_values and y_values as non-empty or specify value_type."
+        "The input array must be a one-dimensional array or sequence."
     )
 
 
-def test___no_data_values_int_type___create___creates_with_int_type() -> None:
-    data = XYData([], [], value_type=int)
-
-    assert_type(data._values, list[list[int]])
-    assert data.x_data == []
-    assert data.y_data == []
-    assert data.x_units == data.y_units == ""
-    assert data._value_type == int
-
-
-def test___int_data_values___create___creates_with_int_data_and_default_units() -> None:
-    data = XYData([10, 20, 30], [40, 50, 60])
-
-    assert_type(data._values[0][0], int)
-    assert data.x_data == [10, 20, 30]
-    assert data.y_data == [40, 50, 60]
-    assert data.x_units == data.y_units == ""
-
-
-def test___float_data_value___create___creates_with_float_data_and_default_units() -> None:
-    data = XYData([20.2, 30.3, 40.4], [50.5, 60.6, 70.7])
-
-    assert_type(data._values[0][0], float)
-    assert data.x_data == [20.2, 30.3, 40.4]
-    assert data.y_data == [50.5, 60.6, 70.7]
-    assert data.x_units == data.y_units == ""
-
-
-def test___float_data_value_and_units___create___creates_with_float_data_and_units() -> None:
-    expected_x_data = [1.1, 2.2, 3.3]
-    expected_x_units = "volts"
-    expected_y_data = [4.4, 5.5, 6.6]
-    expected_y_units = "seconds"
-
-    data = XYData(expected_x_data, expected_y_data, expected_x_units, expected_y_units)
-
-    assert data.x_data == expected_x_data
-    assert data.y_data == expected_y_data
-    assert data.x_units == expected_x_units
-    assert data.y_units == expected_y_units
-
-
-@pytest.mark.parametrize("data_value", [[[1.0, 2.0]], [{"key", "value"}]])
-def test___invalid_data_value___create___raises_type_error(data_value: Any) -> None:
-    with pytest.raises(TypeError) as exc:
-        _ = XYData(data_value, data_value)
-
-    assert exc.value.args[0].startswith("The XYData input data must be an int or float.")
-
-
-def test___mixed_data_values___create___raises_type_error() -> None:
-    with pytest.raises(TypeError) as exc:
-        mixed_data = [1.0, 2, 3]
-        _ = XYData(mixed_data, mixed_data)
-
-    assert exc.value.args[0].startswith("Input data does not match expected type.")
-
-
-def test___int_data_values_length_mismatch___create___raises_value_error() -> None:
-    with pytest.raises(ValueError) as exc:
-        _ = XYData([1, 2], [3, 4, 5])
-
-    assert exc.value.args[0].startswith("x_values and y_values must be the same length.")
-
-
-###############################################################################
-# append
-###############################################################################
-def test___xy_data___append_same_type___values_appended() -> None:
-    data = XYData([1, 2, 3], [7, 6, 5])
-
-    data.append(4, 4)
-
-    assert data.x_data == [1, 2, 3, 4]
-    assert data.y_data == [7, 6, 5, 4]
-
-
-def test___xy_data___append_multiple_times___values_appended() -> None:
-    data = XYData([1, 2, 3], [7, 6, 5])
-
-    data.append(4, 4)
-    data.append(20, 21)
-
-    assert data.x_data == [1, 2, 3, 4, 20]
-    assert data.y_data == [7, 6, 5, 4, 21]
-
-
-def test___xy_data___append_different_type___raises_type_error() -> None:
-    data = XYData([1.0, 2.0, 3.0], [4.0, 5.0, 6.0])
-
-    with pytest.raises(TypeError) as exc:
-        data.append(True, False)
-
-    assert exc.value.args[0].startswith("Input data does not match expected type.")
-
-
-def test___empty_xy_data___append___appends_data() -> None:
-    data = XYData([], [], value_type=int)
-    data.append(1, 2)
-
-    assert data.x_data == [1]
-    assert data.y_data == [2]
-
-
-###############################################################################
-# extend
-###############################################################################
-def test___xy_data___extend_same_type___values_extended() -> None:
-    data = XYData([1, 2, 3], [4, 5, 6])
-
-    data.extend([4, 5], [7, 8])
-
-    assert data.x_data == [1, 2, 3, 4, 5]
-    assert data.y_data == [4, 5, 6, 7, 8]
-
-
-def test___xy_data___extend_multiple_times___values_extended() -> None:
-    data = XYData([1, 2, 3], [4, 5, 6])
-
-    data.extend([4, 5], [7, 8])
-    data.extend([10], [11])
-
-    assert data.x_data == [1, 2, 3, 4, 5, 10]
-    assert data.y_data == [4, 5, 6, 7, 8, 11]
-
-
-def test___xy_data___extend_different_type___raises_type_error() -> None:
-    data = XYData([1.0, 2.0, 3.0], [4.0, 5.0, 6.0])
-
-    with pytest.raises(TypeError) as exc:
-        data.extend([1, 2], [3, 4])
-
-    assert exc.value.args[0].startswith("Input data does not match expected type.")
-
-
-def test___xy_data___extend_mixed_lengths___raises_value_error() -> None:
-    data = XYData([1, 2, 3], [4, 5, 6])
+def test___int_list_without_dtype___from_array_1d___raises_value_error() -> None:
+    data = [1, 2, 3, 4, 5]
 
     with pytest.raises(ValueError) as exc:
-        data.extend([1, 2, 3], [4, 5])
+        _ = XYData.from_arrays_1d(data, data)
 
-    assert exc.value.args[0].startswith("X and Y sequences to extend must be the same length.")
-
-
-def test___empty_xy_data___extend___values_extended() -> None:
-    data = XYData([], [], value_type=float)
-    data.extend([1.0, 2.0], [3.0, 4.0])
-
-    assert data.x_data == [1.0, 2.0]
-    assert data.y_data == [3.0, 4.0]
+    assert exc.value.args[0].startswith(
+        "You must specify a dtype when the input array is a sequence."
+    )
 
 
-def test___xy_data___extend_with_empty_list___values_unchanged() -> None:
-    data = XYData([1, 2, 3], [4, 5, 6])
+def test___bytes___from_array_1d___raises_value_error() -> None:
+    data = b"\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
 
-    data.extend([], [])
+    with pytest.raises(ValueError) as exc:
+        _ = XYData.from_arrays_1d(data, data, np.int32)
 
-    assert data.x_data == [1, 2, 3]
-    assert data.y_data == [4, 5, 6]
+    assert exc.value.args[0].startswith("invalid literal for int() with base 10:")
 
 
-###############################################################################
-# length
-###############################################################################
-def test___xy_data___check_length___length_correct() -> None:
-    xy_data = XYData([1, 2], [3, 4])
+def test___iterable___from_array_1d___raises_type_error() -> None:
+    data = itertools.repeat(3)
 
-    assert len(xy_data) == 2
+    with pytest.raises(TypeError) as exc:
+        _ = XYData.from_arrays_1d(data, data, np.int32)  # type: ignore[call-overload]
+
+    assert exc.value.args[0].startswith(
+        "The input array must be a one-dimensional array or sequence."
+    )
+
+
+def test___ndarray_with_unsupported_dtype___from_array_1d___raises_type_error() -> None:
+    data = np.zeros(3, np.str_)
+
+    with pytest.raises(TypeError) as exc:
+        _ = XYData.from_arrays_1d(data, data)
+
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
+
+
+def test___copy___from_array_1d___creates_spectrum_linked_to_different_buffer() -> None:
+    x_data = np.array([1, 2, 3, 4, 5], np.int32)
+    y_data = np.array([6, 7, 8, 9, 10], np.int32)
+
+    xydata = XYData.from_arrays_1d(x_data, y_data, copy=True)
+
+    assert xydata.x_data is not x_data
+    assert xydata.x_data.tolist() == x_data.tolist()
+    x_data[:] = [5, 4, 3, 2, 1]
+    assert xydata.x_data.tolist() != x_data.tolist()
+
+    assert xydata.y_data is not y_data
+    assert xydata.y_data.tolist() == y_data.tolist()
+    y_data[:] = [5, 4, 3, 2, 1]
+    assert xydata.y_data.tolist() != y_data.tolist()
+
+
+def test___int32_ndarray_no_copy___from_array_1d___creates_spectrum_linked_to_same_buffer() -> None:
+    x_data = np.array([1, 2, 3, 4, 5], np.int32)
+    y_data = np.array([6, 7, 8, 9, 10], np.int32)
+
+    xydata = XYData.from_arrays_1d(x_data, y_data, copy=False)
+
+    assert xydata._x_data is x_data
+    assert xydata.x_data.tolist() == x_data.tolist()
+    x_data[:] = [5, 4, 3, 2, 1]
+    assert xydata.x_data.tolist() == x_data.tolist()
+
+    assert xydata._y_data is y_data
+    assert xydata.y_data.tolist() == y_data.tolist()
+    y_data[:] = [5, 4, 3, 2, 1]
+    assert xydata.y_data.tolist() == y_data.tolist()
+
+
+def test___int_list_no_copy___from_array_1d___raises_value_error() -> None:
+    x_data = [1, 2, 3, 4, 5]
+    y_data = [6, 7, 8, 9, 10]
+
+    with pytest.raises(ValueError) as exc:
+        _ = XYData.from_arrays_1d(x_data, y_data, np.int32, copy=False)
+
+    assert exc.value.args[0].startswith(
+        "Unable to avoid copy while creating an array as requested."
+    )
 
 
 ###############################################################################
@@ -199,30 +223,42 @@ def test___xy_data___check_length___length_correct() -> None:
 @pytest.mark.parametrize(
     "left, right",
     [
-        (XYData([1, 2], [3, 4]), XYData([1, 2], [3, 4])),
-        (XYData([1.0, 2.0], [3.0, 4.0]), XYData([1.0, 2.0], [3.0, 4.0])),
+        (
+            XYData.from_arrays_1d([1, 2], [3, 4], np.int32),
+            XYData.from_arrays_1d([1, 2], [3, 4], np.int32),
+        ),
+        (
+            XYData.from_arrays_1d([1.0, 2.0], [3.0, 4.0], np.int32),
+            XYData.from_arrays_1d([1.0, 2.0], [3.0, 4.0], np.int32),
+        ),
     ],
 )
-def test___same_value___comparison___equal(left: XYData[TNumeric], right: XYData[TNumeric]) -> None:
+def test___same_value___comparison___equal(left: XYData[_TData], right: XYData[_TData]) -> None:
     assert left == right
 
 
 @pytest.mark.parametrize(
     "left, right",
     [
-        (XYData([1, 2], [5, 6]), XYData([1, 2], [3, 4])),
-        (XYData([1.0, 2.0], [5.0, 6.0]), XYData([1.0, 2.0], [3.0, 4.0])),
+        (
+            XYData.from_arrays_1d([1, 2], [5, 6], np.int32),
+            XYData.from_arrays_1d([1, 2], [3, 4], np.int32),
+        ),
+        (
+            XYData.from_arrays_1d([1.0, 2.0], [5.0, 6.0], np.int32),
+            XYData.from_arrays_1d([1.0, 2.0], [3.0, 4.0], np.int32),
+        ),
     ],
 )
 def test___different_values___comparison___not_equal(
-    left: XYData[TNumeric], right: XYData[TNumeric]
+    left: XYData[_TData], right: XYData[_TData]
 ) -> None:
     assert left != right
 
 
 def test___different_units___comparison___not_equal() -> None:
-    left = XYData([0], [0], "volts", "seconds")
-    right = XYData([0], [0], "amps", "seconds")
+    left = XYData.from_arrays_1d([0], [0], np.int32, x_units="volts", y_units="seconds")
+    right = XYData.from_arrays_1d([0], [0], np.int32, x_units="amps", y_units="seconds")
 
     assert left != right
 
@@ -234,16 +270,16 @@ def test___different_units___comparison___not_equal() -> None:
     "value, expected_repr",
     [
         (
-            XYData([10], [20]),
-            "nitypes.xy_data.XYData(x_data=[10], y_data=[20], x_units='', y_units='')",
+            XYData.from_arrays_1d([10], [20], np.int32),
+            "nitypes.xy_data.XYData(x_data=array([10], dtype=int32), y_data=array([20], dtype=int32), x_units='', y_units='')",
         ),
         (
-            XYData([1.0, 1.1], [1.2, 1.3]),
-            "nitypes.xy_data.XYData(x_data=[1.0, 1.1], y_data=[1.2, 1.3], x_units='', y_units='')",
+            XYData.from_arrays_1d([1.0, 1.1], [1.2, 1.3], np.float64),
+            "nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]), x_units='', y_units='')",
         ),
         (
-            XYData([10], [20], "volts", "s"),
-            "nitypes.xy_data.XYData(x_data=[10], y_data=[20], x_units='volts', y_units='s')",
+            XYData.from_arrays_1d([10], [20], np.int32, x_units="volts", y_units="s"),
+            "nitypes.xy_data.XYData(x_data=array([10], dtype=int32), y_data=array([20], dtype=int32), x_units='volts', y_units='s')",
         ),
     ],
 )
@@ -254,12 +290,30 @@ def test___various_values___repr___looks_ok(value: XYData[Any], expected_repr: s
 @pytest.mark.parametrize(
     "value, expected_str",
     [
-        (XYData([], [], value_type=int), "[[], []]"),
-        (XYData([], [], "volts", "s", value_type=int), "[[], []]"),
-        (XYData([10, 20], [30, 40]), "[[10, 20], [30, 40]]"),
-        (XYData([10.0, 20.0], [30.0, 40.0]), "[[10.0, 20.0], [30.0, 40.0]]"),
-        (XYData([10], [20], "volts", "s"), "[[10 volts], [20 s]]"),
-        (XYData([1, 2], [3, 4], "miles", "hr"), "[[1 miles, 2 miles], [3 hr, 4 hr]]"),
+        (
+            XYData.from_arrays_1d([], [], np.int32),
+            "[[], []]",
+        ),
+        (
+            XYData.from_arrays_1d([], [], np.int32, x_units="volts", y_units="s"),
+            "[[], []]",
+        ),
+        (
+            XYData.from_arrays_1d([10, 20], [30, 40], np.int32),
+            "[[10, 20], [30, 40]]",
+        ),
+        (
+            XYData.from_arrays_1d([10.0, 20.0], [30.0, 40.0], np.float64),
+            "[[10.0, 20.0], [30.0, 40.0]]",
+        ),
+        (
+            XYData.from_arrays_1d([10], [20], np.int32, x_units="volts", y_units="s"),
+            "[[10 volts], [20 s]]",
+        ),
+        (
+            XYData.from_arrays_1d([1, 2], [3, 4], np.int32, x_units="miles", y_units="hr"),
+            "[[1 miles, 2 miles], [3 hr, 4 hr]]",
+        ),
     ],
 )
 def test___various_values___str___looks_ok(value: XYData[Any], expected_str: str) -> None:
@@ -270,7 +324,7 @@ def test___various_values___str___looks_ok(value: XYData[Any], expected_str: str
 # other properties
 ###############################################################################
 def test___xy_data_with_units___get_extended_properties___returns_correct_dictionary() -> None:
-    value = XYData([20.0], [40.0], "watts", "hr")
+    value = XYData.from_arrays_1d([20.0], [40.0], np.float64, x_units="watts", y_units="hr")
 
     prop_dict = value.extended_properties
 
@@ -280,7 +334,7 @@ def test___xy_data_with_units___get_extended_properties___returns_correct_dictio
 
 
 def test___xy_data_with_units___set_units___units_updated_correctly() -> None:
-    value = XYData([20.0], [40.0], "watts", "hr")
+    value = XYData.from_arrays_1d([20.0], [40.0], np.float64, x_units="watts", y_units="hr")
 
     value.x_units = "volts"
     value.y_units = "s"
@@ -292,13 +346,13 @@ def test___xy_data_with_units___set_units___units_updated_correctly() -> None:
 @pytest.mark.parametrize(
     "value",
     [
-        XYData([10, 20], [30, 40]),
-        XYData([20.0, 20.1], [20.3, 20.4]),
-        XYData([10, 20], [30, 40], "A", "B"),
-        XYData([20.0, 20.1], [20.3, 20.4], "C", "D"),
+        XYData.from_arrays_1d([10, 20], [30, 40], np.int32),
+        XYData.from_arrays_1d([20.0, 20.1], [20.3, 20.4], np.float64),
+        XYData.from_arrays_1d([10, 20], [30, 40], np.int32, x_units="A", y_units="B"),
+        XYData.from_arrays_1d([20.0, 20.1], [20.3, 20.4], np.float64, x_units="C", y_units="D"),
     ],
 )
-def test___various_values___copy___makes_copy(value: XYData[TNumeric]) -> None:
+def test___various_values___copy___makes_copy(value: XYData[_TData]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
@@ -307,20 +361,20 @@ def test___various_values___copy___makes_copy(value: XYData[TNumeric]) -> None:
 @pytest.mark.parametrize(
     "value",
     [
-        XYData([10, 20], [30, 40]),
-        XYData([20.0, 20.1], [20.3, 20.4]),
-        XYData([10, 20], [30, 40], "A", "B"),
-        XYData([20.0, 20.1], [20.3, 20.4], "C", "D"),
+        XYData.from_arrays_1d([10, 20], [30, 40], np.int32),
+        XYData.from_arrays_1d([20.0, 20.1], [20.3, 20.4], np.float64),
+        XYData.from_arrays_1d([10, 20], [30, 40], np.int32, x_units="A", y_units="B"),
+        XYData.from_arrays_1d([20.0, 20.1], [20.3, 20.4], np.float64, x_units="C", y_units="D"),
     ],
 )
-def test___various_values___pickle_unpickle___makes_copy(value: XYData[TNumeric]) -> None:
+def test___various_values___pickle_unpickle___makes_copy(value: XYData[_TData]) -> None:
     new_value = pickle.loads(pickle.dumps(value))
     assert new_value is not value
     assert new_value == value
 
 
 def test___xy_data___pickle___references_public_modules() -> None:
-    value = XYData([10, 20], [30, 40])
+    value = XYData.from_arrays_1d([10, 20], [30, 40], np.int32)
     value_bytes = pickle.dumps(value)
 
     assert b"nitypes.xy_data" in value_bytes
@@ -328,7 +382,7 @@ def test___xy_data___pickle___references_public_modules() -> None:
 
 
 def test___various_units_values___change_units___updates_units_correctly() -> None:
-    data = XYData([1], [2])
+    data = XYData.from_arrays_1d([1], [2], np.int32)
 
     # Because x and y units are stored as a single string in the ExtendedPropertiesDictionary,
     # I want to test an assortment of unit assignments (blank strings, order, etc.) to make sure
