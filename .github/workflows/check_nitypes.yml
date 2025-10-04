@@ -12,7 +12,7 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-latest]
         # Type checking requires an up-to-date NumPy.
         # The latest NumPy only supports 3.11 and later
-        python-version: [3.11, 3.13]
+        python-version: [3.11, 3.14-dev]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repo
