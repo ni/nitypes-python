@@ -23,6 +23,8 @@
   - [Binary Time](#binary-time)
 - [Scalar Values](#scalar-values)
   - [Scalar](#scalar)
+  - [Vector](#vector)
+  - [XYData](#xydata)
 
 # About
 
@@ -141,4 +143,11 @@ API Reference.
 information and extended properties. Valid types for the scalar values are `bool`, `int`, `float`,
 and `str`. For more details, see
 [Scalar](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/vector/index.html#vector) in the
+API Reference.
+
+## XYData
+
+`nitypes.xy_data.XYData` is a data type that represents a two axes (sequences) of numeric values
+with units information. Valid types for the numeric values are `int` and `float`. For more details,
+see [XYData](https://nitypes.readthedocs.io/en/latest/autoapi/nitypes/xy_data/index.html) in the
 API Reference.
