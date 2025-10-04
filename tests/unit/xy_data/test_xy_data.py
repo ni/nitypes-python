@@ -11,18 +11,30 @@ import pytest
 from typing_extensions import assert_type
 
 from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
-from nitypes.xy_data import _TData, _UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y, XYData
+from nitypes.xy_data import _UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y, XYData, _TData
 
 
 ###############################################################################
 # create
 ###############################################################################
-def test___data_and_dtype___create___creates_xydata_with_data_and_dtype() -> None:
+def test___data_and_dtype___create___creates_xydata_with_data_dtype_and_default_units() -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
     xydata = XYData(data, data)
 
     assert xydata.dtype == np.int32
     assert_type(xydata, XYData[np.int32])
+    assert xydata.x_units == ""
+    assert xydata.y_units == ""
+
+
+def test___data_dtype_and_units___create___creates_xydata_with_data_dtype_and_units() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    xydata = XYData(data, data, x_units="volts", y_units="seconds")
+
+    assert xydata.dtype == np.int32
+    assert_type(xydata, XYData[np.int32])
+    assert xydata.x_units == "volts"
+    assert xydata.y_units == "seconds"
 
 
 def test___mismatched_dtypes___create___raises_type_error() -> None:
@@ -35,16 +47,22 @@ def test___mismatched_dtypes___create___raises_type_error() -> None:
     assert exc.value.args[0].startswith("x_values and y_values must have the same type.")
 
 
-# TODO: Fix this test to pass in arrays of the invalid types.
-# @pytest.mark.parametrize("dtype", [np.complex128, np.str_, np.void, "i2, i2"])
-# def test___unsupported_dtype___create___raises_type_error(
-#     dtype: npt.DTypeLike,
-# ) -> None:
-#     data = np.array([1, 2, 3, 4, 5], dtype)
-#     with pytest.raises(TypeError) as exc:
-#         _ = XYData(data, data)
+@pytest.mark.parametrize(
+    "data",
+    [
+        np.array([1 + 2j, 3 - 4j, -5 + 6j, -7 - 8j], dtype=np.complex128),
+        np.array(["a", "b", "c"], dtype=np.str_),
+        np.array([b"\x01\x02", b"\x03\x04"], dtype=np.void),
+        np.array([(1, 2), (3, 4)], dtype="i2,i2"),
+    ],
+)
+def test___unsupported_dtype___create___raises_type_error(
+    data: np.ndarray,
+) -> None:
+    with pytest.raises(TypeError) as exc:
+        _ = XYData(data, data)
 
-#     assert exc.value.args[0].startswith("The requested data type is not supported.")
+    assert exc.value.args[0].startswith("The requested data type is not supported.")
 
 
 ###############################################################################
@@ -59,6 +77,23 @@ def test___float64_ndarray___from_array_1d___creates_spectrum_with_float64_dtype
     assert xydata.y_data.tolist() == data.tolist()
     assert xydata.dtype == np.float64
     assert_type(xydata, XYData[np.float64])
+    assert xydata.x_units == ""
+    assert xydata.y_units == ""
+
+
+def test___float64_ndarray_with_units___from_array_1d___creates_spectrum_with_float64_dtype_and_units() -> (
+    None
+):
+    data = np.array([1.1, 2.2, 3.3, 4.4, 5.5], np.float64)
+
+    xydata = XYData.from_arrays_1d(data, data, x_units="amps", y_units="hours")
+
+    assert xydata.x_data.tolist() == data.tolist()
+    assert xydata.y_data.tolist() == data.tolist()
+    assert xydata.dtype == np.float64
+    assert_type(xydata, XYData[np.float64])
+    assert xydata.x_units == "amps"
+    assert xydata.y_units == "hours"
 
 
 def test___int32_ndarray___from_array_1d___creates_spectrum_with_int32_dtype() -> None:
@@ -383,10 +418,6 @@ def test___xy_data___pickle___references_public_modules() -> None:
 
 def test___various_units_values___change_units___updates_units_correctly() -> None:
     data = XYData.from_arrays_1d([1], [2], np.int32)
-
-    # Because x and y units are stored as a single string in the ExtendedPropertiesDictionary,
-    # I want to test an assortment of unit assignments (blank strings, order, etc.) to make sure
-    # the code that updates/reads the units from the single string is correct.
     data.x_units = "volts"
 
     assert data.x_units == "volts"
