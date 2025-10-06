@@ -315,16 +315,30 @@ else:
         (
             XYData.from_arrays_1d([10], [20], np.int32),
             f"nitypes.xy_data.XYData(x_data=array([10]{_NDARRAY_DTYPE_INT32}), "
-            f"y_data=array([20]{_NDARRAY_DTYPE_INT32}), x_units='', y_units='')",
+            f"y_data=array([20]{_NDARRAY_DTYPE_INT32}), "
+            "extended_properties={'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''})",
         ),
         (
             XYData.from_arrays_1d([1.0, 1.1], [1.2, 1.3], np.float64),
-            "nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]), x_units='', y_units='')",
+            "nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]), "
+            "extended_properties={'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''})",
         ),
         (
             XYData.from_arrays_1d([10], [20], np.int32, x_units="volts", y_units="s"),
             f"nitypes.xy_data.XYData(x_data=array([10]{_NDARRAY_DTYPE_INT32}), "
-            f"y_data=array([20]{_NDARRAY_DTYPE_INT32}), x_units='volts', y_units='s')",
+            f"y_data=array([20]{_NDARRAY_DTYPE_INT32}), "
+            "extended_properties={'NI_UnitDescription_X': 'volts', 'NI_UnitDescription_Y': 's'})",
+        ),
+        (
+            XYData.from_arrays_1d(
+                [1.0, 1.1],
+                [1.2, 1.3],
+                np.float64,
+                extended_properties={"NI_ChannelName": "Dev1/ai0"}
+            ),
+            "nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]), "
+            "extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription_X': '', "
+            "'NI_UnitDescription_Y': ''})",
         ),
     ],
 )

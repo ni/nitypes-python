@@ -71,18 +71,20 @@ class XYData(Generic[_TData]):
     To construct an XYData object, use the :class:`XYData` class:
 
     >>> XYData(np.array([1.1], np.float64), np.array([4.1], np.float64))
-    nitypes.xy_data.XYData(x_data=array([1.1]), y_data=array([4.1]), x_units='', y_units='')
+    nitypes.xy_data.XYData(x_data=array([1.1]), y_data=array([4.1]),
+    extended_properties={'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''})
     >>> XYData(np.array([1, 2]), np.array([4, 5]), x_units="A", y_units="V")
-    nitypes.xy_data.XYData(x_data=array([1, 2]), y_data=array([4, 5]), x_units='A', y_units='V')
+    nitypes.xy_data.XYData(x_data=array([1, 2]), y_data=array([4, 5]),
+    extended_properties={'NI_UnitDescription_X': 'A', 'NI_UnitDescription_Y': 'V'})
 
     To construct an XYData object using built-in lists, use from_arrays_1d():
 
     >>> XYData.from_arrays_1d([1, 2], [5, 6], np.int32)
     nitypes.xy_data.XYData(x_data=array([1, 2], dtype=int32), y_data=array([5, 6], dtype=int32),
-    x_units='', y_units='')
+    extended_properties={'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''})
     >>> XYData.from_arrays_1d([1.0, 1.1], [1.2, 1.3], np.float64)
     nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]),
-    x_units='', y_units='')
+    extended_properties={'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''})
     """
 
     __slots__ = [
@@ -372,8 +374,7 @@ class XYData(Generic[_TData]):
         args = [
             f"x_data={self.x_data!r}",
             f"y_data={self.y_data!r}",
-            f"x_units={self.x_units!r}",
-            f"y_units={self.y_units!r}",
+            f"extended_properties={self._extended_properties._properties!r}"
         ]
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
