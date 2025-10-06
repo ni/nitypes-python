@@ -151,21 +151,20 @@ class XYData(Generic[_TData]):
         copy: bool = True,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
     ) -> XYData[Any]:
-        """Construct a spectrum from a one-dimensional array or sequence.
+        """Construct an XYData from two one-dimensional arrays or sequences.
 
         Args:
-            array: The spectrum data as a one-dimensional array or a sequence.
-            dtype: The NumPy data type for the spectrum data. This argument is required
-                when array is a sequence.
-            copy: Specifies whether to copy the array or save a reference to it.
-            start_index: The sample index at which the spectrum data begins.
-            sample_count: The number of samples in the spectrum.
-            start_frequency: The start frequency of the spectrum.
-            frequency_increment: The frequency increment of the spectrum.
-            extended_properties: The extended properties of the spectrum.
+            x_array: The x-axis data as a one-dimensional array or a sequence.
+            y_array: The y-axis data as a one-dimensional array or a sequence.
+            dtype: The NumPy data type for the XYdata axes. This argument is required
+                when x_array and y_array are sequences.
+            x_units: The units string associated with x_array.
+            y_units: The units string associated with y_array
+            copy: Specifies whether to copy the arrays or save references to them.
+            extended_properties: The extended properties of the XYData.
 
         Returns:
-            A spectrum containing the specified data.
+            An XYData object containing the specified data.
         """
         if isinstance(x_array, np.ndarray):
             if x_array.ndim != 1:
@@ -214,7 +213,6 @@ class XYData(Generic[_TData]):
         """Initialize a new XYData.
 
         Args:
-            dtype: The NumPy data type for the XYData.
             x_values: A NumPy ndarray to use for x-axis data storage. The XYData takes ownership
                 of this array. If not specified, an ndarray is created based on the specified
                 dtype and capacity.
@@ -223,8 +221,6 @@ class XYData(Generic[_TData]):
                 dtype and capacity.
             x_units: The units string associated with x_values.
             y_units: The units string associated with y_values.
-            capacity: The number of samples to allocate. Pre-allocating a larger buffer optimizes
-                appending samples to the XYData.
             extended_properties: The extended properties of the XYData.
             copy_extended_properties: Specifies whether to copy the extended properties or take
                 ownership.
@@ -383,12 +379,6 @@ class XYData(Generic[_TData]):
         x_str = XYData._format_values_with_units(self.x_data, self.x_units)
         y_str = XYData._format_values_with_units(self.y_data, self.y_units)
         return f"[{x_str}, {y_str}]"
-
-    def _create_value_mismatch_exception(self, value: object) -> TypeError:
-        return TypeError(
-            f"Input data does not match expected type. Input Type: {type(value)} "
-            f"Expected Type: {self.dtype}"
-        )
 
     @staticmethod
     def _format_values_with_units(values: npt.NDArray[_TData], units: str) -> str:

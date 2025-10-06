@@ -70,7 +70,7 @@ def test___unsupported_dtype___create___raises_type_error(
 ###############################################################################
 # from_arrays_1d
 ###############################################################################
-def test___float64_ndarray___from_array_1d___creates_spectrum_with_float64_dtype() -> None:
+def test___float64_ndarray___from_arrays_1d___creates_xydata_with_float64_dtype() -> None:
     data = np.array([1.1, 2.2, 3.3, 4.4, 5.5], np.float64)
 
     xydata = XYData.from_arrays_1d(data, data)
@@ -83,7 +83,7 @@ def test___float64_ndarray___from_array_1d___creates_spectrum_with_float64_dtype
     assert xydata.y_units == ""
 
 
-def test___float64_ndarray_with_units___from_array_1d___creates_spectrum_with_float64_dtype_and_units() -> (
+def test___float64_ndarray_with_units___from_arrays_1d___creates_xydata_with_float64_dtype_and_units() -> (
     None
 ):
     data = np.array([1.1, 2.2, 3.3, 4.4, 5.5], np.float64)
@@ -98,7 +98,7 @@ def test___float64_ndarray_with_units___from_array_1d___creates_spectrum_with_fl
     assert xydata.y_units == "hours"
 
 
-def test___int32_ndarray___from_array_1d___creates_spectrum_with_int32_dtype() -> None:
+def test___int32_ndarray___from_arrays_1d___creates_xydata_with_int32_dtype() -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
 
     xydata = XYData.from_arrays_1d(data, data)
@@ -109,7 +109,7 @@ def test___int32_ndarray___from_array_1d___creates_spectrum_with_int32_dtype() -
     assert_type(xydata, XYData[np.int32])
 
 
-def test___int32_array_with_dtype___from_array_1d___creates_spectrum_with_specified_dtype() -> None:
+def test___int32_array_with_dtype___from_arrays_1d___creates_xydata_with_specified_dtype() -> None:
     data = array.array("i", [1, 2, 3, 4, 5])
 
     xydata = XYData.from_arrays_1d(data, data, np.int32)
@@ -120,7 +120,7 @@ def test___int32_array_with_dtype___from_array_1d___creates_spectrum_with_specif
     assert_type(xydata, XYData[np.int32])
 
 
-def test___int16_ndarray_with_mismatched_dtype___from_array_1d___creates_spectrum_with_specified_dtype() -> (
+def test___int16_ndarray_with_mismatched_dtype___from_arrays_1d___creates_xydata_with_specified_dtype() -> (
     None
 ):
     data = np.array([1, 2, 3, 4, 5], np.int16)
@@ -133,7 +133,7 @@ def test___int16_ndarray_with_mismatched_dtype___from_array_1d___creates_spectru
     assert_type(xydata, XYData[np.int32])
 
 
-def test___int_list_with_dtype___from_array_1d___creates_spectrum_with_specified_dtype() -> None:
+def test___int_list_with_dtype___from_arrays_1d___creates_xydata_with_specified_dtype() -> None:
     data = [1, 2, 3, 4, 5]
 
     xydata = XYData.from_arrays_1d(data, data, np.int32)
@@ -144,9 +144,7 @@ def test___int_list_with_dtype___from_array_1d___creates_spectrum_with_specified
     assert_type(xydata, XYData[np.int32])
 
 
-def test___int_list_with_dtype_str___from_array_1d___creates_spectrum_with_specified_dtype() -> (
-    None
-):
+def test___int_list_with_dtype_str___from_arrays_1d___creates_xydata_with_specified_dtype() -> None:
     data = [1, 2, 3, 4, 5]
 
     xydata = XYData.from_arrays_1d(data, data, "int32")
@@ -157,7 +155,7 @@ def test___int_list_with_dtype_str___from_array_1d___creates_spectrum_with_speci
     assert_type(xydata, XYData[Any])  # dtype not inferred from string
 
 
-def test___int32_ndarray_2d___from_array_1d___raises_value_error() -> None:
+def test___int32_ndarray_2d___from_arrays_1d___raises_value_error() -> None:
     data = np.array([[1, 2, 3], [4, 5, 6]], np.int32)
 
     with pytest.raises(ValueError) as exc:
@@ -168,7 +166,7 @@ def test___int32_ndarray_2d___from_array_1d___raises_value_error() -> None:
     )
 
 
-def test___int_list_without_dtype___from_array_1d___raises_value_error() -> None:
+def test___int_list_without_dtype___from_arrays_1d___raises_value_error() -> None:
     data = [1, 2, 3, 4, 5]
 
     with pytest.raises(ValueError) as exc:
@@ -179,7 +177,7 @@ def test___int_list_without_dtype___from_array_1d___raises_value_error() -> None
     )
 
 
-def test___bytes___from_array_1d___raises_value_error() -> None:
+def test___bytes___from_arrays_1d___raises_value_error() -> None:
     data = b"\x01\x00\x00\x00\x02\x00\x00\x00\x03\x00\x00\x00"
 
     with pytest.raises(ValueError) as exc:
@@ -188,7 +186,7 @@ def test___bytes___from_array_1d___raises_value_error() -> None:
     assert exc.value.args[0].startswith("invalid literal for int() with base 10:")
 
 
-def test___iterable___from_array_1d___raises_type_error() -> None:
+def test___iterable___from_arrays_1d___raises_type_error() -> None:
     data = itertools.repeat(3)
 
     with pytest.raises(TypeError) as exc:
@@ -199,7 +197,7 @@ def test___iterable___from_array_1d___raises_type_error() -> None:
     )
 
 
-def test___ndarray_with_unsupported_dtype___from_array_1d___raises_type_error() -> None:
+def test___ndarray_with_unsupported_dtype___from_arrays_1d___raises_type_error() -> None:
     data = np.zeros(3, np.str_)
 
     with pytest.raises(TypeError) as exc:
@@ -208,7 +206,7 @@ def test___ndarray_with_unsupported_dtype___from_array_1d___raises_type_error() 
     assert exc.value.args[0].startswith("The requested data type is not supported.")
 
 
-def test___copy___from_array_1d___creates_spectrum_linked_to_different_buffer() -> None:
+def test___copy___from_arrays_1d___creates_xydata_linked_to_different_buffer() -> None:
     x_data = np.array([1, 2, 3, 4, 5], np.int32)
     y_data = np.array([6, 7, 8, 9, 10], np.int32)
 
@@ -225,7 +223,7 @@ def test___copy___from_array_1d___creates_spectrum_linked_to_different_buffer() 
     assert xydata.y_data.tolist() != y_data.tolist()
 
 
-def test___int32_ndarray_no_copy___from_array_1d___creates_spectrum_linked_to_same_buffer() -> None:
+def test___int32_ndarray_no_copy___from_arrays_1d___creates_xydata_linked_to_same_buffer() -> None:
     x_data = np.array([1, 2, 3, 4, 5], np.int32)
     y_data = np.array([6, 7, 8, 9, 10], np.int32)
 
@@ -242,7 +240,7 @@ def test___int32_ndarray_no_copy___from_array_1d___creates_spectrum_linked_to_sa
     assert xydata.y_data.tolist() == y_data.tolist()
 
 
-def test___int_list_no_copy___from_array_1d___raises_value_error() -> None:
+def test___int_list_no_copy___from_arrays_1d___raises_value_error() -> None:
     x_data = [1, 2, 3, 4, 5]
     y_data = [6, 7, 8, 9, 10]
 
