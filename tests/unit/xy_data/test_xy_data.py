@@ -308,6 +308,7 @@ if Version(np.__version__) >= Version("2.0.0") or sys.platform != "win32":
 else:
     _NDARRAY_DTYPE_INT32 = ""
 
+
 @pytest.mark.parametrize(
     "value, expected_repr",
     [
