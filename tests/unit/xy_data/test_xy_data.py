@@ -334,7 +334,7 @@ else:
                 [1.0, 1.1],
                 [1.2, 1.3],
                 np.float64,
-                extended_properties={"NI_ChannelName": "Dev1/ai0"}
+                extended_properties={"NI_ChannelName": "Dev1/ai0"},
             ),
             "nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]), "
             "extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription_X': '', "

@@ -374,7 +374,7 @@ class XYData(Generic[_TData]):
         args = [
             f"x_data={self.x_data!r}",
             f"y_data={self.y_data!r}",
-            f"extended_properties={self._extended_properties._properties!r}"
+            f"extended_properties={self._extended_properties._properties!r}",
         ]
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
