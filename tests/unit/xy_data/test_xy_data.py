@@ -4,10 +4,12 @@ import array
 import copy
 import itertools
 import pickle
+import sys
 from typing import Any
 
 import numpy as np
 import pytest
+from packaging.version import Version
 from typing_extensions import assert_type
 
 from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
@@ -301,12 +303,18 @@ def test___different_units___comparison___not_equal() -> None:
 ###############################################################################
 # other operators
 ###############################################################################
+if Version(np.__version__) >= Version("2.0.0") or sys.platform != "win32":
+    _NDARRAY_DTYPE_INT32 = ", dtype=int32"
+else:
+    _NDARRAY_DTYPE_INT32 = ""
+
 @pytest.mark.parametrize(
     "value, expected_repr",
     [
         (
             XYData.from_arrays_1d([10], [20], np.int32),
-            "nitypes.xy_data.XYData(x_data=array([10], dtype=int32), y_data=array([20], dtype=int32), x_units='', y_units='')",
+            f"nitypes.xy_data.XYData(x_data=array([10]{_NDARRAY_DTYPE_INT32}), "
+            f"y_data=array([20]{_NDARRAY_DTYPE_INT32}), x_units='', y_units='')",
         ),
         (
             XYData.from_arrays_1d([1.0, 1.1], [1.2, 1.3], np.float64),
@@ -314,7 +322,8 @@ def test___different_units___comparison___not_equal() -> None:
         ),
         (
             XYData.from_arrays_1d([10], [20], np.int32, x_units="volts", y_units="s"),
-            "nitypes.xy_data.XYData(x_data=array([10], dtype=int32), y_data=array([20], dtype=int32), x_units='volts', y_units='s')",
+            f"nitypes.xy_data.XYData(x_data=array([10]{_NDARRAY_DTYPE_INT32}), "
+            f"y_data=array([20]{_NDARRAY_DTYPE_INT32}), x_units='volts', y_units='s')",
         ),
     ],
 )
