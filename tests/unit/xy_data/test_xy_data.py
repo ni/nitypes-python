@@ -13,7 +13,7 @@ from packaging.version import Version
 from typing_extensions import assert_type
 
 from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
-from nitypes.xy_data import _UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y, XYData, _TData
+from nitypes.xy_data import _UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y, XYData, TData
 
 
 ###############################################################################
@@ -268,7 +268,7 @@ def test___int_list_no_copy___from_arrays_1d___raises_value_error() -> None:
         ),
     ],
 )
-def test___same_value___comparison___equal(left: XYData[_TData], right: XYData[_TData]) -> None:
+def test___same_value___comparison___equal(left: XYData[TData], right: XYData[TData]) -> None:
     assert left == right
 
 
@@ -286,7 +286,7 @@ def test___same_value___comparison___equal(left: XYData[_TData], right: XYData[_
     ],
 )
 def test___different_values___comparison___not_equal(
-    left: XYData[_TData], right: XYData[_TData]
+    left: XYData[TData], right: XYData[TData]
 ) -> None:
     assert left != right
 
@@ -409,7 +409,7 @@ def test___xy_data_with_units___set_units___units_updated_correctly() -> None:
         XYData.from_arrays_1d([20.0, 20.1], [20.3, 20.4], np.float64, x_units="C", y_units="D"),
     ],
 )
-def test___various_values___copy___makes_copy(value: XYData[_TData]) -> None:
+def test___various_values___copy___makes_copy(value: XYData[TData]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
@@ -424,7 +424,7 @@ def test___various_values___copy___makes_copy(value: XYData[_TData]) -> None:
         XYData.from_arrays_1d([20.0, 20.1], [20.3, 20.4], np.float64, x_units="C", y_units="D"),
     ],
 )
-def test___various_values___pickle_unpickle___makes_copy(value: XYData[_TData]) -> None:
+def test___various_values___pickle_unpickle___makes_copy(value: XYData[TData]) -> None:
     new_value = pickle.loads(pickle.dumps(value))
     assert new_value is not value
     assert new_value == value

@@ -35,8 +35,8 @@ else:
 _UNIT_DESCRIPTION_X = "NI_UnitDescription_X"
 _UNIT_DESCRIPTION_Y = "NI_UnitDescription_Y"
 
-_TData = TypeVar("_TData", bound=Union[np.floating, np.integer])
-_TOtherData = TypeVar("_TOtherData", bound=Union[np.floating, np.integer])
+TData = TypeVar("TData", bound=Union[np.floating, np.integer])
+TOtherData = TypeVar("TOtherData", bound=Union[np.floating, np.integer])
 
 # Use the C types here because np.isdtype() considers some of them to be distinct types, even when
 # they have the same size (e.g. np.intc vs. np.int_).
@@ -62,7 +62,7 @@ _DATA_DTYPES = (
 
 
 @final
-class XYData(Generic[_TData]):
+class XYData(Generic[TData]):
     """Two axes (sequences) of numeric values with units information.
 
     Constructing
@@ -93,23 +93,23 @@ class XYData(Generic[_TData]):
         "_extended_properties",
     ]
 
-    _x_data: npt.NDArray[_TData]
-    _y_data: npt.NDArray[_TData]
+    _x_data: npt.NDArray[TData]
+    _y_data: npt.NDArray[TData]
     _extended_properties: ExtendedPropertyDictionary
 
     @overload
     @classmethod
     def from_arrays_1d(
         cls,
-        x_array: npt.NDArray[_TOtherData],
-        y_array: npt.NDArray[_TOtherData],
+        x_array: npt.NDArray[TOtherData],
+        y_array: npt.NDArray[TOtherData],
         dtype: None = ...,
         *,
         x_units: str = ...,
         y_units: str = ...,
         copy: bool = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-    ) -> XYData[_TOtherData]: ...
+    ) -> XYData[TOtherData]: ...
 
     @overload
     @classmethod
@@ -117,13 +117,13 @@ class XYData(Generic[_TData]):
         cls,
         x_array: npt.NDArray[Any] | Sequence[Any],
         y_array: npt.NDArray[Any] | Sequence[Any],
-        dtype: type[_TOtherData] | np.dtype[_TOtherData],
+        dtype: type[TOtherData] | np.dtype[TOtherData],
         *,
         x_units: str = ...,
         y_units: str = ...,
         copy: bool = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
-    ) -> XYData[_TOtherData]: ...
+    ) -> XYData[TOtherData]: ...
 
     @overload
     @classmethod
@@ -201,9 +201,9 @@ class XYData(Generic[_TData]):
         )
 
     def __init__(
-        self: XYData[_TOtherData],
-        x_values: npt.NDArray[_TOtherData],
-        y_values: npt.NDArray[_TOtherData],
+        self: XYData[TOtherData],
+        x_values: npt.NDArray[TOtherData],
+        y_values: npt.NDArray[TOtherData],
         *,
         x_units: str = "",
         y_units: str = "",
@@ -255,8 +255,8 @@ class XYData(Generic[_TData]):
 
     def _init_with_provided_arrays(
         self,
-        x_values: npt.NDArray[_TData],
-        y_values: npt.NDArray[_TData],
+        x_values: npt.NDArray[TData],
+        y_values: npt.NDArray[TData],
         dtype: npt.DTypeLike = None,
     ) -> None:
         if not isinstance(x_values, np.ndarray):
@@ -289,12 +289,12 @@ class XYData(Generic[_TData]):
         self._y_data = y_values
 
     @property
-    def x_data(self) -> npt.NDArray[_TData]:
+    def x_data(self) -> npt.NDArray[TData]:
         """The x-axis data of this XYData."""
         return self._x_data
 
     @property
-    def y_data(self) -> npt.NDArray[_TData]:
+    def y_data(self) -> npt.NDArray[TData]:
         """The y-axis data of this XYData."""
         return self._y_data
 
@@ -325,7 +325,7 @@ class XYData(Generic[_TData]):
         self._extended_properties[_UNIT_DESCRIPTION_Y] = value
 
     @property
-    def dtype(self) -> np.dtype[_TData]:
+    def dtype(self) -> np.dtype[TData]:
         """The NumPy dtype for the XYData."""
         return self._x_data.dtype
 
@@ -381,7 +381,7 @@ class XYData(Generic[_TData]):
         return f"[{x_str}, {y_str}]"
 
     @staticmethod
-    def _format_values_with_units(values: npt.NDArray[_TData], units: str) -> str:
+    def _format_values_with_units(values: npt.NDArray[TData], units: str) -> str:
         if units:
             values_with_units = [f"{value} {units}" for value in values]
             values_str = ", ".join(values_with_units)
