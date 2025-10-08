@@ -354,8 +354,6 @@ class XYData(Generic[TData]):
         """Return object state for pickling."""
         ctor_args = (self._x_data, self._y_data)
         ctor_kwargs: dict[str, Any] = {
-            "x_units": self.x_units,
-            "y_units": self.y_units,
             "extended_properties": self._extended_properties,
             "copy_extended_properties": False,
         }
