@@ -46,7 +46,7 @@ def test___mismatched_dtypes___create___raises_type_error() -> None:
     with pytest.raises(TypeError) as exc:
         _ = XYData(data, data2)
 
-    assert exc.value.args[0].startswith("x_values and y_values must have the same type.")
+    assert exc.value.args[0].startswith("x_data and y_data must have the same type.")
 
 
 @pytest.mark.parametrize(

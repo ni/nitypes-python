@@ -193,8 +193,8 @@ class XYData(Generic[TData]):
             raise invalid_arg_type("input array", "one-dimensional array or sequence", y_array)
 
         return cls(
-            x_values=_np_asarray(x_array, dtype, copy=copy),
-            y_values=_np_asarray(y_array, dtype, copy=copy),
+            x_data=_np_asarray(x_array, dtype, copy=copy),
+            y_data=_np_asarray(y_array, dtype, copy=copy),
             x_units=x_units,
             y_units=y_units,
             extended_properties=extended_properties,
@@ -202,8 +202,8 @@ class XYData(Generic[TData]):
 
     def __init__(
         self: XYData[TOtherData],
-        x_values: npt.NDArray[TOtherData],
-        y_values: npt.NDArray[TOtherData],
+        x_data: npt.NDArray[TOtherData],
+        y_data: npt.NDArray[TOtherData],
         *,
         x_units: str = "",
         y_units: str = "",
@@ -213,14 +213,14 @@ class XYData(Generic[TData]):
         """Initialize a new XYData.
 
         Args:
-            x_values: A NumPy ndarray to use for x-axis data storage. The XYData takes ownership
+            x_data: A NumPy ndarray to use for x-axis data storage. The XYData takes ownership
                 of this array. If not specified, an ndarray is created based on the specified
                 dtype and capacity.
-            y_values: A NumPy ndarray to use for y-axis data storage. The XYData takes ownership
+            y_data: A NumPy ndarray to use for y-axis data storage. The XYData takes ownership
                 of this array. If not specified, an ndarray is created based on the specified
                 dtype and capacity.
-            x_units: The units string associated with x_values.
-            y_units: The units string associated with y_values.
+            x_units: The units string associated with x_data.
+            y_units: The units string associated with y_data.
             extended_properties: The extended properties of the XYData.
             copy_extended_properties: Specifies whether to copy the extended properties or take
                 ownership.
@@ -228,17 +228,17 @@ class XYData(Generic[TData]):
         Returns:
             An XYData object.
         """
-        if x_values.dtype != y_values.dtype:
-            raise TypeError("x_values and y_values must have the same type.")
+        if x_data.dtype != y_data.dtype:
+            raise TypeError("x_data and y_data must have the same type.")
 
-        if isinstance(x_values, np.ndarray) and isinstance(y_values, np.ndarray):
+        if isinstance(x_data, np.ndarray) and isinstance(y_data, np.ndarray):
             self._init_with_provided_arrays(
-                x_values,
-                y_values,
-                x_values.dtype,
+                x_data,
+                y_data,
+                x_data.dtype,
             )
         else:
-            raise invalid_arg_type("raw data", "NumPy ndarray", x_values)
+            raise invalid_arg_type("raw data", "NumPy ndarray", x_data)
 
         if copy_extended_properties or not isinstance(
             extended_properties, ExtendedPropertyDictionary
@@ -255,38 +255,38 @@ class XYData(Generic[TData]):
 
     def _init_with_provided_arrays(
         self,
-        x_values: npt.NDArray[TData],
-        y_values: npt.NDArray[TData],
+        x_data: npt.NDArray[TData],
+        y_data: npt.NDArray[TData],
         dtype: npt.DTypeLike = None,
     ) -> None:
-        if not isinstance(x_values, np.ndarray):
-            raise invalid_arg_type("x-axis input array", "one-dimensional array", x_values)
-        if not isinstance(y_values, np.ndarray):
-            raise invalid_arg_type("y-axis input array", "one-dimensional array", y_values)
-        if x_values.ndim != 1:
-            raise invalid_array_ndim("x-axis input array", "one-dimensional array", x_values.ndim)
-        if y_values.ndim != 1:
-            raise invalid_array_ndim("y-axis input array", "one-dimensional array", y_values.ndim)
-        if len(x_values) != len(y_values):
-            raise ValueError("x_values and y_values must be the same length.")
+        if not isinstance(x_data, np.ndarray):
+            raise invalid_arg_type("x-axis input array", "one-dimensional array", x_data)
+        if not isinstance(y_data, np.ndarray):
+            raise invalid_arg_type("y-axis input array", "one-dimensional array", y_data)
+        if x_data.ndim != 1:
+            raise invalid_array_ndim("x-axis input array", "one-dimensional array", x_data.ndim)
+        if y_data.ndim != 1:
+            raise invalid_array_ndim("y-axis input array", "one-dimensional array", y_data.ndim)
+        if len(x_data) != len(y_data):
+            raise ValueError("x_data and y_data must be the same length.")
 
         if dtype is None:
-            if x_values.dtype != y_values.dtype:
-                raise TypeError("x_values and y_values must be the same type.")
-            dtype = x_values.dtype
+            if x_data.dtype != y_data.dtype:
+                raise TypeError("x_data and y_data must be the same type.")
+            dtype = x_data.dtype
 
-        if dtype != x_values.dtype:
-            raise create_datatype_mismatch_error(
-                "input array", x_values.dtype, "requested", np.dtype(dtype)
-            )
-        if dtype != y_values.dtype:
-            raise create_datatype_mismatch_error(
-                "input array", y_values.dtype, "requested", np.dtype(dtype)
-            )
         validate_dtype(dtype, _DATA_DTYPES)
+        if dtype != x_data.dtype:
+            raise create_datatype_mismatch_error(
+                "input array", x_data.dtype, "requested", np.dtype(dtype)
+            )
+        if dtype != y_data.dtype:
+            raise create_datatype_mismatch_error(
+                "input array", y_data.dtype, "requested", np.dtype(dtype)
+            )
 
-        self._x_data = x_values
-        self._y_data = y_values
+        self._x_data = x_data
+        self._y_data = y_data
 
     @property
     def x_data(self) -> npt.NDArray[TData]:
