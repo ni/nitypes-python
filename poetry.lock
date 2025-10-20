@@ -500,14 +500,14 @@ setuptools = "*"
 
 [[package]]
 name = "hightime"
-version = "0.3.0.dev1"
+version = "1.0.0"
 description = "Hightime Python API"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "hightime-0.3.0.dev1-py3-none-any.whl", hash = "sha256:33b05864264655929f6ecaade8a1f27070f1e3a2028e304e051825cbe6a505c9"},
-    {file = "hightime-0.3.0.dev1.tar.gz", hash = "sha256:e1ad569c034b61be5b906a5dc4b226af6b6fe4985f2550edc8b575a4df5fdaf0"},
+    {file = "hightime-1.0.0-py3-none-any.whl", hash = "sha256:ba86d42976c36451b14e11c736e61f296f9f00dbb79c8488e18d70c6b2dbb395"},
+    {file = "hightime-1.0.0.tar.gz", hash = "sha256:480d2a03e2c3ed44916d2406d40ab6d10a276ed7f101619fc3fcc1e00c46aacf"},
 ]
 
 [[package]]
