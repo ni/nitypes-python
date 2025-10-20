@@ -11,7 +11,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping, MutableSequence
 from typing import TYPE_CHECKING, overload, Any, Union
 
-from typing_extensions import TypeVar, final, override
+from typing_extensions import Self, TypeVar, final, override
 
 from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform.typing import ExtendedPropertyValue
@@ -36,13 +36,13 @@ class Vector(MutableSequence[TScalar]):
     To construct a vector data object, use the :class:`Vector` class:
 
     >>> Vector([False, True])
-    nitypes.vector.Vector(values=[False, True], units='')
+    nitypes.vector.Vector(values=[False, True], extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
     >>> Vector([0, 1, 2])
-    nitypes.vector.Vector(values=[0, 1, 2], units='')
+    nitypes.vector.Vector(values=[0, 1, 2], extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
     >>> Vector([5.0, 6.0], 'volts')
-    nitypes.vector.Vector(values=[5.0, 6.0], units='volts')
+    nitypes.vector.Vector(values=[5.0, 6.0], extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'volts'}))
     >>> Vector(["one", "two"], "volts")
-    nitypes.vector.Vector(values=['one', 'two'], units='volts')
+    nitypes.vector.Vector(values=['one', 'two'], extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'volts'}))
     """
 
     __slots__ = [
@@ -201,11 +201,24 @@ class Vector(MutableSequence[TScalar]):
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        return (self.__class__, (self._values, self.units))
+        ctor_args = (self._values, self.units)
+        ctor_kwargs: dict[str, Any] = {
+            "value_type": self._value_type,
+            "extended_properties": self._extended_properties,
+            "copy_extended_properties": False,
+        }
+        return (self.__class__._unpickle, (ctor_args, ctor_kwargs))
+
+    @classmethod
+    def _unpickle(cls, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Self:
+        return cls(*args, **kwargs)
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        args = [f"values={self._values!r}", f"units={self.units!r}"]
+        args = [
+            f"values={self._values!r}",
+            f"extended_properties={self.extended_properties!r}",
+        ]
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
     def __str__(self) -> str:

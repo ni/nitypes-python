@@ -182,14 +182,46 @@ def test___different_units___comparison___throws_exception() -> None:
 @pytest.mark.parametrize(
     "value, expected_repr",
     [
-        (Scalar(False), "nitypes.scalar.Scalar(value=False, units='')"),
-        (Scalar(10), "nitypes.scalar.Scalar(value=10, units='')"),
-        (Scalar(20.0), "nitypes.scalar.Scalar(value=20.0, units='')"),
-        (Scalar("value"), "nitypes.scalar.Scalar(value='value', units='')"),
-        (Scalar(False, "amps"), "nitypes.scalar.Scalar(value=False, units='amps')"),
-        (Scalar(10, "volts"), "nitypes.scalar.Scalar(value=10, units='volts')"),
-        (Scalar(20.0, "watts"), "nitypes.scalar.Scalar(value=20.0, units='watts')"),
-        (Scalar("value", ""), "nitypes.scalar.Scalar(value='value', units='')"),
+        (
+            Scalar(False),
+            "nitypes.scalar.Scalar(value=False, extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
+        ),
+        (
+            Scalar(10),
+            "nitypes.scalar.Scalar(value=10, extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
+        ),
+        (
+            Scalar(20.0),
+            "nitypes.scalar.Scalar(value=20.0, extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
+        ),
+        (
+            Scalar("value"),
+            "nitypes.scalar.Scalar(value='value', extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
+        ),
+        (
+            Scalar(False, "amps"),
+            "nitypes.scalar.Scalar(value=False, extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'amps'}))",
+        ),
+        (
+            Scalar(10, "volts"),
+            "nitypes.scalar.Scalar(value=10, extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'volts'}))",
+        ),
+        (
+            Scalar(20.0, "watts"),
+            "nitypes.scalar.Scalar(value=20.0, extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'watts'}))",
+        ),
+        (
+            Scalar("value", ""),
+            "nitypes.scalar.Scalar(value='value', ""extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
+        ),
     ],
 )
 def test___various_values___repr___looks_ok(value: Scalar[Any], expected_repr: str) -> None:

@@ -293,14 +293,46 @@ def test___different_units___comparison___not_equal() -> None:
 @pytest.mark.parametrize(
     "value, expected_repr",
     [
-        (Vector([False, True]), "nitypes.vector.Vector(values=[False, True], units='')"),
-        (Vector([10, 20]), "nitypes.vector.Vector(values=[10, 20], units='')"),
-        (Vector([20.0, 20.1]), "nitypes.vector.Vector(values=[20.0, 20.1], units='')"),
-        (Vector(["a", "b"]), "nitypes.vector.Vector(values=['a', 'b'], units='')"),
-        (Vector([False, True], "f"), "nitypes.vector.Vector(values=[False, True], units='f')"),
-        (Vector([10, 20], "volts"), "nitypes.vector.Vector(values=[10, 20], units='volts')"),
-        (Vector([20.0, 20.1], "w"), "nitypes.vector.Vector(values=[20.0, 20.1], units='w')"),
-        (Vector(["a", "b"], ""), "nitypes.vector.Vector(values=['a', 'b'], units='')"),
+        (
+            Vector([False, True]),
+            "nitypes.vector.Vector(values=[False, True], extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
+        ),
+        (
+            Vector([10, 20]),
+            "nitypes.vector.Vector(values=[10, 20], extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
+        ),
+        (
+            Vector([20.0, 20.1]),
+            "nitypes.vector.Vector(values=[20.0, 20.1], extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
+        ),
+        (
+            Vector(["a", "b"]),
+            "nitypes.vector.Vector(values=['a', 'b'], extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
+        ),
+        (
+            Vector([False, True], "f"),
+            "nitypes.vector.Vector(values=[False, True], extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'f'}))",
+        ),
+        (
+            Vector([10, 20], "volts"),
+            "nitypes.vector.Vector(values=[10, 20], extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'volts'}))",
+        ),
+        (
+            Vector([20.0, 20.1], "w"),
+            "nitypes.vector.Vector(values=[20.0, 20.1], extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'w'}))",
+        ),
+        (
+            Vector(["a", "b"], ""),
+            "nitypes.vector.Vector(values=['a', 'b'], extended_properties="
+            "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
+        ),
     ],
 )
 def test___various_values___repr___looks_ok(value: Vector[Any], expected_repr: str) -> None:

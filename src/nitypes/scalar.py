@@ -12,7 +12,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Generic, Union
 
-from typing_extensions import TypeVar, final
+from typing_extensions import TypeVar, Self, final
 
 from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform.typing import ExtendedPropertyValue
@@ -38,13 +38,13 @@ class Scalar(Generic[TScalar_co]):
     To construct a scalar data object, use the :class:`Scalar` class:
 
     >>> Scalar(False)
-    nitypes.scalar.Scalar(value=False, units='')
+    nitypes.scalar.Scalar(value=False, extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
     >>> Scalar(0)
-    nitypes.scalar.Scalar(value=0, units='')
+    nitypes.scalar.Scalar(value=0, extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
     >>> Scalar(5.0, 'volts')
-    nitypes.scalar.Scalar(value=5.0, units='volts')
+    nitypes.scalar.Scalar(value=5.0, extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'volts'}))
     >>> Scalar("value", "volts")
-    nitypes.scalar.Scalar(value='value', units='volts')
+    nitypes.scalar.Scalar(value='value', extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'volts'}))
 
     Class members
     ^^^^^^^^^^^^^
@@ -179,11 +179,23 @@ class Scalar(Generic[TScalar_co]):
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        return (self.__class__, (self.value, self.units))
+        ctor_args = (self.value, self.units)
+        ctor_kwargs: dict[str, Any] = {
+            "extended_properties": self._extended_properties,
+            "copy_extended_properties": False,
+        }
+        return (self.__class__._unpickle, (ctor_args, ctor_kwargs))
+
+    @classmethod
+    def _unpickle(cls, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Self:
+        return cls(*args, **kwargs)
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        args = [f"value={self.value!r}", f"units={self.units!r}"]
+        args = [
+            f"value={self.value!r}",
+            f"extended_properties={self.extended_properties!r}",
+        ]
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
     def __str__(self) -> str:
