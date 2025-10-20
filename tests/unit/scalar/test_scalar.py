@@ -244,12 +244,14 @@ def test___scalar_with_units___set_units___units_updated_correctly() -> None:
         Scalar(10, "volts"),
         Scalar(20.0, "watts"),
         Scalar("value", ""),
+        Scalar(10, "Volts", extended_properties={"one": 1})
     ],
 )
 def test___various_values___copy___makes_copy(value: Scalar[TScalar_co]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
+    assert new_value.extended_properties == value.extended_properties
 
 
 @pytest.mark.parametrize(
@@ -263,12 +265,15 @@ def test___various_values___copy___makes_copy(value: Scalar[TScalar_co]) -> None
         Scalar(10, "volts"),
         Scalar(20.0, "watts"),
         Scalar("value", ""),
+        Scalar(10, "Volts", extended_properties={"one": 1})
     ],
 )
 def test___various_values___pickle_unpickle___makes_copy(value: Scalar[TScalar_co]) -> None:
     new_value = pickle.loads(pickle.dumps(value))
+    assert isinstance(new_value, Scalar)
     assert new_value is not value
     assert new_value == value
+    assert new_value.extended_properties == value.extended_properties
 
 
 def test___scalar___pickle___references_public_modules() -> None:

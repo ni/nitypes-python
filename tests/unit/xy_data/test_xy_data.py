@@ -407,12 +407,21 @@ def test___xy_data_with_units___set_units___units_updated_correctly() -> None:
         XYData.from_arrays_1d([20.0, 20.1], [20.3, 20.4], np.float64),
         XYData.from_arrays_1d([10, 20], [30, 40], np.int32, x_units="A", y_units="B"),
         XYData.from_arrays_1d([20.0, 20.1], [20.3, 20.4], np.float64, x_units="C", y_units="D"),
+        XYData.from_arrays_1d(
+            [20.0, 20.1],
+            [20.3, 20.4],
+            np.float64,
+            x_units="C",
+            y_units="D",
+            extended_properties={"one": 1}
+        ),
     ],
 )
 def test___various_values___copy___makes_copy(value: XYData[TData]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
+    assert new_value.extended_properties == value.extended_properties
 
 
 @pytest.mark.parametrize(

@@ -8,12 +8,13 @@ Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and 
 
 from __future__ import annotations
 
-from collections.abc import Iterable, MutableSequence
+from collections.abc import Iterable, Mapping, MutableSequence
 from typing import TYPE_CHECKING, overload, Any, Union
 
 from typing_extensions import TypeVar, final, override
 
 from nitypes._exceptions import invalid_arg_type
+from nitypes.waveform.typing import ExtendedPropertyValue
 from nitypes.waveform._extended_properties import UNIT_DESCRIPTION
 
 if TYPE_CHECKING:
@@ -60,6 +61,8 @@ class Vector(MutableSequence[TScalar]):
         units: str = "",
         *,
         value_type: type[TScalar] | None = None,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        copy_extended_properties: bool = True,
     ) -> None:
         """Initialize a new vector.
 
@@ -94,8 +97,15 @@ class Vector(MutableSequence[TScalar]):
             raise invalid_arg_type("units", "str", units)
 
         self._values = list(values)
-        self._extended_properties = ExtendedPropertyDictionary()
-        self._extended_properties[UNIT_DESCRIPTION] = units
+        if copy_extended_properties or not isinstance(
+            extended_properties, ExtendedPropertyDictionary
+        ):
+            extended_properties = ExtendedPropertyDictionary(extended_properties)
+        self._extended_properties = extended_properties
+        # If units are not already in extended properties, set them.
+        # If the caller specifies a non-blank units string, overwrite the existing entry.
+        if UNIT_DESCRIPTION not in self._extended_properties or units:
+            self._extended_properties[UNIT_DESCRIPTION] = units
 
     @property
     def units(self) -> str:

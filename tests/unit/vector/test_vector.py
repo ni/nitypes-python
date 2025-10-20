@@ -359,12 +359,14 @@ def test___vector_with_units___set_units___units_updated_correctly() -> None:
         Vector([10, 20], "volts"),
         Vector([20.0, 20.1], "watts"),
         Vector(["a", "b"], ""),
+        Vector([10, 20], "volts", extended_properties={"one": 1}),
     ],
 )
 def test___various_values___copy___makes_copy(value: Vector[TScalar]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
+    assert new_value.extended_properties == value.extended_properties
 
 
 @pytest.mark.parametrize(
@@ -378,12 +380,15 @@ def test___various_values___copy___makes_copy(value: Vector[TScalar]) -> None:
         Vector([10, 20], "volts"),
         Vector([20.0, 20.1], "watts"),
         Vector(["a", "b"], ""),
+        Vector([10, 20], "volts", extended_properties={"one": 1}),
     ],
 )
 def test___various_values___pickle_unpickle___makes_copy(value: Vector[TScalar]) -> None:
     new_value = pickle.loads(pickle.dumps(value))
+    assert isinstance(new_value, Vector)
     assert new_value is not value
     assert new_value == value
+    assert new_value.extended_properties == value.extended_properties
 
 
 def test___vector___pickle___references_public_modules() -> None:

@@ -9,11 +9,13 @@ Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and 
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Generic, Union
 
 from typing_extensions import TypeVar, final
 
 from nitypes._exceptions import invalid_arg_type
+from nitypes.waveform.typing import ExtendedPropertyValue
 from nitypes.waveform._extended_properties import UNIT_DESCRIPTION
 
 if TYPE_CHECKING:
@@ -60,12 +62,18 @@ class Scalar(Generic[TScalar_co]):
         self,
         value: TScalar_co,
         units: str = "",
+        *,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        copy_extended_properties: bool = True,
     ) -> None:
         """Initialize a new scalar.
 
         Args:
             value: The scalar data to store in this object.
             units: The units string associated with this data.
+            extended_properties: The extended properties of the Scalar.
+            copy_extended_properties: Specifies whether to copy the extended properties or take
+                ownership.
 
         Returns:
             A scalar data object.
@@ -77,8 +85,15 @@ class Scalar(Generic[TScalar_co]):
             raise invalid_arg_type("units", "str", units)
 
         self._value = value
-        self._extended_properties = ExtendedPropertyDictionary()
-        self._extended_properties[UNIT_DESCRIPTION] = units
+        if copy_extended_properties or not isinstance(
+            extended_properties, ExtendedPropertyDictionary
+        ):
+            extended_properties = ExtendedPropertyDictionary(extended_properties)
+        self._extended_properties = extended_properties
+        # If units are not already in extended properties, set them.
+        # If the caller specifies a non-blank units string, overwrite the existing entry.
+        if UNIT_DESCRIPTION not in self._extended_properties or units:
+            self._extended_properties[UNIT_DESCRIPTION] = units
 
     @property
     def value(self) -> TScalar_co:
