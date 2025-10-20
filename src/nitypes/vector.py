@@ -9,13 +9,13 @@ Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and 
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, MutableSequence
-from typing import TYPE_CHECKING, overload, Any, Union
+from typing import TYPE_CHECKING, Any, Union, overload
 
 from typing_extensions import Self, TypeVar, final, override
 
 from nitypes._exceptions import invalid_arg_type
-from nitypes.waveform.typing import ExtendedPropertyValue
 from nitypes.waveform._extended_properties import UNIT_DESCRIPTION
+from nitypes.waveform.typing import ExtendedPropertyValue
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
@@ -36,13 +36,19 @@ class Vector(MutableSequence[TScalar]):
     To construct a vector data object, use the :class:`Vector` class:
 
     >>> Vector([False, True])
-    nitypes.vector.Vector(values=[False, True], extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
+    nitypes.vector.Vector(values=[False, True],
+    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
     >>> Vector([0, 1, 2])
-    nitypes.vector.Vector(values=[0, 1, 2], extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
+    nitypes.vector.Vector(values=[0, 1, 2],
+    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
     >>> Vector([5.0, 6.0], 'volts')
-    nitypes.vector.Vector(values=[5.0, 6.0], extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'volts'}))
+    nitypes.vector.Vector(values=[5.0, 6.0],
+    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription':
+    'volts'}))
     >>> Vector(["one", "two"], "volts")
-    nitypes.vector.Vector(values=['one', 'two'], extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'volts'}))
+    nitypes.vector.Vector(values=['one', 'two'],
+    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription':
+    'volts'}))
     """
 
     __slots__ = [

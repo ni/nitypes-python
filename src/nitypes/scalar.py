@@ -12,11 +12,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Generic, Union
 
-from typing_extensions import TypeVar, Self, final
+from typing_extensions import Self, TypeVar, final
 
 from nitypes._exceptions import invalid_arg_type
-from nitypes.waveform.typing import ExtendedPropertyValue
 from nitypes.waveform._extended_properties import UNIT_DESCRIPTION
+from nitypes.waveform.typing import ExtendedPropertyValue
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
@@ -38,13 +38,19 @@ class Scalar(Generic[TScalar_co]):
     To construct a scalar data object, use the :class:`Scalar` class:
 
     >>> Scalar(False)
-    nitypes.scalar.Scalar(value=False, extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
+    nitypes.scalar.Scalar(value=False,
+    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
     >>> Scalar(0)
-    nitypes.scalar.Scalar(value=0, extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
+    nitypes.scalar.Scalar(value=0,
+    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
     >>> Scalar(5.0, 'volts')
-    nitypes.scalar.Scalar(value=5.0, extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'volts'}))
+    nitypes.scalar.Scalar(value=5.0,
+    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription':
+    'volts'}))
     >>> Scalar("value", "volts")
-    nitypes.scalar.Scalar(value='value', extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': 'volts'}))
+    nitypes.scalar.Scalar(value='value',
+    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription':
+    'volts'}))
 
     Class members
     ^^^^^^^^^^^^^

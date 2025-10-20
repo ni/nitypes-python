@@ -13,7 +13,7 @@ from packaging.version import Version
 from typing_extensions import assert_type
 
 from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
-from nitypes.xy_data import _UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y, XYData, TData
+from nitypes.xy_data import _UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y, TData, XYData
 
 
 ###############################################################################
@@ -413,7 +413,7 @@ def test___xy_data_with_units___set_units___units_updated_correctly() -> None:
             np.float64,
             x_units="C",
             y_units="D",
-            extended_properties={"one": 1}
+            extended_properties={"one": 1},
         ),
     ],
 )

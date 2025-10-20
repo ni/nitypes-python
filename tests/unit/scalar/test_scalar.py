@@ -219,7 +219,8 @@ def test___different_units___comparison___throws_exception() -> None:
         ),
         (
             Scalar("value", ""),
-            "nitypes.scalar.Scalar(value='value', ""extended_properties="
+            "nitypes.scalar.Scalar(value='value', "
+            "extended_properties="
             "nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))",
         ),
     ],
@@ -276,7 +277,7 @@ def test___scalar_with_units___set_units___units_updated_correctly() -> None:
         Scalar(10, "volts"),
         Scalar(20.0, "watts"),
         Scalar("value", ""),
-        Scalar(10, "Volts", extended_properties={"one": 1})
+        Scalar(10, "Volts", extended_properties={"one": 1}),
     ],
 )
 def test___various_values___copy___makes_copy(value: Scalar[TScalar_co]) -> None:
@@ -297,7 +298,7 @@ def test___various_values___copy___makes_copy(value: Scalar[TScalar_co]) -> None
         Scalar(10, "volts"),
         Scalar(20.0, "watts"),
         Scalar("value", ""),
-        Scalar(10, "Volts", extended_properties={"one": 1})
+        Scalar(10, "Volts", extended_properties={"one": 1}),
     ],
 )
 def test___various_values___pickle_unpickle___makes_copy(value: Scalar[TScalar_co]) -> None:
