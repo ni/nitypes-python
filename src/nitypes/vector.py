@@ -36,19 +36,13 @@ class Vector(MutableSequence[TScalar]):
     To construct a vector data object, use the :class:`Vector` class:
 
     >>> Vector([False, True])
-    nitypes.vector.Vector(values=[False, True],
-    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
+    nitypes.vector.Vector(values=[False, True])
     >>> Vector([0, 1, 2])
-    nitypes.vector.Vector(values=[0, 1, 2],
-    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
+    nitypes.vector.Vector(values=[0, 1, 2])
     >>> Vector([5.0, 6.0], 'volts')
-    nitypes.vector.Vector(values=[5.0, 6.0],
-    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription':
-    'volts'}))
+    nitypes.vector.Vector(values=[5.0, 6.0], units='volts')
     >>> Vector(["one", "two"], "volts")
-    nitypes.vector.Vector(values=['one', 'two'],
-    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription':
-    'volts'}))
+    nitypes.vector.Vector(values=['one', 'two'], units='volts')
     """
 
     __slots__ = [
@@ -215,7 +209,7 @@ class Vector(MutableSequence[TScalar]):
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        ctor_args = (self._values, self.units)
+        ctor_args = (self._values,)
         ctor_kwargs: dict[str, Any] = {
             "value_type": self._value_type,
             "extended_properties": self._extended_properties,
@@ -229,10 +223,15 @@ class Vector(MutableSequence[TScalar]):
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        args = [
-            f"values={self._values!r}",
-            f"extended_properties={self.extended_properties!r}",
-        ]
+        args = [f"values={self._values!r}"]
+
+        if self.units:
+            args.append(f"units={self.units!r}")
+
+        # Only display the extended properties if non-units entries are specified.
+        if any([key for key in self.extended_properties.keys() if key != UNIT_DESCRIPTION]):
+            args.append(f"extended_properties={self.extended_properties!r}")
+
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
     def __str__(self) -> str:

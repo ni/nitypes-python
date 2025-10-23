@@ -38,19 +38,13 @@ class Scalar(Generic[TScalar_co]):
     To construct a scalar data object, use the :class:`Scalar` class:
 
     >>> Scalar(False)
-    nitypes.scalar.Scalar(value=False,
-    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
+    nitypes.scalar.Scalar(value=False)
     >>> Scalar(0)
-    nitypes.scalar.Scalar(value=0,
-    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription': ''}))
+    nitypes.scalar.Scalar(value=0)
     >>> Scalar(5.0, 'volts')
-    nitypes.scalar.Scalar(value=5.0,
-    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription':
-    'volts'}))
+    nitypes.scalar.Scalar(value=5.0, units='volts')
     >>> Scalar("value", "volts")
-    nitypes.scalar.Scalar(value='value',
-    extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_UnitDescription':
-    'volts'}))
+    nitypes.scalar.Scalar(value='value', units='volts')
 
     Class members
     ^^^^^^^^^^^^^
@@ -190,7 +184,7 @@ class Scalar(Generic[TScalar_co]):
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        ctor_args = (self.value, self.units)
+        ctor_args = (self.value,)
         ctor_kwargs: dict[str, Any] = {
             "extended_properties": self._extended_properties,
             "copy_extended_properties": False,
@@ -203,10 +197,15 @@ class Scalar(Generic[TScalar_co]):
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        args = [
-            f"value={self.value!r}",
-            f"extended_properties={self.extended_properties!r}",
-        ]
+        args = [f"value={self.value!r}"]
+
+        if self.units:
+            args.append(f"units={self.units!r}")
+
+        # Only display the extended properties if non-units entries are specified.
+        if any([key for key in self.extended_properties.keys() if key != UNIT_DESCRIPTION]):
+            args.append(f"extended_properties={self.extended_properties!r}")
+
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
     def __str__(self) -> str:
