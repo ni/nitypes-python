@@ -39,6 +39,38 @@ def test___data_dtype_and_units___create___creates_xydata_with_data_dtype_and_un
     assert xydata.y_units == "seconds"
 
 
+def test___both_x_units_specified_unequal__create___raises_value_error() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    with pytest.raises(ValueError) as exc:
+        _ = XYData(data, data, x_units="Volts", extended_properties={_UNIT_DESCRIPTION_X: "Amps"})
+
+    assert exc.value.args[0].startswith(
+        "The specified x_units input does not match the units specified in extended_properties."
+    )
+
+
+def test___both_y_units_specified_unequal__create___raises_value_error() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    with pytest.raises(ValueError) as exc:
+        _ = XYData(data, data, y_units="Volts", extended_properties={_UNIT_DESCRIPTION_Y: "Amps"})
+
+    assert exc.value.args[0].startswith(
+        "The specified y_units input does not match the units specified in extended_properties."
+    )
+
+
+def test___x_units_only_specified_in_extended_properties__create___creates_with_units() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    xydata = XYData(data, data, extended_properties={_UNIT_DESCRIPTION_X: "Volts"})
+    assert xydata.x_units == "Volts"
+
+
+def test___y_units_only_specified_in_extended_properties__create___creates_with_units() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    xydata = XYData(data, data, extended_properties={_UNIT_DESCRIPTION_Y: "Volts"})
+    assert xydata.y_units == "Volts"
+
+
 def test___mismatched_dtypes___create___raises_type_error() -> None:
     data = np.array([1, 2, 3, 4, 5], np.int32)
     data2 = np.array([1, 2, 3, 4, 5], np.float64)

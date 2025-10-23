@@ -96,10 +96,15 @@ class Scalar(Generic[TScalar_co]):
         ):
             extended_properties = ExtendedPropertyDictionary(extended_properties)
         self._extended_properties = extended_properties
+
         # If units are not already in extended properties, set them.
-        # If the caller specifies a non-blank units string, overwrite the existing entry.
-        if UNIT_DESCRIPTION not in self._extended_properties or units:
+        if UNIT_DESCRIPTION not in self._extended_properties:
             self._extended_properties[UNIT_DESCRIPTION] = units
+        elif units and units != self._extended_properties.get(UNIT_DESCRIPTION):
+            raise ValueError(
+                "The specified units input does not match the units specified in "
+                "extended_properties."
+            )
 
     @property
     def value(self) -> TScalar_co:

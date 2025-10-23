@@ -79,6 +79,20 @@ def test___data_value_and_units___create___creates_scalar_data_with_data_and_uni
     assert data.units == units
 
 
+def test___both_units_specified_unequal__create___raises_value_error() -> None:
+    with pytest.raises(ValueError) as exc:
+        _ = Vector([10], "Volts", extended_properties={UNIT_DESCRIPTION: "Amps"})
+
+    assert exc.value.args[0].startswith(
+        "The specified units input does not match the units specified in extended_properties."
+    )
+
+
+def test___units_only_specified_in_extended_properties__create___creates_with_units() -> None:
+    data = Vector([10], extended_properties={UNIT_DESCRIPTION: "Volts"})
+    assert data.units == "Volts"
+
+
 @pytest.mark.parametrize("data_value", [[[1.0, 2.0]], [{"key", "value"}]])
 def test___invalid_data_value___create___raises_type_error(data_value: Any) -> None:
     with pytest.raises(TypeError) as exc:

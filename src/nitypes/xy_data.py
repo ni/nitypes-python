@@ -246,12 +246,23 @@ class XYData(Generic[TData]):
             extended_properties = ExtendedPropertyDictionary(extended_properties)
         self._extended_properties = extended_properties
 
-        # If x and y units are not already in extended properties, set them.
-        # If the caller specifies a non-blank x or y units, overwrite the existing entry.
-        if _UNIT_DESCRIPTION_X not in self._extended_properties or x_units:
+        # If x_units are not already in extended properties, set them.
+        if _UNIT_DESCRIPTION_X not in self._extended_properties:
             self._extended_properties[_UNIT_DESCRIPTION_X] = x_units
-        if _UNIT_DESCRIPTION_Y not in self._extended_properties or y_units:
+        elif x_units and x_units != self._extended_properties.get(_UNIT_DESCRIPTION_X):
+            raise ValueError(
+                "The specified x_units input does not match the units specified in "
+                "extended_properties."
+            )
+
+        # If y_units are not already in extended properties, set them.
+        if _UNIT_DESCRIPTION_Y not in self._extended_properties:
             self._extended_properties[_UNIT_DESCRIPTION_Y] = y_units
+        elif y_units and y_units != self._extended_properties.get(_UNIT_DESCRIPTION_Y):
+            raise ValueError(
+                "The specified y_units input does not match the units specified in "
+                "extended_properties."
+            )
 
     def _init_with_provided_arrays(
         self,
