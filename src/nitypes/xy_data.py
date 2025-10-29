@@ -382,11 +382,9 @@ class XYData(Generic[TData]):
 
         # Only display the extended properties if non-units entries are specified.
         if any(
-            [
                 key
                 for key in self.extended_properties.keys()
                 if key not in [_UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y]
-            ]
         ):
             args.append(f"extended_properties={self.extended_properties!r}")
 

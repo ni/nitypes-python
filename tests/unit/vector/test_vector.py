@@ -315,6 +315,12 @@ def test___different_units___comparison___not_equal() -> None:
         (Vector([10, 20], "volts"), "nitypes.vector.Vector(values=[10, 20], units='volts')"),
         (Vector([20.0, 20.1], "w"), "nitypes.vector.Vector(values=[20.0, 20.1], units='w')"),
         (Vector(["a", "b"], ""), "nitypes.vector.Vector(values=['a', 'b'])"),
+        (
+            Vector([10, 20], "volts", extended_properties={"Prop1": "Value1"}),
+            "nitypes.vector.Vector(values=[10, 20], units='volts', "
+            "extended_properties=nitypes.waveform.ExtendedPropertyDictionary("
+            "{'Prop1': 'Value1', 'NI_UnitDescription': 'volts'}))",
+        ),
     ],
 )
 def test___various_values___repr___looks_ok(value: Vector[Any], expected_repr: str) -> None:

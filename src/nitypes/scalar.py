@@ -203,7 +203,7 @@ class Scalar(Generic[TScalar_co]):
             args.append(f"units={self.units!r}")
 
         # Only display the extended properties if non-units entries are specified.
-        if any([key for key in self.extended_properties.keys() if key != UNIT_DESCRIPTION]):
+        if any(key for key in self.extended_properties.keys() if key != UNIT_DESCRIPTION):
             args.append(f"extended_properties={self.extended_properties!r}")
 
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"

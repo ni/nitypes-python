@@ -204,6 +204,12 @@ def test___different_units___comparison___throws_exception() -> None:
         (Scalar(10, "volts"), "nitypes.scalar.Scalar(value=10, units='volts')"),
         (Scalar(20.0, "watts"), "nitypes.scalar.Scalar(value=20.0, units='watts')"),
         (Scalar("value", ""), "nitypes.scalar.Scalar(value='value')"),
+        (
+            Scalar(10, units="volts", extended_properties={"Prop1": "Value1"}),
+            "nitypes.scalar.Scalar(value=10, units='volts', "
+            "extended_properties=nitypes.waveform.ExtendedPropertyDictionary("
+            "{'Prop1': 'Value1', 'NI_UnitDescription': 'volts'}))",
+        ),
     ],
 )
 def test___various_values___repr___looks_ok(value: Scalar[Any], expected_repr: str) -> None:
