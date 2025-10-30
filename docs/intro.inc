@@ -21,7 +21,7 @@ Operating System Support
 Python Version Support
 ----------------------
 
-``nitypes`` supports CPython 3.9+ and PyPy3.
+``nitypes`` supports CPython 3.10+ and PyPy3.
 
 Installation
 ------------
