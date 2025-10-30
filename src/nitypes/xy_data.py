@@ -71,20 +71,16 @@ class XYData(Generic[TData]):
     To construct an XYData object, use the :class:`XYData` class:
 
     >>> XYData(np.array([1.1], np.float64), np.array([4.1], np.float64))
-    nitypes.xy_data.XYData(x_data=array([1.1]), y_data=array([4.1]),
-    extended_properties={'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''})
+    nitypes.xy_data.XYData(x_data=array([1.1]), y_data=array([4.1]))
     >>> XYData(np.array([1, 2]), np.array([4, 5]), x_units="A", y_units="V")
-    nitypes.xy_data.XYData(x_data=array([1, 2]), y_data=array([4, 5]),
-    extended_properties={'NI_UnitDescription_X': 'A', 'NI_UnitDescription_Y': 'V'})
+    nitypes.xy_data.XYData(x_data=array([1, 2]), y_data=array([4, 5]), x_units='A', y_units='V')
 
     To construct an XYData object using built-in lists, use from_arrays_1d():
 
     >>> XYData.from_arrays_1d([1, 2], [5, 6], np.int32)
-    nitypes.xy_data.XYData(x_data=array([1, 2], dtype=int32), y_data=array([5, 6], dtype=int32),
-    extended_properties={'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''})
+    nitypes.xy_data.XYData(x_data=array([1, 2], dtype=int32), y_data=array([5, 6], dtype=int32))
     >>> XYData.from_arrays_1d([1.0, 1.1], [1.2, 1.3], np.float64)
-    nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]),
-    extended_properties={'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''})
+    nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]))
     """
 
     __slots__ = [
@@ -246,12 +242,23 @@ class XYData(Generic[TData]):
             extended_properties = ExtendedPropertyDictionary(extended_properties)
         self._extended_properties = extended_properties
 
-        # If x and y units are not already in extended properties, set them.
-        # If the caller specifies a non-blank x or y units, overwrite the existing entry.
-        if _UNIT_DESCRIPTION_X not in self._extended_properties or x_units:
+        # If x_units are not already in extended properties, set them.
+        if _UNIT_DESCRIPTION_X not in self._extended_properties:
             self._extended_properties[_UNIT_DESCRIPTION_X] = x_units
-        if _UNIT_DESCRIPTION_Y not in self._extended_properties or y_units:
+        elif x_units and x_units != self._extended_properties.get(_UNIT_DESCRIPTION_X):
+            raise ValueError(
+                "The specified x_units input does not match the units specified in "
+                "extended_properties."
+            )
+
+        # If y_units are not already in extended properties, set them.
+        if _UNIT_DESCRIPTION_Y not in self._extended_properties:
             self._extended_properties[_UNIT_DESCRIPTION_Y] = y_units
+        elif y_units and y_units != self._extended_properties.get(_UNIT_DESCRIPTION_Y):
+            raise ValueError(
+                "The specified y_units input does not match the units specified in "
+                "extended_properties."
+            )
 
     def _init_with_provided_arrays(
         self,
@@ -365,11 +372,22 @@ class XYData(Generic[TData]):
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        args = [
-            f"x_data={self.x_data!r}",
-            f"y_data={self.y_data!r}",
-            f"extended_properties={self._extended_properties._properties!r}",
-        ]
+        args = [f"x_data={self.x_data!r}", f"y_data={self.y_data!r}"]
+
+        if self.x_units:
+            args.append(f"x_units={self.x_units!r}")
+
+        if self.y_units:
+            args.append(f"y_units={self.y_units!r}")
+
+        # Only display the extended properties if non-units entries are specified.
+        if any(
+            key
+            for key in self.extended_properties.keys()
+            if key not in [_UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y]
+        ):
+            args.append(f"extended_properties={self.extended_properties!r}")
+
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
     def __str__(self) -> str:

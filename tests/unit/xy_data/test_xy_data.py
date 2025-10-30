@@ -13,7 +13,7 @@ from packaging.version import Version
 from typing_extensions import assert_type
 
 from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
-from nitypes.xy_data import _UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y, XYData, TData
+from nitypes.xy_data import _UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y, TData, XYData
 
 
 ###############################################################################
@@ -37,6 +37,38 @@ def test___data_dtype_and_units___create___creates_xydata_with_data_dtype_and_un
     assert_type(xydata, XYData[np.int32])
     assert xydata.x_units == "volts"
     assert xydata.y_units == "seconds"
+
+
+def test___both_x_units_specified_unequal__create___raises_value_error() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    with pytest.raises(ValueError) as exc:
+        _ = XYData(data, data, x_units="Volts", extended_properties={_UNIT_DESCRIPTION_X: "Amps"})
+
+    assert exc.value.args[0].startswith(
+        "The specified x_units input does not match the units specified in extended_properties."
+    )
+
+
+def test___both_y_units_specified_unequal__create___raises_value_error() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    with pytest.raises(ValueError) as exc:
+        _ = XYData(data, data, y_units="Volts", extended_properties={_UNIT_DESCRIPTION_Y: "Amps"})
+
+    assert exc.value.args[0].startswith(
+        "The specified y_units input does not match the units specified in extended_properties."
+    )
+
+
+def test___x_units_only_specified_in_extended_properties__create___creates_with_units() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    xydata = XYData(data, data, extended_properties={_UNIT_DESCRIPTION_X: "Volts"})
+    assert xydata.x_units == "Volts"
+
+
+def test___y_units_only_specified_in_extended_properties__create___creates_with_units() -> None:
+    data = np.array([1, 2, 3, 4, 5], np.int32)
+    xydata = XYData(data, data, extended_properties={_UNIT_DESCRIPTION_Y: "Volts"})
+    assert xydata.y_units == "Volts"
 
 
 def test___mismatched_dtypes___create___raises_type_error() -> None:
@@ -313,19 +345,16 @@ else:
         (
             XYData.from_arrays_1d([10], [20], np.int32),
             f"nitypes.xy_data.XYData(x_data=array([10]{_NDARRAY_DTYPE_INT32}), "
-            f"y_data=array([20]{_NDARRAY_DTYPE_INT32}), "
-            "extended_properties={'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''})",
+            f"y_data=array([20]{_NDARRAY_DTYPE_INT32}))",
         ),
         (
             XYData.from_arrays_1d([1.0, 1.1], [1.2, 1.3], np.float64),
-            "nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]), "
-            "extended_properties={'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''})",
+            "nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]))",
         ),
         (
             XYData.from_arrays_1d([10], [20], np.int32, x_units="volts", y_units="s"),
             f"nitypes.xy_data.XYData(x_data=array([10]{_NDARRAY_DTYPE_INT32}), "
-            f"y_data=array([20]{_NDARRAY_DTYPE_INT32}), "
-            "extended_properties={'NI_UnitDescription_X': 'volts', 'NI_UnitDescription_Y': 's'})",
+            f"y_data=array([20]{_NDARRAY_DTYPE_INT32}), x_units='volts', y_units='s')",
         ),
         (
             XYData.from_arrays_1d(
@@ -335,8 +364,8 @@ else:
                 extended_properties={"NI_ChannelName": "Dev1/ai0"},
             ),
             "nitypes.xy_data.XYData(x_data=array([1. , 1.1]), y_data=array([1.2, 1.3]), "
-            "extended_properties={'NI_ChannelName': 'Dev1/ai0', 'NI_UnitDescription_X': '', "
-            "'NI_UnitDescription_Y': ''})",
+            "extended_properties=nitypes.waveform.ExtendedPropertyDictionary({'NI_ChannelName': "
+            "'Dev1/ai0', 'NI_UnitDescription_X': '', 'NI_UnitDescription_Y': ''}))",
         ),
     ],
 )
@@ -407,12 +436,21 @@ def test___xy_data_with_units___set_units___units_updated_correctly() -> None:
         XYData.from_arrays_1d([20.0, 20.1], [20.3, 20.4], np.float64),
         XYData.from_arrays_1d([10, 20], [30, 40], np.int32, x_units="A", y_units="B"),
         XYData.from_arrays_1d([20.0, 20.1], [20.3, 20.4], np.float64, x_units="C", y_units="D"),
+        XYData.from_arrays_1d(
+            [20.0, 20.1],
+            [20.3, 20.4],
+            np.float64,
+            x_units="C",
+            y_units="D",
+            extended_properties={"one": 1},
+        ),
     ],
 )
 def test___various_values___copy___makes_copy(value: XYData[TData]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
+    assert new_value.extended_properties == value.extended_properties
 
 
 @pytest.mark.parametrize(

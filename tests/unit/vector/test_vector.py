@@ -79,6 +79,20 @@ def test___data_value_and_units___create___creates_scalar_data_with_data_and_uni
     assert data.units == units
 
 
+def test___both_units_specified_unequal__create___raises_value_error() -> None:
+    with pytest.raises(ValueError) as exc:
+        _ = Vector([10], "Volts", extended_properties={UNIT_DESCRIPTION: "Amps"})
+
+    assert exc.value.args[0].startswith(
+        "The specified units input does not match the units specified in extended_properties."
+    )
+
+
+def test___units_only_specified_in_extended_properties__create___creates_with_units() -> None:
+    data = Vector([10], extended_properties={UNIT_DESCRIPTION: "Volts"})
+    assert data.units == "Volts"
+
+
 @pytest.mark.parametrize("data_value", [[[1.0, 2.0]], [{"key", "value"}]])
 def test___invalid_data_value___create___raises_type_error(data_value: Any) -> None:
     with pytest.raises(TypeError) as exc:
@@ -293,14 +307,20 @@ def test___different_units___comparison___not_equal() -> None:
 @pytest.mark.parametrize(
     "value, expected_repr",
     [
-        (Vector([False, True]), "nitypes.vector.Vector(values=[False, True], units='')"),
-        (Vector([10, 20]), "nitypes.vector.Vector(values=[10, 20], units='')"),
-        (Vector([20.0, 20.1]), "nitypes.vector.Vector(values=[20.0, 20.1], units='')"),
-        (Vector(["a", "b"]), "nitypes.vector.Vector(values=['a', 'b'], units='')"),
+        (Vector([False, True]), "nitypes.vector.Vector(values=[False, True])"),
+        (Vector([10, 20]), "nitypes.vector.Vector(values=[10, 20])"),
+        (Vector([20.0, 20.1]), "nitypes.vector.Vector(values=[20.0, 20.1])"),
+        (Vector(["a", "b"]), "nitypes.vector.Vector(values=['a', 'b'])"),
         (Vector([False, True], "f"), "nitypes.vector.Vector(values=[False, True], units='f')"),
         (Vector([10, 20], "volts"), "nitypes.vector.Vector(values=[10, 20], units='volts')"),
         (Vector([20.0, 20.1], "w"), "nitypes.vector.Vector(values=[20.0, 20.1], units='w')"),
-        (Vector(["a", "b"], ""), "nitypes.vector.Vector(values=['a', 'b'], units='')"),
+        (Vector(["a", "b"], ""), "nitypes.vector.Vector(values=['a', 'b'])"),
+        (
+            Vector([10, 20], "volts", extended_properties={"Prop1": "Value1"}),
+            "nitypes.vector.Vector(values=[10, 20], units='volts', "
+            "extended_properties=nitypes.waveform.ExtendedPropertyDictionary("
+            "{'Prop1': 'Value1', 'NI_UnitDescription': 'volts'}))",
+        ),
     ],
 )
 def test___various_values___repr___looks_ok(value: Vector[Any], expected_repr: str) -> None:
@@ -359,12 +379,14 @@ def test___vector_with_units___set_units___units_updated_correctly() -> None:
         Vector([10, 20], "volts"),
         Vector([20.0, 20.1], "watts"),
         Vector(["a", "b"], ""),
+        Vector([10, 20], "volts", extended_properties={"one": 1}),
     ],
 )
 def test___various_values___copy___makes_copy(value: Vector[TScalar]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
+    assert new_value.extended_properties == value.extended_properties
 
 
 @pytest.mark.parametrize(
@@ -378,12 +400,15 @@ def test___various_values___copy___makes_copy(value: Vector[TScalar]) -> None:
         Vector([10, 20], "volts"),
         Vector([20.0, 20.1], "watts"),
         Vector(["a", "b"], ""),
+        Vector([10, 20], "volts", extended_properties={"one": 1}),
     ],
 )
 def test___various_values___pickle_unpickle___makes_copy(value: Vector[TScalar]) -> None:
     new_value = pickle.loads(pickle.dumps(value))
+    assert isinstance(new_value, Vector)
     assert new_value is not value
     assert new_value == value
+    assert new_value.extended_properties == value.extended_properties
 
 
 def test___vector___pickle___references_public_modules() -> None:

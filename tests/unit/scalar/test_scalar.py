@@ -68,6 +68,20 @@ def test___invalid_data_value___create___raises_type_error(data_value: Any) -> N
     assert exc.value.args[0].startswith("The scalar input data must be a bool, int, float, or str.")
 
 
+def test___both_units_specified_unequal__create___raises_value_error() -> None:
+    with pytest.raises(ValueError) as exc:
+        _ = Scalar(10, "Volts", extended_properties={UNIT_DESCRIPTION: "Amps"})
+
+    assert exc.value.args[0].startswith(
+        "The specified units input does not match the units specified in extended_properties."
+    )
+
+
+def test___units_only_specified_in_extended_properties__create___creates_with_units() -> None:
+    data = Scalar(10, extended_properties={UNIT_DESCRIPTION: "Volts"})
+    assert data.units == "Volts"
+
+
 ###############################################################################
 # compare
 ###############################################################################
@@ -182,14 +196,20 @@ def test___different_units___comparison___throws_exception() -> None:
 @pytest.mark.parametrize(
     "value, expected_repr",
     [
-        (Scalar(False), "nitypes.scalar.Scalar(value=False, units='')"),
-        (Scalar(10), "nitypes.scalar.Scalar(value=10, units='')"),
-        (Scalar(20.0), "nitypes.scalar.Scalar(value=20.0, units='')"),
-        (Scalar("value"), "nitypes.scalar.Scalar(value='value', units='')"),
+        (Scalar(False), "nitypes.scalar.Scalar(value=False)"),
+        (Scalar(10), "nitypes.scalar.Scalar(value=10)"),
+        (Scalar(20.0), "nitypes.scalar.Scalar(value=20.0)"),
+        (Scalar("value"), "nitypes.scalar.Scalar(value='value')"),
         (Scalar(False, "amps"), "nitypes.scalar.Scalar(value=False, units='amps')"),
         (Scalar(10, "volts"), "nitypes.scalar.Scalar(value=10, units='volts')"),
         (Scalar(20.0, "watts"), "nitypes.scalar.Scalar(value=20.0, units='watts')"),
-        (Scalar("value", ""), "nitypes.scalar.Scalar(value='value', units='')"),
+        (Scalar("value", ""), "nitypes.scalar.Scalar(value='value')"),
+        (
+            Scalar(10, units="volts", extended_properties={"Prop1": "Value1"}),
+            "nitypes.scalar.Scalar(value=10, units='volts', "
+            "extended_properties=nitypes.waveform.ExtendedPropertyDictionary("
+            "{'Prop1': 'Value1', 'NI_UnitDescription': 'volts'}))",
+        ),
     ],
 )
 def test___various_values___repr___looks_ok(value: Scalar[Any], expected_repr: str) -> None:
@@ -244,12 +264,14 @@ def test___scalar_with_units___set_units___units_updated_correctly() -> None:
         Scalar(10, "volts"),
         Scalar(20.0, "watts"),
         Scalar("value", ""),
+        Scalar(10, "Volts", extended_properties={"one": 1}),
     ],
 )
 def test___various_values___copy___makes_copy(value: Scalar[TScalar_co]) -> None:
     new_value = copy.copy(value)
     assert new_value is not value
     assert new_value == value
+    assert new_value.extended_properties == value.extended_properties
 
 
 @pytest.mark.parametrize(
@@ -263,12 +285,15 @@ def test___various_values___copy___makes_copy(value: Scalar[TScalar_co]) -> None
         Scalar(10, "volts"),
         Scalar(20.0, "watts"),
         Scalar("value", ""),
+        Scalar(10, "Volts", extended_properties={"one": 1}),
     ],
 )
 def test___various_values___pickle_unpickle___makes_copy(value: Scalar[TScalar_co]) -> None:
     new_value = pickle.loads(pickle.dumps(value))
+    assert isinstance(new_value, Scalar)
     assert new_value is not value
     assert new_value == value
+    assert new_value.extended_properties == value.extended_properties
 
 
 def test___scalar___pickle___references_public_modules() -> None:

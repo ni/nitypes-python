@@ -8,13 +8,14 @@ Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and 
 
 from __future__ import annotations
 
-from collections.abc import Iterable, MutableSequence
-from typing import TYPE_CHECKING, overload, Any, Union
+from collections.abc import Iterable, Mapping, MutableSequence
+from typing import TYPE_CHECKING, Any, Union, overload
 
-from typing_extensions import TypeVar, final, override
+from typing_extensions import Self, TypeVar, final, override
 
 from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform._extended_properties import UNIT_DESCRIPTION
+from nitypes.waveform.typing import ExtendedPropertyValue
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
@@ -35,9 +36,9 @@ class Vector(MutableSequence[TScalar]):
     To construct a vector data object, use the :class:`Vector` class:
 
     >>> Vector([False, True])
-    nitypes.vector.Vector(values=[False, True], units='')
+    nitypes.vector.Vector(values=[False, True])
     >>> Vector([0, 1, 2])
-    nitypes.vector.Vector(values=[0, 1, 2], units='')
+    nitypes.vector.Vector(values=[0, 1, 2])
     >>> Vector([5.0, 6.0], 'volts')
     nitypes.vector.Vector(values=[5.0, 6.0], units='volts')
     >>> Vector(["one", "two"], "volts")
@@ -60,6 +61,8 @@ class Vector(MutableSequence[TScalar]):
         units: str = "",
         *,
         value_type: type[TScalar] | None = None,
+        extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
+        copy_extended_properties: bool = True,
     ) -> None:
         """Initialize a new vector.
 
@@ -69,6 +72,9 @@ class Vector(MutableSequence[TScalar]):
             value_type: The type of values that will be added to this Vector.
                 This parameter should only be used when creating a Vector with
                 an empty Iterable.
+            extended_properties: The extended properties of the Vector.
+            copy_extended_properties: Specifies whether to copy the extended properties or take
+                ownership.
 
         Returns:
             A vector data object.
@@ -94,8 +100,20 @@ class Vector(MutableSequence[TScalar]):
             raise invalid_arg_type("units", "str", units)
 
         self._values = list(values)
-        self._extended_properties = ExtendedPropertyDictionary()
-        self._extended_properties[UNIT_DESCRIPTION] = units
+        if copy_extended_properties or not isinstance(
+            extended_properties, ExtendedPropertyDictionary
+        ):
+            extended_properties = ExtendedPropertyDictionary(extended_properties)
+        self._extended_properties = extended_properties
+
+        # If units are not already in extended properties, set them.
+        if UNIT_DESCRIPTION not in self._extended_properties:
+            self._extended_properties[UNIT_DESCRIPTION] = units
+        elif units and units != self._extended_properties.get(UNIT_DESCRIPTION):
+            raise ValueError(
+                "The specified units input does not match the units specified in "
+                "extended_properties."
+            )
 
     @property
     def units(self) -> str:
@@ -191,11 +209,29 @@ class Vector(MutableSequence[TScalar]):
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        return (self.__class__, (self._values, self.units))
+        ctor_args = (self._values,)
+        ctor_kwargs: dict[str, Any] = {
+            "value_type": self._value_type,
+            "extended_properties": self._extended_properties,
+            "copy_extended_properties": False,
+        }
+        return (self.__class__._unpickle, (ctor_args, ctor_kwargs))
+
+    @classmethod
+    def _unpickle(cls, args: tuple[Any, ...], kwargs: dict[str, Any]) -> Self:
+        return cls(*args, **kwargs)
 
     def __repr__(self) -> str:
         """Return repr(self)."""
-        args = [f"values={self._values!r}", f"units={self.units!r}"]
+        args = [f"values={self._values!r}"]
+
+        if self.units:
+            args.append(f"units={self.units!r}")
+
+        # Only display the extended properties if non-units entries are specified.
+        if any(key for key in self.extended_properties.keys() if key != UNIT_DESCRIPTION):
+            args.append(f"extended_properties={self.extended_properties!r}")
+
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
 
     def __str__(self) -> str:
