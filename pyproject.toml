@@ -13,7 +13,6 @@ classifiers = [
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -26,7 +25,7 @@ dynamic = ["dependencies"]
 readme = "README.md"
 authors = [{name = "NI", email = "opensource@ni.com"}]
 maintainers = [{name = "Brad Keryan", email = "brad.keryan@ni.com"}]
-requires-python = '>=3.9,<4.0'
+requires-python = '>=3.10,<4.0'
 
 [project.urls]
 repository = "https://github.com/ni/nitypes-python"
@@ -37,10 +36,10 @@ packages = [{ include = "nitypes", from = "src" }]
 requires-poetry = '>=2.1,<3.0'
 
 [tool.poetry.dependencies]
-# NumPy 2.0.x is the last version that supports Python 3.9, but it crashes with Python 3.13.
+# NumPy 2.2.x is the last version that supports Python 3.10
 numpy = [
-  { version = ">=1.22", python = ">=3.9,<3.13" },
-  { version = ">=2.1", python = "^3.13" }
+  { version = ">=2.2", python = ">=3.10,<3.11" },
+  { version = ">=2.3", python = "^3.13" }
 ]
 hightime = { version = ">=0.2.2", allow-prereleases = true }
 typing-extensions = ">=4.13.2"
@@ -48,7 +47,7 @@ typing-extensions = ">=4.13.2"
 [tool.poetry.group.dev.dependencies]
 # Specify additional NumPy version constraints to speed up locking and test with binary wheels that support PyPy.
 numpy = [
-  { version = ">=1.22", python = ">=3.9,<3.12", markers = "implementation_name != 'pypy'" },
+  { version = ">=1.22", python = ">=3.10,<3.12", markers = "implementation_name != 'pypy'" },
   { version = ">=1.26", python = ">=3.12,<3.13", markers = "implementation_name != 'pypy'" },
   { version = ">=2.1", python = "^3.13", markers = "implementation_name != 'pypy'" },
   { version = ">=2.1", python = ">=3.10,<3.11", markers = "implementation_name == 'pypy'" },
@@ -78,7 +77,6 @@ optional = true
 [tool.poetry.group.docs.dependencies]
 # The latest Sphinx requires a recent Python version.
 Sphinx = [
-  { version = ">=7.4", python = ">=3.9,<3.10" },
   { version = ">=8.1", python = ">=3.10,<3.11" },
   { version = ">=8.2", python = "^3.11" },
 ]
