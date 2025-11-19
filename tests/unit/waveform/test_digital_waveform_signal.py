@@ -100,12 +100,12 @@ def test___signal___set_signal_name___sets_name() -> None:
     waveform.signals[1].name = "port0/line1"
     waveform.signals[2].name = "port0/line2"
 
-    assert waveform.extended_properties["NI_LineNames"] == "port0/line0, port0/line1, port0/line2"
+    assert waveform.extended_properties["NI_LineNames"] == "port0/line2, port0/line1, port0/line0"
 
 
 def test___signal_with_line_names___get_signal_name___returns_line_name() -> None:
     waveform = DigitalWaveform(
-        10, 3, extended_properties={"NI_LineNames": "port0/line0, port0/line1, port0/line2"}
+        10, 3, extended_properties={"NI_LineNames": "port0/line2, port0/line1, port0/line0"}
     )
 
     assert waveform.signals[0].name == "port0/line0"
@@ -115,12 +115,12 @@ def test___signal_with_line_names___get_signal_name___returns_line_name() -> Non
 
 def test___signal_with_line_names___set_signal_name___returns_line_name() -> None:
     waveform = DigitalWaveform(
-        10, 3, extended_properties={"NI_LineNames": "port0/line0, port0/line1, port0/line2"}
+        10, 3, extended_properties={"NI_LineNames": "port0/line2, port0/line1, port0/line0"}
     )
 
     waveform.signals[1].name = "MySignal"
 
-    assert waveform.extended_properties["NI_LineNames"] == "port0/line0, MySignal, port0/line2"
+    assert waveform.extended_properties["NI_LineNames"] == "port0/line2, MySignal, port0/line0"
 
 
 ###############################################################################
@@ -131,9 +131,9 @@ def test___waveform___get_signal_data___returns_line_data() -> None:
 
     assert_type(waveform.signals[0].data, npt.NDArray[np.uint8])
     assert len(waveform.signals) == 3
-    assert waveform.signals[0].data.tolist() == [0, 3]
+    assert waveform.signals[0].data.tolist() == [2, 5]
     assert waveform.signals[1].data.tolist() == [1, 4]
-    assert waveform.signals[2].data.tolist() == [2, 5]
+    assert waveform.signals[2].data.tolist() == [0, 3]
 
 
 ###############################################################################
@@ -197,7 +197,7 @@ def test___different_value___equality___not_equal(
         ),
         (
             DigitalWaveform(
-                3, 2, extended_properties={"NI_LineNames": "port0/line0, port0/line1"}
+                3, 2, extended_properties={"NI_LineNames": "port0/line1, port0/line0"}
             ).signals[1],
             "nitypes.waveform.DigitalWaveformSignal(name='port0/line1', data=array([0, 0, 0], dtype=uint8))",
         ),

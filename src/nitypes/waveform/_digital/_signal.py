@@ -23,15 +23,17 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
     collection, e.g. ``waveform.signals[0]`` or ``waveform.signals["Dev1/port0/line0"]``.
     """
 
-    __slots__ = ["_owner", "_signal_index", "__weakref__"]
+    __slots__ = ["_owner", "_raw_index", "_signal_index", "__weakref__"]
 
     _owner: DigitalWaveform[TDigitalState]
+    _raw_index: int
     _signal_index: int
 
-    def __init__(self, owner: DigitalWaveform[TDigitalState], signal_index: SupportsIndex) -> None:
+    def __init__(self, owner: DigitalWaveform[TDigitalState], signal_index: SupportsIndex, raw_index: SupportsIndex) -> None:
         """Initialize a new digital waveform signal."""
         self._owner = owner
         self._signal_index = arg_to_uint("signal index", signal_index)
+        self._raw_index = arg_to_uint("raw index", raw_index)
 
     @property
     def owner(self) -> DigitalWaveform[TDigitalState]:
@@ -44,19 +46,23 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
         return self._signal_index
 
     @property
+    def raw_index(self) -> int:
+        """The raw index."""
+        return self._raw_index
+
+    @property
     def data(self) -> npt.NDArray[TDigitalState]:
         """The signal data, indexed by sample."""
-        return self._owner.data[:, self._signal_index]
+        return self._owner.data[:, self._raw_index]
 
     @property
     def name(self) -> str:
         """The signal name."""
-        return self._owner._get_signal_name(self._signal_index)
+        return self._owner._get_signal_name(self._raw_index)
 
     @name.setter
     def name(self, value: str) -> None:
-        self._owner._set_signal_name(self._signal_index, value)
-
+        self._owner._set_signal_name(self._raw_index, value)
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
         if not isinstance(value, self.__class__):
@@ -66,7 +72,7 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        ctor_args = (self._owner, self._signal_index)
+        ctor_args = (self._owner, self._signal_index, self._raw_index)
         return (self.__class__, ctor_args)
 
     def __repr__(self) -> str:

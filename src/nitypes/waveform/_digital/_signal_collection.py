@@ -54,7 +54,7 @@ class DigitalWaveformSignalCollection(
                 index += len(self._signals)
             value = self._signals[index]
             if value is None:
-                value = self._signals[index] = DigitalWaveformSignal(self._owner, index)
+                value = self._signals[index] = DigitalWaveformSignal(self._owner, index, len(self) - index - 1)
             return value
         elif isinstance(index, str):
             signal_names = self._owner._get_signal_names()

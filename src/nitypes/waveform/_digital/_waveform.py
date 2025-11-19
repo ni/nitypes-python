@@ -989,12 +989,12 @@ class DigitalWaveform(Generic[TDigitalState]):
                 signal_names.extend([""] * (self.signal_count - len(signal_names)))
         return signal_names
 
-    def _get_signal_name(self, signal_index: int) -> str:
-        return self._get_signal_names()[signal_index]
+    def _get_signal_name(self, raw_index: int) -> str:
+        return self._get_signal_names()[raw_index]
 
-    def _set_signal_name(self, signal_index: int, value: str) -> None:
+    def _set_signal_name(self, raw_index: int, value: str) -> None:
         signal_names = self._get_signal_names()
-        signal_names[signal_index] = value
+        signal_names[raw_index] = value
         self._extended_properties[LINE_NAMES] = ", ".join(signal_names)
 
     def _set_timing(self, value: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]) -> None:
