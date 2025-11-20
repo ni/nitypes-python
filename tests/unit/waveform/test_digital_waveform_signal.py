@@ -57,9 +57,12 @@ def test___str_index___signals_getitem___returns_signal() -> None:
     )
 
     assert_type(waveform.signals["port0/line0"], DigitalWaveformSignal[np.uint8])
-    assert waveform.signals["port0/line0"].signal_index == 0
+    assert waveform.signals["port0/line2"].signal_index == 0
     assert waveform.signals["port0/line1"].signal_index == 1
-    assert waveform.signals["port0/line2"].signal_index == 2
+    assert waveform.signals["port0/line0"].signal_index == 2
+    assert waveform.signals["port0/line0"].line_index == 0
+    assert waveform.signals["port0/line1"].line_index == 1
+    assert waveform.signals["port0/line2"].line_index == 2
 
 
 def test___invalid_str_index___signals_getitem___raises_index_error() -> None:

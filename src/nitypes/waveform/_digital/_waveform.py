@@ -617,7 +617,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         "_extended_properties",
         "_timing",
         "_signals",
-        "_signal_names",
+        "_line_names",
         "__weakref__",
     ]
 
@@ -628,7 +628,7 @@ class DigitalWaveform(Generic[TDigitalState]):
     _extended_properties: ExtendedPropertyDictionary
     _timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]
     _signals: DigitalWaveformSignalCollection[TDigitalState] | None
-    _signal_names: list[str] | None
+    _line_names: list[str] | None
 
     # If neither dtype nor data is specified, _TData defaults to np.uint8.
     @overload
@@ -763,7 +763,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         self._timing = timing
 
         self._signals = None
-        self._signal_names = None
+        self._line_names = None
 
     def _init_with_new_array(
         self,
@@ -864,6 +864,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         #
         # https://github.com/ni/nitypes-python/issues/131 - DigitalWaveform.signals introduces a
         # reference cycle, which affects GC overhead.
+        # TODO: clear the _signals if the flop state is changed
         value = self._signals
         if value is None:
             value = self._signals = DigitalWaveformSignalCollection(self)
@@ -976,26 +977,24 @@ class DigitalWaveform(Generic[TDigitalState]):
             raise invalid_arg_type("channel name", "str", value)
         self._extended_properties[CHANNEL_NAME] = value
 
-    def _get_signal_names(self) -> list[str]:
-        # Lazily allocate self._signal_names if the application needs it.
-        signal_names = self._signal_names
-        if signal_names is None:
-            signal_names_str = self._extended_properties.get(LINE_NAMES, "")
-            assert isinstance(signal_names_str, str)
-            signal_names = self._signal_names = [
-                name.strip() for name in signal_names_str.split(",")
-            ]
-            if len(signal_names) < self.signal_count:
-                signal_names.extend([""] * (self.signal_count - len(signal_names)))
-        return signal_names
+    def _get_line_names(self) -> list[str]:
+        # Lazily allocate self._line_names if the application needs it.
+        line_names = self._line_names
+        if line_names is None:
+            line_names_str = self._extended_properties.get(LINE_NAMES, "")
+            assert isinstance(line_names_str, str)
+            line_names = self._line_names = [name.strip() for name in line_names_str.split(",")]
+            if len(line_names) < self.signal_count:
+                line_names.extend([""] * (self.signal_count - len(line_names)))
+        return line_names
 
-    def _get_signal_name(self, raw_index: int) -> str:
-        return self._get_signal_names()[raw_index]
+    def _get_line_name(self, line_index: int) -> str:
+        return self._get_line_names()[line_index]
 
-    def _set_signal_name(self, raw_index: int, value: str) -> None:
-        signal_names = self._get_signal_names()
-        signal_names[raw_index] = value
-        self._extended_properties[LINE_NAMES] = ", ".join(signal_names)
+    def _set_line_name(self, line_index: int, value: str) -> None:
+        line_names = self._get_line_names()
+        line_names[line_index] = value
+        self._extended_properties[LINE_NAMES] = ", ".join(line_names)
 
     def _set_timing(self, value: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]) -> None:
         if self._timing is not value:
