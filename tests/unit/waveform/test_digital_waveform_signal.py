@@ -156,12 +156,12 @@ def test___waveform___get_data_with_line_index___returns_line_data() -> None:
 
     assert_type(waveform.signals[0].data, npt.NDArray[np.uint8])
     assert len(waveform.signals) == 3
-    assert waveform.data[0][waveform.signals[0].line_index].data.tolist() == 2
-    assert waveform.data[0][waveform.signals[1].line_index].data.tolist() == 1
-    assert waveform.data[0][waveform.signals[2].line_index].data.tolist() == 0
-    assert waveform.data[1][waveform.signals[0].line_index].data.tolist() == 5
-    assert waveform.data[1][waveform.signals[1].line_index].data.tolist() == 4
-    assert waveform.data[1][waveform.signals[2].line_index].data.tolist() == 3
+    assert waveform.data[0][waveform.signals[0].line_index] == 2
+    assert waveform.data[0][waveform.signals[1].line_index] == 1
+    assert waveform.data[0][waveform.signals[2].line_index] == 0
+    assert waveform.data[1][waveform.signals[0].line_index] == 5
+    assert waveform.data[1][waveform.signals[1].line_index] == 4
+    assert waveform.data[1][waveform.signals[2].line_index] == 3
 
 
 ###############################################################################
