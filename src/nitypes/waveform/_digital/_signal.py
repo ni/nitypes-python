@@ -23,22 +23,22 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
     collection, e.g. ``waveform.signals[0]`` or ``waveform.signals["Dev1/port0/line0"]``.
     """
 
-    __slots__ = ["_owner", "_signal_index", "_line_index", "__weakref__"]
+    __slots__ = ["_owner", "_signal_index", "_data_index", "__weakref__"]
 
     _owner: DigitalWaveform[TDigitalState]
-    _line_index: int
+    _data_index: int
     _signal_index: int
 
     def __init__(
         self,
         owner: DigitalWaveform[TDigitalState],
         signal_index: SupportsIndex,
-        line_index: SupportsIndex,
+        data_index: SupportsIndex,
     ) -> None:
         """Initialize a new digital waveform signal."""
         self._owner = owner
         self._signal_index = arg_to_uint("signal index", signal_index)
-        self._line_index = arg_to_uint("line index", line_index)
+        self._data_index = arg_to_uint("data index", data_index)
 
     @property
     def owner(self) -> DigitalWaveform[TDigitalState]:
@@ -47,27 +47,36 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
 
     @property
     def signal_index(self) -> int:
-        """The signal index."""
+        """The signal's position in the DigitalWaveform.signals collection (0-based)."""
         return self._signal_index
 
     @property
-    def line_index(self) -> int:
-        """The line index."""
-        return self._line_index
+    def data_index(self) -> int:
+        """The signal's position in the DigitalWaveform.data array's second dimension (0-based).
+
+        This index is used to access the signal's data within the waveform's raw data array:
+        `waveform.data[:, data_index]`.
+
+        Note: The data_index is reversed compared to signal_index. Waveform.data[:, 0] corresponds
+        to the highest signal_index, and Waveform.data[:, -1] corresponds to signal_index 0. This
+        maintains compatibility with hardware conventions where the least significant signal
+        (line 0) is last.
+        """
+        return self._data_index
 
     @property
     def data(self) -> npt.NDArray[TDigitalState]:
         """The signal data, indexed by sample."""
-        return self._owner.data[:, self._line_index]
+        return self._owner.data[:, self._data_index]
 
     @property
     def name(self) -> str:
         """The signal name."""
-        return self._owner._get_line_name(self._line_index)
+        return self._owner._get_line_name(self._data_index)
 
     @name.setter
     def name(self, value: str) -> None:
-        self._owner._set_line_name(self._line_index, value)
+        self._owner._set_line_name(self._data_index, value)
 
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
@@ -78,7 +87,7 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        ctor_args = (self._owner, self._signal_index, self._line_index)
+        ctor_args = (self._owner, self._signal_index, self._data_index)
         return (self.__class__, ctor_args)
 
     def __repr__(self) -> str:

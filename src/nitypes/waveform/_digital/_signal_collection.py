@@ -54,22 +54,18 @@ class DigitalWaveformSignalCollection(
                 index += len(self._signals)
             value = self._signals[index]
             if value is None:
-                line_index = self._swap_index(index)
-                value = self._signals[index] = DigitalWaveformSignal(self._owner, index, line_index)
+                data_index = self._owner._reverse_index(index)
+                value = self._signals[index] = DigitalWaveformSignal(self._owner, index, data_index)
             return value
         elif isinstance(index, str):  # index is the line name
             line_names = self._owner._get_line_names()
             try:
-                signal_index = self._swap_index(line_names.index(index))
+                data_index = line_names.index(index)
             except ValueError:
                 raise IndexError(index)
+            signal_index = self._owner._reverse_index(data_index)
             return self[signal_index]
         elif isinstance(index, slice):  # index is a slice of signal indices
             return [self[i] for i in range(*index.indices(len(self)))]
         else:
             raise invalid_arg_type("index", "int or str", index)
-
-    def _swap_index(self, index: int) -> int:
-        """Convert a signal index to a line index, or vice versa."""
-        assert 0 <= index < len(self)
-        return len(self) - 1 - index
