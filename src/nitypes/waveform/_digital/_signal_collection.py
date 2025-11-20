@@ -49,7 +49,7 @@ class DigitalWaveformSignalCollection(
         self, index: int | str | slice
     ) -> DigitalWaveformSignal[TDigitalState] | Sequence[DigitalWaveformSignal[TDigitalState]]:
         """Get self[index]."""
-        if isinstance(index, int):
+        if isinstance(index, int):  # index is the signal index
             if index < 0:
                 index += len(self._signals)
             value = self._signals[index]
@@ -57,18 +57,19 @@ class DigitalWaveformSignalCollection(
                 line_index = self._swap_index(index)
                 value = self._signals[index] = DigitalWaveformSignal(self._owner, index, line_index)
             return value
-        elif isinstance(index, str):
+        elif isinstance(index, str):  # index is the line name
             line_names = self._owner._get_line_names()
             try:
                 signal_index = self._swap_index(line_names.index(index))
             except ValueError:
                 raise IndexError(index)
             return self[signal_index]
-        elif isinstance(index, slice):
+        elif isinstance(index, slice):  # index is a slice of signal indices
             return [self[i] for i in range(*index.indices(len(self)))]
         else:
             raise invalid_arg_type("index", "int or str", index)
 
     def _swap_index(self, index: int) -> int:
         """Convert a signal index to a line index, or vice versa."""
+        assert 0 <= index < len(self)
         return len(self) - 1 - index
