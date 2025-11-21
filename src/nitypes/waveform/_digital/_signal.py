@@ -57,10 +57,10 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
         This index is used to access the signal's data within the waveform's raw data array:
         `waveform.data[:, data_index]`.
 
-        Note: The data_index is reversed compared to signal_index. Waveform.data[:, 0] corresponds
-        to the highest signal_index, and Waveform.data[:, -1] corresponds to signal_index 0. This
-        maintains compatibility with hardware conventions where the least significant signal
-        (line 0) is last.
+        Note: The data_index is reversed compared to the signal_index. Data index 0 (the leftmost
+        column) corresponds to the highest signal_index and highest line number. The highest
+        data_index (the rightmost column) corresponds to signal_index 0 and line 0. This matches
+        industry conventions where line 0 is the LSB and appears as the rightmost bit.
         """
         return self._data_index
 

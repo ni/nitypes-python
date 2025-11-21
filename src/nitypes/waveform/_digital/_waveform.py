@@ -127,9 +127,12 @@ class DigitalWaveform(Generic[TDigitalState]):
     To construct a digital waveform from a NumPy array of port data, use the
     :any:`DigitalWaveform.from_port` method. Each element of the port data array represents a digital
     sample taken over a port of signals. Each bit in the sample is a signal value, either 1 for "on" or
-    0 for "off". The least significant bit of the sample is placed at signal index 0 of the
-    DigitalWaveform, which will be taken from last line in the port. The first line in the port will be
-    the highest signal index in the DigitalWaveform, and the most significant bit of the sample.
+    0 for "off".
+
+    The rightmost bit (the last column) in the sample will be the least significant bit (line 0) and
+    will be placed at signal index 0 in the DigitalWaveform. The leftmost bit (the first column) in
+    the sample will be the most significant bit (highest line number) and will be placed at the highest
+    signal index in the DigitalWaveform.
 
     >>> DigitalWaveform.from_port(np.array([0, 1, 2, 3], np.uint8))  # doctest: +NORMALIZE_WHITESPACE
     nitypes.waveform.DigitalWaveform(4, 8, data=array([[0, 0, 0, 0, 0, 0, 0, 0],
@@ -176,13 +179,14 @@ class DigitalWaveform(Generic[TDigitalState]):
     Each :class:`DigitalWaveformSignal` has two index properties:
 
     * :attr:`DigitalWaveformSignal.signal_index` - The position in the :attr:`DigitalWaveform.signals`
-      collection (0-based from the first signal)
+      collection (0-based from the first signal). Signal index 0 is the rightmost column in the data.
     * :attr:`DigitalWaveformSignal.data_index` - The position in the :attr:`DigitalWaveform.data` array's
-      second dimension (0-based from the first line/column)
+      second dimension (0-based from the first column). Data index 0 is the leftmost column in the data.
 
-    These indices are reversed with respect to each other. Signal 0 corresponds to the highest data
-    index, and the highest signal index corresponds to data index 0. This ordering maintains compatibility
-    with hardware conventions where the least significant signal (line 0) is last.
+    These indices are reversed with respect to each other. Signal index 0 (line 0) corresponds to the
+    highest data_index, and the highest signal index (the highest line) corresponds to data_index 0. This
+    ordering follows industry conventions where line 0 is the least significant bit and appears last (in
+    the rightmost column) of the data array.
 
     >>> wfm = DigitalWaveform.from_port([0, 4, 2, 6], 0x7)  # 3 signals
     >>> wfm.data
@@ -217,9 +221,10 @@ class DigitalWaveform(Generic[TDigitalState]):
     nitypes.waveform.DigitalWaveformSignal(name='port0/line0', data=array([0, 1, 0, 1], dtype=uint8))
 
     The signal names are stored in the ``NI_LineNames`` extended property on the digital waveform.
-    Note that the order of the names in the string is reversed compared to the signal indices.
-    This ordering maintains compatibility with hardware conventions where the least significant signal
-    (line 0) is last.
+    Note that the order of the names in the string follows data_index order (highest line number
+    first), which is reversed compared to signal_index order (lowest line first). This means line 0
+    (signal_index 0) appears last in the NI_LineNames string. This matches industry conventions where
+    line 0 appears in the rightmost column of the data array.
 
     >>> wfm.extended_properties["NI_LineNames"]
     'port0/line2, port0/line1, port0/line0'
@@ -454,8 +459,12 @@ class DigitalWaveform(Generic[TDigitalState]):
 
         Each element of the port data array represents a digital sample taken over a port of
         signals. Each bit in the sample represents a digital state, either 1 for "on" or 0 for
-        "off". The least significant bit of the sample is placed at signal index 0 of the
-        DigitalWaveform.
+        "off".
+
+        The rightmost bit (the last column) in the sample will be the least significant bit (line
+        0) and will be placed at signal index 0 in the DigitalWaveform. The leftmost bit (the first
+        column) in the sample will be the most significant bit (highest line number) and will be
+        placed at the highest signal index in the DigitalWaveform.
 
         If the input array is not a NumPy array, you must specify the mask.
 
@@ -578,10 +587,12 @@ class DigitalWaveform(Generic[TDigitalState]):
 
         Each row of the port data array corresponds to a resulting DigitalWaveform. Each element of
         the port data array represents a digital sample taken over a port of signals. Each bit in
-        the sample is represents a digital state, either 1 for "on" or 0 for "off". The least
-        significant bit of the sample is placed at signal index 0 of the corresponding
-        DigitalWaveform.
+        the sample represents a digital state, either 1 for "on" or 0 for "off".
 
+        The rightmost bit (the last column) in the sample will be the least significant bit (line
+        0) and will be placed at signal index 0 in the DigitalWaveform. The leftmost bit (the first
+        column) in the sample will be the most significant bit (highest line number) and will be
+        placed at the highest signal index in the DigitalWaveform.
         If the input array is not a NumPy array, you must specify the masks.
 
         Args:
