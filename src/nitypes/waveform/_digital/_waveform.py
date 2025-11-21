@@ -110,7 +110,7 @@ class DigitalWaveform(Generic[TDigitalState]):
     :any:`DigitalWaveform.from_lines` method. Each array element represents a digital state, such as 1
     for "on" or 0 for "off". The line data should be in a 1D array indexed by sample or a 2D array
     indexed by (sample, signal). (Note, signal indices are reversed! See "Signal index vs. data index"
-    below for details.) The digital waveform displays the line data as a 2D array. 
+    below for details.) The digital waveform displays the line data as a 2D array.
 
     >>> import numpy as np
     >>> DigitalWaveform.from_lines(np.array([0, 1, 0], np.uint8))
