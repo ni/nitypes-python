@@ -173,11 +173,11 @@ class DigitalWaveform(Generic[TDigitalState]):
     Signal index vs. data index
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    Each :any:`DigitalWaveformSignal` has two index properties:
+    Each :class:`DigitalWaveformSignal` has two index properties:
 
-    * :any:`DigitalWaveformSignal.signal_index` - The position in the :any:`DigitalWaveform.signals`
+    * :attr:`DigitalWaveformSignal.signal_index` - The position in the :attr:`DigitalWaveform.signals`
       collection (0-based from the first signal)
-    * :any:`DigitalWaveformSignal.data_index` - The position in the :any:`DigitalWaveform.data` array's
+    * :attr:`DigitalWaveformSignal.data_index` - The position in the :attr:`DigitalWaveform.data` array's
       second dimension (0-based from the first line/column)
 
     These indices are reversed with respect to each other. Signal 0 corresponds to the highest data
