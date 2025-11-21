@@ -109,8 +109,8 @@ class DigitalWaveform(Generic[TDigitalState]):
     To construct a digital waveform from a NumPy array of line data, use the
     :any:`DigitalWaveform.from_lines` method. Each array element represents a digital state, such as 1
     for "on" or 0 for "off". The line data should be in a 1D array indexed by sample or a 2D array
-    indexed by (sample, signal). The digital waveform displays the line data as a 2D array.
-    (Note, the signal indices are reversed here. See "Signal index vs. data index" below for details.)
+    indexed by (sample, signal). The digital waveform displays the line data as a 2D array. (See
+    "Signal index vs. data index" below for data layout details.)
 
     >>> import numpy as np
     >>> DigitalWaveform.from_lines(np.array([0, 1, 0], np.uint8))
@@ -127,12 +127,7 @@ class DigitalWaveform(Generic[TDigitalState]):
     To construct a digital waveform from a NumPy array of port data, use the
     :any:`DigitalWaveform.from_port` method. Each element of the port data array represents a digital
     sample taken over a port of signals. Each bit in the sample is a signal value, either 1 for "on" or
-    0 for "off".
-
-    The rightmost bit (the last column) in the sample will be the least significant bit (line 0) and
-    will be placed at signal index 0 in the DigitalWaveform. The leftmost bit (the first column) in
-    the sample will be the most significant bit (highest line number) and will be placed at the highest
-    signal index in the DigitalWaveform.
+    0 for "off". (See "Signal index vs. data index" below for data layout details.)
 
     >>> DigitalWaveform.from_port(np.array([0, 1, 2, 3], np.uint8))  # doctest: +NORMALIZE_WHITESPACE
     nitypes.waveform.DigitalWaveform(4, 8, data=array([[0, 0, 0, 0, 0, 0, 0, 0],
@@ -358,6 +353,11 @@ class DigitalWaveform(Generic[TDigitalState]):
         for "off". The line data should be in a 1D array indexed by sample or a 2D array indexed
         by (sample, signal). The line data may also use digital state values from the
         :class:`DigitalState` enum.
+
+        The rightmost bit (the last column) in the sample will be the least significant bit (line
+        0) and will be placed at signal index 0 in the DigitalWaveform. The leftmost bit (the first
+        column) in the sample will be the most significant bit (highest line number) and will be
+        placed at the highest signal index in the DigitalWaveform.
 
         Args:
             array: The line data as a one or two-dimensional array or a sequence.
@@ -593,6 +593,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         0) and will be placed at signal index 0 in the DigitalWaveform. The leftmost bit (the first
         column) in the sample will be the most significant bit (highest line number) and will be
         placed at the highest signal index in the DigitalWaveform.
+
         If the input array is not a NumPy array, you must specify the masks.
 
         Args:

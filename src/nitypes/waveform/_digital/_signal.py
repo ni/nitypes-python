@@ -54,7 +54,7 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
     def data_index(self) -> int:
         """The signal's position in the DigitalWaveform.data array's second dimension (0-based).
 
-        This index is used to access the signal's data within the waveform's raw data array:
+        This index is used to access the signal's data within the waveform's data array:
         `waveform.data[:, data_index]`.
 
         Note: The data_index is reversed compared to the signal_index. Data index 0 (the leftmost
