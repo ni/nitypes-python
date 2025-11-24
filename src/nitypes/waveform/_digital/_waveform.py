@@ -66,9 +66,6 @@ class DigitalWaveformFailure:
     signal_index: int
     """The signal index where the test failure occurred."""
 
-    data_index: int
-    """The data index where the test failure occurred."""
-
     actual_state: DigitalState
     """The state from the compared waveform where the test failure occurred."""
 
@@ -1312,7 +1309,6 @@ class DigitalWaveform(Generic[TDigitalState]):
                             start_sample,
                             expected_start_sample,
                             signal_index,
-                            data_index,
                             actual_state,
                             expected_state,
                         )
