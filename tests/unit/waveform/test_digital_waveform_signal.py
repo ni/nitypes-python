@@ -138,6 +138,21 @@ def test___signal_with_line_names___set_signal_name___returns_line_name() -> Non
     assert waveform.extended_properties["NI_LineNames"] == "port0/line2, MySignal, port0/line0"
 
 
+def test___signal_with_line_names___change_line_names_property___signal_returns_new_line_name() -> (
+    None
+):
+    waveform = DigitalWaveform(
+        10, 2, extended_properties={"NI_LineNames": "port0/line1, port0/line0"}
+    )
+    assert waveform.signals[0].name == "port0/line0"
+    assert waveform.signals[1].name == "port0/line1"
+
+    waveform.extended_properties["NI_LineNames"] = "port0/line11, port0/line10"
+
+    assert waveform.signals[0].name == "port0/line10"
+    assert waveform.signals[1].name == "port0/line11"
+
+
 ###############################################################################
 # signal data
 ###############################################################################
