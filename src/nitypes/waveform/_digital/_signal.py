@@ -23,22 +23,22 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
     collection, e.g. ``waveform.signals[0]`` or ``waveform.signals["Dev1/port0/line0"]``.
     """
 
-    __slots__ = ["_owner", "_signal_index", "_data_index", "__weakref__"]
+    __slots__ = ["_owner", "_signal_index", "_signal_column_index", "__weakref__"]
 
     _owner: DigitalWaveform[TDigitalState]
-    _data_index: int
+    _signal_column_index: int
     _signal_index: int
 
     def __init__(
         self,
         owner: DigitalWaveform[TDigitalState],
         signal_index: SupportsIndex,
-        data_index: SupportsIndex,
+        signal_column_index: SupportsIndex,
     ) -> None:
         """Initialize a new digital waveform signal."""
         self._owner = owner
         self._signal_index = arg_to_uint("signal index", signal_index)
-        self._data_index = arg_to_uint("data index", data_index)
+        self._signal_column_index = arg_to_uint("signal column index", signal_column_index)
 
     @property
     def owner(self) -> DigitalWaveform[TDigitalState]:
@@ -51,32 +51,33 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
         return self._signal_index
 
     @property
-    def data_index(self) -> int:
+    def signal_column_index(self) -> int:
         """The signal's position in the DigitalWaveform.data array's second dimension (0-based).
 
         This index is used to access the signal's data within the waveform's data array:
-        `waveform.data[:, data_index]`.
+        `waveform.data[:, signal_column_index]`.
 
-        Note: The data_index is reversed compared to the signal_index. Data index 0 (the leftmost
-        column) corresponds to the highest signal_index and highest line number. The highest
-        data_index (the rightmost column) corresponds to signal_index 0 and line 0. This matches
-        industry conventions where line 0 is the LSB and appears as the rightmost bit.
+        Note: The signal_column_index is reversed compared to the signal_index. signal_column_index
+        0 (the leftmost column) corresponds to the highest signal_index and highest line number.
+        The highest signal_column_index (the rightmost column) corresponds to signal_index 0 and
+        line 0. This matches industry conventions where line 0 is the LSB and appears as the
+        rightmost bit.
         """
-        return self._data_index
+        return self._signal_column_index
 
     @property
     def data(self) -> npt.NDArray[TDigitalState]:
         """The signal data, indexed by sample."""
-        return self._owner.data[:, self._data_index]
+        return self._owner.data[:, self._signal_column_index]
 
     @property
     def name(self) -> str:
         """The signal name."""
-        return self._owner._get_line_name(self._data_index)
+        return self._owner._get_line_name(self._signal_column_index)
 
     @name.setter
     def name(self, value: str) -> None:
-        self._owner._set_line_name(self._data_index, value)
+        self._owner._set_line_name(self._signal_column_index, value)
 
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
@@ -87,7 +88,7 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
-        ctor_args = (self._owner, self._signal_index, self._data_index)
+        ctor_args = (self._owner, self._signal_index, self._signal_column_index)
         return (self.__class__, ctor_args)
 
     def __repr__(self) -> str:

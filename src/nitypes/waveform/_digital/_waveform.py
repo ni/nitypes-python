@@ -130,7 +130,7 @@ class DigitalWaveform(Generic[TDigitalState]):
     To construct a digital waveform from a NumPy array of line data, use the
     :any:`DigitalWaveform.from_lines` method. Each array element represents a digital state, such as 1
     for "on" or 0 for "off". The line data should be in a 1D array indexed by sample or a 2D array
-    indexed by (sample, signal). (Note, signal indices are reversed! See "Signal index vs. data index"
+    indexed by (sample, signal). (Note, signal indices are reversed! See "Signal index vs. signal column index"
     below for details.) The digital waveform displays the line data as a 2D array.
 
     >>> import numpy as np
@@ -148,7 +148,7 @@ class DigitalWaveform(Generic[TDigitalState]):
     To construct a digital waveform from a NumPy array of port data, use the
     :any:`DigitalWaveform.from_port` method. Each element of the port data array represents a digital
     sample taken over a port of signals. Each bit in the sample is a signal value, either 1 for "on" or
-    0 for "off". (Note, signal indices are reversed! See "Signal index vs. data index" below for
+    0 for "off". (Note, signal indices are reversed! See "Signal index vs. signal column index" below for
     details.)
 
     >>> DigitalWaveform.from_port(np.array([0, 1, 2, 3], np.uint8))  # doctest: +NORMALIZE_WHITESPACE
@@ -190,18 +190,18 @@ class DigitalWaveform(Generic[TDigitalState]):
     >>> wfm.signals[0].data
     array([0, 0, 1, 1], dtype=uint8)
 
-    Signal index vs. data index
+    Signal index vs. signal column index
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Each :class:`DigitalWaveformSignal` has two index properties:
 
     * :attr:`DigitalWaveformSignal.signal_index` - The position in the :attr:`DigitalWaveform.signals`
-      collection (0-based from the first signal). Signal index 0 is the rightmost column in the data.
-    * :attr:`DigitalWaveformSignal.data_index` - The position in the :attr:`DigitalWaveform.data` array's
-      second dimension (0-based from the first column). Data index 0 is the leftmost column in the data.
+      collection (0-based from the first signal). signal_index 0 is the rightmost column in the data.
+    * :attr:`DigitalWaveformSignal.signal_column_index` - The position in the :attr:`DigitalWaveform.data` array's
+      second dimension (0-based from the first column). signal_column_index 0 is the leftmost column in the data.
 
-    These indices are reversed with respect to each other. Signal index 0 (line 0) corresponds to the
-    highest data_index, and the highest signal index (the highest line) corresponds to data_index 0. This
+    These indices are reversed with respect to each other. signal_index 0 (line 0) corresponds to the
+    highest signal_column_index, and the highest signal_index (the highest line) corresponds to signal_column_index 0. This
     ordering follows industry conventions where line 0 is the least significant bit and appears last (in
     the rightmost column) of the data array.
 
@@ -213,13 +213,13 @@ class DigitalWaveform(Generic[TDigitalState]):
            [0, 1, 1]], dtype=uint8)
     >>> wfm.signals[0].signal_index
     0
-    >>> wfm.signals[0].data_index
+    >>> wfm.signals[0].signal_column_index
     2
     >>> wfm.signals[0].data
     array([0, 1, 0, 1], dtype=uint8)
     >>> wfm.signals[2].signal_index
     2
-    >>> wfm.signals[2].data_index
+    >>> wfm.signals[2].signal_column_index
     0
     >>> wfm.signals[2].data
     array([0, 0, 0, 0], dtype=uint8)
@@ -238,7 +238,7 @@ class DigitalWaveform(Generic[TDigitalState]):
     nitypes.waveform.DigitalWaveformSignal(name='port0/line0', data=array([0, 1, 0, 1], dtype=uint8))
 
     The signal names are stored in the ``NI_LineNames`` extended property on the digital waveform.
-    Note that the order of the names in the string follows data_index order (highest line number
+    Note that the order of the names in the string follows signal_column_index order (highest line number
     first), which is reversed compared to signal_index order (lowest line first). This means line 0
     (signal_index 0) appears last in the NI_LineNames string. This matches industry conventions where
     line 0 appears in the rightmost column of the data array.
@@ -296,10 +296,10 @@ class DigitalWaveform(Generic[TDigitalState]):
     and the digital state from the actual and expected waveforms:
 
     >>> result.failures[0]  # doctest: +NORMALIZE_WHITESPACE
-    DigitalWaveformFailure(sample_index=0, expected_sample_index=0, signal_index=0, data_index=1,
+    DigitalWaveformFailure(sample_index=0, expected_sample_index=0, signal_index=0, signal_column_index=1,
     actual_state=<DigitalState.FORCE_UP: 1>, expected_state=<DigitalState.COMPARE_LOW: 3>)
     >>> result.failures[1]  # doctest: +NORMALIZE_WHITESPACE
-    DigitalWaveformFailure(sample_index=1, expected_sample_index=1, signal_index=0, data_index=1,
+    DigitalWaveformFailure(sample_index=1, expected_sample_index=1, signal_index=0, signal_column_index=1,
     actual_state=<DigitalState.FORCE_UP: 1>, expected_state=<DigitalState.COMPARE_LOW: 3>)
 
     Timing information
@@ -1063,12 +1063,12 @@ class DigitalWaveform(Generic[TDigitalState]):
                 line_names.extend([""] * (self.signal_count - len(line_names)))
         return line_names
 
-    def _get_line_name(self, data_index: int) -> str:
-        return self._get_line_names()[data_index]
+    def _get_line_name(self, signal_column_index: int) -> str:
+        return self._get_line_names()[signal_column_index]
 
-    def _set_line_name(self, data_index: int, value: str) -> None:
+    def _set_line_name(self, signal_column_index: int, value: str) -> None:
         line_names = self._get_line_names()
-        line_names[data_index] = value
+        line_names[signal_column_index] = value
         self._extended_properties[LINE_NAMES] = ", ".join(line_names)
 
     def _set_timing(self, value: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]) -> None:
@@ -1321,11 +1321,11 @@ class DigitalWaveform(Generic[TDigitalState]):
 
         failures = []
         for _ in range(sample_count):
-            for data_index in range(self.signal_count):
-                signal_index = self._reverse_index(data_index)
-                actual_state = DigitalState(self.data[start_sample, data_index])
+            for signal_column_index in range(self.signal_count):
+                signal_index = self._reverse_index(signal_column_index)
+                actual_state = DigitalState(self.data[start_sample, signal_column_index])
                 expected_state = DigitalState(
-                    expected_waveform.data[expected_start_sample, data_index]
+                    expected_waveform.data[expected_start_sample, signal_column_index]
                 )
                 if DigitalState.test(actual_state, expected_state):
                     failures.append(
@@ -1343,7 +1343,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         return DigitalWaveformTestResult(failures)
 
     def _reverse_index(self, index: int) -> int:
-        """Convert a signal index to a data index, or vice versa."""
+        """Convert a signal_index to a signal_column_index, or vice versa."""
         assert 0 <= index < self.signal_count
         return self.signal_count - 1 - index
 
