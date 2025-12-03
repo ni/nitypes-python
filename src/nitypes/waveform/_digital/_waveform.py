@@ -191,19 +191,20 @@ class DigitalWaveform(Generic[TDigitalState]):
     array([0, 0, 1, 1], dtype=uint8)
 
     Signal index vs. signal column index
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     Each :class:`DigitalWaveformSignal` has two index properties:
 
     * :attr:`DigitalWaveformSignal.signal_index` - The position in the :attr:`DigitalWaveform.signals`
       collection (0-based from the first signal). signal_index 0 is the rightmost column in the data.
-    * :attr:`DigitalWaveformSignal.signal_column_index` - The position in the :attr:`DigitalWaveform.data` array's
-      second dimension (0-based from the first column). signal_column_index 0 is the leftmost column in the data.
+    * :attr:`DigitalWaveformSignal.signal_column_index` - The position in the :attr:`DigitalWaveform.data`
+      array's second dimension (0-based from the first column). signal_column_index 0 is the leftmost
+      column in the data.
 
-    These indices are reversed with respect to each other. signal_index 0 (line 0) corresponds to the
-    highest signal_column_index, and the highest signal_index (the highest line) corresponds to signal_column_index 0. This
-    ordering follows industry conventions where line 0 is the least significant bit and appears last (in
-    the rightmost column) of the data array.
+    These indices are reversed with respect to each other. signal_index 0 (line 0) corresponds to
+    the highest signal_column_index, and the highest signal_index (the highest line) corresponds to
+    signal_column_index 0. This ordering follows industry conventions where line 0 is the least
+    significant bit and appears last (in the rightmost column) of the data array.
 
     >>> wfm = DigitalWaveform.from_port([0, 4, 2, 6], 0x7)  # 3 signals
     >>> wfm.data
@@ -238,10 +239,10 @@ class DigitalWaveform(Generic[TDigitalState]):
     nitypes.waveform.DigitalWaveformSignal(name='port0/line0', data=array([0, 1, 0, 1], dtype=uint8))
 
     The signal names are stored in the ``NI_LineNames`` extended property on the digital waveform.
-    Note that the order of the names in the string follows signal_column_index order (highest line number
-    first), which is reversed compared to signal_index order (lowest line first). This means line 0
-    (signal_index 0) appears last in the NI_LineNames string. This matches industry conventions where
-    line 0 appears in the rightmost column of the data array.
+    Note that the order of the names in the string follows signal_column_index order (highest
+    line number first), which is reversed compared to signal_index order (lowest line first). This
+    means line 0 (signal_index 0) appears last in the NI_LineNames string. This matches industry
+    conventions where line 0 appears in the rightmost column of the data array.
 
     >>> wfm.extended_properties["NI_LineNames"]
     'port0/line2, port0/line1, port0/line0'
