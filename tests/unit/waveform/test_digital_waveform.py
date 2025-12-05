@@ -1968,10 +1968,8 @@ def test___same_data___test___returns_success() -> None:
 
 
 def test___different_data___test___reports_failures() -> None:
-    waveform = DigitalWaveform.from_port([1, 3, 3, 0xFF, 0x82, 0x34], 0xFF, bitorder="little")
-    expected_waveform = DigitalWaveform.from_port(
-        [1, 2, 3, 0xFF, 0x12, 0x34], 0xFF, bitorder="little"
-    )
+    waveform = DigitalWaveform.from_port([1, 3, 3, 0xFF, 0x82, 0x34], 0xFF)
+    expected_waveform = DigitalWaveform.from_port([1, 2, 3, 0xFF, 0x12, 0x34], 0xFF)
 
     result = waveform.test(expected_waveform)
 
@@ -1980,6 +1978,13 @@ def test___different_data___test___reports_failures() -> None:
         DigitalWaveformFailure(
             sample_index=1,
             expected_sample_index=1,
+            signal_index=0,
+            actual_state=DigitalState.FORCE_UP,
+            expected_state=DigitalState.FORCE_DOWN,
+        ),
+        DigitalWaveformFailure(
+            sample_index=4,
+            expected_sample_index=4,
             signal_index=7,
             actual_state=DigitalState.FORCE_UP,
             expected_state=DigitalState.FORCE_DOWN,
@@ -1987,25 +1992,16 @@ def test___different_data___test___reports_failures() -> None:
         DigitalWaveformFailure(
             sample_index=4,
             expected_sample_index=4,
-            signal_index=3,
+            signal_index=4,
             actual_state=DigitalState.FORCE_DOWN,
             expected_state=DigitalState.FORCE_UP,
-        ),
-        DigitalWaveformFailure(
-            sample_index=4,
-            expected_sample_index=4,
-            signal_index=0,
-            actual_state=DigitalState.FORCE_UP,
-            expected_state=DigitalState.FORCE_DOWN,
         ),
     ]
 
 
 def test___shifted_different_data___test___reports_shifted_failures() -> None:
-    waveform = DigitalWaveform.from_port([0, 0, 1, 3, 3, 0xFF, 0x82, 0x34], 0xFF, bitorder="little")
-    expected_waveform = DigitalWaveform.from_port(
-        [0, 1, 2, 3, 0xFF, 0x12, 0x34, 0, 0, 0], 0xFF, bitorder="little"
-    )
+    waveform = DigitalWaveform.from_port([0, 0, 1, 3, 3, 0xFF, 0x82, 0x34], 0xFF)
+    expected_waveform = DigitalWaveform.from_port([0, 1, 2, 3, 0xFF, 0x12, 0x34, 0, 0, 0], 0xFF)
 
     result = waveform.test(
         expected_waveform, start_sample=2, expected_start_sample=1, sample_count=6
@@ -2016,6 +2012,13 @@ def test___shifted_different_data___test___reports_shifted_failures() -> None:
         DigitalWaveformFailure(
             sample_index=3,
             expected_sample_index=2,
+            signal_index=0,
+            actual_state=DigitalState.FORCE_UP,
+            expected_state=DigitalState.FORCE_DOWN,
+        ),
+        DigitalWaveformFailure(
+            sample_index=6,
+            expected_sample_index=5,
             signal_index=7,
             actual_state=DigitalState.FORCE_UP,
             expected_state=DigitalState.FORCE_DOWN,
@@ -2023,15 +2026,8 @@ def test___shifted_different_data___test___reports_shifted_failures() -> None:
         DigitalWaveformFailure(
             sample_index=6,
             expected_sample_index=5,
-            signal_index=3,
+            signal_index=4,
             actual_state=DigitalState.FORCE_DOWN,
             expected_state=DigitalState.FORCE_UP,
-        ),
-        DigitalWaveformFailure(
-            sample_index=6,
-            expected_sample_index=5,
-            signal_index=0,
-            actual_state=DigitalState.FORCE_UP,
-            expected_state=DigitalState.FORCE_DOWN,
         ),
     ]
