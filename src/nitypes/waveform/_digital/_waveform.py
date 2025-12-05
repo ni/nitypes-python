@@ -86,30 +86,6 @@ class DigitalWaveformTestResult:
     """A collection of test failure information."""
 
 
-class _DigitalWaveformExtendedProperties(ExtendedPropertyDictionary):
-    """Extended properties that invalidate cached line names when NI_LineNames is modified."""
-
-    __slots__ = ["_waveform"]
-
-    def __init__(
-        self,
-        waveform: DigitalWaveform[Any],
-        properties: Mapping[str, ExtendedPropertyValue] | None = None,
-    ) -> None:
-        super().__init__(properties)
-        self._waveform = waveform
-
-    def __setitem__(self, key: str, value: ExtendedPropertyValue, /) -> None:
-        super().__setitem__(key, value)
-        if key == LINE_NAMES:
-            self._waveform._line_names = None
-
-    def __delitem__(self, key: str, /) -> None:
-        super().__delitem__(key)
-        if key == LINE_NAMES:
-            self._waveform._line_names = None
-
-
 class DigitalWaveform(Generic[TDigitalState]):
     """A digital waveform, which encapsulates digital data and timing information.
 
@@ -858,10 +834,11 @@ class DigitalWaveform(Generic[TDigitalState]):
             raise invalid_arg_type("raw data", "NumPy ndarray", data)
 
         if copy_extended_properties or not isinstance(
-            extended_properties, _DigitalWaveformExtendedProperties
+            extended_properties, ExtendedPropertyDictionary
         ):
-            extended_properties = _DigitalWaveformExtendedProperties(self, extended_properties)
+            extended_properties = ExtendedPropertyDictionary(extended_properties)
         self._extended_properties = extended_properties
+        self._extended_properties.on_key_changed = self._on_extended_property_changed
 
         if timing is None:
             timing = Timing.empty
@@ -869,6 +846,10 @@ class DigitalWaveform(Generic[TDigitalState]):
 
         self._signals = None
         self._line_names = None
+
+    def _on_extended_property_changed(self, key: str) -> None:
+        if key == LINE_NAMES:
+            self._line_names = None
 
     def _init_with_new_array(
         self,
@@ -1387,24 +1368,12 @@ class DigitalWaveform(Generic[TDigitalState]):
             and self._timing == value._timing
         )
 
-    def __copy__(self) -> Self:
-        """Return a shallow copy of self."""
-        return self.__class__(
-            self._sample_count,
-            self.signal_count,
-            self.dtype,
-            data=self.data,
-            extended_properties=self._extended_properties,
-            copy_extended_properties=False,
-            timing=self._timing,
-        )
-
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
         ctor_args = (self._sample_count, self.signal_count, self.dtype)
         ctor_kwargs: dict[str, Any] = {
             "data": self.data,
-            "extended_properties": ExtendedPropertyDictionary(self._extended_properties),
+            "extended_properties": self._extended_properties,
             "copy_extended_properties": False,
             "timing": self._timing,
         }
