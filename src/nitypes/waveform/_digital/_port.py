@@ -118,7 +118,7 @@ def port_to_line_data(
     port_size = port_data.dtype.itemsize * 8
     # Convert to big-endian byte order to ensure MSB comes first when bitorder='big'
     # For multi-byte types on little-endian systems, we need to byteswap
-    if bitorder == "big" and port_data.dtype.itemsize > 1 and sys.byteorder == "little":
+    if bitorder != sys.byteorder and port_data.dtype.itemsize > 1:
         port_data = port_data.byteswap()
 
     line_data = np.unpackbits(port_data.view(np.uint8), bitorder=bitorder)
