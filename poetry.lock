@@ -853,6 +853,7 @@ description = "Mypyc runtime library"
 optional = false
 python-versions = ">=3.9"
 groups = ["lint"]
+markers = "implementation_name != \"pypy\""
 files = [
     {file = "librt-0.7.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:f5771fd63fe30dfbc94ac08eb6f590fb74964d90aba14c06ac94ed40cbff9f99"},
     {file = "librt-0.7.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:388f794cd52ed4692ec0e3b00a07a502ef879bac90fa21f6e0035422c7b117c8"},
@@ -1141,6 +1142,7 @@ description = "Optional static typing for Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["lint"]
+markers = "implementation_name != \"pypy\""
 files = [
     {file = "mypy-1.19.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:6148ede033982a8c5ca1143de34c71836a09f105068aaa8b7d5edab2b053e6c8"},
     {file = "mypy-1.19.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:a9ac09e52bb0f7fb912f5d2a783345c72441a08ef56ce3e17c1752af36340a39"},
@@ -2468,4 +2470,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4.0"
-content-hash = "56f9363a257f8e9df9c6d130fa9f35680d12e19a4f24d235f5d8053ce7053956"
+content-hash = "7b70988ed8e3d51feb1518ac84c638bdcb228e9a55c020e7ccb9df7389933bd2"
