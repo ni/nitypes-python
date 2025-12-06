@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import operator
-from collections.abc import Iterator, Mapping, MutableMapping
+from collections.abc import Callable, Iterator, Mapping, MutableMapping
+from typing import TYPE_CHECKING
 
 from nitypes.waveform.typing import ExtendedPropertyValue
 
@@ -9,6 +10,9 @@ from nitypes.waveform.typing import ExtendedPropertyValue
 CHANNEL_NAME = "NI_ChannelName"
 LINE_NAMES = "NI_LineNames"
 UNIT_DESCRIPTION = "NI_UnitDescription"
+
+if TYPE_CHECKING:
+    OnKeyChangedCallback = Callable[[str], None]
 
 
 class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
@@ -19,13 +23,23 @@ class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
         over the network or write it to a TDMS file.
     """
 
-    __slots__ = ["_properties"]
+    __slots__ = ["_properties", "_on_key_changed"]
 
     def __init__(self, properties: Mapping[str, ExtendedPropertyValue] | None = None, /) -> None:
         """Initialize a new ExtendedPropertyDictionary."""
         self._properties: dict[str, ExtendedPropertyValue] = {}
+        self._on_key_changed: OnKeyChangedCallback | None = None
         if properties is not None:
             self._properties.update(properties)
+
+    @property
+    def on_key_changed(self) -> OnKeyChangedCallback | None:
+        """Callback invoked when a key is set or deleted."""
+        return self._on_key_changed
+
+    @on_key_changed.setter
+    def on_key_changed(self, value: OnKeyChangedCallback | None) -> None:
+        self._on_key_changed = value
 
     def __len__(self) -> int:
         """Return len(self)."""
@@ -46,10 +60,14 @@ class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
     def __setitem__(self, key: str, value: ExtendedPropertyValue, /) -> None:
         """Set self[key] to value."""
         operator.setitem(self._properties, key, value)
+        if self._on_key_changed is not None:
+            self._on_key_changed(key)
 
     def __delitem__(self, key: str, /) -> None:
         """Delete self[key]."""
         operator.delitem(self._properties, key)
+        if self._on_key_changed is not None:
+            self._on_key_changed(key)
 
     def _merge(self, other: ExtendedPropertyDictionary) -> None:
         for key, value in other.items():
