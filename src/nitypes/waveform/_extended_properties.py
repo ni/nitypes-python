@@ -32,15 +32,6 @@ class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
         if properties is not None:
             self._properties.update(properties)
 
-    @property
-    def on_key_changed(self) -> OnKeyChangedCallback | None:
-        """Callback invoked when a key is set or deleted."""
-        return self._on_key_changed
-
-    @on_key_changed.setter
-    def on_key_changed(self, value: OnKeyChangedCallback | None) -> None:
-        self._on_key_changed = value
-
     def __len__(self) -> int:
         """Return len(self)."""
         return len(self._properties)

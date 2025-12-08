@@ -838,7 +838,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         ):
             extended_properties = ExtendedPropertyDictionary(extended_properties)
         self._extended_properties = extended_properties
-        self._extended_properties.on_key_changed = self._on_extended_property_changed
+        self._extended_properties._on_key_changed = self._on_extended_property_changed
 
         if timing is None:
             timing = Timing.empty
