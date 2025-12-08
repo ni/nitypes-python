@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import operator
 from collections.abc import Callable, Iterator, Mapping, MutableMapping
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeAlias
 
 from nitypes.waveform.typing import ExtendedPropertyValue
 
@@ -12,7 +12,7 @@ LINE_NAMES = "NI_LineNames"
 UNIT_DESCRIPTION = "NI_UnitDescription"
 
 if TYPE_CHECKING:
-    OnKeyChangedCallback = Callable[[str], None]
+    OnKeyChangedCallback: TypeAlias = Callable[[str], None]
 
 
 class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):

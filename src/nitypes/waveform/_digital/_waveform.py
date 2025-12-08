@@ -173,9 +173,8 @@ class DigitalWaveform(Generic[TDigitalState]):
 
     * :attr:`DigitalWaveformSignal.signal_index` - The position in the :attr:`DigitalWaveform.signals`
       collection (0-based from the first signal). signal_index 0 is the rightmost column in the data.
-    * :attr:`DigitalWaveformSignal.column_index` - The position in the :attr:`DigitalWaveform.data`
-      array's second dimension (0-based from the first column). column_index 0 is the leftmost column
-      in the data.
+    * :attr:`DigitalWaveformSignal.column_index` - The column in the :attr:`DigitalWaveform.data`
+      array, e.g. `waveform.data[:, column_index]`. column_index 0 is the leftmost column in the data.
 
     These indices are reversed with respect to each other. signal_index 0 (line 0) corresponds to
     the highest column_index, and the highest signal_index (the highest line) corresponds to
