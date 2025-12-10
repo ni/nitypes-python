@@ -153,6 +153,52 @@ def test___signal_with_line_names___change_line_names_property___signal_returns_
     assert waveform.signals[1].name == "port0/line11"
 
 
+def test___pickled_waveform___change_line_names_property___signal_returns_new_line_name() -> None:
+    waveform = DigitalWaveform(
+        10, 2, extended_properties={"NI_LineNames": "port0/line1, port0/line0"}
+    )
+    pickled_waveform = pickle.loads(pickle.dumps(waveform))
+    assert pickled_waveform.signals[0].name == "port0/line0"
+    assert pickled_waveform.signals[1].name == "port0/line1"
+
+    pickled_waveform.extended_properties["NI_LineNames"] = "port0/line11, port0/line10"
+
+    assert pickled_waveform.signals[0].name == "port0/line10"
+    assert pickled_waveform.signals[1].name == "port0/line11"
+
+
+def test___shallow_copied_waveform___change_line_names_property___signal_returns_new_line_name() -> (
+    None
+):
+    waveform = DigitalWaveform(
+        10, 2, extended_properties={"NI_LineNames": "port0/line1, port0/line0"}
+    )
+    copied_waveform = copy.copy(waveform)
+    assert copied_waveform.signals[0].name == "port0/line0"
+    assert copied_waveform.signals[1].name == "port0/line1"
+
+    copied_waveform.extended_properties["NI_LineNames"] = "port0/line11, port0/line10"
+
+    assert copied_waveform.signals[0].name == "port0/line10"
+    assert copied_waveform.signals[1].name == "port0/line11"
+
+
+def test___deep_copied_waveform___change_line_names_property___signal_returns_new_line_name() -> (
+    None
+):
+    waveform = DigitalWaveform(
+        10, 2, extended_properties={"NI_LineNames": "port0/line1, port0/line0"}
+    )
+    copied_waveform = copy.deepcopy(waveform)
+    assert copied_waveform.signals[0].name == "port0/line0"
+    assert copied_waveform.signals[1].name == "port0/line1"
+
+    copied_waveform.extended_properties["NI_LineNames"] = "port0/line11, port0/line10"
+
+    assert copied_waveform.signals[0].name == "port0/line10"
+    assert copied_waveform.signals[1].name == "port0/line11"
+
+
 ###############################################################################
 # signal data
 ###############################################################################

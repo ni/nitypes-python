@@ -1397,3 +1397,15 @@ class DigitalWaveform(Generic[TDigitalState]):
         if self._timing is not Timing.empty:
             args.append(f"timing={self._timing!r}")
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
+
+    def __copy__(self) -> Self:
+        """Create a shallow copy of the waveform."""
+        return self.__class__(
+            self._sample_count,
+            self.signal_count,
+            self.dtype,
+            data=self.data,
+            extended_properties=self._extended_properties,
+            copy_extended_properties=True,  # Each waveform needs its own callback
+            timing=self._timing,
+        )

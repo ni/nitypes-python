@@ -66,6 +66,14 @@ class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
         for key, value in other.items():
             self._properties.setdefault(key, value)
 
+    def __getstate__(self) -> dict[str, ExtendedPropertyValue]:
+        """Return state for pickling, excluding the callback."""
+        return self._properties
+
+    def __setstate__(self, state: dict[str, ExtendedPropertyValue]) -> None:
+        """Restore state from pickling, excluding the callback."""
+        self._properties = state
+
     def __repr__(self) -> str:
         """Return repr(self)."""
         return f"{self.__class__.__module__}.{self.__class__.__name__}({self._properties!r})"

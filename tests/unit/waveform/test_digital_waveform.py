@@ -1912,7 +1912,10 @@ def _assert_shallow_copy(value: DigitalWaveform[Any], other: DigitalWaveform[Any
         or value._data.base is other._data
         or value._data.base is other._data_1d
     )
-    assert value._extended_properties is other._extended_properties
+    # extended_properties should NOT be shared because callbacks must be unique
+    assert value._extended_properties is not other._extended_properties
+    assert value.extended_properties._on_key_changed == value._on_extended_property_changed
+    assert other.extended_properties._on_key_changed == other._on_extended_property_changed
     assert value._timing is other._timing
 
 
@@ -1928,6 +1931,8 @@ def _assert_deep_copy(value: DigitalWaveform[Any], other: DigitalWaveform[Any]) 
     assert value is not other
     assert value._data is not other._data and value._data.base is not other._data
     assert value._extended_properties is not other._extended_properties
+    assert value.extended_properties._on_key_changed == value._on_extended_property_changed
+    assert other.extended_properties._on_key_changed == other._on_extended_property_changed
     if other._timing is not Timing.empty:
         assert value._timing is not other._timing
 
@@ -1952,6 +1957,45 @@ def test___waveform___pickle___references_public_modules() -> None:
     assert b"nitypes.waveform._digital" not in value_bytes
     assert b"nitypes.waveform._extended_properties" not in value_bytes
     assert b"nitypes.waveform._timing" not in value_bytes
+
+
+def test___waveform_with_extended_properties___pickle_unpickle___valid_on_key_changed() -> None:
+    value = DigitalWaveform(
+        data=np.array([1, 2, 3], _np_bool),
+        extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+        timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+    )
+
+    new_value = pickle.loads(pickle.dumps(value))
+
+    assert new_value.extended_properties._on_key_changed == new_value._on_extended_property_changed
+    assert value.extended_properties._on_key_changed == value._on_extended_property_changed
+
+
+def test___waveform_with_extended_properties___shallow_copy___valid_on_key_changed() -> None:
+    value = DigitalWaveform(
+        data=np.array([1, 2, 3], _np_bool),
+        extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+        timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+    )
+
+    new_value = copy.copy(value)
+
+    assert new_value.extended_properties._on_key_changed == new_value._on_extended_property_changed
+    assert value.extended_properties._on_key_changed == value._on_extended_property_changed
+
+
+def test___waveform_with_extended_properties___deep_copy___valid_on_key_changed() -> None:
+    value = DigitalWaveform(
+        data=np.array([1, 2, 3], _np_bool),
+        extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+        timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+    )
+
+    new_value = copy.deepcopy(value)
+
+    assert new_value.extended_properties._on_key_changed == new_value._on_extended_property_changed
+    assert value.extended_properties._on_key_changed == value._on_extended_property_changed
 
 
 ###############################################################################
