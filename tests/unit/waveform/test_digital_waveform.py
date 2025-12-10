@@ -1903,6 +1903,13 @@ def test___various_values___copy___makes_shallow_copy(value: DigitalWaveform[Any
     _assert_shallow_copy(new_value, value)
 
 
+def _assert_on_key_changed_valid(value: DigitalWaveform[Any]) -> None:
+    assert any(
+        ref() == value._on_extended_property_changed
+        for ref in value.extended_properties._on_key_changed
+    )
+
+
 def _assert_shallow_copy(value: DigitalWaveform[Any], other: DigitalWaveform[Any]) -> None:
     assert value == other
     assert value is not other
@@ -1912,10 +1919,9 @@ def _assert_shallow_copy(value: DigitalWaveform[Any], other: DigitalWaveform[Any
         or value._data.base is other._data
         or value._data.base is other._data_1d
     )
-    # extended_properties should NOT be shared because callbacks must be unique
-    assert value._extended_properties is not other._extended_properties
-    assert value.extended_properties._on_key_changed == value._on_extended_property_changed
-    assert other.extended_properties._on_key_changed == other._on_extended_property_changed
+    assert value._extended_properties is other._extended_properties
+    _assert_on_key_changed_valid(value)
+    _assert_on_key_changed_valid(other)
     assert value._timing is other._timing
 
 
@@ -1931,8 +1937,8 @@ def _assert_deep_copy(value: DigitalWaveform[Any], other: DigitalWaveform[Any]) 
     assert value is not other
     assert value._data is not other._data and value._data.base is not other._data
     assert value._extended_properties is not other._extended_properties
-    assert value.extended_properties._on_key_changed == value._on_extended_property_changed
-    assert other.extended_properties._on_key_changed == other._on_extended_property_changed
+    _assert_on_key_changed_valid(value)
+    _assert_on_key_changed_valid(other)
     if other._timing is not Timing.empty:
         assert value._timing is not other._timing
 
@@ -1968,8 +1974,8 @@ def test___waveform_with_extended_properties___pickle_unpickle___valid_on_key_ch
 
     new_value = pickle.loads(pickle.dumps(value))
 
-    assert new_value.extended_properties._on_key_changed == new_value._on_extended_property_changed
-    assert value.extended_properties._on_key_changed == value._on_extended_property_changed
+    _assert_on_key_changed_valid(value)
+    _assert_on_key_changed_valid(new_value)
 
 
 def test___waveform_with_extended_properties___shallow_copy___valid_on_key_changed() -> None:
@@ -1981,8 +1987,8 @@ def test___waveform_with_extended_properties___shallow_copy___valid_on_key_chang
 
     new_value = copy.copy(value)
 
-    assert new_value.extended_properties._on_key_changed == new_value._on_extended_property_changed
-    assert value.extended_properties._on_key_changed == value._on_extended_property_changed
+    _assert_on_key_changed_valid(value)
+    _assert_on_key_changed_valid(new_value)
 
 
 def test___waveform_with_extended_properties___deep_copy___valid_on_key_changed() -> None:
@@ -1994,8 +2000,8 @@ def test___waveform_with_extended_properties___deep_copy___valid_on_key_changed(
 
     new_value = copy.deepcopy(value)
 
-    assert new_value.extended_properties._on_key_changed == new_value._on_extended_property_changed
-    assert value.extended_properties._on_key_changed == value._on_extended_property_changed
+    _assert_on_key_changed_valid(value)
+    _assert_on_key_changed_valid(new_value)
 
 
 ###############################################################################

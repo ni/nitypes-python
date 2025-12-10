@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import operator
+import weakref
 from collections.abc import Callable, Iterator, Mapping, MutableMapping
 from typing import TYPE_CHECKING
 
@@ -30,7 +31,7 @@ class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
     def __init__(self, properties: Mapping[str, ExtendedPropertyValue] | None = None, /) -> None:
         """Initialize a new ExtendedPropertyDictionary."""
         self._properties: dict[str, ExtendedPropertyValue] = {}
-        self._on_key_changed: OnKeyChangedCallback | None = None
+        self._on_key_changed: list[weakref.ref[OnKeyChangedCallback]] = []
         if properties is not None:
             self._properties.update(properties)
 
@@ -53,26 +54,28 @@ class ExtendedPropertyDictionary(MutableMapping[str, ExtendedPropertyValue]):
     def __setitem__(self, key: str, value: ExtendedPropertyValue, /) -> None:
         """Set self[key] to value."""
         operator.setitem(self._properties, key, value)
-        if self._on_key_changed is not None:
-            self._on_key_changed(key)
+        self._notify_on_key_changed(key)
 
     def __delitem__(self, key: str, /) -> None:
         """Delete self[key]."""
         operator.delitem(self._properties, key)
-        if self._on_key_changed is not None:
-            self._on_key_changed(key)
+        self._notify_on_key_changed(key)
+
+    def _notify_on_key_changed(self, key: str) -> None:
+        for callback_ref in self._on_key_changed:
+            callback = callback_ref()
+            if callback:
+                callback(key)
 
     def _merge(self, other: ExtendedPropertyDictionary) -> None:
         for key, value in other.items():
             self._properties.setdefault(key, value)
 
-    def __getstate__(self) -> dict[str, ExtendedPropertyValue]:
-        """Return state for pickling, excluding the callback."""
-        return self._properties
-
-    def __setstate__(self, state: dict[str, ExtendedPropertyValue]) -> None:
-        """Restore state from pickling, excluding the callback."""
-        self._properties = state
+    def __reduce__(
+        self,
+    ) -> tuple[type[ExtendedPropertyDictionary], tuple[dict[str, ExtendedPropertyValue]]]:
+        """Return object state for pickling, excluding the callback."""
+        return (self.__class__, (self._properties,))
 
     def __repr__(self) -> str:
         """Return repr(self)."""

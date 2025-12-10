@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 import sys
+import weakref
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Generic, Literal, SupportsIndex, overload
@@ -837,7 +838,9 @@ class DigitalWaveform(Generic[TDigitalState]):
         ):
             extended_properties = ExtendedPropertyDictionary(extended_properties)
         self._extended_properties = extended_properties
-        self._extended_properties._on_key_changed = self._on_extended_property_changed
+        self._extended_properties._on_key_changed.append(
+            weakref.WeakMethod(self._on_extended_property_changed)
+        )
 
         if timing is None:
             timing = Timing.empty
@@ -1397,15 +1400,3 @@ class DigitalWaveform(Generic[TDigitalState]):
         if self._timing is not Timing.empty:
             args.append(f"timing={self._timing!r}")
         return f"{self.__class__.__module__}.{self.__class__.__name__}({', '.join(args)})"
-
-    def __copy__(self) -> Self:
-        """Create a shallow copy of the waveform."""
-        return self.__class__(
-            self._sample_count,
-            self.signal_count,
-            self.dtype,
-            data=self.data,
-            extended_properties=self._extended_properties,
-            copy_extended_properties=True,  # Each waveform needs its own callback
-            timing=self._timing,
-        )

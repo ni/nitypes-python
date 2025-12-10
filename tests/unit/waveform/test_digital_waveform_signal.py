@@ -158,13 +158,18 @@ def test___pickled_waveform___change_line_names_property___signal_returns_new_li
         10, 2, extended_properties={"NI_LineNames": "port0/line1, port0/line0"}
     )
     pickled_waveform = pickle.loads(pickle.dumps(waveform))
+    assert waveform.signals[0].name == "port0/line0"
+    assert waveform.signals[1].name == "port0/line1"
     assert pickled_waveform.signals[0].name == "port0/line0"
     assert pickled_waveform.signals[1].name == "port0/line1"
 
-    pickled_waveform.extended_properties["NI_LineNames"] = "port0/line11, port0/line10"
+    waveform.extended_properties["NI_LineNames"] = "port0/line11, port0/line10"
+    pickled_waveform.extended_properties["NI_LineNames"] = "port0/line21, port0/line20"
 
-    assert pickled_waveform.signals[0].name == "port0/line10"
-    assert pickled_waveform.signals[1].name == "port0/line11"
+    assert waveform.signals[0].name == "port0/line10"
+    assert waveform.signals[1].name == "port0/line11"
+    assert pickled_waveform.signals[0].name == "port0/line20"
+    assert pickled_waveform.signals[1].name == "port0/line21"
 
 
 def test___shallow_copied_waveform___change_line_names_property___signal_returns_new_line_name() -> (
@@ -174,11 +179,15 @@ def test___shallow_copied_waveform___change_line_names_property___signal_returns
         10, 2, extended_properties={"NI_LineNames": "port0/line1, port0/line0"}
     )
     copied_waveform = copy.copy(waveform)
+    assert waveform.signals[0].name == "port0/line0"
+    assert waveform.signals[1].name == "port0/line1"
     assert copied_waveform.signals[0].name == "port0/line0"
     assert copied_waveform.signals[1].name == "port0/line1"
 
     copied_waveform.extended_properties["NI_LineNames"] = "port0/line11, port0/line10"
 
+    assert waveform.signals[0].name == "port0/line10"
+    assert waveform.signals[1].name == "port0/line11"
     assert copied_waveform.signals[0].name == "port0/line10"
     assert copied_waveform.signals[1].name == "port0/line11"
 
@@ -190,13 +199,18 @@ def test___deep_copied_waveform___change_line_names_property___signal_returns_ne
         10, 2, extended_properties={"NI_LineNames": "port0/line1, port0/line0"}
     )
     copied_waveform = copy.deepcopy(waveform)
+    assert waveform.signals[0].name == "port0/line0"
+    assert waveform.signals[1].name == "port0/line1"
     assert copied_waveform.signals[0].name == "port0/line0"
     assert copied_waveform.signals[1].name == "port0/line1"
 
-    copied_waveform.extended_properties["NI_LineNames"] = "port0/line11, port0/line10"
+    waveform.extended_properties["NI_LineNames"] = "port0/line11, port0/line10"
+    copied_waveform.extended_properties["NI_LineNames"] = "port0/line21, port0/line20"
 
-    assert copied_waveform.signals[0].name == "port0/line10"
-    assert copied_waveform.signals[1].name == "port0/line11"
+    assert waveform.signals[0].name == "port0/line10"
+    assert waveform.signals[1].name == "port0/line11"
+    assert copied_waveform.signals[0].name == "port0/line20"
+    assert copied_waveform.signals[1].name == "port0/line21"
 
 
 ###############################################################################
