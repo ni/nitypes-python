@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import datetime as dt
 import sys
+import weakref
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Generic, SupportsIndex, overload
+from typing import TYPE_CHECKING, Any, Generic, Literal, SupportsIndex, overload
 
 import hightime as ht
 import numpy as np
@@ -106,7 +107,8 @@ class DigitalWaveform(Generic[TDigitalState]):
     To construct a digital waveform from a NumPy array of line data, use the
     :any:`DigitalWaveform.from_lines` method. Each array element represents a digital state, such as 1
     for "on" or 0 for "off". The line data should be in a 1D array indexed by sample or a 2D array
-    indexed by (sample, signal). The digital waveform displays the line data as a 2D array.
+    indexed by (sample, signal). *(Note, signal indices are reversed! See "Signal index vs. column index"
+    below for details.)* The digital waveform displays the line data as a 2D array.
 
     >>> import numpy as np
     >>> DigitalWaveform.from_lines(np.array([0, 1, 0], np.uint8))
@@ -123,30 +125,30 @@ class DigitalWaveform(Generic[TDigitalState]):
     To construct a digital waveform from a NumPy array of port data, use the
     :any:`DigitalWaveform.from_port` method. Each element of the port data array represents a digital
     sample taken over a port of signals. Each bit in the sample is a signal value, either 1 for "on" or
-    0 for "off". The least significant bit of the sample is placed at signal index 0 of the
-    DigitalWaveform.
+    0 for "off". *(Note, signal indices are reversed! See "Signal index vs. column index" below for
+    details.)*
 
     >>> DigitalWaveform.from_port(np.array([0, 1, 2, 3], np.uint8))  # doctest: +NORMALIZE_WHITESPACE
     nitypes.waveform.DigitalWaveform(4, 8, data=array([[0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0, 0, 0]], dtype=uint8))
+    [0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0, 1, 1]], dtype=uint8))
 
     You can use a mask to specify which lines in the port to include in the waveform.
 
     >>> DigitalWaveform.from_port(np.array([0, 1, 2, 3], np.uint8), 0x3)
-    nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [1, 0], [0, 1], [1, 1]], dtype=uint8))
+    nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=uint8))
 
     You can also use a non-NumPy sequence such as a list, but you must specify a mask so the waveform
     knows how many bits are in each list element.
 
     >>> DigitalWaveform.from_port([0, 1, 2, 3], 0x3)
-    nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [1, 0], [0, 1], [1, 1]], dtype=uint8))
+    nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=uint8))
 
     The 2D version, :any:`DigitalWaveform.from_ports`, returns multiple waveforms, one for each row of
     data in the array or nested sequence.
 
     >>> nested_list = [[0, 1, 2, 3], [3, 0, 3, 0]]
     >>> DigitalWaveform.from_ports(nested_list, [0x3, 0x3])  # doctest: +NORMALIZE_WHITESPACE
-    [nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [1, 0], [0, 1], [1, 1]], dtype=uint8)),
+    [nitypes.waveform.DigitalWaveform(4, 2, data=array([[0, 0], [0, 1], [1, 0], [1, 1]], dtype=uint8)),
     nitypes.waveform.DigitalWaveform(4, 2, data=array([[1, 1], [0, 0], [1, 1], [0, 0]], dtype=uint8))]
 
     Digital signals
@@ -165,6 +167,40 @@ class DigitalWaveform(Generic[TDigitalState]):
     >>> wfm.signals[0].data
     array([0, 1, 0, 1], dtype=uint8)
 
+    Signal index vs. column index
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    Each :class:`DigitalWaveformSignal` has two index properties:
+
+    * :attr:`DigitalWaveformSignal.signal_index` - The position in the :attr:`DigitalWaveform.signals`
+      collection (0-based from the first signal). signal_index 0 is the rightmost column in the data.
+    * :attr:`DigitalWaveformSignal.column_index` - The column in the :attr:`DigitalWaveform.data`
+      array, e.g. `waveform.data[:, column_index]`. column_index 0 is the leftmost column in the data.
+
+    These indices are reversed with respect to each other. signal_index 0 (line 0) corresponds to
+    the highest column_index, and the highest signal_index (the highest line) corresponds to
+    column_index 0. This ordering follows industry conventions where line 0 is the least
+    significant bit and appears last (in the rightmost column) of the data array.
+
+    >>> wfm = DigitalWaveform.from_port([0, 1, 2, 3], 0x7)  # 3 signals
+    >>> wfm.data
+    array([[0, 0, 0],
+           [0, 0, 1],
+           [0, 1, 0],
+           [0, 1, 1]], dtype=uint8)
+    >>> wfm.signals[0].signal_index
+    0
+    >>> wfm.signals[0].column_index
+    2
+    >>> wfm.signals[0].data
+    array([0, 1, 0, 1], dtype=uint8)
+    >>> wfm.signals[2].signal_index
+    2
+    >>> wfm.signals[2].column_index
+    0
+    >>> wfm.signals[2].data
+    array([0, 0, 0, 0], dtype=uint8)
+
     Digital signal names
     ^^^^^^^^^^^^^^^^^^^^
 
@@ -172,20 +208,25 @@ class DigitalWaveform(Generic[TDigitalState]):
 
     >>> wfm.signals[0].name = "port0/line0"
     >>> wfm.signals[1].name = "port0/line1"
+    >>> wfm.signals[2].name = "port0/line2"
     >>> wfm.signals[0].name
     'port0/line0'
     >>> wfm.signals[0]
     nitypes.waveform.DigitalWaveformSignal(name='port0/line0', data=array([0, 1, 0, 1], dtype=uint8))
 
     The signal names are stored in the ``NI_LineNames`` extended property on the digital waveform.
+    Note that the order of the names in the string follows column_index order (highest line number
+    first), which is reversed compared to signal_index order (lowest line first). This means line 0
+    (signal_index 0) appears last in the NI_LineNames string. This matches industry conventions
+    where line 0 appears in the rightmost column of the data array.
 
     >>> wfm.extended_properties["NI_LineNames"]
-    'port0/line0, port0/line1'
+    'port0/line2, port0/line1, port0/line0'
 
     When creating a digital waveform, you can directly set the ``NI_LineNames`` extended property.
 
     >>> wfm = DigitalWaveform.from_port([2, 4], 0x7,
-    ... extended_properties={"NI_LineNames": "Dev1/port1/line4, Dev1/port1/line5, Dev1/port1/line6"})
+    ... extended_properties={"NI_LineNames": "Dev1/port1/line6, Dev1/port1/line5, Dev1/port1/line4"})
     >>> wfm.signals[0]
     nitypes.waveform.DigitalWaveformSignal(name='Dev1/port1/line4', data=array([0, 0], dtype=uint8))
     >>> wfm.signals[1]
@@ -215,7 +256,7 @@ class DigitalWaveform(Generic[TDigitalState]):
     objects, which indicate the location of each test failure.
 
     Here is an example. The expected waveform counts in binary using ``COMPARE_LOW`` (``L``) and
-    ``COMPARE_HIGH`` (``H``), but signal 1 of the actual waveform is stuck high.
+    ``COMPARE_HIGH`` (``H``), but signal 0 of the actual waveform is stuck high.
 
     >>> actual = DigitalWaveform.from_lines([[0, 1], [1, 1], [0, 1], [1, 1]])
     >>> expected = DigitalWaveform.from_lines([[DigitalState.COMPARE_LOW, DigitalState.COMPARE_LOW],
@@ -232,10 +273,10 @@ class DigitalWaveform(Generic[TDigitalState]):
     and the digital state from the actual and expected waveforms:
 
     >>> result.failures[0]  # doctest: +NORMALIZE_WHITESPACE
-    DigitalWaveformFailure(sample_index=0, expected_sample_index=0, signal_index=1,
+    DigitalWaveformFailure(sample_index=0, expected_sample_index=0, signal_index=0, column_index=1,
     actual_state=<DigitalState.FORCE_UP: 1>, expected_state=<DigitalState.COMPARE_LOW: 3>)
     >>> result.failures[1]  # doctest: +NORMALIZE_WHITESPACE
-    DigitalWaveformFailure(sample_index=1, expected_sample_index=1, signal_index=1,
+    DigitalWaveformFailure(sample_index=1, expected_sample_index=1, signal_index=0, column_index=1,
     actual_state=<DigitalState.FORCE_UP: 1>, expected_state=<DigitalState.COMPARE_LOW: 3>)
 
     Timing information
@@ -312,6 +353,10 @@ class DigitalWaveform(Generic[TDigitalState]):
         by (sample, signal). The line data may also use digital state values from the
         :class:`DigitalState` enum.
 
+        Note that signal indices are reversed with respect to this array's column indices.
+        The first column in each sample corresponds to the highest line number and highest signal
+        index. The last column in each sample corresponds to line 0 and signal index 0.
+
         Args:
             array: The line data as a one or two-dimensional array or a sequence.
             dtype: The NumPy data type for the waveform data.
@@ -357,6 +402,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         mask: SupportsIndex | None = ...,
         dtype: None = ...,
         *,
+        bitorder: Literal["big", "little"] = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
@@ -374,6 +420,7 @@ class DigitalWaveform(Generic[TDigitalState]):
             | np.dtype[TOtherDigitalState]
         ) = ...,
         *,
+        bitorder: Literal["big", "little"] = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
@@ -388,6 +435,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         mask: SupportsIndex | None = ...,
         dtype: npt.DTypeLike = ...,
         *,
+        bitorder: Literal["big", "little"] = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
@@ -401,6 +449,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         mask: SupportsIndex | None = None,
         dtype: npt.DTypeLike = None,
         *,
+        bitorder: Literal["big", "little"] = "big",
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
@@ -408,12 +457,24 @@ class DigitalWaveform(Generic[TDigitalState]):
     ) -> DigitalWaveform[Any]:
         """Construct a waveform from a one-dimensional array or sequence of port data.
 
-        This method allocates a new array in order to convert the port data to line data.
+        This method allocates a new array in order to convert the port data (integers) to line data
+        (bits).
 
         Each element of the port data array represents a digital sample taken over a port of
         signals. Each bit in the sample represents a digital state, either 1 for "on" or 0 for
-        "off". The least significant bit of the sample is placed at signal index 0 of the
-        DigitalWaveform.
+        "off".
+
+        When bitorder='big' (default), the integers in the samples are big-endian. The most
+        significant bit of each integer will be placed in the first column of the data array
+        (corresponding to the highest line number and highest signal index). The least significant
+        bit will be placed in the last column of the data array (corresponding to line 0 and signal
+        index 0).
+
+        When bitorder='little', the integers in the samples are little-endian. The least
+        significant bit of each integer will be placed in the first column of the data array
+        (corresponding to the highest line number and highest signal index). The most significant
+        bit will be placed in the last column of the data array (corresponding to line 0 and signal
+        index 0).
 
         If the input array is not a NumPy array, you must specify the mask.
 
@@ -421,6 +482,8 @@ class DigitalWaveform(Generic[TDigitalState]):
             array: The port data as a one-dimensional array or a sequence.
             mask: A bitmask specifying which lines to include in the waveform.
             dtype: The NumPy data type for the waveform (line) data.
+            bitorder: The bit ordering to use when unpacking port data ('big' or 'little').
+                Defaults to 'big'.
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
             extended_properties: The extended properties of the waveform.
@@ -460,7 +523,7 @@ class DigitalWaveform(Generic[TDigitalState]):
             port_dtype = get_port_dtype(mask)
 
         port_data = _np_asarray(array, port_dtype)
-        line_data = port_to_line_data(port_data, mask)
+        line_data = port_to_line_data(port_data, mask, bitorder)
         if line_data.dtype != dtype:
             line_data = line_data.view(dtype)
 
@@ -481,6 +544,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         masks: Sequence[SupportsIndex] | None = ...,
         dtype: None = ...,
         *,
+        bitorder: Literal["big", "little"] = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
@@ -498,6 +562,7 @@ class DigitalWaveform(Generic[TDigitalState]):
             | np.dtype[TOtherDigitalState]
         ) = ...,
         *,
+        bitorder: Literal["big", "little"] = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
@@ -512,6 +577,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         masks: Sequence[SupportsIndex] | None = ...,
         dtype: npt.DTypeLike = ...,
         *,
+        bitorder: Literal["big", "little"] = ...,
         start_index: SupportsIndex | None = ...,
         sample_count: SupportsIndex | None = ...,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = ...,
@@ -525,6 +591,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         masks: Sequence[SupportsIndex] | None = None,
         dtype: npt.DTypeLike = None,
         *,
+        bitorder: Literal["big", "little"] = "big",
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,
         extended_properties: Mapping[str, ExtendedPropertyValue] | None = None,
@@ -536,9 +603,19 @@ class DigitalWaveform(Generic[TDigitalState]):
 
         Each row of the port data array corresponds to a resulting DigitalWaveform. Each element of
         the port data array represents a digital sample taken over a port of signals. Each bit in
-        the sample is represents a digital state, either 1 for "on" or 0 for "off". The least
-        significant bit of the sample is placed at signal index 0 of the corresponding
-        DigitalWaveform.
+        the sample represents a digital state, either 1 for "on" or 0 for "off".
+
+        When bitorder='big' (default), the integers in the samples are big-endian. The most
+        significant bit of each integer will be placed in the first column of the data array
+        (corresponding to the highest line number and highest signal index). The least significant
+        bit will be placed in the last column of the data array (corresponding to line 0 and signal
+        index 0).
+
+        When bitorder='little', the integers in the samples are little-endian. The least
+        significant bit of each integer will be placed in the first column of the data array
+        (corresponding to the highest line number and highest signal index). The most significant
+        bit will be placed in the last column of the data array (corresponding to line 0 and signal
+        index 0).
 
         If the input array is not a NumPy array, you must specify the masks.
 
@@ -547,6 +624,8 @@ class DigitalWaveform(Generic[TDigitalState]):
             masks: A sequence of bitmasks specifying which lines from each port to include in the
                 corresponding waveform.
             dtype: The NumPy data type for the waveform (line) data.
+            bitorder: The bit ordering to use when unpacking port data ('big' or 'little').
+                Defaults to 'big'.
             start_index: The sample index at which the waveform data begins.
             sample_count: The number of samples in the waveform.
             extended_properties: The extended properties of the waveform.
@@ -593,7 +672,9 @@ class DigitalWaveform(Generic[TDigitalState]):
         port_data = _np_asarray(array, port_dtype)
         waveforms = []
         for port_index in range(port_data.shape[0]):
-            line_data = port_to_line_data(port_data[port_index, :], validated_masks[port_index])
+            line_data = port_to_line_data(
+                port_data[port_index, :], validated_masks[port_index], bitorder
+            )
             if line_data.dtype != dtype:
                 line_data = line_data.view(dtype)
 
@@ -617,7 +698,7 @@ class DigitalWaveform(Generic[TDigitalState]):
         "_extended_properties",
         "_timing",
         "_signals",
-        "_signal_names",
+        "_line_names",
         "__weakref__",
     ]
 
@@ -628,7 +709,7 @@ class DigitalWaveform(Generic[TDigitalState]):
     _extended_properties: ExtendedPropertyDictionary
     _timing: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]
     _signals: DigitalWaveformSignalCollection[TDigitalState] | None
-    _signal_names: list[str] | None
+    _line_names: list[str] | None
 
     # If neither dtype nor data is specified, _TData defaults to np.uint8.
     @overload
@@ -757,13 +838,20 @@ class DigitalWaveform(Generic[TDigitalState]):
         ):
             extended_properties = ExtendedPropertyDictionary(extended_properties)
         self._extended_properties = extended_properties
+        self._extended_properties._on_key_changed.append(
+            weakref.WeakMethod(self._on_extended_property_changed)
+        )
 
         if timing is None:
             timing = Timing.empty
         self._timing = timing
 
         self._signals = None
-        self._signal_names = None
+        self._line_names = None
+
+    def _on_extended_property_changed(self, key: str) -> None:
+        if key == LINE_NAMES:
+            self._line_names = None
 
     def _init_with_new_array(
         self,
@@ -976,26 +1064,24 @@ class DigitalWaveform(Generic[TDigitalState]):
             raise invalid_arg_type("channel name", "str", value)
         self._extended_properties[CHANNEL_NAME] = value
 
-    def _get_signal_names(self) -> list[str]:
-        # Lazily allocate self._signal_names if the application needs it.
-        signal_names = self._signal_names
-        if signal_names is None:
-            signal_names_str = self._extended_properties.get(LINE_NAMES, "")
-            assert isinstance(signal_names_str, str)
-            signal_names = self._signal_names = [
-                name.strip() for name in signal_names_str.split(",")
-            ]
-            if len(signal_names) < self.signal_count:
-                signal_names.extend([""] * (self.signal_count - len(signal_names)))
-        return signal_names
+    def _get_line_names(self) -> list[str]:
+        # Lazily allocate self._line_names if the application needs it.
+        line_names = self._line_names
+        if line_names is None:
+            line_names_str = self._extended_properties.get(LINE_NAMES, "")
+            assert isinstance(line_names_str, str)
+            line_names = self._line_names = [name.strip() for name in line_names_str.split(",")]
+            if len(line_names) < self.signal_count:
+                line_names.extend([""] * (self.signal_count - len(line_names)))
+        return line_names
 
-    def _get_signal_name(self, signal_index: int) -> str:
-        return self._get_signal_names()[signal_index]
+    def _get_line_name(self, column_index: int) -> str:
+        return self._get_line_names()[column_index]
 
-    def _set_signal_name(self, signal_index: int, value: str) -> None:
-        signal_names = self._get_signal_names()
-        signal_names[signal_index] = value
-        self._extended_properties[LINE_NAMES] = ", ".join(signal_names)
+    def _set_line_name(self, column_index: int, value: str) -> None:
+        line_names = self._get_line_names()
+        line_names[column_index] = value
+        self._extended_properties[LINE_NAMES] = ", ".join(line_names)
 
     def _set_timing(self, value: Timing[AnyDateTime, AnyTimeDelta, AnyTimeDelta]) -> None:
         if self._timing is not value:
@@ -1247,10 +1333,11 @@ class DigitalWaveform(Generic[TDigitalState]):
 
         failures = []
         for _ in range(sample_count):
-            for signal_index in range(self.signal_count):
-                actual_state = DigitalState(self.data[start_sample, signal_index])
+            for column_index in range(self.signal_count):
+                signal_index = self._reverse_index(column_index)
+                actual_state = DigitalState(self.data[start_sample, column_index])
                 expected_state = DigitalState(
-                    expected_waveform.data[expected_start_sample, signal_index]
+                    expected_waveform.data[expected_start_sample, column_index]
                 )
                 if DigitalState.test(actual_state, expected_state):
                     failures.append(
@@ -1266,6 +1353,11 @@ class DigitalWaveform(Generic[TDigitalState]):
             expected_start_sample += 1
 
         return DigitalWaveformTestResult(failures)
+
+    def _reverse_index(self, index: int) -> int:
+        """Convert a signal_index to a column_index, or vice versa."""
+        assert 0 <= index < self.signal_count
+        return self.signal_count - 1 - index
 
     def __eq__(self, value: object, /) -> bool:
         """Return self==value."""
