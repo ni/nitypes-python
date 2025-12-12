@@ -45,7 +45,8 @@ jobs:
       - name: Display installed dependency versions
         run: poetry run pip list
       - name: Run unit tests and code coverage
-        # Skip test___pickled_value___unpickle___is_compatible because NumPy 2.0 broke pickle compatibility.
+        # Skip test___pickled_value___unpickle___is_compatible because NumPy 2.0 does not support loading pickle files from NumPy 1.25 and earlier.
+        # https://numpy.org/doc/2.0/numpy_2_0_migration_guide.html#note-about-pickled-files
         run: poetry run pytest ./tests/unit -v --cov=nitypes --junitxml=test_results/nitypes-oldest-deps-${{ matrix.os }}-py${{ matrix.python-version }}.xml -k "not test___pickled_value___unpickle___is_compatible"
       - name: Upload test results
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
