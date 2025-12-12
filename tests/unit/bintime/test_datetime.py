@@ -448,6 +448,27 @@ def test___time_value___pickle___references_public_modules() -> None:
 
 
 @pytest.mark.parametrize(
+    "pickled_value, expected",
+    [
+        # nitypes 1.0.0
+        (
+            b"\x80\x04\x95W\x00\x00\x00\x00\x00\x00\x00\x8c\x08builtins\x94\x8c\x07getattr\x94\x93\x94\x8c\x0fnitypes.bintime\x94\x8c\x08DateTime\x94\x93\x94\x8c\nfrom_ticks\x94\x86\x94R\x94\x8a\tN\xca\xb9\xf4\xe9\xd3\x9a\x1f\xff\x85\x94R\x94.",
+            DateTime(1903, 12, 31, 23, 59, 59, 123_456, 234_567_789, 345_567_890, dt.timezone.utc),
+        ),
+        (
+            b"\x80\x04\x95[\x00\x00\x00\x00\x00\x00\x00\x8c\x08builtins\x94\x8c\x07getattr\x94\x93\x94\x8c\x0fnitypes.bintime\x94\x8c\x08DateTime\x94\x93\x94\x8c\nfrom_ticks\x94\x86\x94R\x94\x8a\r\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf4\x92\xb4\x00\x85\x94R\x94.",
+            DateTime(2000, 1, 1, 0, 0, 0, 0, 0, 0, dt.timezone.utc),
+        ),
+    ],
+)
+def test___pickled_value___unpickle___is_compatible(
+    pickled_value: bytes, expected: DateTime
+) -> None:
+    new_value = pickle.loads(pickled_value)
+    assert new_value == expected
+
+
+@pytest.mark.parametrize(
     "value, expected",
     [
         (

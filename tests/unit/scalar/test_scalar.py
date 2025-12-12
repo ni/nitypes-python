@@ -302,3 +302,20 @@ def test___scalar___pickle___references_public_modules() -> None:
 
     assert b"nitypes.scalar" in value_bytes
     assert b"nitypes.scalar._scalar" not in value_bytes
+
+
+@pytest.mark.parametrize(
+    "pickled_value, expected",
+    [
+        # nitypes 1.0.0
+        (
+            b"\x80\x04\x952\x00\x00\x00\x00\x00\x00\x00\x8c\x0enitypes.scalar\x94\x8c\x06Scalar\x94\x93\x94G@4\x00\x00\x00\x00\x00\x00\x8c\x05watts\x94\x86\x94R\x94.",
+            Scalar(20.0, "watts"),
+        ),
+    ],
+)
+def test___pickled_value___unpickle___is_compatible(
+    pickled_value: bytes, expected: Scalar[Any]
+) -> None:
+    new_value = pickle.loads(pickled_value)
+    assert new_value == expected

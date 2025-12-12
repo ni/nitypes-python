@@ -8,8 +8,7 @@ import numpy as np
 import pytest
 from typing_extensions import assert_type
 
-from nitypes.bintime import TimeDelta
-from nitypes.bintime import TimeDeltaArray
+from nitypes.bintime import TimeDelta, TimeDeltaArray
 
 
 ###############################################################################
@@ -918,6 +917,23 @@ def test___timedelta_array___pickle___references_public_modules() -> None:
 
     assert b"nitypes.bintime" in pickled
     assert b"nitypes.bintime._timedelta_array" not in pickled
+
+
+@pytest.mark.parametrize(
+    "pickled_value, expected",
+    [
+        # nitypes 1.0.0
+        (
+            b"\x80\x04\x95\xa8\x00\x00\x00\x00\x00\x00\x00\x8c\x0fnitypes.bintime\x94\x8c\x0eTimeDeltaArray\x94\x93\x94]\x94(\x8c\x08builtins\x94\x8c\x07getattr\x94\x93\x94h\x00\x8c\tTimeDelta\x94\x93\x94\x8c\nfrom_ticks\x94\x86\x94R\x94\x8a\t\x00\x00\xc3\xf5(\\\x8fB\x14\x85\x94R\x94h\x06h\x08h\t\x86\x94R\x94\x8a\t\x00\x00\x00\x00\x00\x00\x00\x00\xff\x85\x94R\x94h\x06h\x08h\t\x86\x94R\x94\x8a\n\x00\x00\x00\x00\x00\x00\x00\x00\xf4\x01\x85\x94R\x94e\x85\x94R\x94.",
+            TimeDeltaArray([TimeDelta(20.26), TimeDelta(-1), TimeDelta(500)]),
+        ),
+    ],
+)
+def test___pickled_value___unpickle___is_compatible(
+    pickled_value: bytes, expected: TimeDeltaArray
+) -> None:
+    new_value = pickle.loads(pickled_value)
+    assert new_value == expected
 
 
 @pytest.mark.parametrize(

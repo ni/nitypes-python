@@ -1343,3 +1343,25 @@ def test___spectrum___pickle___references_public_modules() -> None:
     assert b"nitypes.waveform" in value_bytes
     assert b"nitypes.waveform._extended_properties" not in value_bytes
     assert b"nitypes.waveform._spectrum" not in value_bytes
+
+
+@pytest.mark.parametrize(
+    "pickled_value, expected",
+    [
+        # nitypes 1.0.0
+        (
+            b"\x80\x04\x95\xdf\x01\x00\x00\x00\x00\x00\x00\x8c\x08builtins\x94\x8c\x07getattr\x94\x93\x94\x8c\x10nitypes.waveform\x94\x8c\x08Spectrum\x94\x93\x94\x8c\t_unpickle\x94\x86\x94R\x94K\x03\x8c\x05numpy\x94\x8c\x05dtype\x94\x93\x94\x8c\x02f8\x94\x89\x88\x87\x94R\x94(K\x03\x8c\x01<\x94NNNJ\xff\xff\xff\xffJ\xff\xff\xff\xffK\x00t\x94b\x86\x94}\x94(\x8c\x04data\x94\x8c\x16numpy._core.multiarray\x94\x8c\x0c_reconstruct\x94\x93\x94h\t\x8c\x07ndarray\x94\x93\x94K\x00\x85\x94C\x01b\x94\x87\x94R\x94(K\x01K\x03\x85\x94h\x0e\x89C\x18\x00\x00\x00\x00\x00\x00\xf0?\x00\x00\x00\x00\x00\x00\x00@\x00\x00\x00\x00\x00\x00\x08@\x94t\x94b\x8c\x0fstart_frequency\x94G@^\xdd/\x1a\x9f\xbew\x8c\x13frequency_increment\x94G?\xb9\x99\x99\x99\x99\x99\x9a\x8c\x13extended_properties\x94h\x03\x8c\x1aExtendedPropertyDictionary\x94\x93\x94)\x81\x94N}\x94\x8c\x0b_properties\x94}\x94(\x8c\x0eNI_ChannelName\x94\x8c\x08Dev1/ai0\x94\x8c\x12NI_UnitDescription\x94\x8c\x05Volts\x94us\x86\x94b\x8c\x18copy_extended_properties\x94\x89u\x86\x94R\x94.",
+            Spectrum(
+                data=np.array([1, 2, 3], np.float64),
+                start_frequency=123.456,
+                frequency_increment=0.1,
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+            ),
+        ),
+    ],
+)
+def test___pickled_value___unpickle___is_compatible(
+    pickled_value: bytes, expected: Spectrum[Any]
+) -> None:
+    new_value = pickle.loads(pickled_value)
+    assert new_value == expected
