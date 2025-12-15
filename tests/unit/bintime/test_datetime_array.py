@@ -1323,6 +1323,29 @@ def test___datetime_array___pickle___references_public_modules() -> None:
 
 
 @pytest.mark.parametrize(
+    "pickled_value, expected",
+    [
+        # nitypes 1.0.0
+        (
+            b"\x80\x04\x95\xb1\x00\x00\x00\x00\x00\x00\x00\x8c\x0fnitypes.bintime\x94\x8c\rDateTimeArray\x94\x93\x94]\x94(\x8c\x08builtins\x94\x8c\x07getattr\x94\x93\x94h\x00\x8c\x08DateTime\x94\x93\x94\x8c\nfrom_ticks\x94\x86\x94R\x94\x8a\r\x00\x00\x00\x00\x00\x00\x00\x00\x00\xf4\x92\xb4\x00\x85\x94R\x94h\x06h\x08h\t\x86\x94R\x94\x8a\r\x00\x00\x00\x00\x00\x00\x00\x00\x00N\xc4\xa1\x00\x85\x94R\x94h\x06h\x08h\t\x86\x94R\x94\x8a\r\x00\x00\x00\x00\x00\x00\x00\x00\x006\x9a\xe3\x00\x85\x94R\x94e\x85\x94R\x94.",
+            DateTimeArray(
+                [
+                    DateTime(2000, 1, 1, tzinfo=dt.timezone.utc),
+                    DateTime(1990, 1, 1, tzinfo=dt.timezone.utc),
+                    DateTime(2025, 1, 1, tzinfo=dt.timezone.utc),
+                ]
+            ),
+        ),
+    ],
+)
+def test___pickled_value___unpickle___is_compatible(
+    pickled_value: bytes, expected: DateTimeArray
+) -> None:
+    new_value = pickle.loads(pickled_value)
+    assert new_value == expected
+
+
+@pytest.mark.parametrize(
     "value",
     (
         (DateTimeArray()),

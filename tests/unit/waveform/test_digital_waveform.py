@@ -1965,6 +1965,40 @@ def test___waveform___pickle___references_public_modules() -> None:
     assert b"nitypes.waveform._timing" not in value_bytes
 
 
+@pytest.mark.parametrize(
+    "pickled_value, expected",
+    [
+        # nitypes 1.0.0
+        pytest.param(
+            b"\x80\x04\x95\x08\x02\x00\x00\x00\x00\x00\x00\x8c\x08builtins\x94\x8c\x07getattr\x94\x93\x94\x8c\x10nitypes.waveform\x94\x8c\x0fDigitalWaveform\x94\x93\x94\x8c\t_unpickle\x94\x86\x94R\x94K\x03K\x01\x8c\x05numpy\x94\x8c\x05dtype\x94\x93\x94\x8c\x02b1\x94\x89\x88\x87\x94R\x94(K\x03\x8c\x01|\x94NNNJ\xff\xff\xff\xffJ\xff\xff\xff\xffK\x00t\x94b\x87\x94}\x94(\x8c\x04data\x94\x8c\x16numpy._core.multiarray\x94\x8c\x0c_reconstruct\x94\x93\x94h\t\x8c\x07ndarray\x94\x93\x94K\x00\x85\x94C\x01b\x94\x87\x94R\x94(K\x01K\x03K\x01\x86\x94h\x0e\x89C\x03\x01\x01\x01\x94t\x94b\x8c\x13extended_properties\x94h\x03\x8c\x1aExtendedPropertyDictionary\x94\x93\x94)\x81\x94N}\x94\x8c\x0b_properties\x94}\x94(\x8c\x0eNI_ChannelName\x94\x8c\x08Dev1/ai0\x94\x8c\x12NI_UnitDescription\x94\x8c\x05Volts\x94us\x86\x94b\x8c\x18copy_extended_properties\x94\x89\x8c\x06timing\x94h\x02h\x03\x8c\x06Timing\x94\x93\x94h\x06\x86\x94R\x94(h\x03\x8c\x12SampleIntervalMode\x94\x93\x94K\x01\x85\x94R\x94NN\x8c\x08datetime\x94\x8c\ttimedelta\x94\x93\x94K\x00K\x00M\xe8\x03\x87\x94R\x94Nt\x94}\x94\x86\x94R\x94u\x86\x94R\x94.",
+            DigitalWaveform(
+                data=np.array([1, 2, 3], _np_bool),
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+            ),
+            marks=pytest.mark.xfail(
+                raises=AttributeError,
+                reason="https://github.com/ni/nitypes-python/issues/234 - ExtendedPropertyDictionary._on_key_changed breaks pickle compatibility",
+            ),
+        ),
+        # nitypes 1.0.1
+        (
+            b"\x80\x04\x95\xf4\x01\x00\x00\x00\x00\x00\x00\x8c\x08builtins\x94\x8c\x07getattr\x94\x93\x94\x8c\x10nitypes.waveform\x94\x8c\x0fDigitalWaveform\x94\x93\x94\x8c\t_unpickle\x94\x86\x94R\x94K\x03K\x01\x8c\x05numpy\x94\x8c\x05dtype\x94\x93\x94\x8c\x02b1\x94\x89\x88\x87\x94R\x94(K\x03\x8c\x01|\x94NNNJ\xff\xff\xff\xffJ\xff\xff\xff\xffK\x00t\x94b\x87\x94}\x94(\x8c\x04data\x94\x8c\x16numpy._core.multiarray\x94\x8c\x0c_reconstruct\x94\x93\x94h\t\x8c\x07ndarray\x94\x93\x94K\x00\x85\x94C\x01b\x94\x87\x94R\x94(K\x01K\x03K\x01\x86\x94h\x0e\x89C\x03\x01\x01\x01\x94t\x94b\x8c\x13extended_properties\x94h\x03\x8c\x1aExtendedPropertyDictionary\x94\x93\x94}\x94(\x8c\x0eNI_ChannelName\x94\x8c\x08Dev1/ai0\x94\x8c\x12NI_UnitDescription\x94\x8c\x05Volts\x94u\x85\x94R\x94\x8c\x18copy_extended_properties\x94\x89\x8c\x06timing\x94h\x02h\x03\x8c\x06Timing\x94\x93\x94h\x06\x86\x94R\x94(h\x03\x8c\x12SampleIntervalMode\x94\x93\x94K\x01\x85\x94R\x94NN\x8c\x08datetime\x94\x8c\ttimedelta\x94\x93\x94K\x00K\x00M\xe8\x03\x87\x94R\x94Nt\x94}\x94\x86\x94R\x94u\x86\x94R\x94.",
+            DigitalWaveform(
+                data=np.array([1, 2, 3], _np_bool),
+                extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
+                timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
+            ),
+        ),
+    ],
+)
+def test___pickled_value___unpickle___is_compatible(
+    pickled_value: bytes, expected: DigitalWaveform[Any]
+) -> None:
+    new_value = pickle.loads(pickled_value)
+    assert new_value == expected
+
+
 def test___waveform_with_extended_properties___pickle_unpickle___valid_on_key_changed() -> None:
     value = DigitalWaveform(
         data=np.array([1, 2, 3], _np_bool),
