@@ -33,9 +33,13 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
         self,
         owner: DigitalWaveform[TDigitalState],
         signal_index: SupportsIndex,
-        column_index: SupportsIndex,
+        column_index: SupportsIndex | None = None,
     ) -> None:
         """Initialize a new digital waveform signal."""
+        if column_index is None:
+            # when unpickling an old version, column_index may not be provided
+            column_index = signal_index
+
         self._owner = owner
         self._signal_index = arg_to_uint("signal index", signal_index)
         self._column_index = arg_to_uint("column index", column_index)
