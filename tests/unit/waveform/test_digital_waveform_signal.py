@@ -378,10 +378,6 @@ def test___waveform___pickle___references_public_modules() -> None:
             DigitalWaveform(
                 3, 2, extended_properties={"NI_LineNames": "port0/line1, port0/line0"}
             ).signals[1],
-            marks=pytest.mark.xfail(
-                raises=AttributeError,
-                reason="https://github.com/ni/nitypes-python/issues/234 - ExtendedPropertyDictionary._on_key_changed breaks pickle compatibility",
-            ),
         ),
         # nitypes 1.0.1
         (

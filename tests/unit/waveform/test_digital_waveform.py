@@ -1976,10 +1976,6 @@ def test___waveform___pickle___references_public_modules() -> None:
                 extended_properties={"NI_ChannelName": "Dev1/ai0", "NI_UnitDescription": "Volts"},
                 timing=Timing.create_with_regular_interval(dt.timedelta(milliseconds=1)),
             ),
-            marks=pytest.mark.xfail(
-                raises=AttributeError,
-                reason="https://github.com/ni/nitypes-python/issues/234 - ExtendedPropertyDictionary._on_key_changed breaks pickle compatibility",
-            ),
         ),
         # nitypes 1.0.1
         (

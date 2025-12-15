@@ -838,6 +838,9 @@ class DigitalWaveform(Generic[TDigitalState]):
         ):
             extended_properties = ExtendedPropertyDictionary(extended_properties)
         self._extended_properties = extended_properties
+        if not hasattr(self._extended_properties, "_on_key_changed"):
+            # when unpickling an old version, _on_key_changed may not exist
+            self._extended_properties._on_key_changed = []
         self._extended_properties._on_key_changed.append(
             weakref.WeakMethod(self._on_extended_property_changed)
         )
