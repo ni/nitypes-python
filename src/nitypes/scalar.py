@@ -38,13 +38,64 @@ class Scalar(Generic[TScalar_co]):
     To construct a scalar data object, use the :class:`Scalar` class:
 
     >>> Scalar(False)
-    nitypes.scalar.Scalar(value=False)
+    scalar.Scalar(value=False)
     >>> Scalar(0)
-    nitypes.scalar.Scalar(value=0)
+    scalar.Scalar(value=0)
     >>> Scalar(5.0, 'volts')
-    nitypes.scalar.Scalar(value=5.0, units='volts')
+    scalar.Scalar(value=5.0, units='volts')
     >>> Scalar("value", "volts")
-    nitypes.scalar.Scalar(value='value', units='volts')
+    scalar.Scalar(value='value', units='volts')
+
+    Comparing Scalars
+    ^^^^^^^^^^^^^^^^^
+    You can compare scalar objects using the standard comparison operators as long as their units
+    are the same and their value types are compatible:
+    >>> s1 = Scalar(5.0, 'volts')
+    >>> s2 = Scalar(10.0, 'volts')
+    >>> s1 < s2
+    True
+    >>> s1 <= s2
+    True
+    >>> s1 > s2
+    False
+    >>> s1 >= s2
+    False
+    >>> s1 == s2
+    False
+    >>> s3 = Scalar(5.0, 'volts')
+    >>> s1 == s3
+    True
+    >>> s4 = Scalar("apple", "quantity")
+    >>> s5 = Scalar("banana", "quantity")
+    >>> s4 < s5
+    True
+    >>> s4 <= s5
+    True
+    >>> s4 > s5
+    False
+    >>> s4 >= s5
+    False
+    >>> s4 == s5
+    False
+    >>> s6 = Scalar("apple", "quantity")
+    >>> s4 == s6
+    True
+
+    Attempting to compare Scalar objects with different units raises a ValueError:
+    >>> s1 = Scalar(5.0, 'volts')
+    >>> s2 = Scalar(10.0, 'amps')
+    >>> s1 < s2
+    Traceback (most recent call last):
+        ...
+    ValueError: Comparing Scalar objects with different units is not permitted.
+
+    Attempting to compare Scalar objects of numeric and string types raises a TypeError:
+    >>> s1 = Scalar(5.0, 'meters')
+    >>> s2 = Scalar("value", 'meters')
+    >>> s1 < s2
+    Traceback (most recent call last):
+        ...
+    TypeError: Comparing Scalar objects of numeric and string types is not permitted
 
     Class members
     ^^^^^^^^^^^^^
