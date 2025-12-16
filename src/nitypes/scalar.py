@@ -38,13 +38,13 @@ class Scalar(Generic[TScalar_co]):
     To construct a scalar data object, use the :class:`Scalar` class:
 
     >>> Scalar(False)
-    scalar.Scalar(value=False)
+    nitypes.scalar.Scalar(value=False)
     >>> Scalar(0)
-    scalar.Scalar(value=0)
+    nitypes.scalar.Scalar(value=0)
     >>> Scalar(5.0, 'volts')
-    scalar.Scalar(value=5.0, units='volts')
+    nitypes.scalar.Scalar(value=5.0, units='volts')
     >>> Scalar("value", "volts")
-    scalar.Scalar(value='value', units='volts')
+    nitypes.scalar.Scalar(value='value', units='volts')
 
     Comparing Scalars
     ^^^^^^^^^^^^^^^^^
