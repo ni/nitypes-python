@@ -51,8 +51,9 @@ class Scalar(Generic[TScalar_co]):
 
     You can compare scalar objects using the standard comparison operators as long as their units
     are the same and their value types are compatible:
-    >>> s1 = Scalar(5.0, 'volts')
-    >>> s2 = Scalar(10.0, 'volts')
+
+    >>> s1 = Scalar(5.0, 'V')
+    >>> s2 = Scalar(10.0, 'V')
     >>> s1 < s2
     True
     >>> s1 <= s2
@@ -63,7 +64,7 @@ class Scalar(Generic[TScalar_co]):
     False
     >>> s1 == s2
     False
-    >>> s3 = Scalar(5.0, 'volts')
+    >>> s3 = Scalar(5.0, 'V')
     >>> s1 == s3
     True
     >>> s4 = Scalar("apple", "quantity")
@@ -83,14 +84,16 @@ class Scalar(Generic[TScalar_co]):
     True
 
     Attempting to compare Scalar objects with different units raises a ValueError:
-    >>> s1 = Scalar(5.0, 'volts')
-    >>> s2 = Scalar(10.0, 'amps')
+
+    >>> s1 = Scalar(0.5, 'V')
+    >>> s2 = Scalar(500, 'mV')
     >>> s1 < s2
     Traceback (most recent call last):
         ...
     ValueError: Comparing Scalar objects with different units is not permitted.
 
     Attempting to compare Scalar objects of numeric and string types raises a TypeError:
+
     >>> s1 = Scalar(5.0, 'meters')
     >>> s2 = Scalar("value", 'meters')
     >>> s1 < s2
