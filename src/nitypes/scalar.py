@@ -48,6 +48,7 @@ class Scalar(Generic[TScalar_co]):
 
     Comparing Scalars
     ^^^^^^^^^^^^^^^^^
+
     You can compare scalar objects using the standard comparison operators as long as their units
     are the same and their value types are compatible:
     >>> s1 = Scalar(5.0, 'volts')
