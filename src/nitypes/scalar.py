@@ -144,7 +144,7 @@ class Scalar(Generic[TScalar_co]):
         elif isinstance(self.value, str) and isinstance(other.value, str):
             return self.value > other.value
         else:
-            raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
+            raise self._comparing_numeric_and_string_not_permitted()
 
     def __ge__(self, other: Scalar[TScalar_co], /) -> bool:
         """Return self >= other."""
@@ -156,7 +156,7 @@ class Scalar(Generic[TScalar_co]):
         elif isinstance(self.value, str) and isinstance(other.value, str):
             return self.value >= other.value
         else:
-            raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
+            raise self._comparing_numeric_and_string_not_permitted()
 
     def __lt__(self, other: Scalar[TScalar_co], /) -> bool:
         """Return self < other."""
@@ -168,7 +168,7 @@ class Scalar(Generic[TScalar_co]):
         elif isinstance(self.value, str) and isinstance(other.value, str):
             return self.value < other.value
         else:
-            raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
+            raise self._comparing_numeric_and_string_not_permitted()
 
     def __le__(self, other: Scalar[TScalar_co], /) -> bool:
         """Return self <= other."""
@@ -180,7 +180,7 @@ class Scalar(Generic[TScalar_co]):
         elif isinstance(self.value, str) and isinstance(other.value, str):
             return self.value <= other.value
         else:
-            raise TypeError("Comparing Scalar objects of numeric and string types is not permitted")
+            raise self._comparing_numeric_and_string_not_permitted()
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
@@ -220,3 +220,6 @@ class Scalar(Generic[TScalar_co]):
         """Raise a ValueError if other_units != self.units."""
         if self.units != other_units:
             raise ValueError("Comparing Scalar objects with different units is not permitted.")
+
+    def _comparing_numeric_and_string_not_permitted(self) -> TypeError:
+        return TypeError("Comparing Scalar objects of numeric and string types is not permitted")
