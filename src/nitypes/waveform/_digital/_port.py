@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import sys
 from collections.abc import Sequence
+from typing import Literal
 
 import numpy as np
 import numpy.typing as npt
@@ -76,15 +78,28 @@ def _get_port_dtype(mask: int) -> np.dtype[AnyDigitalPort]:
         )
 
 
-def port_to_line_data(port_data: npt.NDArray[AnyDigitalPort], mask: int) -> npt.NDArray[np.uint8]:
+def port_to_line_data(
+    port_data: npt.NDArray[AnyDigitalPort], mask: int, bitorder: Literal["big", "little"] = "big"
+) -> npt.NDArray[np.uint8]:
     """Convert a 1D array of port data to a 2D array of line data, using the specified mask.
 
     >>> port_to_line_data(np.array([0,1,2,3], np.uint8), 0xFF)
+    array([[0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 1],
+           [0, 0, 0, 0, 0, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 1, 1]], dtype=uint8)
+
+    >>> port_to_line_data(np.array([0,1,2,3], np.uint8), 0xFF, bitorder="little")
     array([[0, 0, 0, 0, 0, 0, 0, 0],
            [1, 0, 0, 0, 0, 0, 0, 0],
            [0, 1, 0, 0, 0, 0, 0, 0],
            [1, 1, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     >>> port_to_line_data(np.array([0,1,2,3], np.uint8), 0x3)
+    array([[0, 0],
+           [0, 1],
+           [1, 0],
+           [1, 1]], dtype=uint8)
+    >>> port_to_line_data(np.array([0,1,2,3], np.uint8), 0x3, bitorder="little")
     array([[0, 0],
            [1, 0],
            [0, 1],
@@ -97,29 +112,42 @@ def port_to_line_data(port_data: npt.NDArray[AnyDigitalPort], mask: int) -> npt.
     >>> port_to_line_data(np.array([0,1,2,3], np.uint8), 0)
     array([], shape=(4, 0), dtype=uint8)
     >>> port_to_line_data(np.array([0x12000000,0xFE000000], np.uint32), 0xFF000000)
-    array([[0, 1, 0, 0, 1, 0, 0, 0],
-           [0, 1, 1, 1, 1, 1, 1, 1]], dtype=uint8)
+    array([[0, 0, 0, 1, 0, 0, 1, 0],
+           [1, 1, 1, 1, 1, 1, 1, 0]], dtype=uint8)
     """
     port_size = port_data.dtype.itemsize * 8
-    line_data = np.unpackbits(port_data.view(np.uint8), bitorder="little")
+    # Convert to big-endian byte order to ensure MSB comes first when bitorder='big'
+    # For multi-byte types on little-endian systems, we need to byteswap
+    if bitorder != sys.byteorder and port_data.dtype.itemsize > 1:
+        port_data = port_data.byteswap()
+
+    line_data = np.unpackbits(port_data.view(np.uint8), bitorder=bitorder)
     line_data = line_data.reshape(len(port_data), port_size)
 
     if mask == bit_mask(port_size):
         return line_data
     else:
-        return line_data[:, _mask_to_line_indices(mask)]
+        return line_data[:, _mask_to_column_indices(mask, port_size, bitorder)]
 
 
-def _mask_to_line_indices(mask: int, /) -> list[int]:
-    """Return the line indices for the given mask.
+def _mask_to_column_indices(
+    mask: int, port_size: int, bitorder: Literal["big", "little"], /
+) -> list[int]:
+    """Return the column indices for the given mask.
 
-    >>> _mask_to_line_indices(0xF)
+    >>> _mask_to_column_indices(0xF, 8, "big")
+    [4, 5, 6, 7]
+    >>> _mask_to_column_indices(0x100, 16, "big")
+    [7]
+    >>> _mask_to_column_indices(0xDEADBEEF, 32, "big")
+    [0, 1, 3, 4, 5, 6, 8, 10, 12, 13, 15, 16, 18, 19, 20, 21, 22, 24, 25, 26, 28, 29, 30, 31]
+    >>> _mask_to_column_indices(0xF, 8, "little")
     [0, 1, 2, 3]
-    >>> _mask_to_line_indices(0x100)
+    >>> _mask_to_column_indices(0x100, 16, "little")
     [8]
-    >>> _mask_to_line_indices(0xDEADBEEF)
+    >>> _mask_to_column_indices(0xDEADBEEF, 32, "little")
     [0, 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 13, 15, 16, 18, 19, 21, 23, 25, 26, 27, 28, 30, 31]
-    >>> _mask_to_line_indices(-1)
+    >>> _mask_to_column_indices(-1, 8)
     Traceback (most recent call last):
     ...
     ValueError: The mask must be a non-negative integer.
@@ -128,11 +156,18 @@ def _mask_to_line_indices(mask: int, /) -> list[int]:
     """
     if mask < 0:
         raise ValueError("The mask must be a non-negative integer.\n\n" f"Mask: {mask}")
-    line_indices = []
-    line_index = 0
+    column_indices = []
+    bit_position = 0
     while mask != 0:
         if mask & 1:
-            line_indices.append(line_index)
-        line_index += 1
+            if bitorder == "big":
+                column_indices.append(port_size - 1 - bit_position)
+            else:  # little
+                column_indices.append(bit_position)
+        bit_position += 1
         mask >>= 1
-    return line_indices
+
+    if bitorder == "big":
+        column_indices.reverse()
+
+    return column_indices
