@@ -99,7 +99,7 @@ class Scalar(Generic[TScalar_co]):
     >>> s1 < s2
     Traceback (most recent call last):
         ...
-    TypeError: Comparing Scalar objects of numeric and string types is not permitted
+    TypeError: Comparing Scalar objects of numeric and string types is not permitted.
 
     Class members
     ^^^^^^^^^^^^^
@@ -277,4 +277,4 @@ class Scalar(Generic[TScalar_co]):
             raise ValueError("Comparing Scalar objects with different units is not permitted.")
 
     def _comparing_numeric_and_string_not_permitted(self) -> TypeError:
-        return TypeError("Comparing Scalar objects of numeric and string types is not permitted")
+        return TypeError("Comparing Scalar objects of numeric and string types is not permitted.")
