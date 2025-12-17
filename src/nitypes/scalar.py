@@ -72,7 +72,7 @@ class Scalar(Generic[TScalar_co]):
     >>> voltage1 == voltage3
     True
 
-    Here are some examples of comparing string scalar objects with identical units:
+    Here are some examples of comparing string scalar objects without units:
 
     >>> fruit1 = Scalar("apple")
     >>> fruit2 = Scalar("banana")
