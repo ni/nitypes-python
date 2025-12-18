@@ -50,76 +50,46 @@ class Scalar(Generic[TScalar_co]):
     ^^^^^^^^^^^^^^^^^^^^^^^^
 
     You can compare scalar objects of compatible types and with identical units
-    using the standard comparison operators (`<`, `<=`, `>`, `>=`, `==`, and `!=`).
+    using the standard comparison operators (``<``, ``<=``, ``>``, ``>=``, ``==``, and ``!=``).
 
     Here are some examples of comparing numeric scalar objects with identical units:
 
-    >>> voltage1 = Scalar(5.0, 'V')
-    >>> voltage2 = Scalar(10.0, 'V')
-    >>> voltage1 < voltage2
+    >>> Scalar(5.0, 'V') < Scalar(10.0, 'V')
     True
-    >>> voltage1 <= voltage2
-    True
-    >>> voltage1 > voltage2
+    >>> Scalar(5.0, 'V') >= Scalar(10.0, 'V')
     False
-    >>> voltage1 >= voltage2
-    False
-    >>> voltage1 == voltage2
-    False
-    >>> voltage1 != voltage2
-    True
-    >>> voltage3 = Scalar(5.0, 'V')
-    >>> voltage1 == voltage3
+    >>> Scalar(5.0, 'V') == Scalar(5.0, 'V')
     True
 
     Here are some examples of comparing string scalar objects without units:
 
-    >>> fruit1 = Scalar("apple")
-    >>> fruit2 = Scalar("banana")
-    >>> fruit1 < fruit2
+    >>> Scalar("apple") < Scalar("banana")
     True
-    >>> fruit1 <= fruit2
-    True
-    >>> fruit1 > fruit2
+    >>> Scalar("apple") < Scalar("Banana")
     False
-    >>> fruit1 >= fruit2
+
+    Equality comparison operators (``==`` and ``!=``) are always supported.
+
+    Here are some examples of comparing scalar objects with different units:
+
+    >>> Scalar(0.5, 'V') == Scalar(500, 'mV')
     False
-    >>> fruit1 == fruit2
+    >>> Scalar(0.5, 'V') != Scalar(500, 'mV')
+    True
+
+    Here is an example of comparing numeric and string scalar objects:
+
+    >>> Scalar(5.0, 'V') == Scalar("5.0", 'V')
     False
-    >>> fruit1 != fruit2
-    True
-    >>> fruit3 = Scalar("apple")
-    >>> fruit1 == fruit3
-    True
 
-    If you compare scalar objects with compatible types and different units using the
-    equal to (`==`) operator, the result will be false.
-    If you use the not equal to (`!=`) operator, the result will be true.
-    Using other comparison operators (`<`, `<=`, `>`, `>=`) will raise a ValueError.
+    Order comparison operators (``<``, ``<=``, ``>``, and ``>=``) raise ``TypeError`` exception
+    if the combination of types is not supported, such as when comparing
+    a numeric scalar object and a string scalar object.
 
-    Here are some examples:
+    Order comparison operators (``<``, ``<=``, ``>``, and ``>=``) raise ``ValueError`` exception
+    if the units are different.
 
-    >>> voltage1 = Scalar(0.5, 'V')
-    >>> voltage2 = Scalar(500, 'mV')
-    >>> voltage1 == voltage2
-    False
-    >>> voltage1 != voltage2
-    True
-    >>> voltage1 < voltage2
-    Traceback (most recent call last):
-        ...
-    ValueError: Comparing Scalar objects with different units is not permitted.
-
-    Attempting to compare Scalar objects of numeric and string types raises a TypeError:
-
-    >>> length1 = Scalar(5.0, 'meters')
-    >>> length2 = Scalar("five", 'meters')
-    >>> length1 < length2
-    Traceback (most recent call last):
-        ...
-    TypeError: Comparing Scalar objects of numeric and string types is not permitted.
-
-    Class members
+    Class Members
     ^^^^^^^^^^^^^
     """
 
@@ -217,7 +187,7 @@ class Scalar(Generic[TScalar_co]):
         elif isinstance(self.value, str) and isinstance(other.value, str):
             return self.value > other.value
         else:
-            raise self._comparing_numeric_and_string_not_permitted()
+            raise _comparing_numeric_and_string_not_permitted()
 
     def __ge__(self, other: Scalar[TScalar_co], /) -> bool:
         """Return self >= other."""
@@ -229,7 +199,7 @@ class Scalar(Generic[TScalar_co]):
         elif isinstance(self.value, str) and isinstance(other.value, str):
             return self.value >= other.value
         else:
-            raise self._comparing_numeric_and_string_not_permitted()
+            raise _comparing_numeric_and_string_not_permitted()
 
     def __lt__(self, other: Scalar[TScalar_co], /) -> bool:
         """Return self < other."""
@@ -241,7 +211,7 @@ class Scalar(Generic[TScalar_co]):
         elif isinstance(self.value, str) and isinstance(other.value, str):
             return self.value < other.value
         else:
-            raise self._comparing_numeric_and_string_not_permitted()
+            raise _comparing_numeric_and_string_not_permitted()
 
     def __le__(self, other: Scalar[TScalar_co], /) -> bool:
         """Return self <= other."""
@@ -253,7 +223,7 @@ class Scalar(Generic[TScalar_co]):
         elif isinstance(self.value, str) and isinstance(other.value, str):
             return self.value <= other.value
         else:
-            raise self._comparing_numeric_and_string_not_permitted()
+            raise _comparing_numeric_and_string_not_permitted()
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""
@@ -290,9 +260,9 @@ class Scalar(Generic[TScalar_co]):
         return value_str
 
     def _check_units_equal_for_comparison(self, other_units: str) -> None:
-        """Raise a ValueError if self.units != other_units."""
         if self.units != other_units:
             raise ValueError("Comparing Scalar objects with different units is not permitted.")
 
-    def _comparing_numeric_and_string_not_permitted(self) -> TypeError:
-        return TypeError("Comparing Scalar objects of numeric and string types is not permitted.")
+
+def _comparing_numeric_and_string_not_permitted() -> TypeError:
+    return TypeError("Comparing Scalar objects of numeric and string types is not permitted.")
