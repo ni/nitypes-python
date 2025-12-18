@@ -49,45 +49,68 @@ class Scalar(Generic[TScalar_co]):
     Comparing Scalar Objects
     ^^^^^^^^^^^^^^^^^^^^^^^^
 
-    You can compare scalar objects of compatible types and with identical units
-    using the standard comparison operators (``<``, ``<=``, ``>``, ``>=``, ``==``, and ``!=``).
+    You can compare scalar objects using standard comparison
+    operators: ``<``, ``<=``, ``>``, ``>=``, ``==``, and ``!=``.
+    Detailed descriptions of operator behaviors are provided below.
 
-    Here are some examples of comparing numeric scalar objects with identical units:
+    Equality Comparison Operators
+    -----------------------------
 
-    >>> Scalar(5.0, 'V') < Scalar(10.0, 'V')
+    Equality comparison operators (``==`` and ``!=``) are always supported and behave as follows:
+
+    - Comparison of scalar objects with compatible types and identical units results
+      in ``True`` or ``False`` based on the comparison of scalar object values.
+    - Comparison of scalar objects with incompatible types (such as numeric and string)
+      results in inequality.
+    - Comparison of scalar objects with different units results in inequality.
+
+    Examples:
+
+    >>> Scalar(5.0, 'V') == Scalar(5.0, 'V') # Numeric scalars with identical values and units
     True
-    >>> Scalar(5.0, 'V') >= Scalar(10.0, 'V')
+    >>> Scalar(5.0, 'V') == Scalar(12.3, 'V') # Numeric scalars with identical units
     False
-    >>> Scalar(5.0, 'V') == Scalar(5.0, 'V')
+    >>> Scalar(5.0, 'V') != Scalar(12.3, 'V') # Numeric scalars with identical units
     True
+    >>> Scalar("apple") == Scalar("banana") # String scalars
+    False
+    >>> Scalar("apple") == Scalar("Apple") # String scalars - note case sensitivity
+    False
+    >>> Scalar(0.5, 'V') == Scalar(500, 'mV') # Numeric scalars with different units
+    False
+    >>> Scalar(5.0, 'V') == Scalar("5.0", 'V') # Comparison of a numeric and a string scalar
+    False
 
-    Here are some examples of comparing string scalar objects without units:
+    Order Comparison Operators
+    --------------------------
 
-    >>> Scalar("apple") < Scalar("banana")
+    Order comparison operators (``<``, ``<=``, ``>``, and ``>=``) behave as follows:
+
+    - Comparison of scalar objects with compatible types and identical units results
+      in ``True`` or ``False`` based on the comparison of scalar object values.
+    - Comparison of scalar objects with incompatible types (such as numeric and string)
+      is not permitted and will raise a ``TypeError`` exception.
+    - Comparison of scalar objects with compatible types and different units
+      is not permitted and will raise a ``ValueError`` exception.
+
+    Examples:
+
+    >>> Scalar(5.0, 'V') < Scalar(10.0, 'V') # Numeric scalars with identical units
     True
-    >>> Scalar("apple") < Scalar("Banana")
+    >>> Scalar(5.0, 'V') >= Scalar(10.0, 'V') # Numeric scalars with identical units
     False
-
-    Equality comparison operators (``==`` and ``!=``) are always supported.
-
-    Here are some examples of comparing scalar objects with different units:
-
-    >>> Scalar(0.5, 'V') == Scalar(500, 'mV')
-    False
-    >>> Scalar(0.5, 'V') != Scalar(500, 'mV')
+    >>> Scalar("apple") < Scalar("banana") # String scalars
     True
-
-    Here is an example of comparing numeric and string scalar objects:
-
-    >>> Scalar(5.0, 'V') == Scalar("5.0", 'V')
+    >>> Scalar("apple") < Scalar("Banana") # String scalars - note case sensitivity
     False
-
-    Order comparison operators (``<``, ``<=``, ``>``, and ``>=``) raise ``TypeError`` exception
-    if the combination of types is not supported, such as when comparing
-    a numeric scalar object and a string scalar object.
-
-    Order comparison operators (``<``, ``<=``, ``>``, and ``>=``) raise ``ValueError`` exception
-    if the units are different.
+    >>> Scalar(5.0, 'V') < Scalar("5.0", 'V') # Comparison of a numeric and a string scalar
+    Traceback (most recent call last):
+        ...
+    TypeError: Comparing Scalar objects of numeric and string types is not permitted.
+    >>> Scalar(0.5, 'V') < Scalar(500, 'mV') # Numeric scalars with different units
+    Traceback (most recent call last):
+        ...
+    ValueError: Comparing Scalar objects with different units is not permitted.
 
     Class Members
     ^^^^^^^^^^^^^
