@@ -64,7 +64,7 @@ class Scalar(Generic[TScalar_co]):
       results in inequality.
     - Comparison of scalar objects with different units results in inequality.
 
-    Examples:
+    Here are a few examples:
 
     >>> Scalar(5.0, 'V') == Scalar(5.0, 'V') # Numeric scalars with identical values and units
     True
@@ -93,7 +93,7 @@ class Scalar(Generic[TScalar_co]):
     - Comparison of scalar objects with compatible types and different units
       is not permitted and will raise a ``ValueError`` exception.
 
-    Examples:
+    Here are a few examples:
 
     >>> Scalar(5.0, 'V') < Scalar(10.0, 'V') # Numeric scalars with identical units
     True
