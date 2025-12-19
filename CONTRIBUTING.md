@@ -28,34 +28,39 @@ To contribute to this project, it is recommended that you follow these steps:
 1. Ensure you have [python](https://www.python.org) version 3.11.9 or newer [installed](https://www.python.org/downloads/).
 1. Ensure you have [poetry](https://python-poetry.org/)
    version 2.1.3 or newer [installed](https://python-poetry.org/docs/#installation).
-1. Fork the repository on GitHub.
+1. If you do not have write access to the repo fork the repository on GitHub.
 1. Install `nitypes` dependencies using `poetry install --with docs`.
-1. Run the regression tests and the static analysis checks on your system
-   (see [Testing](#testing) and [Static Analysis](#static-analysis) sections).
-   If regression tests and static analysis checks all pass, proceed to the next step.
-   If you encounter any failures do not begin development.
-   Try to investigate these failures. If you're unable to resolve the failures, report an
+1. Perform regression tests per [Regression Tests](#regression-tests) section below.
+1. Perform static analysis checks per [Static Analysis Checks](#static-analysis-checks)
+   section below.
+1. If your changes will cover documentation generated from the code, generate that
+   documentation per
+   [Documentation Generated from the Code](#documentation-generated-from-the-code) section.
+1. If you are concerned that your changes may have negative impact on performance,
+   perform benchmark test per [Benchmark Tests](#benchmark-tests)
+1. If all of the tests and checks listed above pass, proceed to the next step.
+   If you encounter any failures do not begin development. Instead, try to resolve
+   those failures. If you are unable to resolve the failures, report an
    issue through our [GitHub issues page](http://github.com/ni/nitypes-python/issues).
-1. If you intend to make any changes that will affect the documentation generated from the code,
-   review relevant portions of the documentation. You can open generated documentation by
-   running the following command from the distribution root: `start docs\_build\index.html`.
 1. Write new tests that demonstrate your bug or feature. Ensure that these new tests fail.
-1. Make your change. Remember to sign off your commits as described [above](#signing-off-commits).
+1. Make your change. Remember to sign off your commits as described
+   [above](#signing-off-commits).
 1. Run all the regression tests again, including the tests you just added.
    If there are any failures, fix them by changing the code or the test, as appropriate, before
    moving to the next step.
-1. Perform all the static analysis checks per [Static Analysis](#static-analysis) section below.
-1. Review documentation generated from code.
-1. Send a GitHub Pull Request to the main repository's `main` branch. GitHub Pull Requests are the
-   expected method of code collaboration on this project.
-1. Look at the checks on the checks on the Conversation tab in the PR. If all checks pass, that
-   portion of the PR page should look similar to this:
-   ![PR Checks](images/pr-checks.png)
+1. Perform all the static analysis checks. If there are any failures, fix them.
+1. If applicable, generate documentation and review generated documentation. If there are any
+   failures, fix them.
+1. If applicable, perform benchmark tests. If there are any failures, fix them.
+1. Send a GitHub Pull Request to the main repository's `main` branch. GitHub Pull Requests are
+   the expected method of code collaboration on this project.
+1. Look at the checks on the checks on the Conversation tab in the PR.
+
    Note that if you are using a fork of the repo, the `Test Results` check will not complete due to a known issue (#243).
 
    If any of the checks fails, attempt to fix the failures by changing the code.
 
-# Testing
+# Regression Tests
 
 In order to be able to run the `nitypes` regression tests, your setup should meet the following minimum
 requirements:
@@ -63,19 +68,9 @@ requirements:
 - Machine has a supported version of CPython or PyPy installed.
 - Machine has [poetry](https://python-poetry.org/) installed.
 
-Run each of the following commands in the root of the distribution.
+To perform regression tests, run `poetry run pytest -v` in the root of the distribution.
 
-1. Run `poetry run pytest -v` to run regression tests.
-1. Perform benchmark test.
-   * For the first run, prior to making any changes, run the
-   command `poetry run pytest -v tests/benchmark --benchmark-save=base`
-   * For the second and subsequent runs, after making changes, run the
-   command `poetry run pytest -v tests/benchmark --benchmark-compare=0001`
-
-   To learn more about benchmark tests, refer
-   to https://pytest-benchmark.readthedocs.io/en/latest/comparing.html
-
-# Static Analysis
+# Static Analysis Checks
 
 Static analysis is performed in several steps, as set forth below. Run each of the commands listed below in the root of the distribution.
 
@@ -85,10 +80,41 @@ Static analysis is performed in several steps, as set forth below. Run each of t
 1. Run `poetry run mypy`. If there are any failures, fix them.
 1. Run `poetry run pyright`. If there are any failures, fix them.
 1. Run `poetry run bandit -c pyproject.toml -r src/nitypes`. If there are any failures, fix them.
-1. Run `poetry run sphinx-build docs docs/_build --builder html --fail-on-warning` to
-   generate documentation. If there are any failures, fix them.
+
+# Special Considerations
+
+## Documentation Generated from the Code
+
+The following information is relevant if you are making changes that
+will impact documentation generated from the code.
+
+To generate documentation from the code, run `poetry run sphinx-build docs docs/_build --builder html --fail-on-warning` in the root of the distribution.
+
+If there are any failures, fix them.
+
+To review generated documentation, run `start docs\_build\index.html` from the
+root of the distribution.
+
+## Benchmark Tests
+
+The PR pipeline will perform benchmark tests. The following information
+is provided in case you expect that your change will impact performance,
+or in case benchmark checks performed by the PR pipeline fail.
+
+To perform benchmark tests do the following:
+   * For the first run, prior to making any changes, run the
+   command `poetry run pytest -v tests/benchmark --benchmark-save=base`
+   * For the second and subsequent runs, after making changes, run the
+   command `poetry run pytest -v tests/benchmark --benchmark-compare=0001`
+
+   To learn more about benchmark tests, refer
+   to https://pytest-benchmark.readthedocs.io/en/latest/comparing.html
 
 # Example Development Workflow
+The example belows applies when you are making changes that will
+not impact documentation generated from code and that will not impact
+code performance. If your situation is different, add appropriate
+steps per documentation above.
 
 ```
 # Create a fork
@@ -99,36 +125,30 @@ git switch --create users/{username}/{branch-purpose} origin/main
 # Install the project dependencies
 poetry install --with docs
 
-# Run the tests
+# Run regression tests
 poetry run pytest -v
-poetry run pytest -v tests/benchmark --benchmark-save=base
 
-# Run the analyzers and generate documentation
+# Run static analysis checks
 poetry run nps lint
 poetry run mypy
 poetry run pyright
 poetry run bandit -c pyproject.toml -r src/nitypes
-poetry run sphinx-build docs docs/_build --builder html --fail-on-warning
 
-# Review generated documentation
-start docs\_build\index.html
+# ✍ Add regression tests.
+# Run regression tests
+poetry run pytest -v
 
 # ✍ Make source changes
 # Remember to sign off commits
 
-# Run the tests
+# Run regression tests
 poetry run pytest -v
-poetry run pytest -v tests/benchmark --benchmark-compare=0001
 
-# Run the analyzers and generate documentation
+# Run static analysis checks
 poetry run nps lint
 poetry run mypy
 poetry run pyright
-poetry run bandit -c pyproject.toml -r src/nitypes
-poetry run sphinx-build docs docs/_build --builder html --fail-on-warning
-
-# Review generated documentation
-start docs\_build\index.html
+poetry run bandit -c pyproject.toml -r src/nitype
 ```
 
 # Publishing on PyPI
