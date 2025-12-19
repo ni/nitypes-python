@@ -147,7 +147,7 @@ def _mask_to_column_indices(
     [8]
     >>> _mask_to_column_indices(0xDEADBEEF, 32, "little")
     [0, 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 13, 15, 16, 18, 19, 21, 23, 25, 26, 27, 28, 30, 31]
-    >>> _mask_to_column_indices(-1, 8)
+    >>> _mask_to_column_indices(-1, 8, "little")
     Traceback (most recent call last):
     ...
     ValueError: The mask must be a non-negative integer.
