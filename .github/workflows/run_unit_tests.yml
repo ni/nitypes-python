@@ -36,6 +36,8 @@ jobs:
         run: poetry run pip list
       - name: Run unit tests and code coverage
         run: poetry run pytest ./tests/unit -v --cov=nitypes --junitxml=test_results/nitypes-${{ matrix.os }}-py${{ matrix.python-version }}.xml
+      - name: Run acceptance tests
+        run: poetry run pytest ./tests/acceptance -v --junitxml=test_results/nitypes-acceptance-${{ matrix.os }}-py${{ matrix.python-version }}.xml
       - name: Run doctests
         run: poetry run pytest --doctest-modules src/nitypes -v --junitxml=test_results/nitypes-doctests-${{ matrix.os }}-py${{ matrix.python-version }}.xml
       - name: Run benchmarks
