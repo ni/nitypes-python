@@ -51,7 +51,7 @@ To contribute to this project, it is recommended that you follow these steps:
 1. Look at the checks on the checks on the Conversation tab in the PR. If all checks pass, that
    portion of the PR page should look similar to this:
    ![PR Checks](images/pr-checks.png)
-   Note that the `Test Results` check will not complete due to a known issue.
+   Note that if you are using a fork of the repo, the `Test Results` check will not complete due to a known issue (#243).
 
    If any of the checks fails, attempt to fix the failures by changing the code.
 
