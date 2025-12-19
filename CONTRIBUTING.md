@@ -30,28 +30,21 @@ To contribute to this project, it is recommended that you follow these steps:
    version 2.1.3 or newer [installed](https://python-poetry.org/docs/#installation).
 1. If you do not have write access to the repo fork the repository on GitHub.
 1. Install `nitypes` dependencies using `poetry install --with docs`.
-1. Perform regression tests per [Regression Tests](#regression-tests) section below.
-1. Perform static analysis checks per [Static Analysis Checks](#static-analysis-checks)
-   section below.
-1. If your changes will cover documentation generated from the code, generate that
-   documentation per
-   [Documentation Generated from the Code](#documentation-generated-from-the-code) section.
-1. If you are concerned that your changes may have negative impact on performance,
-   perform benchmark test per [Benchmark Tests](#benchmark-tests)
-1. If all of the tests and checks listed above pass, proceed to the next step.
+1. Perform [Contributor Quality Assurance Activities](#contributor-quality-assurance-activities)
+1. If all of the tests and checks covered under
+   [Contributor Quality Assurance Activities](#contributor-quality-assurance-activities) pass,
+   proceed to the next step.
    If you encounter any failures do not begin development. Instead, try to resolve
-   those failures. If you are unable to resolve the failures, report an
-   issue through our [GitHub issues page](http://github.com/ni/nitypes-python/issues).
-1. Write new tests that demonstrate your bug or feature. Ensure that these new tests fail.
+   those failures, and go back to the previous step. If you are unable to resolve the failures,
+   report an issue through our [GitHub issues page](http://github.com/ni/nitypes-python/issues).
+1. Write new tests that demonstrate your bug or feature. Run regression tests.
+   Ensure that the new tests fail.
 1. Make your change. Remember to sign off your commits as described
    [above](#signing-off-commits).
-1. Run all the regression tests again, including the tests you just added.
-   If there are any failures, fix them by changing the code or the test, as appropriate, before
-   moving to the next step.
-1. Perform all the static analysis checks. If there are any failures, fix them.
-1. If applicable, generate documentation and review generated documentation. If there are any
-   failures, fix them.
-1. If applicable, perform benchmark tests. If there are any failures, fix them.
+1. Perform [Contributor Quality Assurance Activities](#contributor-quality-assurance-activities)
+1. If all of the tests and checks covered under
+   [Contributor Quality Assurance Activities](#contributor-quality-assurance-activities) pass,
+   proceed to the next step. Otherwise, fix the failures and go back to the previous step.
 1. Send a GitHub Pull Request to the main repository's `main` branch. GitHub Pull Requests are
    the expected method of code collaboration on this project.
 1. Look at the checks on the checks on the Conversation tab in the PR.
@@ -60,7 +53,19 @@ To contribute to this project, it is recommended that you follow these steps:
 
    If any of the checks fails, attempt to fix the failures by changing the code.
 
-# Regression Tests
+## Contributor Quality Assurance Activities
+
+As a contributor, you are expected to perform the following quality assurance activities:
+1. Perform regression tests per [Regression Tests](#regression-tests) section below.
+1. Perform static analysis checks per [Static Analysis Checks](#static-analysis-checks)
+section below.
+1. If your changes will cover documentation generated from the code, generate that
+   documentation per
+   [Documentation Generated from the Code](#documentation-generated-from-the-code) section.
+1. If you are concerned that your changes may have negative impact on performance,
+   perform benchmark test per [Benchmark Tests](#benchmark-tests)
+
+## Regression Tests
 
 In order to be able to run the `nitypes` regression tests, your setup should meet the following minimum
 requirements:
@@ -70,7 +75,7 @@ requirements:
 
 To perform regression tests, run `poetry run pytest -v` in the root of the distribution.
 
-# Static Analysis Checks
+## Static Analysis Checks
 
 Static analysis is performed in several steps, as set forth below. Run each of the commands listed below in the root of the distribution.
 
