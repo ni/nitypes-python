@@ -41,7 +41,7 @@ To contribute to this project, it is recommended that you follow these steps:
    running the following command from the distribution root: `start docs\_build\index.html`.
 1. Write new tests that demonstrate your bug or feature. Ensure that these new tests fail.
 1. Make your change. Remember to sign off your commits as described [above](#signing-off-commits).
-1. Run all the regression tests again (including the tests you just added.
+1. Run all the regression tests again, including the tests you just added.
    If there are any failures, fix them by changing the code or the test, as appropriate, before
    moving to the next step.
 1. Perform all the static analysis checks per [Static Analysis](#static-analysis) section below.
