@@ -23,16 +23,10 @@ jobs:
           merge-multiple: true
       - name: List downloaded files
         run: ls -lR
-      - name: Publish test results  
+      - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
         with:
           files: "test_results/**/*.xml"
-          check_name: "Test Results"
           comment_mode: "off"
-        if: always() && github.event.repository.fork == true
-      - name: Publish test results with comments
-        uses: EnricoMi/publish-unit-test-result-action@34d7c956a59aed1bfebf31df77b8de55db9bbaaf # v2.21.0
-        with:
-          files: "test_results/**/*.xml" 
-          check_name: "Test Results"
-        if: always() && github.event.repository.fork == false
+          check_run: true
+        if: always()
