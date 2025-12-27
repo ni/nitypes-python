@@ -21,6 +21,12 @@ jobs:
           path: test_results
           pattern: test_results_*
           merge-multiple: true
+      - name: Debug workflow context
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Event name: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "Is fork: ${{ github.event.pull_request.head.repo.fork || 'not a PR' }}"
       - name: List downloaded files
         run: ls -lR
       - name: Publish test results
@@ -29,4 +35,8 @@ jobs:
           files: "test_results/**/*.xml"
           comment_mode: "off"
           check_run: true
+          action_fail: false
         if: always()
+      - name: Always complete status
+        if: always()
+        run: echo "Test results workflow completed"
