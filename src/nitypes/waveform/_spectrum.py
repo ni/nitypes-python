@@ -742,16 +742,16 @@ class Spectrum(Generic[_TData]):
             self._start_index = start_index
             self._sample_count = sample_count
 
-    def __eq__(self, value: object, /) -> bool:
-        """Return self==value."""
-        if not isinstance(value, self.__class__):
+    def __eq__(self, other: object, /) -> bool:
+        """Return self == other."""
+        if not isinstance(other, self.__class__):
             return NotImplemented
         return (
-            self.dtype == value.dtype
-            and np.array_equal(self.data, value.data)
-            and self.start_frequency == value.start_frequency
-            and self.frequency_increment == value.frequency_increment
-            and self._extended_properties == value._extended_properties
+            self.dtype == other.dtype
+            and np.array_equal(self.data, other.data)
+            and self.start_frequency == other.start_frequency
+            and self.frequency_increment == other.frequency_increment
+            and self._extended_properties == other._extended_properties
         )
 
     def __reduce__(self) -> tuple[Any, ...]:

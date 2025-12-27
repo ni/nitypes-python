@@ -1362,15 +1362,15 @@ class DigitalWaveform(Generic[TDigitalState]):
         assert 0 <= index < self.signal_count
         return self.signal_count - 1 - index
 
-    def __eq__(self, value: object, /) -> bool:
-        """Return self==value."""
-        if not isinstance(value, self.__class__):
+    def __eq__(self, other: object, /) -> bool:
+        """Return self == other."""
+        if not isinstance(other, self.__class__):
             return NotImplemented
         return (
-            self.dtype == value.dtype
-            and np.array_equal(self.data, value.data)
-            and self._extended_properties == value._extended_properties
-            and self._timing == value._timing
+            self.dtype == other.dtype
+            and np.array_equal(self.data, other.data)
+            and self._extended_properties == other._extended_properties
+            and self._timing == other._timing
         )
 
     def __reduce__(self) -> tuple[Any, ...]:

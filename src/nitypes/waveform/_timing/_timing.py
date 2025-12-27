@@ -320,16 +320,16 @@ class Timing(Generic[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]):
             ),
         )
 
-    def __eq__(self, value: object, /) -> bool:
-        """Return self==value."""
-        if not isinstance(value, self.__class__):
+    def __eq__(self, other: object, /) -> bool:
+        """Return self == other."""
+        if not isinstance(other, self.__class__):
             return NotImplemented
         return (
-            self._timestamp == value._timestamp
-            and self._time_offset == value._time_offset
-            and self._sample_interval == value._sample_interval
-            and self._sample_interval_mode == value._sample_interval_mode
-            and self._timestamps == value._timestamps
+            self._timestamp == other._timestamp
+            and self._time_offset == other._time_offset
+            and self._sample_interval == other._sample_interval
+            and self._sample_interval_mode == other._sample_interval_mode
+            and self._timestamps == other._timestamps
         )
 
     def __reduce__(self) -> tuple[Any, ...]:

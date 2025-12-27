@@ -499,14 +499,14 @@ class TimeDelta:
         else:
             return NotImplemented
 
-    def __eq__(self, value: object, /) -> bool:
-        """Return self==value."""
-        if isinstance(value, self.__class__):
-            return self._ticks == value._ticks
-        elif isinstance(value, ht.timedelta):
-            return self._to_hightime_timedelta() == value
-        elif isinstance(value, dt.timedelta):
-            return self == self.__class__(value)
+    def __eq__(self, other: object, /) -> bool:
+        """Return self == other."""
+        if isinstance(other, self.__class__):
+            return self._ticks == other._ticks
+        elif isinstance(other, ht.timedelta):
+            return self._to_hightime_timedelta() == other
+        elif isinstance(other, dt.timedelta):
+            return self == self.__class__(other)
         else:
             return NotImplemented
 

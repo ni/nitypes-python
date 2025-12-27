@@ -346,15 +346,15 @@ class XYData(Generic[TData]):
         """
         return self._extended_properties
 
-    def __eq__(self, value: object, /) -> bool:
-        """Return self==value."""
-        if not isinstance(value, self.__class__):
+    def __eq__(self, other: object, /) -> bool:
+        """Return self == other."""
+        if not isinstance(other, self.__class__):
             return NotImplemented
         return (
-            np.array_equal(self.x_data, value.x_data)
-            and np.array_equal(self.y_data, value.y_data)
-            and self.x_units == value.x_units
-            and self.y_units == value.y_units
+            np.array_equal(self.x_data, other.x_data)
+            and np.array_equal(self.y_data, other.y_data)
+            and self.x_units == other.x_units
+            and self.y_units == other.y_units
         )
 
     def __reduce__(self) -> tuple[Any, ...]:
