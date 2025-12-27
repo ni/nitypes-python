@@ -20,3 +20,5 @@ jobs:
       contents: read
       checks: write
       pull-requests: write
+      actions: read
+      issues: read
