@@ -201,11 +201,11 @@ class Vector(MutableSequence[TScalar]):
             raise self._create_value_mismatch_exception(value)
         self._values.insert(index, value)
 
-    def __eq__(self, value: object, /) -> bool:
-        """Return self==value."""
-        if not isinstance(value, self.__class__):
+    def __eq__(self, other: object, /) -> bool:
+        """Return self == other."""
+        if not isinstance(other, self.__class__):
             return NotImplemented
-        return self._values == value._values and self.units == value.units
+        return self._values == other._values and self.units == other.units
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""

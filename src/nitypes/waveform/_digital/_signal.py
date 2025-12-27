@@ -82,12 +82,12 @@ class DigitalWaveformSignal(Generic[TDigitalState]):
     def name(self, value: str) -> None:
         self._owner._set_line_name(self._column_index, value)
 
-    def __eq__(self, value: object, /) -> bool:
-        """Return self==value."""
-        if not isinstance(value, self.__class__):
+    def __eq__(self, other: object, /) -> bool:
+        """Return self == other."""
+        if not isinstance(other, self.__class__):
             return NotImplemented
         # Do not compare the index or name.
-        return np.array_equal(self.data, value.data)
+        return np.array_equal(self.data, other.data)
 
     def __reduce__(self) -> tuple[Any, ...]:
         """Return object state for pickling."""

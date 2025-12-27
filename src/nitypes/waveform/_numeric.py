@@ -734,16 +734,16 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
             self._start_index = start_index
             self._sample_count = sample_count
 
-    def __eq__(self, value: object, /) -> bool:
-        """Return self==value."""
-        if not isinstance(value, self.__class__):
+    def __eq__(self, other: object, /) -> bool:
+        """Return self == other."""
+        if not isinstance(other, self.__class__):
             return NotImplemented
         return (
-            self.dtype == value.dtype
-            and np.array_equal(self.raw_data, value.raw_data)
-            and self._extended_properties == value._extended_properties
-            and self._timing == value._timing
-            and self._scale_mode == value._scale_mode
+            self.dtype == other.dtype
+            and np.array_equal(self.raw_data, other.raw_data)
+            and self._extended_properties == other._extended_properties
+            and self._timing == other._timing
+            and self._scale_mode == other._scale_mode
         )
 
     def __reduce__(self) -> tuple[Any, ...]:

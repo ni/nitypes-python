@@ -431,14 +431,14 @@ class DateTime:
         else:
             return NotImplemented
 
-    def __eq__(self, value: object, /) -> bool:
-        """Return self==value."""
-        if isinstance(value, self.__class__):
-            return self._offset == value._offset
-        elif isinstance(value, ht.datetime):
-            return self._to_hightime_datetime() == value
-        elif isinstance(value, dt.datetime):
-            return self == self.__class__(value)
+    def __eq__(self, other: object, /) -> bool:
+        """Return self == other."""
+        if isinstance(other, self.__class__):
+            return self._offset == other._offset
+        elif isinstance(other, ht.datetime):
+            return self._to_hightime_datetime() == other
+        elif isinstance(other, dt.datetime):
+            return self == self.__class__(other)
         else:
             return NotImplemented
 
