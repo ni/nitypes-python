@@ -39,7 +39,7 @@ jobs:
     uses: ./.github/workflows/run_unit_tests_oldest_deps.yml
     needs: [checks_succeeded]
   report_test_results:
-    name: Report test results
+    name: Test Results
     uses: ./.github/workflows/report_test_results.yml
     needs: [run_unit_tests, run_unit_tests_oldest_deps]
     if: always()
