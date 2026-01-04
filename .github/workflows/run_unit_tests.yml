@@ -38,9 +38,9 @@ jobs:
         run: poetry run pytest ./tests/unit -v --cov=nitypes --junitxml=test_results/nitypes-${{ matrix.os }}-py${{ matrix.python-version }}.xml
       - name: Run benchmarks
         run: poetry run pytest ./tests/benchmark -v --junitxml=test_results/nitypes-benchmarks-${{ matrix.os }}-py${{ matrix.python-version }}.xml
-      - name: Upload test results
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+      - name: Upload Test Results
+        if: (!cancelled())
+        uses: actions/upload-artifact@v4
         with:
-          name: test_results_unit_${{ matrix.os }}_py${{ matrix.python-version }}
+          name: Test Results (unit_${{ matrix.os }}_py${{ matrix.python-version }})
           path: ./test_results/*.xml
-        if: always()
