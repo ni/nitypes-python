@@ -9,6 +9,15 @@ on:
   workflow_dispatch:
 
 jobs:
+  event_file:
+    name: "Event File"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: Event File
+        path: ${{ github.event_path }}
   check_nitypes:
     name: Check nitypes
     uses: ./.github/workflows/check_nitypes.yml
