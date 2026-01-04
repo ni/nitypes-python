@@ -9,6 +9,15 @@ on:
   workflow_dispatch:
 
 jobs:
+  event_file:
+    name: "Event File"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: Event File
+        path: ${{ github.event_path }}
   check_nitypes:
     name: Check nitypes
     uses: ./.github/workflows/check_nitypes.yml
@@ -30,7 +39,7 @@ jobs:
     uses: ./.github/workflows/run_unit_tests_oldest_deps.yml
     needs: [checks_succeeded]
   report_test_results:
-    name: Report test results
+    name: Test Results
     uses: ./.github/workflows/report_test_results.yml
     needs: [run_unit_tests, run_unit_tests_oldest_deps]
     if: always()
