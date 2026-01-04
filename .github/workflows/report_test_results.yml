@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  report_test_results:
-    name: Report test results
+  test-results:
+    name: Test Results
     runs-on: ubuntu-latest
     permissions:
       contents: read
