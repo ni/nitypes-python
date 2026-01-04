@@ -51,5 +51,5 @@ jobs:
         if: (!cancelled())
         uses: actions/upload-artifact@v4
         with:
-          name: Test Results (oldest_deps_${{ matrix.os }}_py${{ matrix.python-version }})
+          name: test_results_oldest_deps_${{ matrix.os }}_py${{ matrix.python-version }}
           path: ./test_results/*.xml
