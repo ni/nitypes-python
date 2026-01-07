@@ -31,7 +31,8 @@ You can construct an array of complex integers from a sequence of tuples using :
 # formatting differences between NumPy 1.x and 2.x (e.g. dtype=int32, 1.23 vs. np.float64(1.23)).
 # We use inline version checks instead of __doctest_requires__ due to a pytest-doctestplus 1.6.0
 # bug that doesn't properly parse version requirements like "numpy>=2.0".
-# This check may exist in multiple places in the code. If you are making changes, you probably need them in every location.
+# This check may exist in multiple places in the code. If you are making changes, you
+# probably need them in every location.
 # TODO: Remove these version checks when NumPy < 2.0 compatibility is no longer required.
 >>> import numpy as np; import pytest
 >>> if tuple(map(int, np.__version__.split('.')[:2])) < (2, 0): pytest.skip("requires numpy>=2.0")
