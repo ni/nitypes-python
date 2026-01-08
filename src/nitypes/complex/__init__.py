@@ -27,15 +27,7 @@ Constructing arrays of complex integers
 
 You can construct an array of complex integers from a sequence of tuples using :func:`numpy.array`:
 
-# Some of these doctests use types introduced in NumPy 2.0 (np.long and np.ulong) or highlight
-# formatting differences between NumPy 1.x and 2.x (e.g. dtype=int32, 1.23 vs. np.float64(1.23)).
-# We use inline version checks instead of __doctest_requires__ due to a pytest-doctestplus 1.6.0
-# bug that doesn't properly parse version requirements like "numpy>=2.0".
-# This check may exist in multiple places in the code. If you are making changes, you
-# probably need them in every location.
-# TODO: Remove these version checks when NumPy < 2.0 compatibility is no longer required.
->>> import numpy as np; import pytest
->>> if tuple(map(int, np.__version__.split('.')[:2])) < (2, 0): pytest.skip("requires numpy>=2.0")
+>>> import numpy as np
 >>> np.array([(1, 2), (3, 4)], dtype=ComplexInt32DType)
 array([(1, 2), (3, 4)], dtype=[('real', '<i2'), ('imag', '<i2')])
 
@@ -130,6 +122,21 @@ Mathematical operations
 Structured arrays of complex integers do not support mathematical operations. Convert
 them to arrays of complex floating-point numbers before doing any sort of math or analysis.
 """
+
+# Some of these doctests use types introduced in NumPy 2.0 (np.long and np.ulong) or highlight
+# formatting differences between NumPy 1.x and 2.x (e.g. dtype=int32, 1.23 vs. np.float64(1.23)).
+# We use inline version checks instead of __doctest_requires__ due to a pytest-doctestplus 1.6.0
+# bug that doesn't properly parse version requirements like "numpy>=2.0".
+# This check may exist in multiple places in the code. If you are making changes, you
+# probably need them in every location.
+# TODO: Remove these version checks when NumPy < 2.0 compatibility is no longer required.
+
+# Module-level doctest setup - skip all doctests if NumPy < 2.0
+import numpy as _np
+import pytest as _pytest
+
+if tuple(map(int, _np.__version__.split('.')[:2])) < (2, 0):
+    _pytest.skip("requires numpy>=2.0", allow_module_level=True)
 
 from nitypes.complex._conversion import convert_complex
 from nitypes.complex._dtypes import ComplexInt32Base, ComplexInt32DType
