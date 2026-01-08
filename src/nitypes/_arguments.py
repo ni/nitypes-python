@@ -17,10 +17,11 @@ from nitypes._numpy import isdtype as _np_isdtype
 # Some of these doctests use types introduced in NumPy 2.0 (np.long and np.ulong) or highlight
 # formatting differences between NumPy 1.x and 2.x (e.g. dtype=int32, 1.23 vs. np.float64(1.23)).
 # We use inline version checks instead of __doctest_requires__ due to pytest-doctestplus bugs
-# in versions 1.6.0 (treated "numpy>=2.0" as literal module name) and 1.7.0 (execution pipeline bugs).
-# This check may exist in multiple places in the code. If you are making changes, you
-# probably need them in every location.
-# TODO: Remove these version checks when pytest-doctestplus is fixed or NumPy < 2.0 compatibility is no longer required.
+# in versions 1.6.0 (treated "numpy>=2.0" as literal module name) and 1.7.0 (execution
+# pipeline bugs). This check may exist in multiple places in the code. If you are making
+# changes, you probably need them in every location.
+# TODO: Remove these version checks when pytest-doctestplus is fixed or NumPy < 2.0
+# compatibility is no longer required.
 
 
 def arg_to_float(
