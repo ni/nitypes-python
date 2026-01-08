@@ -135,7 +135,7 @@ them to arrays of complex floating-point numbers before doing any sort of math o
 import numpy as _np
 import pytest as _pytest
 
-if tuple(map(int, _np.__version__.split('.')[:2])) < (2, 0):
+if tuple(map(int, _np.__version__.split(".")[:2])) < (2, 0):
     _pytest.skip("requires numpy>=2.0", allow_module_level=True)
 
 from nitypes.complex._conversion import convert_complex
