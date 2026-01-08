@@ -28,6 +28,8 @@ Constructing arrays of complex integers
 You can construct an array of complex integers from a sequence of tuples using :func:`numpy.array`:
 
 >>> import numpy as np
+>>> import pytest  # doctest: +SKIP  
+>>> if tuple(map(int, np.__version__.split(".")[:2])) < (2, 0): pytest.skip("requires numpy>=2.0")  # doctest: +SKIP
 >>> np.array([(1, 2), (3, 4)], dtype=ComplexInt32DType)
 array([(1, 2), (3, 4)], dtype=[('real', '<i2'), ('imag', '<i2')])
 
@@ -130,13 +132,6 @@ them to arrays of complex floating-point numbers before doing any sort of math o
 # This check may exist in multiple places in the code. If you are making changes, you
 # probably need them in every location.
 # TODO: Remove these version checks when NumPy < 2.0 compatibility is no longer required.
-
-# Module-level doctest setup - skip all doctests if NumPy < 2.0
-import numpy as _np
-import pytest as _pytest
-
-if tuple(map(int, _np.__version__.split(".")[:2])) < (2, 0):
-    _pytest.skip("requires numpy>=2.0", allow_module_level=True)
 
 from nitypes.complex._conversion import convert_complex
 from nitypes.complex._dtypes import ComplexInt32Base, ComplexInt32DType
