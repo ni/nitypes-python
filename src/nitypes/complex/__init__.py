@@ -126,15 +126,10 @@ Structured arrays of complex integers do not support mathematical operations. Co
 them to arrays of complex floating-point numbers before doing any sort of math or analysis.
 """
 
-# Some of these doctests use types introduced in NumPy 2.0 (np.long and np.ulong) or highlight
-# formatting differences between NumPy 1.x and 2.x (e.g. dtype=int32, 1.23 vs. np.float64(1.23)).
-# We use inline version checks instead of __doctest_requires__ due to a pytest-doctestplus 1.6.0
-# bug that doesn't properly parse version requirements like "numpy>=2.0".
-# This check may exist in multiple places in the code. If you are making changes, you
-# probably need them in every location.
-# TODO: Remove these version checks when NumPy < 2.0 compatibility is no longer required.
-
 from nitypes.complex._conversion import convert_complex
 from nitypes.complex._dtypes import ComplexInt32Base, ComplexInt32DType
 
 __all__ = ["convert_complex", "ComplexInt32DType", "ComplexInt32Base"]
+
+# We use inline version checking for doctest because __doctest_requires__
+# isn't working with pytest-doctestplus 1.6.0 and 1.7.0 due to version parsing bugs
