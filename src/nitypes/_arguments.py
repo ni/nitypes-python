@@ -29,9 +29,7 @@ def arg_to_float(
 ) -> float:
     """Convert an argument to a float.
 
-    >>> import pytest  # doctest: +SKIP
-    >>> version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)  # doctest: +SKIP
-    >>> if version_check: pytest.skip("requires numpy>=2.0")  # doctest: +SKIP
+    >>> import pytest; version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0); pytest.skip("requires numpy>=2.0") if version_check else None  # doctest: +SKIP
     >>> arg_to_float("xyz", 1.234)
     1.234
     >>> arg_to_float("xyz", 1234)
@@ -159,9 +157,7 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
 
     Unlike :any:`numpy.isdtype`, this function supports structured data types.
 
-    >>> import pytest  # doctest: +SKIP
-    >>> version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)  # doctest: +SKIP
-    >>> if version_check: pytest.skip("requires numpy>=2.0")  # doctest: +SKIP
+    >>> import pytest; version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0); pytest.skip("requires numpy>=2.0") if version_check else None  # doctest: +SKIP
     >>> is_dtype(np.float64, (np.float64, np.intc, np.long,))
     True
     >>> is_dtype("float64", (np.float64, np.intc, np.long,))
@@ -199,9 +195,7 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
 def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) -> None:
     """Validate a dtype-like object against a tuple of supported dtype-like objects.
 
-    >>> import pytest  # doctest: +SKIP
-    >>> version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)  # doctest: +SKIP
-    >>> if version_check: pytest.skip("requires numpy>=2.0")  # doctest: +SKIP
+    >>> import pytest; version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0); pytest.skip("requires numpy>=2.0") if version_check else None  # doctest: +SKIP
     >>> validate_dtype(np.float64, (np.float64, np.intc, np.long,))
     >>> validate_dtype("float64", (np.float64, np.intc, np.long,))
     >>> validate_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.long, np.longlong))
