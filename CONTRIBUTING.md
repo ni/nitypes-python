@@ -53,9 +53,9 @@ To contribute to this project, it is recommended that you follow these steps:
 
    If any of the checks fails, attempt to fix the failures by changing the code.
 
-## Contributor Quality Assurance Activities
+## Tests and Checks
 
-As a contributor, you are expected to perform the following quality assurance activities:
+As a contributor, you are expected to perform the following tests and checks:
 1. Perform regression tests per [Regression Tests](#regression-tests) section below.
 1. Perform static analysis checks per [Static Analysis Checks](#static-analysis-checks)
 section below.
