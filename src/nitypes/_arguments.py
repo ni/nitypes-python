@@ -14,22 +14,14 @@ from nitypes._exceptions import (
 )
 from nitypes._numpy import isdtype as _np_isdtype
 
-# Some of these doctests use types introduced in NumPy 2.0 (np.long and np.ulong) or highlight
-# formatting differences between NumPy 1.x and 2.x (e.g. dtype=int32, 1.23 vs. np.float64(1.23)).
-# We use inline version checks instead of __doctest_requires__ due to pytest-doctestplus bugs
-# in versions 1.6.0 (treated "numpy>=2.0" as literal module name) and 1.7.0 (execution
-# pipeline bugs). This check may exist in multiple places in the code. If you are making
-# changes, you probably need them in every location.
-# TODO: Remove these version checks when pytest-doctestplus is fixed or NumPy < 2.0
-# compatibility is no longer required.
-
 
 def arg_to_float(
     arg_description: str, value: SupportsFloat | None, default_value: float | None = None
 ) -> float:
     """Convert an argument to a float.
 
-    >>> import pytest; version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0); pytest.skip("requires numpy>=2.0") if version_check else None  # doctest: +SKIP
+    __doctest_requires__ = ["numpy>=2.0"]
+
     >>> arg_to_float("xyz", 1.234)
     1.234
     >>> arg_to_float("xyz", 1234)
@@ -144,20 +136,13 @@ def arg_to_uint(
     return value
 
 
-# Some of these doctests use types introduced in NumPy 2.0 (np.long and np.ulong) or highlight
-# formatting differences between NumPy 1.x and 2.x (e.g. dtype=int32, 1.23 vs.
-# np.float64(1.23)).
-# We use inline version checks instead of __doctest_requires__ due to a pytest-doctestplus 1.6.0
-# bug that doesn't properly parse version requirements like "numpy>=2.0".
-# This check may exist in multiple places in the code. If you are making changes, you
-# probably need them in every location.
-# TODO: Remove these version checks when NumPy < 2.0 compatibility is no longer required.
 def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) -> bool:
     """Check a dtype-like object against a tuple of supported dtype-like objects.
 
     Unlike :any:`numpy.isdtype`, this function supports structured data types.
 
-    >>> import pytest; version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0); pytest.skip("requires numpy>=2.0") if version_check else None  # doctest: +SKIP
+    __doctest_requires__ = ["numpy>=2.0"]
+
     >>> is_dtype(np.float64, (np.float64, np.intc, np.long,))
     True
     >>> is_dtype("float64", (np.float64, np.intc, np.long,))
@@ -184,18 +169,11 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
     return _np_isdtype(dtype, supported_dtypes)
 
 
-# Some of these doctests use types introduced in NumPy 2.0 (np.long and np.ulong) or highlight
-# formatting differences between NumPy 1.x and 2.x (e.g. dtype=int32, 1.23 vs.
-# np.float64(1.23)).
-# We use inline version checks instead of __doctest_requires__ due to a pytest-doctestplus 1.6.0
-# bug that doesn't properly parse version requirements like "numpy>=2.0".
-# This check may exist in multiple places in the code. If you are making changes, you
-# probably need them in every location.
-# TODO: Remove these version checks when NumPy < 2.0 compatibility is no longer required.
 def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) -> None:
     """Validate a dtype-like object against a tuple of supported dtype-like objects.
 
-    >>> import pytest; version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0); pytest.skip("requires numpy>=2.0") if version_check else None  # doctest: +SKIP
+    __doctest_requires__ = ["numpy>=2.0"]
+
     >>> validate_dtype(np.float64, (np.float64, np.intc, np.long,))
     >>> validate_dtype("float64", (np.float64, np.intc, np.long,))
     >>> validate_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.long, np.longlong))
