@@ -28,7 +28,7 @@ To contribute to this project, it is recommended that you follow these steps:
 1. Ensure you have [python](https://www.python.org) version 3.11.9 or newer [installed](https://www.python.org/downloads/).
 1. Ensure you have [poetry](https://python-poetry.org/)
    version 2.1.3 or newer [installed](https://python-poetry.org/docs/#installation).
-1. If you do not have write access to the repo fork the repository on GitHub.
+1. If you do not have write access to the repo, fork the repository on GitHub.
 1. Install `nitypes` dependencies using `poetry install --with docs`.
 1. Perform [Contributor Quality Assurance Activities](#contributor-quality-assurance-activities)
 1. If all of the tests and checks covered under
