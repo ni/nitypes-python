@@ -29,6 +29,7 @@ You can construct an array of complex integers from a sequence of tuples using :
 
 .. testsetup::
 
+    # Workaround for technical debt #251: Skip doctest if numpy<2.0
     import numpy as np
     import pytest
     v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
@@ -137,6 +138,5 @@ __all__ = ["convert_complex", "ComplexInt32DType", "ComplexInt32Base"]
 # The following line is commented out as workaround for technical debt #251.
 # __doctest_requires__ = {".": ["numpy>=2.0"]}
 # When the technical debt is resolved, uncomment the line above
-# and remove the lines similar to the ones below:
-# >>> import pytest; version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
-# >>> pytest.skip("requires numpy>=2.0") if version_check else None  # doctest: +SKIP
+# and remove testsetup blocks that include comments like the one below:
+# # Workaround for technical debt #251: Skip doctest if numpy<2.0

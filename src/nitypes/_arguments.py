@@ -19,8 +19,8 @@ from nitypes._numpy import isdtype as _np_isdtype
 # The following line is commented out as workaround for technical debt #251.
 # __doctest_requires__ = {("arg_to_float", "is_dtype", "validate_dtype"): ["numpy>=2.0"]}
 # When the technical debt is resolved, uncomment the line above
-# and remove the lines similar to the ones below:
-# >>> import pytest; version_check = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
+# and remove testsetup blocks that include comments like the one below:
+# # Workaround for technical debt #251: Skip doctest if numpy<2.0
 # >>> pytest.skip("requires numpy>=2.0") if version_check else None  # doctest: +SKIP
 
 def arg_to_float(
@@ -30,6 +30,7 @@ def arg_to_float(
 
     .. testsetup::
 
+        # Workaround for technical debt #251: Skip doctest if numpy<2.0
         import numpy as np
         import pytest
         v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
@@ -37,10 +38,10 @@ def arg_to_float(
 
     >>> arg_to_float("xyz", 1.234)
     1.234
-    >>> arg_to_float("xyz", np.float64(1.234))
-    np.float64(1.234)
     >>> arg_to_float("xyz", 1234)
     1234.0
+    >>> arg_to_float("xyz", np.float64(1.234))
+    np.float64(1.234)
     >>> arg_to_float("xyz", np.float32(1.234))  # doctest: +ELLIPSIS
     1.233999...
     >>> arg_to_float("xyz", 1.234, 5.0)
@@ -156,6 +157,7 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
 
     .. testsetup::
 
+        # Workaround for technical debt #251: Skip doctest if numpy<2.0
         import numpy as np
         import pytest
         v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
@@ -192,6 +194,7 @@ def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, 
 
     .. testsetup::
 
+        # Workaround for technical debt #251: Skip doctest if numpy<2.0
         import numpy as np
         import pytest
         v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
