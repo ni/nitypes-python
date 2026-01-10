@@ -30,10 +30,8 @@ To contribute to this project, it is recommended that you follow these steps:
    version 2.1.3 or newer [installed](https://python-poetry.org/docs/#installation).
 1. If you do not have write access to the repo, fork the repository on GitHub.
 1. Install `nitypes` dependencies using `poetry install --with docs`.
-1. Perform [Contributor Quality Assurance Activities](#contributor-quality-assurance-activities)
-1. If all of the tests and checks covered under
-   [Contributor Quality Assurance Activities](#contributor-quality-assurance-activities) pass,
-   proceed to the next step.
+1. Perform [Tests and Checks](#tests-and-checks)
+1. If all the tests and checks pass, proceed to the next step.
    If you encounter any failures do not begin development. Instead, try to resolve
    those failures, and go back to the previous step. If you are unable to resolve the failures,
    report an issue through our [GitHub issues page](http://github.com/ni/nitypes-python/issues).
@@ -41,17 +39,16 @@ To contribute to this project, it is recommended that you follow these steps:
    Ensure that the new tests fail.
 1. Make your change. Remember to sign off your commits as described
    [above](#signing-off-commits).
-1. Perform [Contributor Quality Assurance Activities](#contributor-quality-assurance-activities)
-1. If all of the tests and checks covered under
-   [Contributor Quality Assurance Activities](#contributor-quality-assurance-activities) pass,
-   proceed to the next step. Otherwise, fix the failures and go back to the previous step.
+1. Perform [Tests and Checks](#tests-and-checks)
+1. If all of the tests and checks pass, proceed to the next step.
+   Otherwise, fix the failures and go back to the previous step where the problem was introduced.
 1. Send a GitHub Pull Request to the main repository's `main` branch. GitHub Pull Requests are
    the expected method of code collaboration on this project.
 1. Look at the checks on the checks on the Conversation tab in the PR.
 
    Note that if you are using a fork of the repo, the `Test Results` check will not complete due to a known issue (#243).
 
-   If any of the checks fails, attempt to fix the failures by changing the code.
+   If any of the tests or checks fails, attempt to fix the failures by changing the code.
 
 ## Tests and Checks
 
