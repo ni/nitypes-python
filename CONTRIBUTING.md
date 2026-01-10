@@ -44,7 +44,7 @@ To contribute to this project, it is recommended that you follow these steps:
    Otherwise, fix the failures and go back to the previous step where the problem was introduced.
 1. Send a GitHub Pull Request to the main repository's `main` branch. GitHub Pull Requests are
    the expected method of code collaboration on this project.
-1. Look at the checks on the checks on the Conversation tab in the PR.
+1. Look at the test and check results on the Conversation tab in the PR.
 
    Note that if you are using a fork of the repo, the `Test Results` check will not complete due to a known issue (#243).
 
