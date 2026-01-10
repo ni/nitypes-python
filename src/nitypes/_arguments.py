@@ -23,6 +23,7 @@ from nitypes._numpy import isdtype as _np_isdtype
 # # Workaround for technical debt #251: Skip doctest if numpy<2.0
 # >>> pytest.skip("requires numpy>=2.0") if version_check else None  # doctest: +SKIP
 
+
 def arg_to_float(
     arg_description: str, value: SupportsFloat | None, default_value: float | None = None
 ) -> float:
@@ -33,8 +34,8 @@ def arg_to_float(
         # Workaround for technical debt #251: Skip doctest if numpy<2.0
         import numpy as np
         import pytest
-        v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
-        pytest.skip("requires numpy>=2.0") if v else None
+        numpy_version = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
+        pytest.skip("requires numpy>=2.0") if numpy_version else None
 
     >>> arg_to_float("xyz", 1.234)
     1.234
@@ -160,8 +161,8 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
         # Workaround for technical debt #251: Skip doctest if numpy<2.0
         import numpy as np
         import pytest
-        v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
-        pytest.skip("requires numpy>=2.0") if v else None
+        numpy_version = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
+        pytest.skip("requires numpy>=2.0") if numpy_version else None
 
     >>> is_dtype(np.float64, (np.float64, np.intc, np.long,))
     True
@@ -197,8 +198,8 @@ def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, 
         # Workaround for technical debt #251: Skip doctest if numpy<2.0
         import numpy as np
         import pytest
-        v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
-        pytest.skip("requires numpy>=2.0") if v else None
+        numpy_version = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
+        pytest.skip("requires numpy>=2.0") if numpy_version else None
 
     >>> validate_dtype(np.float64, (np.float64, np.intc, np.long,))
     >>> validate_dtype("float64", (np.float64, np.intc, np.long,))

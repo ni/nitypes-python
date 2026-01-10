@@ -32,8 +32,8 @@ You can construct an array of complex integers from a sequence of tuples using :
     # Workaround for technical debt #251: Skip doctest if numpy<2.0
     import numpy as np
     import pytest
-    v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
-    pytest.skip("requires numpy>=2.0") if v else None
+    numpy_version = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
+    pytest.skip("requires numpy>=2.0") if numpy_version else None
 
 >>> import numpy as np
 >>> np.array([(1, 2), (3, 4)], dtype=ComplexInt32DType)
