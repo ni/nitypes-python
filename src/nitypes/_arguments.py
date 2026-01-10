@@ -16,7 +16,8 @@ from nitypes._numpy import isdtype as _np_isdtype
 
 # Some of these doctests use types introduced in NumPy 2.0 (np.long and np.ulong) or highlight
 # formatting differences between NumPy 1.x and 2.x (e.g. dtype=int32, 1.23 vs. np.float64(1.23)).
-__doctest_requires__ = {("arg_to_float", "is_dtype", "validate_dtype"): ["numpy>=2.0"]}
+# The following line is commented out as workaround for technical debt #251.
+# __doctest_requires__ = {("arg_to_float", "is_dtype", "validate_dtype"): ["numpy>=2.0"]}
 
 
 def arg_to_float(
