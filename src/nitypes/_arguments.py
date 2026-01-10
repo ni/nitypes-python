@@ -35,11 +35,12 @@ def arg_to_float(
         v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
         pytest.skip("requires numpy>=2.0") if v else None
 
-    >>> import numpy as np
-    >>> arg_to_float("xyz", 1234)
-    1234.0
+    >>> arg_to_float("xyz", 1.234)
+    1.234
     >>> arg_to_float("xyz", np.float64(1.234))
     np.float64(1.234)
+    >>> arg_to_float("xyz", 1234)
+    1234.0
     >>> arg_to_float("xyz", np.float32(1.234))  # doctest: +ELLIPSIS
     1.233999...
     >>> arg_to_float("xyz", 1.234, 5.0)
@@ -160,7 +161,6 @@ def is_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, ...]) 
         v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
         pytest.skip("requires numpy>=2.0") if v else None
 
-    >>> import numpy as np
     >>> is_dtype(np.float64, (np.float64, np.intc, np.long,))
     True
     >>> is_dtype("float64", (np.float64, np.intc, np.long,))
@@ -197,7 +197,6 @@ def validate_dtype(dtype: npt.DTypeLike, supported_dtypes: tuple[npt.DTypeLike, 
         v = tuple(map(int, np.__version__.split(".")[:2])) < (2, 0)
         pytest.skip("requires numpy>=2.0") if v else None
 
-    >>> import numpy as np
     >>> validate_dtype(np.float64, (np.float64, np.intc, np.long,))
     >>> validate_dtype("float64", (np.float64, np.intc, np.long,))
     >>> validate_dtype(np.float64, (np.byte, np.short, np.intc, np.int_, np.long, np.longlong))
