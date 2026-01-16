@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 else:
     from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
 
-__doctest_requires__ = {"XYData": ["numpy>=2.0"]}
+__doctest_requires__ = {".": ["numpy>=2.0"]}
 
 # Extended property keys for X and Y units.
 _UNIT_DESCRIPTION_X = "NI_UnitDescription_X"

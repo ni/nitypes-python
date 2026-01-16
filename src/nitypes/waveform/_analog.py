@@ -21,7 +21,7 @@ else:
     from nitypes.waveform._timing import Timing
 
 
-__doctest_requires__ = {"AnalogWaveform": ["numpy>=2.0"]}
+__doctest_requires__ = {".": ["numpy>=2.0"]}
 
 # _TRaw specifies the type of the raw_data array. AnalogWaveform accepts a narrower set of types
 # than NumericWaveform.
