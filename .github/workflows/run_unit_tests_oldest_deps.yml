@@ -44,9 +44,9 @@ jobs:
         run: poetry install -v
       - name: Display installed dependency versions
         run: poetry run pip list
-      - name: Run unit tests and code coverage
+      - name: Run regression tests and code coverage
         # Skip test___pickled_value___unpickle___is_compatible because this test's pickle data was saved with NumPy 2.x and cannot be loaded in NumPy 1.x.
-        run: poetry run pytest ./tests/unit -v --cov=nitypes --junitxml=test_results/nitypes-oldest-deps-${{ matrix.os }}-py${{ matrix.python-version }}.xml -k "not test___pickled_value___unpickle___is_compatible"
+        run: poetry run pytest -v --cov=nitypes --junitxml=test_results/nitypes-oldest-deps-${{ matrix.os }}-py${{ matrix.python-version }}.xml -k "not test___pickled_value___unpickle___is_compatible"
       - name: Upload test results
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
