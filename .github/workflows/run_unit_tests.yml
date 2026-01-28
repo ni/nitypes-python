@@ -34,8 +34,8 @@ jobs:
         run: poetry install -v
       - name: Display installed dependency versions
         run: poetry run pip list
-      - name: Run unit tests and code coverage
-        run: poetry run pytest ./tests/unit -v --cov=nitypes --junitxml=test_results/nitypes-${{ matrix.os }}-py${{ matrix.python-version }}.xml
+      - name: Run unit/acceptance/doc tests and code coverage
+        run: poetry run pytest -v --cov=nitypes --junitxml=test_results/nitypes-${{ matrix.os }}-py${{ matrix.python-version }}.xml
       - name: Run benchmarks
         run: poetry run pytest ./tests/benchmark -v --junitxml=test_results/nitypes-benchmarks-${{ matrix.os }}-py${{ matrix.python-version }}.xml
       - name: Upload test results

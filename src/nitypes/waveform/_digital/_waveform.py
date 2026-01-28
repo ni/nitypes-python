@@ -273,10 +273,10 @@ class DigitalWaveform(Generic[TDigitalState]):
     and the digital state from the actual and expected waveforms:
 
     >>> result.failures[0]  # doctest: +NORMALIZE_WHITESPACE
-    DigitalWaveformFailure(sample_index=0, expected_sample_index=0, signal_index=0, column_index=1,
+    DigitalWaveformFailure(sample_index=0, expected_sample_index=0, signal_index=0,
     actual_state=<DigitalState.FORCE_UP: 1>, expected_state=<DigitalState.COMPARE_LOW: 3>)
     >>> result.failures[1]  # doctest: +NORMALIZE_WHITESPACE
-    DigitalWaveformFailure(sample_index=1, expected_sample_index=1, signal_index=0, column_index=1,
+    DigitalWaveformFailure(sample_index=1, expected_sample_index=1, signal_index=0,
     actual_state=<DigitalState.FORCE_UP: 1>, expected_state=<DigitalState.COMPARE_LOW: 3>)
 
     Timing information
