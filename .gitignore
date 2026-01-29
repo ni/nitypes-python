@@ -17,6 +17,7 @@ htmlcov/
 # Built artifacts
 dist/
 docs/_build/
+docs/autoapi/
 
 # Common editor metadata
 .vscode/
