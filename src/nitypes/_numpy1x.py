@@ -32,7 +32,7 @@ __all__ = ["asarray", "bool", "isdtype", "long", "ulong"]
 
 
 def asarray(  # noqa: D103 - missing docstring in public function
-    a: npt.ArrayLike, dtype: npt.DTypeLike = None, *, copy: builtins.bool | None = None
+    a: npt.ArrayLike, dtype: npt.DTypeLike | None = None, *, copy: builtins.bool | None = None
 ) -> npt.NDArray[Any]:
     b = np.asarray(a, dtype)
     made_copy = b is not a and b.base is None
