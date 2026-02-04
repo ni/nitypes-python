@@ -127,7 +127,7 @@ class XYData(Generic[TData]):
         cls,
         x_array: npt.NDArray[Any] | Sequence[Any],
         y_array: npt.NDArray[Any] | Sequence[Any],
-        dtype: npt.DTypeLike = ...,
+        dtype: npt.DTypeLike | None = ...,
         *,
         x_units: str = ...,
         y_units: str = ...,
@@ -140,7 +140,7 @@ class XYData(Generic[TData]):
         cls,
         x_array: npt.NDArray[Any] | Sequence[Any],
         y_array: npt.NDArray[Any] | Sequence[Any],
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         x_units: str = "",
         y_units: str = "",
@@ -264,7 +264,7 @@ class XYData(Generic[TData]):
         self,
         x_data: npt.NDArray[TData],
         y_data: npt.NDArray[TData],
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
     ) -> None:
         if not isinstance(x_data, np.ndarray):
             raise invalid_arg_type("x-axis input array", "one-dimensional array", x_data)

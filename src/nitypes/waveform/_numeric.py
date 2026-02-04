@@ -96,7 +96,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
     def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
@@ -147,7 +147,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
     def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
@@ -221,7 +221,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
     def __init__(
         self,
         sample_count: SupportsIndex | None = None,
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         raw_data: npt.NDArray[_TRaw] | None = None,
         start_index: SupportsIndex | None = None,
@@ -284,7 +284,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
     def _init_with_new_array(
         self,
         sample_count: SupportsIndex | None = None,
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
@@ -311,7 +311,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
     def _init_with_provided_array(
         self,
         data: npt.NDArray[_TRaw],
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         start_index: SupportsIndex | None = None,
         sample_count: SupportsIndex | None = None,
@@ -420,7 +420,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
 
     def get_scaled_data(
         self,
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         start_index: SupportsIndex | None = 0,
         sample_count: SupportsIndex | None = None,

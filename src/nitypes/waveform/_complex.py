@@ -159,7 +159,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
     def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
-        dtype: npt.DTypeLike = ...,
+        dtype: npt.DTypeLike | None = ...,
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -174,7 +174,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
     def from_array_1d(  # pyright: ignore[reportIncompatibleMethodOverride]
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
@@ -245,7 +245,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
     def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: npt.DTypeLike = ...,
+        dtype: npt.DTypeLike | None = ...,
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -260,7 +260,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
     def from_array_2d(  # pyright: ignore[reportIncompatibleMethodOverride]
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
@@ -352,7 +352,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self: ComplexWaveform[Any],
         sample_count: SupportsIndex | None = ...,
-        dtype: npt.DTypeLike = ...,
+        dtype: npt.DTypeLike | None = ...,
         *,
         raw_data: npt.NDArray[Any] | None = ...,
         start_index: SupportsIndex | None = ...,
@@ -366,7 +366,7 @@ class ComplexWaveform(NumericWaveform[_TRaw, np.complex128]):
     def __init__(
         self,
         sample_count: SupportsIndex | None = None,
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         raw_data: npt.NDArray[Any] | None = None,
         start_index: SupportsIndex | None = None,

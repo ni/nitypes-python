@@ -139,7 +139,7 @@ class Spectrum(Generic[_TData]):
     def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
-        dtype: npt.DTypeLike = ...,
+        dtype: npt.DTypeLike | None = ...,
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -153,7 +153,7 @@ class Spectrum(Generic[_TData]):
     def from_array_1d(
         cls,
         array: npt.NDArray[Any] | Sequence[Any],
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
@@ -235,7 +235,7 @@ class Spectrum(Generic[_TData]):
     def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: npt.DTypeLike = ...,
+        dtype: npt.DTypeLike | None = ...,
         *,
         copy: bool = ...,
         start_index: SupportsIndex | None = ...,
@@ -249,7 +249,7 @@ class Spectrum(Generic[_TData]):
     def from_array_2d(
         cls,
         array: npt.NDArray[Any] | Sequence[Sequence[Any]],
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         copy: bool = True,
         start_index: SupportsIndex | None = 0,
@@ -370,7 +370,7 @@ class Spectrum(Generic[_TData]):
     def __init__(  # noqa: D107 - Missing docstring in __init__ (auto-generated noqa)
         self: Spectrum[Any],
         sample_count: SupportsIndex | None = ...,
-        dtype: npt.DTypeLike = ...,
+        dtype: npt.DTypeLike | None = ...,
         *,
         data: npt.NDArray[Any] | None = ...,
         start_index: SupportsIndex | None = ...,
@@ -384,7 +384,7 @@ class Spectrum(Generic[_TData]):
     def __init__(
         self,
         sample_count: SupportsIndex | None = None,
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         data: npt.NDArray[Any] | None = None,
         start_index: SupportsIndex | None = None,
@@ -442,7 +442,7 @@ class Spectrum(Generic[_TData]):
     def _init_with_new_array(
         self,
         sample_count: SupportsIndex | None = None,
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         start_index: SupportsIndex | None = None,
         capacity: SupportsIndex | None = None,
@@ -469,7 +469,7 @@ class Spectrum(Generic[_TData]):
     def _init_with_provided_array(
         self,
         data: npt.NDArray[_TData],
-        dtype: npt.DTypeLike = None,
+        dtype: npt.DTypeLike | None = None,
         *,
         start_index: SupportsIndex | None = None,
         sample_count: SupportsIndex | None = None,

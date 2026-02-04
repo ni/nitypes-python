@@ -121,13 +121,13 @@ def port_to_line_data(
     if bitorder != sys.byteorder and port_data.dtype.itemsize > 1:
         port_data = port_data.byteswap()
 
-    line_data = np.unpackbits(port_data.view(np.uint8), bitorder=bitorder)
-    line_data = line_data.reshape(len(port_data), port_size)
+    line_data_1d = np.unpackbits(port_data.view(np.uint8), bitorder=bitorder)
+    line_data_2d = line_data_1d.reshape(len(port_data), port_size)
 
     if mask == bit_mask(port_size):
-        return line_data
+        return line_data_2d
     else:
-        return line_data[:, _mask_to_column_indices(mask, port_size, bitorder)]
+        return line_data_2d[:, _mask_to_column_indices(mask, port_size, bitorder)]
 
 
 def _mask_to_column_indices(
