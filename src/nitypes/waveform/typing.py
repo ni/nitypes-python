@@ -18,6 +18,7 @@ ExtendedPropertyValue: TypeAlias = Union[bool, float, int, str]
 """Type alias for an ExtendedPropertyDictionary value.
 
 This type alias is a union of the following types:
+
 * :class:`bool`
 * :class:`float`
 * :class:`int`
