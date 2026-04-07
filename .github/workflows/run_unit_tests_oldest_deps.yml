@@ -48,7 +48,7 @@ jobs:
         # Skip test___pickled_value___unpickle___is_compatible because this test's pickle data was saved with NumPy 2.x and cannot be loaded in NumPy 1.x.
         run: poetry run pytest ./tests/unit -v --cov=nitypes --junitxml=test_results/nitypes-oldest-deps-${{ matrix.os }}-py${{ matrix.python-version }}.xml -k "not test___pickled_value___unpickle___is_compatible"
       - name: Upload test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: test_results_unit_oldest_deps_${{ matrix.os }}_py${{ matrix.python-version }}
           path: ./test_results/*.xml
