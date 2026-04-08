@@ -13,6 +13,7 @@ extensions = [
     "autoapi.extension",
     "m2r2",
     "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
