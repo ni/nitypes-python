@@ -211,7 +211,7 @@ class Timing(Generic[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]):
         value = self.timestamp
         if self.has_time_offset:
             # Work around https://github.com/python/mypy/issues/18203
-            value += self.time_offset  # type: ignore[operator]
+            value += self.time_offset  # type: ignore[arg-type,operator]
         return value  # type: ignore[reportReturnType,unused-ignore]
 
     @property
