@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import pickle
+from collections.abc import Iterable
 from typing import Any
 
 import pytest
@@ -51,7 +52,7 @@ def test___int_data_values___create___creates_with_int_data_and_default_units() 
     assert data.units == ""
 
 
-def test___float_data_value___create___creates_scalar_data_with_data_and_default_units() -> None:
+def test___float_data_values___create___creates_with_float_data_and_default_units() -> None:
     data = Vector([20.2, 30.3, 40.4])
 
     assert_type(data._values[0], float)
@@ -59,11 +60,24 @@ def test___float_data_value___create___creates_scalar_data_with_data_and_default
     assert data.units == ""
 
 
-def test___str_data_value___create___creates_scalar_data_with_data_and_default_units() -> None:
+def test___str_data_values___create___creates_with_str_data_and_default_units() -> None:
     data = Vector(["one", "two"])
 
     assert_type(data._values[0], str)
     assert data._values == ["one", "two"]
+    assert data.units == ""
+
+
+def test___generator_data_values___create___creates_with_data_and_default_units() -> None:
+    def get_values() -> Iterable[float]:
+        yield 20.2
+        yield 30.3
+        yield 40.4
+
+    data = Vector(get_values())
+
+    assert_type(data._values[0], float)
+    assert data._values == [20.2, 30.3, 40.4]
     assert data.units == ""
 
 
@@ -99,6 +113,29 @@ def test___invalid_data_value___create___raises_type_error(data_value: Any) -> N
         _ = Vector(data_value)
 
     assert exc.value.args[0].startswith("The vector input data must be a bool, int, float, or str.")
+
+
+def test___invalid_generator_data_values___create___raises_type_error() -> None:
+    def get_values() -> Iterable[Any]:
+        yield from [{"test_key", "test_value"}, 1.0, 2.0]
+
+    with pytest.raises(TypeError) as exc:
+        _ = Vector(get_values())
+
+    assert exc.value.args[0].startswith("The vector input data must be a bool, int, float, or str.")
+    assert "{'test_key', 'test_value'}" in exc.value.args[0]
+
+
+def test___empty_generator_data_values___create___raises_type_error() -> None:
+    def get_values() -> Iterable[float]:
+        yield from []
+
+    with pytest.raises(TypeError) as exc:
+        _ = Vector(get_values())
+
+    assert exc.value.args[0].startswith(
+        "You must specify values as non-empty or specify value_type."
+    )
 
 
 def test___mixed_data_values___create___raises_type_error() -> None:
@@ -143,6 +180,19 @@ def test___vector_with_data___set_item_at_slice___values_set_correctly() -> None
     vector = Vector([1, 2, 3], "volts")
 
     vector[0:2] = [6, 7]
+
+    assert vector._values == [6, 7, 3]
+
+
+def test___vector_with_data___set_item_at_slice_with_generator___values_set_correctly() -> None:
+    def get_values() -> Iterable[int]:
+        yield 6
+        yield 7
+
+    vector = Vector([1, 2, 3], "volts")
+
+    vector[0:2] = get_values()
+
     assert vector._values == [6, 7, 3]
 
 
@@ -150,6 +200,7 @@ def test___vector_with_data___set_item_at_slice_to_empty_list___values_set_corre
     vector = Vector([1, 2, 3], "volts")
 
     vector[0:2] = []
+
     assert vector._values == [3]
 
 
