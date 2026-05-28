@@ -86,6 +86,7 @@ class Vector(MutableSequence[TScalar]):
             self._value_type = value_type
         else:
             self._value_type = type(backing_values[0])
+            # Validate the values input
             for value in backing_values:
                 if not isinstance(value, (bool, int, float, str)):
                     raise invalid_arg_type(
