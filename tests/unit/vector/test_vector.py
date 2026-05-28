@@ -117,13 +117,13 @@ def test___invalid_data_value___create___raises_type_error(data_value: Any) -> N
 
 def test___invalid_generator_data_values___create___raises_type_error() -> None:
     def get_values() -> Iterable[Any]:
-        yield from [{"test_key", "test_value"}, 1.0, 2.0]
+        yield from [{"value_one", "value_two"}, 1.0, 2.0]
 
     with pytest.raises(TypeError) as exc:
         _ = Vector(get_values())
 
     assert exc.value.args[0].startswith("The vector input data must be a bool, int, float, or str.")
-    assert "{'test_key', 'test_value'}" in exc.value.args[0]
+    assert "value_one" in exc.value.args[0]
 
 
 def test___empty_generator_data_values___create___raises_type_error() -> None:
