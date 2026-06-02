@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import pickle
-from collections.abc import Iterable
+from collections.abc import Generator
 from typing import Any
 
 import pytest
@@ -69,7 +69,7 @@ def test___str_data_values___create___creates_with_str_data_and_default_units() 
 
 
 def test___generator_data_values___create___creates_with_data_and_default_units() -> None:
-    def get_values() -> Iterable[float]:
+    def get_values() -> Generator[float]:
         yield 20.2
         yield 30.3
         yield 40.4
@@ -116,7 +116,7 @@ def test___invalid_data_value___create___raises_type_error(data_value: Any) -> N
 
 
 def test___invalid_generator_data_values___create___raises_type_error() -> None:
-    def get_values() -> Iterable[Any]:
+    def get_values() -> Generator[Any]:
         yield from [{"value_one", "value_two"}, 1.0, 2.0]
 
     with pytest.raises(TypeError) as exc:
@@ -127,7 +127,7 @@ def test___invalid_generator_data_values___create___raises_type_error() -> None:
 
 
 def test___empty_generator_data_values___create___raises_type_error() -> None:
-    def get_values() -> Iterable[float]:
+    def get_values() -> Generator[float]:
         yield from []
 
     with pytest.raises(TypeError) as exc:
@@ -185,7 +185,7 @@ def test___vector_with_data___set_item_at_slice___values_set_correctly() -> None
 
 
 def test___vector_with_data___set_item_at_slice_with_generator___values_set_correctly() -> None:
-    def get_values() -> Iterable[int]:
+    def get_values() -> Generator[int]:
         yield 6
         yield 7
 
