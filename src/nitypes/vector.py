@@ -8,7 +8,7 @@ Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and 
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Mapping, MutableSequence
+from collections.abc import Iterable, Mapping, MutableSequence, Sequence
 from typing import TYPE_CHECKING, Any, Union, overload
 
 from typing_extensions import Self, TypeVar, final, override
@@ -79,19 +79,19 @@ class Vector(MutableSequence[TScalar]):
         Returns:
             A vector data object.
         """
-        if not values:
+        backing_values = list(values)
+        if not backing_values:
             if not value_type:
                 raise TypeError("You must specify values as non-empty or specify value_type.")
             self._value_type = value_type
         else:
+            self._value_type = type(backing_values[0])
             # Validate the values input
-            for index, value in enumerate(values):
-                # Only set _value_type once.
-                if not index:
-                    self._value_type = type(value)
-
+            for value in backing_values:
                 if not isinstance(value, (bool, int, float, str)):
-                    raise invalid_arg_type("vector input data", "bool, int, float, or str", values)
+                    raise invalid_arg_type(
+                        "vector input data", "bool, int, float, or str", backing_values
+                    )
 
                 if not isinstance(value, self._value_type):
                     raise TypeError("All values in the values input must be of the same type.")
@@ -99,7 +99,7 @@ class Vector(MutableSequence[TScalar]):
         if not isinstance(units, str):
             raise invalid_arg_type("units", "str", units)
 
-        self._values = list(values)
+        self._values = backing_values
         if copy_extended_properties or not isinstance(
             extended_properties, ExtendedPropertyDictionary
         ):
@@ -178,14 +178,20 @@ class Vector(MutableSequence[TScalar]):
                 raise TypeError("You must assign an Iterable to a Vector slice.")
             elif isinstance(value, str):  # Narrow the type to exclude string.
                 raise TypeError("You cannot assign a string to Vector slice.")
-            else:
-                # Assigning an empty Iterable to a slice is valid, so we don't check for empty.
-                # If an empty Iterable is assigned to a slice, that slice is deleted.
-                for subval in value:
-                    if not isinstance(subval, self._value_type):
-                        raise self._create_value_mismatch_exception(subval)
 
-            self._values[index] = value
+            if isinstance(value, Sequence):
+                # A Sequence can be iterated over multiple times, so no need for a wrapper list.
+                replacement_values = value
+            else:
+                replacement_values = list(value)
+
+            # Assigning an empty Iterable to a slice is valid, so we don't check for empty.
+            # If an empty Iterable is assigned to a slice, that slice is deleted.
+            for subval in replacement_values:
+                if not isinstance(subval, self._value_type):
+                    raise self._create_value_mismatch_exception(subval)
+
+            self._values[index] = replacement_values
 
     def __delitem__(self, index: int | slice) -> None:
         """Delete item(s) from the specified location."""
