@@ -16,11 +16,11 @@ def main(args: list[str]) -> int | str | None:
         return f"Unsupported arguments: {args!r}"
     pyproject = tomlkit.loads(pyproject_path.read_text())
 
-    poetry_deps = pyproject["tool"]["poetry"]["dependencies"]  # type: ignore[index]
+    poetry_deps = pyproject["tool"]["poetry"]["dependencies"]
     assert isinstance(poetry_deps, AbstractTable)
     _pin_oldest_for_deps_list(poetry_deps)
 
-    dev_deps = pyproject["tool"]["poetry"]["group"]["dev"]["dependencies"]  # type: ignore[index]
+    dev_deps = pyproject["tool"]["poetry"]["group"]["dev"]["dependencies"]
     assert isinstance(dev_deps, AbstractTable)
     _remove_duplicate_dev_deps(poetry_deps, dev_deps)
 
