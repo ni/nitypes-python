@@ -17,9 +17,14 @@ jobs:
   check_docs:
     name: Check docs
     uses: ./.github/workflows/check_docs.yml
+  check_workflows:
+    name: Check workflows
+    uses: ./.github/workflows/check_workflows.yml
+    permissions:
+      security-events: write
   checks_succeeded:
     name: Checks succeeded
-    needs: [check_nitypes, check_docs]
+    needs: [check_nitypes, check_docs, check_workflows]
     runs-on: ubuntu-latest
     steps:
       - run: exit 0
