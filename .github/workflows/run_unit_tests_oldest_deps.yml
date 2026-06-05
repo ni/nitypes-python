@@ -4,6 +4,8 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   run_unit_tests_oldest_deps:
     name: Run unit tests (oldest deps)
