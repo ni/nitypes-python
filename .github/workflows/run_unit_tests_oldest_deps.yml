@@ -47,7 +47,9 @@ jobs:
         if: steps.cache-virtualenv.outputs.cache-hit != 'true'
         run: poetry install -v
       - name: Display installed dependency versions
-        run: poetry run pip list
+        run: |
+          poetry run python -m ensurepip
+          poetry run pip list
       - name: Run unit tests and code coverage
         # Skip test___pickled_value___unpickle___is_compatible because this test's pickle data was saved with NumPy 2.x and cannot be loaded in NumPy 1.x.
         run: poetry run pytest ./tests/unit -v --cov=nitypes --junitxml=test_results/nitypes-oldest-deps-${{ matrix.os }}-py${{ matrix.python-version }}.xml -k "not test___pickled_value___unpickle___is_compatible"
