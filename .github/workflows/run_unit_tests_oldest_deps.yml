@@ -48,8 +48,9 @@ jobs:
         run: poetry install -v
       - name: Display installed dependency versions
         run: |
+          # Use importlib instead of assuming that the project venv contains an up-to-date pip.
           import importlib.metadata
-          for dist in importlib.metadata.Distribution.discover():
+          for dist in sorted(importlib.metadata.Distribution.discover(), key=lambda d: d.name):
             print(f"{dist.name}: {dist.version}")
         shell: poetry run python {0}
       - name: Run unit tests and code coverage
