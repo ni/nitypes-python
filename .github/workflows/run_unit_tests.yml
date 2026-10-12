@@ -27,8 +27,6 @@ jobs:
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install pip
-        run: python -m ensurepip --upgrade
       - name: Set up Poetry
         uses: ni/python-actions/setup-poetry@a2554c7e5680982d3355677b2290e48b60678744 # v0.8.0
       - name: Cache virtualenv
@@ -39,7 +37,11 @@ jobs:
       - name: Install nitypes
         run: poetry install -v
       - name: Display installed dependency versions
-        run: poetry run pip list
+        run: |
+          import importlib.metadata
+          for dist in importlib.metadata.Distribution.discover():
+            print(f"{dist.name}: {dist.version}")
+        shell: poetry run python {0}
       - name: Run unit/acceptance/doc tests and code coverage
         run: poetry run pytest -v --cov=nitypes --junitxml=test_results/nitypes-${{ matrix.os }}-py${{ matrix.python-version }}.xml
       - name: Run benchmarks
