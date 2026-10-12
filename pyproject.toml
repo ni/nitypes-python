@@ -13,12 +13,12 @@ classifiers = [
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
@@ -26,7 +26,7 @@ dynamic = ["dependencies"]
 readme = "README.md"
 authors = [{name = "NI", email = "opensource@ni.com"}]
 maintainers = [{name = "Brad Keryan", email = "brad.keryan@ni.com"}]
-requires-python = '>=3.9,<4.0'
+requires-python = '>=3.10,<4.0'
 
 [project.urls]
 repository = "https://github.com/ni/nitypes-python"
