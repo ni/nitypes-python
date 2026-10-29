@@ -50,7 +50,8 @@ typing-extensions = ">=4.13.2"
 numpy = [
   { version = ">=1.23.2", python = ">=3.11,<3.12", markers = "implementation_name != 'pypy'" },
   { version = ">=1.26", python = ">=3.12,<3.13", markers = "implementation_name != 'pypy'" },
-  { version = ">=2.1", python = "^3.13", markers = "implementation_name != 'pypy'" },
+  { version = ">=2.1", python = ">=3.13,<3.15", markers = "implementation_name != 'pypy'" },
+  { version = ">=2.5.1", python = "^3.15", markers = "implementation_name != 'pypy'" },
   { version = ">=2.3", python = "^3.11", markers = "implementation_name == 'pypy'" },
 ]
 
