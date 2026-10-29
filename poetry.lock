@@ -915,9 +915,6 @@ files = [
     {file = "mistune-3.3.4.tar.gz", hash = "sha256:58b5c96d6fcb61190dfe5fae498d2b2065f99cf61e9649418fd54cf1ada86dfe"},
 ]
 
-[package.dependencies]
-typing-extensions = {version = "*", markers = "python_version < \"3.11\""}
-
 [[package]]
 name = "mypy"
 version = "2.1.0"
@@ -1988,4 +1985,4 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<4.0"
-content-hash = "84bba92348fca89627e77c076e70d9af03c030f70ef1924c7fa8d52606c2f06a"
+content-hash = "23e0e62cd1c2549216be8bc639982e1a8cada5f9bf238ed497afa699037637fc"
