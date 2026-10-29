@@ -108,6 +108,7 @@ files = "examples/,scripts/,src/,tests/"
 namespace_packages = true
 strict = true
 show_traceback = true
+native_parser = false
 
 [[tool.mypy.overrides]]
 module = [
