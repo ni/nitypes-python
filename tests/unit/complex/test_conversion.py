@@ -155,8 +155,8 @@ def test___arrays_with_static_shape___convert_complex___preserves_static_and_run
     value_out_3d = convert_complex(np.complex64, value_in_3d)
 
     assert_type(value_out_1d, np.ndarray[tuple[int], np.dtype[np.complex128]])
-    assert_type(value_out_2d, np.ndarray[tuple[int, int], np.dtype[ComplexInt32Base]])
-    assert_type(value_out_3d, np.ndarray[tuple[int, int, int], np.dtype[np.complex64]])
+    assert_type(value_out_2d, np.ndarray[tuple[int, int], np.dtype[ComplexInt32Base]])  # pyright: ignore[reportAssertTypeFailure]
+    assert_type(value_out_3d, np.ndarray[tuple[int, int, int], np.dtype[np.complex64]])  # pyright: ignore[reportAssertTypeFailure]
     assert isinstance(value_out_1d, np.ndarray) and value_out_1d.shape == (3,)
     assert isinstance(value_out_2d, np.ndarray) and value_out_2d.shape == (4, 5)
     assert isinstance(value_out_3d, np.ndarray) and value_out_3d.shape == (6, 7, 8)
