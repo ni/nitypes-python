@@ -107,6 +107,7 @@ build-backend = "poetry.core.masonry.api"
 files = "examples/,scripts/,src/,tests/"
 namespace_packages = true
 strict = true
+show_traceback = true
 
 [[tool.mypy.overrides]]
 module = [
