@@ -107,6 +107,9 @@ build-backend = "poetry.core.masonry.api"
 files = "examples/,scripts/,src/,tests/"
 namespace_packages = true
 strict = true
+# Work around https://github.com/ni/nitypes-python/issues/298
+show_traceback = true
+native_parser = false
 
 [[tool.mypy.overrides]]
 module = [

@@ -2,23 +2,23 @@ from __future__ import annotations
 
 from collections.abc import Iterable, MutableSequence
 from typing import (
-    TYPE_CHECKING,
     Any,
     final,
     overload,
+    TYPE_CHECKING,
 )
 
 import numpy as np
 import numpy.typing as npt
 
-from nitypes._exceptions import invalid_arg_value, invalid_arg_type
+from nitypes._exceptions import invalid_arg_type, invalid_arg_value
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
     from nitypes.bintime import CVIAbsoluteTimeDType, DateTime, TimeValueTuple
 else:
-    from nitypes.bintime._dtypes import CVIAbsoluteTimeDType
     from nitypes.bintime._datetime import DateTime
+    from nitypes.bintime._dtypes import CVIAbsoluteTimeDType
     from nitypes.bintime._time_value_tuple import TimeValueTuple
 
 
