@@ -14,7 +14,7 @@ from typing import (
 )
 
 import hightime as ht
-from typing_extensions import Self, TypeAlias
+from typing import Self, TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
 from nitypes.bintime._timedelta import _OTHER_TIMEDELTA_TUPLE, _OtherTimeDelta

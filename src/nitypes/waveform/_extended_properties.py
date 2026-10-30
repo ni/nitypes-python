@@ -5,7 +5,7 @@ import weakref
 from collections.abc import Callable, Iterator, Mapping, MutableMapping
 from typing import TYPE_CHECKING
 
-from typing_extensions import TypeAlias
+from typing import TypeAlias
 
 from nitypes.waveform.typing import ExtendedPropertyValue
 

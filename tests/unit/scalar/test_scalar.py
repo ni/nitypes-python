@@ -5,7 +5,7 @@ import pickle
 from typing import Any
 
 import pytest
-from typing_extensions import assert_type
+from typing import assert_type
 
 from nitypes.scalar import Scalar, TScalar_co
 from nitypes.waveform._extended_properties import (

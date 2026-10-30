@@ -14,16 +14,15 @@ from typing import TYPE_CHECKING, Any, Generic, Union, overload
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self, TypeVar, final
+from typing_extensions import TypeVar
+
+from typing import Self, final
 
 from nitypes._arguments import validate_dtype
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray, long as _np_long, ulong as _np_ulong
 from nitypes.waveform._exceptions import create_datatype_mismatch_error
 from nitypes.waveform.typing import ExtendedPropertyValue
-
-if sys.version_info < (3, 10):
-    import array as std_array
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.

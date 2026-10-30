@@ -9,7 +9,7 @@ from functools import singledispatchmethod
 from typing import TYPE_CHECKING, Any, ClassVar, SupportsIndex, Union, final, overload
 
 import hightime as ht
-from typing_extensions import Self, TypeAlias
+from typing import Self, TypeAlias
 
 from nitypes._arguments import arg_to_int
 from nitypes._exceptions import int_out_of_range, invalid_arg_type

@@ -6,7 +6,7 @@ import pickle
 from typing import Any
 
 import pytest
-from typing_extensions import assert_type
+from typing import assert_type
 
 import nitypes.bintime as bt
 import nitypes.waveform.errors as wfmex

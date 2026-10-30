@@ -10,7 +10,7 @@ import hightime as ht
 import numpy as np
 import numpy.typing as npt
 import pytest
-from typing_extensions import assert_type
+from typing import assert_type
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType
 from nitypes.waveform import NO_SCALING, ComplexWaveform, LinearScaleMode, Timing

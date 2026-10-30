@@ -20,11 +20,7 @@ def add_note(exception: Exception, note: str) -> None:
     ValueError: Oh no
     p.s. This is bad
     """
-    if sys.version_info >= (3, 11):
-        exception.add_note(note)
-    else:
-        message = exception.args[0] + "\n" + note
-        exception.args = (message,) + exception.args[1:]
+    exception.add_note(note)
 
 
 def invalid_arg_value(

@@ -5,7 +5,9 @@ from typing import Any, SupportsIndex, Union, overload
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import TYPE_CHECKING, TypeVar, final, override
+from typing_extensions import TypeVar, override
+
+from typing import TYPE_CHECKING, final
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType, convert_complex
 from nitypes.time.typing import AnyDateTime, AnyTimeDelta

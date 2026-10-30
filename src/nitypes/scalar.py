@@ -12,7 +12,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Generic, Union
 
-from typing_extensions import Self, TypeVar, final
+from typing_extensions import TypeVar
+
+from typing import Self, final
 
 from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform._extended_properties import UNIT_DESCRIPTION

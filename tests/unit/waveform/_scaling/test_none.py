@@ -5,7 +5,7 @@ import pickle
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import assert_type
+from typing import assert_type
 
 from nitypes.waveform import NO_SCALING, NoneScaleMode
 

@@ -15,7 +15,7 @@ import numpy as np
 import numpy.typing as npt
 import pytest
 from packaging.version import Version
-from typing_extensions import assert_type
+from typing import assert_type
 
 import nitypes.bintime as bt
 import nitypes.waveform.errors as wfmex

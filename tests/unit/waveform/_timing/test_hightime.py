@@ -7,7 +7,7 @@ from typing import Any
 
 import hightime as ht
 import pytest
-from typing_extensions import assert_type
+from typing import assert_type
 
 import nitypes.waveform.errors as wfmex
 from nitypes.waveform import SampleIntervalMode, Timing

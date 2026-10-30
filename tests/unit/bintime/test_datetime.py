@@ -6,7 +6,7 @@ import pickle
 
 import hightime as ht
 import pytest
-from typing_extensions import assert_type
+from typing import assert_type
 from tzlocal import get_localzone
 
 from nitypes.bintime import DateTime, TimeDelta

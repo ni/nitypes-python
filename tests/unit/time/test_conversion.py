@@ -5,7 +5,7 @@ from typing import Any
 
 import hightime as ht
 import pytest
-from typing_extensions import assert_type
+from typing import assert_type
 
 import nitypes.bintime as bt
 from nitypes.time import convert_datetime, convert_timedelta

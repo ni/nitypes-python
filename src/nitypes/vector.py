@@ -11,7 +11,9 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping, MutableSequence, Sequence
 from typing import TYPE_CHECKING, Any, Union, overload
 
-from typing_extensions import Self, TypeVar, final, override
+from typing_extensions import TypeVar, override
+
+from typing import Self, final
 
 from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform._extended_properties import UNIT_DESCRIPTION

@@ -4,7 +4,7 @@ import datetime as dt
 
 import hightime as ht
 import pytest
-from typing_extensions import assert_type
+from typing import assert_type
 
 import nitypes.bintime as bt
 from nitypes.waveform import SampleIntervalMode, Timing

@@ -10,7 +10,7 @@ from typing import Any
 
 import hightime as ht
 import pytest
-from typing_extensions import assert_type
+from typing import assert_type
 
 from nitypes.bintime import TimeDelta
 from nitypes.bintime._time_value_tuple import TimeValueTuple

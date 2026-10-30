@@ -6,7 +6,7 @@ import datetime as dt
 from typing import TypeVar, Union
 
 import hightime as ht
-from typing_extensions import TypeAlias
+from typing import TypeAlias
 
 import nitypes.bintime as bt
 

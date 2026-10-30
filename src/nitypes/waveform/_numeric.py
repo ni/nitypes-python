@@ -10,7 +10,9 @@ from typing import TYPE_CHECKING, Any, Generic, SupportsIndex, overload
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self, TypeVar
+from typing_extensions import TypeVar
+
+from typing import Self
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
@@ -27,9 +29,6 @@ from nitypes.waveform._exceptions import (
 from nitypes.waveform._extended_properties import CHANNEL_NAME, UNIT_DESCRIPTION
 from nitypes.waveform._warnings import scale_mode_mismatch
 from nitypes.waveform.typing import ExtendedPropertyValue
-
-if sys.version_info < (3, 10):
-    import array as std_array
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.

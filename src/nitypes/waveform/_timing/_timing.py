@@ -6,7 +6,7 @@ from collections.abc import Iterable, Sequence
 from typing import Any, cast, ClassVar, final, Generic, SupportsIndex, TYPE_CHECKING
 
 import hightime as ht
-from typing_extensions import Self
+from typing import Self
 
 import nitypes.bintime as bt
 from nitypes._exceptions import add_note
