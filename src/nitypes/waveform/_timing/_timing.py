@@ -9,7 +9,6 @@ import hightime as ht
 from typing import Self
 
 import nitypes.bintime as bt
-from nitypes._exceptions import add_note
 from nitypes.time import convert_datetime, convert_timedelta
 from nitypes.waveform._timing._sample_interval import (
     create_sample_interval_strategy,
@@ -169,7 +168,7 @@ class Timing(Generic[TTimestamp_co, TTimeOffset_co, TSampleInterval_co]):
                 self, sample_interval_mode, timestamp, time_offset, sample_interval, timestamps
             )
         except (TypeError, ValueError) as e:
-            add_note(e, f"Sample interval mode: {sample_interval_mode}")
+            e.add_note(f"Sample interval mode: {sample_interval_mode}")
             raise
 
         if timestamps is not None and (copy_timestamps or not isinstance(timestamps, list)):

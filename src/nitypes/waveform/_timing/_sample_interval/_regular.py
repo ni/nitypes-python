@@ -5,7 +5,7 @@ from collections.abc import Generator, Iterable, Sequence
 from typing import TYPE_CHECKING, cast, final
 
 from nitypes._arguments import validate_unsupported_arg
-from nitypes._exceptions import add_note, invalid_arg_type
+from nitypes._exceptions import invalid_arg_type
 from nitypes.time._types import ANY_DATETIME_TUPLE, ANY_TIMEDELTA_TUPLE
 from nitypes.waveform._exceptions import (
     create_no_timestamp_information_error,
@@ -75,7 +75,7 @@ class RegularSampleIntervalStrategy(
         try:
             validate_unsupported_arg("timestamps", timestamps)
         except (TypeError, ValueError) as e:
-            add_note(e, f"Sample interval mode: {timing.sample_interval_mode}")
+            e.add_note(f"Sample interval mode: {timing.sample_interval_mode}")
             raise
         return timing
 

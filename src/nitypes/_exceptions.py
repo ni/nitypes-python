@@ -7,22 +7,6 @@ import numpy as np
 import numpy.typing as npt
 
 
-def add_note(exception: Exception, note: str) -> None:
-    """Add a note to an exception.
-
-    >>> try:
-    ...     raise ValueError("Oh no")
-    ... except Exception as e:
-    ...     add_note(e, "p.s. This is bad")
-    ...     raise
-    Traceback (most recent call last):
-    ...
-    ValueError: Oh no
-    p.s. This is bad
-    """
-    exception.add_note(note)
-
-
 def invalid_arg_value(
     arg_description: str, valid_value_description: str, value: object
 ) -> ValueError:
