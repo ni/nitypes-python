@@ -3,18 +3,19 @@ from __future__ import annotations
 import datetime as dt
 from functools import singledispatchmethod
 from typing import (
-    TYPE_CHECKING,
     Any,
-    ClassVar,
-    SupportsIndex,
-    Union,
     cast,
+    ClassVar,
     final,
     overload,
+    Self,
+    SupportsIndex,
+    TYPE_CHECKING,
+    TypeAlias,
+    Union,
 )
 
 import hightime as ht
-from typing_extensions import Self, TypeAlias
 
 from nitypes._exceptions import invalid_arg_type, invalid_arg_value
 from nitypes.bintime._timedelta import _OTHER_TIMEDELTA_TUPLE, _OtherTimeDelta

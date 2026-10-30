@@ -3,11 +3,10 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import pickle
-from typing import Any
+from typing import Any, assert_type
 
 import hightime as ht
 import pytest
-from typing_extensions import assert_type
 
 import nitypes.waveform.errors as wfmex
 from nitypes.waveform import SampleIntervalMode, Timing

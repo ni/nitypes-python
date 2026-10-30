@@ -6,13 +6,12 @@ import datetime as dt
 import pickle
 import weakref
 from collections.abc import Sequence
-from typing import Any, Union
+from typing import Any, assert_type, Union
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
 import pytest
-from typing_extensions import assert_type
 
 import nitypes.bintime as bt
 import nitypes.waveform.errors as wfmex

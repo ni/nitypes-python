@@ -8,22 +8,18 @@ information. Valid types for the numeric values are :any:`int` and :any:`float`.
 
 from __future__ import annotations
 
-import sys
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Generic, Union, overload
+from typing import Any, final, Generic, overload, Self, TYPE_CHECKING, Union
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self, TypeVar, final
+from typing_extensions import TypeVar
 
 from nitypes._arguments import validate_dtype
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
 from nitypes._numpy import asarray as _np_asarray, long as _np_long, ulong as _np_ulong
 from nitypes.waveform._exceptions import create_datatype_mismatch_error
 from nitypes.waveform.typing import ExtendedPropertyValue
-
-if sys.version_info < (3, 10):
-    import array as std_array
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
@@ -167,9 +163,7 @@ class XYData(Generic[TData]):
                 raise invalid_array_ndim(
                     "input array", "one-dimensional array or sequence", x_array.ndim
                 )
-        elif isinstance(x_array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(x_array, std_array.array)
-        ):
+        elif isinstance(x_array, Sequence):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
@@ -180,9 +174,7 @@ class XYData(Generic[TData]):
                 raise invalid_array_ndim(
                     "input array", "one-dimensional array or sequence", y_array.ndim
                 )
-        elif isinstance(y_array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(y_array, std_array.array)
-        ):
+        elif isinstance(y_array, Sequence):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:

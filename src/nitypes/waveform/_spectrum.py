@@ -1,21 +1,21 @@
 from __future__ import annotations
 
-import sys
 from collections.abc import Mapping, Sequence
 from typing import (
-    TYPE_CHECKING,
     Any,
+    final,
     Generic,
+    overload,
+    Self,
     SupportsFloat,
     SupportsIndex,
+    TYPE_CHECKING,
     Union,
-    final,
-    overload,
 )
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self, TypeVar
+from typing_extensions import TypeVar
 
 from nitypes._arguments import arg_to_float, arg_to_uint, validate_dtype
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
@@ -29,9 +29,6 @@ from nitypes.waveform._exceptions import (
 )
 from nitypes.waveform._extended_properties import CHANNEL_NAME, UNIT_DESCRIPTION
 from nitypes.waveform.typing import ExtendedPropertyValue
-
-if sys.version_info < (3, 10):
-    import array as std_array
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
@@ -183,9 +180,7 @@ class Spectrum(Generic[_TData]):
                 raise invalid_array_ndim(
                     "input array", "one-dimensional array or sequence", array.ndim
                 )
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
@@ -283,9 +278,7 @@ class Spectrum(Generic[_TData]):
                 raise invalid_array_ndim(
                     "input array", "two-dimensional array or nested sequence", array.ndim
                 )
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:

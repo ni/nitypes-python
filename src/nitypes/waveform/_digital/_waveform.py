@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 import datetime as dt
-import sys
 import weakref
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Generic, Literal, SupportsIndex, overload
+from typing import Any, Generic, Literal, overload, Self, SupportsIndex, TYPE_CHECKING
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
@@ -33,9 +31,6 @@ from nitypes.waveform.typing import (
     TDigitalState,
     TOtherDigitalState,
 )
-
-if sys.version_info < (3, 10):
-    import array as std_array
 
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
@@ -377,9 +372,7 @@ class DigitalWaveform(Generic[TDigitalState]):
                 )
             if dtype is not None and array.dtype != dtype:
                 raise create_datatype_mismatch_error("input array", array.dtype, "requested", dtype)
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             if dtype is None:
                 dtype = np.uint8
         else:
@@ -499,9 +492,7 @@ class DigitalWaveform(Generic[TDigitalState]):
                 )
             validate_dtype(array.dtype, DIGITAL_PORT_DTYPES)
             default_mask = bit_mask(array.dtype.itemsize * 8)
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             # np.array([0,1]).dtype is np.int64 by default, so the user must specify the port size.
             if mask is None:
                 raise ValueError(
@@ -641,9 +632,7 @@ class DigitalWaveform(Generic[TDigitalState]):
                 )
             validate_dtype(array.dtype, DIGITAL_PORT_DTYPES)
             default_masks = [bit_mask(array.dtype.itemsize * 8)] * array.shape[0]
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             # np.array([0,1]).dtype is np.int64 by default, so the user must specify the port size.
             if masks is None:
                 raise ValueError(

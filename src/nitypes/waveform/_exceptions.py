@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing_extensions import Literal
+from typing import Literal
 
 from nitypes.waveform.errors import (
     CapacityMismatchError,

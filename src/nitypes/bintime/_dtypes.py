@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from typing import TypeAlias
+
 import numpy as np
-from typing_extensions import TypeAlias
 
 CVIAbsoluteTimeBase: TypeAlias = np.void
 """Type alias for the base type of :any:`CVIAbsoluteTimeDType`, which is :any:`numpy.void`."""

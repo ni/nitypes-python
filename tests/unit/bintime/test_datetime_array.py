@@ -3,11 +3,11 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import pickle
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any, assert_type
 
 import numpy as np
 import pytest
-from typing_extensions import assert_type
 
 from nitypes.bintime import DateTime, DateTimeArray
 
