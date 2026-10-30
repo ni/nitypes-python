@@ -374,9 +374,7 @@ class DigitalWaveform(Generic[TDigitalState]):
                 )
             if dtype is not None and array.dtype != dtype:
                 raise create_datatype_mismatch_error("input array", array.dtype, "requested", dtype)
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             if dtype is None:
                 dtype = np.uint8
         else:
@@ -496,9 +494,7 @@ class DigitalWaveform(Generic[TDigitalState]):
                 )
             validate_dtype(array.dtype, DIGITAL_PORT_DTYPES)
             default_mask = bit_mask(array.dtype.itemsize * 8)
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             # np.array([0,1]).dtype is np.int64 by default, so the user must specify the port size.
             if mask is None:
                 raise ValueError(
@@ -638,9 +634,7 @@ class DigitalWaveform(Generic[TDigitalState]):
                 )
             validate_dtype(array.dtype, DIGITAL_PORT_DTYPES)
             default_masks = [bit_mask(array.dtype.itemsize * 8)] * array.shape[0]
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             # np.array([0,1]).dtype is np.int64 by default, so the user must specify the port size.
             if masks is None:
                 raise ValueError(

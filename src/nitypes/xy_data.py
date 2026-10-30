@@ -166,9 +166,7 @@ class XYData(Generic[TData]):
                 raise invalid_array_ndim(
                     "input array", "one-dimensional array or sequence", x_array.ndim
                 )
-        elif isinstance(x_array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(x_array, std_array.array)
-        ):
+        elif isinstance(x_array, Sequence):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
@@ -179,9 +177,7 @@ class XYData(Generic[TData]):
                 raise invalid_array_ndim(
                     "input array", "one-dimensional array or sequence", y_array.ndim
                 )
-        elif isinstance(y_array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(y_array, std_array.array)
-        ):
+        elif isinstance(y_array, Sequence):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:

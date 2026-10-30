@@ -125,9 +125,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
                 raise invalid_array_ndim(
                     "input array", "one-dimensional array or sequence", array.ndim
                 )
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
@@ -180,9 +178,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
                 raise invalid_array_ndim(
                     "input array", "two-dimensional array or nested sequence", array.ndim
                 )
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
