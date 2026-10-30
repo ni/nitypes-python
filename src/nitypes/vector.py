@@ -9,11 +9,9 @@ Valid types for the scalar value are :any:`bool`, :any:`int`, :any:`float`, and 
 from __future__ import annotations
 
 from collections.abc import Iterable, Mapping, MutableSequence, Sequence
-from typing import TYPE_CHECKING, Any, Union, overload
+from typing import Any, final, overload, Self, TYPE_CHECKING, Union
 
-from typing_extensions import TypeVar, override
-
-from typing import Self, final
+from typing_extensions import override, TypeVar
 
 from nitypes._exceptions import invalid_arg_type
 from nitypes.waveform._extended_properties import UNIT_DESCRIPTION

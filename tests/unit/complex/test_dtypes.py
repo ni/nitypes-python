@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, assert_type
 
 import numpy as np
 import numpy.typing as npt
 import pytest
-from typing import assert_type
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType
 

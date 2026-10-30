@@ -3,10 +3,10 @@ from __future__ import annotations
 import copy
 import datetime as dt
 import pickle
+from typing import assert_type
 
 import hightime as ht
 import pytest
-from typing import assert_type
 from tzlocal import get_localzone
 
 from nitypes.bintime import DateTime, TimeDelta

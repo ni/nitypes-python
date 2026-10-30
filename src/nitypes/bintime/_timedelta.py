@@ -6,10 +6,19 @@ import math
 import operator
 from decimal import Decimal
 from functools import singledispatchmethod
-from typing import TYPE_CHECKING, Any, ClassVar, SupportsIndex, Union, final, overload
+from typing import (
+    Any,
+    ClassVar,
+    final,
+    overload,
+    Self,
+    SupportsIndex,
+    TYPE_CHECKING,
+    TypeAlias,
+    Union,
+)
 
 import hightime as ht
-from typing import Self, TypeAlias
 
 from nitypes._arguments import arg_to_int
 from nitypes._exceptions import int_out_of_range, invalid_arg_type

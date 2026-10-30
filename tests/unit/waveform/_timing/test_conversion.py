@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import datetime as dt
+from typing import assert_type
 
 import hightime as ht
 import pytest
-from typing import assert_type
 
 import nitypes.bintime as bt
 from nitypes.waveform import SampleIntervalMode, Timing

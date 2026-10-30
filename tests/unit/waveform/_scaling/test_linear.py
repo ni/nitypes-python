@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import copy
 import pickle
-from typing import SupportsFloat
+from typing import assert_type, SupportsFloat
 
 import numpy as np
 import numpy.typing as npt
 import pytest
-from typing import assert_type
 
-from nitypes.waveform import NO_SCALING, LinearScaleMode, ScaleMode
+from nitypes.waveform import LinearScaleMode, NO_SCALING, ScaleMode
 
 
 @pytest.mark.parametrize(

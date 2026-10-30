@@ -2,13 +2,11 @@ from __future__ import annotations
 
 import copy
 import pickle
-from typing import Any
-
 from collections.abc import Sequence
+from typing import Any, assert_type
 
 import numpy as np
 import pytest
-from typing import assert_type
 
 from nitypes.bintime import TimeDelta, TimeDeltaArray
 

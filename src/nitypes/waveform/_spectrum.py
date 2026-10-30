@@ -1,23 +1,21 @@
 from __future__ import annotations
 
-import sys
 from collections.abc import Mapping, Sequence
 from typing import (
-    TYPE_CHECKING,
     Any,
+    final,
     Generic,
+    overload,
+    Self,
     SupportsFloat,
     SupportsIndex,
+    TYPE_CHECKING,
     Union,
-    final,
-    overload,
 )
 
 import numpy as np
 import numpy.typing as npt
 from typing_extensions import TypeVar
-
-from typing import Self
 
 from nitypes._arguments import arg_to_float, arg_to_uint, validate_dtype
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim

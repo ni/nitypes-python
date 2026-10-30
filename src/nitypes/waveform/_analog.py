@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, SupportsIndex, Union, overload
+from typing import Any, final, overload, SupportsIndex, TYPE_CHECKING, Union
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import TypeVar, override
-
-from typing import TYPE_CHECKING, final
+from typing_extensions import override, TypeVar
 
 from nitypes._numpy import long as _np_long, ulong as _np_ulong
 from nitypes.time.typing import AnyDateTime, AnyTimeDelta

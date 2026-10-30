@@ -6,11 +6,10 @@ import pickle
 import random
 from collections.abc import Generator
 from decimal import Decimal
-from typing import Any
+from typing import Any, assert_type
 
 import hightime as ht
 import pytest
-from typing import assert_type
 
 from nitypes.bintime import TimeDelta
 from nitypes.bintime._time_value_tuple import TimeValueTuple

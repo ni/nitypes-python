@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-import numpy as np
 from typing import TypeAlias
+
+import numpy as np
 
 ComplexInt32Base: TypeAlias = np.void
 """Type alias for the base type of :any:`ComplexInt32DType`, which is :any:`numpy.void`."""

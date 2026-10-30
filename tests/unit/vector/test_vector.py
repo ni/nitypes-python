@@ -3,15 +3,14 @@ from __future__ import annotations
 import copy
 import pickle
 from collections.abc import Generator
-from typing import Any
+from typing import Any, assert_type
 
 import pytest
-from typing import assert_type
 
 from nitypes.vector import TScalar, Vector
 from nitypes.waveform._extended_properties import (
-    UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
+    UNIT_DESCRIPTION,
 )
 
 

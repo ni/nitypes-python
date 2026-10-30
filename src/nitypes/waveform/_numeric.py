@@ -1,18 +1,15 @@
 from __future__ import annotations
 
 import datetime as dt
-import sys
 import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Generic, SupportsIndex, overload
+from typing import Any, Generic, overload, Self, SupportsIndex, TYPE_CHECKING
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
 from typing_extensions import TypeVar
-
-from typing import Self
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
@@ -33,8 +30,8 @@ from nitypes.waveform.typing import ExtendedPropertyValue
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
     from nitypes.waveform import (
-        NO_SCALING,
         ExtendedPropertyDictionary,
+        NO_SCALING,
         ScaleMode,
         Timing,
     )

@@ -8,15 +8,12 @@ information. Valid types for the numeric values are :any:`int` and :any:`float`.
 
 from __future__ import annotations
 
-import sys
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Generic, Union, overload
+from typing import Any, final, Generic, overload, Self, TYPE_CHECKING, Union
 
 import numpy as np
 import numpy.typing as npt
 from typing_extensions import TypeVar
-
-from typing import Self, final
 
 from nitypes._arguments import validate_dtype
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim

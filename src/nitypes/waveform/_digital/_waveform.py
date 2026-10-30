@@ -1,16 +1,14 @@
 from __future__ import annotations
 
 import datetime as dt
-import sys
 import weakref
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Generic, Literal, SupportsIndex, overload
+from typing import Any, Generic, Literal, overload, Self, SupportsIndex, TYPE_CHECKING
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
-from typing import Self
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
