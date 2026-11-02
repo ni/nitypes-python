@@ -23,12 +23,12 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up Python
-        uses: ni/python-actions/setup-python@dee640bba235ae28fdc6b7337c643bd06358ae90 # v0.9.0
+        uses: ni/python-actions/setup-python@5b65c39ed45a0e5b51f584f408edf89955c9cee6
         id: setup-python
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up Poetry
-        uses: ni/python-actions/setup-poetry@dee640bba235ae28fdc6b7337c643bd06358ae90 # v0.9.0
+        uses: ni/python-actions/setup-poetry@5b65c39ed45a0e5b51f584f408edf89955c9cee6
       - name: Cache virtualenv
         id: cache-virtualenv
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
