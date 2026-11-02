@@ -17,6 +17,8 @@ jobs:
           persist-credentials: false
       - name: Set up Python
         uses: ni/python-actions/setup-python@5b65c39ed45a0e5b51f584f408edf89955c9cee6
+        with:
+          python-version: 3.11
         id: setup-python
       - name: Set up Poetry
         uses: ni/python-actions/setup-poetry@5b65c39ed45a0e5b51f584f408edf89955c9cee6
