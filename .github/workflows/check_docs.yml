@@ -18,6 +18,7 @@ jobs:
       - name: Set up Python
         uses: ni/python-actions/setup-python@36d77b6a215e106c33e30638943d5bc5233bef2f # v0.10.0
         with:
+          # Work around https://github.com/ni/nitypes-python/issues/302 - Documentation generation fails with Python 3.13
           python-version: 3.11
         id: setup-python
       - name: Set up Poetry
