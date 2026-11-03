@@ -35,10 +35,10 @@ permissions: {}
 jobs:
   check_nitypes:
     name: Check nitypes
-    uses: ./.github/workflows/check_nitypes.yml
+    uses: $/.github/workflows/check_nitypes.yml
   check_docs:
     name: Check docs
-    uses: ./.github/workflows/check_docs.yml
+    uses: $/.github/workflows/check_docs.yml
   build_nitypes:
     name: Build nitypes
     runs-on: ubuntu-latest
@@ -83,7 +83,7 @@ jobs:
         path: dist/
     - run: ls -lR
     - name: Upload to ${{ env.environment }}
-      uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+      uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
       with:
         repository-url: ${{ fromJson(env.environment-info)[env.environment].upload-url }} 
   update_version:
