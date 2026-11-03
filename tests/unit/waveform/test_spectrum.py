@@ -6,13 +6,12 @@ import itertools
 import pickle
 import sys
 import weakref
-from typing import Any, SupportsIndex
+from typing import Any, assert_type, SupportsIndex
 
 import numpy as np
 import numpy.typing as npt
 import pytest
 from packaging.version import Version
-from typing_extensions import assert_type
 
 import nitypes.waveform.errors as wfmex
 from nitypes.waveform import Spectrum

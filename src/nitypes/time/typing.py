@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import TypeVar, Union
+from typing import TypeAlias, TypeVar, Union
 
 import hightime as ht
-from typing_extensions import TypeAlias
 
 import nitypes.bintime as bt
 

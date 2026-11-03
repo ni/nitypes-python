@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any, SupportsIndex, Union, overload
+from typing import Any, final, overload, SupportsIndex, TYPE_CHECKING, Union
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import TYPE_CHECKING, TypeVar, final, override
+from typing_extensions import override, TypeVar
 
 from nitypes.complex import ComplexInt32Base, ComplexInt32DType, convert_complex
 from nitypes.time.typing import AnyDateTime, AnyTimeDelta

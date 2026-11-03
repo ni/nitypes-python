@@ -5,12 +5,11 @@ import copy
 import itertools
 import pickle
 import sys
-from typing import Any
+from typing import Any, assert_type
 
 import numpy as np
 import pytest
 from packaging.version import Version
-from typing_extensions import assert_type
 
 from nitypes.waveform._extended_properties import ExtendedPropertyDictionary
 from nitypes.xy_data import _UNIT_DESCRIPTION_X, _UNIT_DESCRIPTION_Y, TData, XYData

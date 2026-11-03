@@ -1,16 +1,15 @@
 from __future__ import annotations
 
 import datetime as dt
-import sys
 import warnings
 from abc import ABC, abstractmethod
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Generic, SupportsIndex, overload
+from typing import Any, Generic, overload, Self, SupportsIndex, TYPE_CHECKING
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import Self, TypeVar
+from typing_extensions import TypeVar
 
 from nitypes._arguments import arg_to_uint, validate_dtype, validate_unsupported_arg
 from nitypes._exceptions import invalid_arg_type, invalid_array_ndim
@@ -28,14 +27,11 @@ from nitypes.waveform._extended_properties import CHANNEL_NAME, UNIT_DESCRIPTION
 from nitypes.waveform._warnings import scale_mode_mismatch
 from nitypes.waveform.typing import ExtendedPropertyValue
 
-if sys.version_info < (3, 10):
-    import array as std_array
-
 if TYPE_CHECKING:
     # Import from the public package so the docs don't reference private submodules.
     from nitypes.waveform import (
-        NO_SCALING,
         ExtendedPropertyDictionary,
+        NO_SCALING,
         ScaleMode,
         Timing,
     )
@@ -126,9 +122,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
                 raise invalid_array_ndim(
                     "input array", "one-dimensional array or sequence", array.ndim
                 )
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:
@@ -181,9 +175,7 @@ class NumericWaveform(ABC, Generic[_TRaw, _TScaled]):
                 raise invalid_array_ndim(
                     "input array", "two-dimensional array or nested sequence", array.ndim
                 )
-        elif isinstance(array, Sequence) or (
-            sys.version_info < (3, 10) and isinstance(array, std_array.array)
-        ):
+        elif isinstance(array, Sequence):
             if dtype is None:
                 raise ValueError("You must specify a dtype when the input array is a sequence.")
         else:

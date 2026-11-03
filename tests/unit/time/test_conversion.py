@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import Any
+from typing import Any, assert_type
 
 import hightime as ht
 import pytest
-from typing_extensions import assert_type
 
 import nitypes.bintime as bt
 from nitypes.time import convert_datetime, convert_timedelta

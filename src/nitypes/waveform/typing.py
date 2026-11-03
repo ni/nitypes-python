@@ -6,10 +6,10 @@
 from __future__ import annotations
 
 import datetime as dt
-from typing import Union
+from typing import TypeAlias, Union
 
 import numpy as np
-from typing_extensions import TypeAlias, TypeVar
+from typing_extensions import TypeVar
 
 from nitypes._numpy import bool as _np_bool
 from nitypes.time.typing import AnyDateTime, AnyTimeDelta

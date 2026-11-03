@@ -8,22 +8,21 @@ import pickle
 import sys
 import weakref
 from collections.abc import Sequence
-from typing import Any, SupportsIndex, Union
+from typing import Any, assert_type, SupportsIndex, Union
 
 import hightime as ht
 import numpy as np
 import numpy.typing as npt
 import pytest
 from packaging.version import Version
-from typing_extensions import assert_type
 
 import nitypes.bintime as bt
 import nitypes.waveform.errors as wfmex
 import nitypes.waveform.warnings as wfmwarn
 from nitypes.waveform import (
-    NO_SCALING,
     AnalogWaveform,
     LinearScaleMode,
+    NO_SCALING,
     NoneScaleMode,
     SampleIntervalMode,
     ScaleMode,

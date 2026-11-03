@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import copy
 import pickle
-from typing import Any
+from typing import Any, assert_type
 
 import pytest
-from typing_extensions import assert_type
 
 from nitypes.scalar import Scalar, TScalar_co
 from nitypes.waveform._extended_properties import (
-    UNIT_DESCRIPTION,
     ExtendedPropertyDictionary,
+    UNIT_DESCRIPTION,
 )
 
 

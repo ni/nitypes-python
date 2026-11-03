@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import copy
 import pickle
+from typing import assert_type
 
 import numpy as np
 import numpy.typing as npt
-from typing_extensions import assert_type
 
 from nitypes.waveform import NO_SCALING, NoneScaleMode
 
