@@ -35,10 +35,10 @@ permissions: {}
 jobs:
   check_nitypes:
     name: Check nitypes
-    uses: ./.github/workflows/check_nitypes.yml
+    uses: $/.github/workflows/check_nitypes.yml
   check_docs:
     name: Check docs
-    uses: ./.github/workflows/check_docs.yml
+    uses: $/.github/workflows/check_docs.yml
   build_nitypes:
     name: Build nitypes
     runs-on: ubuntu-latest
