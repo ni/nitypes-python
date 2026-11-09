@@ -2,5 +2,15 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
         "local>ni/python-renovate-config:recommended"
+    ],
+    "packageRules": [
+        {
+            "description": "Update setup-python default Python version to latest 3.13.x.",
+            "matchDepNames": [
+                "python"
+            ],
+            "allowedVersions": "< 3.14.0",
+            "minimumReleaseAge": "3 days"
+        }
     ]
 }
