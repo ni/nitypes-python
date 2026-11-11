@@ -1,7 +1,11 @@
 """Data types for NI Python APIs."""
 
-from importlib.metadata import version
+import importlib.metadata
 
 
-__version__ = version(__name__)
-"""nitypes version string."""
+try:
+    # Use a literal package name so PyInstaller automatically copies package metadata.
+    __version__ = importlib.metadata.version("nitypes")
+    """nitypes version string."""
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "unknown"
