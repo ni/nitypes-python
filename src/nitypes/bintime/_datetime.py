@@ -17,7 +17,7 @@ from typing import (
 
 import hightime as ht
 
-from nitypes._exceptions import invalid_arg_type, invalid_arg_value
+from nitypes._exceptions import invalid_arg_type
 from nitypes.bintime._timedelta import _OTHER_TIMEDELTA_TUPLE, _OtherTimeDelta
 
 if TYPE_CHECKING:
@@ -32,6 +32,18 @@ _HT_EPOCH_1904 = ht.datetime(1904, 1, 1, tzinfo=dt.timezone.utc)
 
 _OtherDateTime: TypeAlias = Union[dt.datetime, ht.datetime]
 _OTHER_DATETIME_TUPLE = (dt.datetime, ht.datetime)
+
+
+def _datetime_to_utc(value: _OtherDateTime, /) -> _OtherDateTime:
+    """Convert a datetime to UTC while preserving date-specific offsets."""
+    # Capture the original offset before arithmetic: it includes DST and the input's fold.
+    # TODO: Define/document the policy for nonexistent spring-forward wall times. This currently
+    # trusts tzinfo.utcoffset() rather than rejecting them; awareness alone does not ensure
+    # validity.
+    offset = value.utcoffset()
+    if value.tzinfo is None or offset is None:
+        raise ValueError("value must be timezone-aware")
+    return (value - offset).replace(tzinfo=dt.timezone.utc)
 
 
 @final
@@ -49,10 +61,14 @@ class DateTime:
     DateTime instances are duck typing compatible with a subset of the method and properties
     supported by :any:`datetime.datetime` and :any:`hightime.datetime`.
 
-    This class only supports the UTC time zone and does not support timezone-naive times.
+    This class only supports timezone-aware times.
 
-    This class does not support the ``fold`` property for disambiguating repeated times for daylight
-    saving time and time zone changes.
+    This class does not expose a ``fold`` property or constructor argument. When an aware datetime
+    is passed in, its UTC offset (including its ``fold`` selection for repeated local times) is used
+    to determine the absolute time. The resulting object represents that instant in UTC.
+
+    TODO: Document how to select a repeated local time by passing an aware datetime with ``fold``
+    set, and document the policy for nonexistent local times during daylight saving transitions.
 
     Constructing
     ^^^^^^^^^^^^
@@ -65,8 +81,11 @@ class DateTime:
     nitypes.bintime.DateTime(2025, 5, 25, 16, 45, tzinfo=datetime.timezone.utc)
 
     .. note::
-        :class:`DateTime` only supports :any:`datetime.timezone.utc`. It does not support time-zone-naive
-        objects or time zones other than UTC.
+        :class:`DateTime` only supports timezone-aware times.
+
+    TODO: Add a non-UTC example showing the UTC date/time after normalization, explain that the
+    source time zone is not retained, and document ValueError for naive inputs (including a tzinfo
+    whose utcoffset() returns None) and overflow when normalization exceeds the datetime range.
 
     You can also construct a :class:`DateTime` from a :any:`datetime.datetime` or
     :any:`hightime.datetime`:
@@ -225,16 +244,14 @@ class DateTime:
     @_to_offset.register(ht.datetime)
     @classmethod
     def _(cls, value: ht.datetime) -> TimeDelta:
-        if value.tzinfo != dt.timezone.utc:
-            raise ValueError("The tzinfo must be datetime.timezone.utc.")
-        return TimeDelta(value - _HT_EPOCH_1904)
+        value_utc = _datetime_to_utc(value)
+        return TimeDelta(value_utc - _HT_EPOCH_1904)
 
     @_to_offset.register(dt.datetime)
     @classmethod
     def _(cls, value: dt.datetime) -> TimeDelta:
-        if value.tzinfo != dt.timezone.utc:
-            raise ValueError("The tzinfo must be datetime.timezone.utc.")
-        return TimeDelta(value - _DT_EPOCH_1904)
+        value_utc = _datetime_to_utc(value)
+        return TimeDelta(value_utc - _DT_EPOCH_1904)
 
     @_to_offset.register(type(None))
     @classmethod
@@ -292,8 +309,8 @@ class DateTime:
         """The day of the month, between 1 and 31 inclusive."""
         return self._to_hightime_datetime().day
 
-    # The hour/minute/second properties currently assume that tzinfo.utcoffset() == 0, which is
-    # true because this class only supports UTC.
+    # The hour/minute/second properties assume a zero UTC offset because inputs are normalized
+    # to UTC, even when the source time zone observes DST.
     @property
     def hour(self) -> int:
         """The hour, between 0 and 23 inclusive."""
@@ -345,10 +362,13 @@ class DateTime:
 
     @classmethod
     def now(cls, tz: dt.tzinfo | None = None) -> Self:
-        """Return the current absolute time."""
-        if tz != dt.timezone.utc:
-            raise invalid_arg_value("tz", "datetime.timezone.utc", tz)
-        return cls(ht.datetime.now(tz))
+        """Return the current absolute time in UTC.
+
+        The supplied time zone must produce an aware datetime. Omitting ``tz`` or passing
+        ``None`` raises :class:`ValueError`.
+        """
+        # Hightime's inherited now() passes tzinfo positionally, which fails for ZoneInfo.
+        return cls(dt.datetime.now(tz))
 
     def __add__(self, value: TimeDelta | _OtherTimeDelta, /) -> DateTime:
         """Return self+value."""

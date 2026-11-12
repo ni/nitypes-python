@@ -13,7 +13,12 @@ from nitypes.time.typing import AnyDateTime, AnyTimeDelta, TDateTime, TTimeDelta
 
 
 def convert_datetime(requested_type: type[TDateTime], value: AnyDateTime, /) -> TDateTime:
-    """Convert a datetime object to the specified type."""
+    """Convert a datetime object to the specified type.
+
+    TODO: Document that conversion to bintime requires an aware input and normalizes it to UTC.
+    Conversion from bintime returns UTC, not the original time zone; conversions between standard
+    datetime and hightime preserve tzinfo and fold.
+    """
     convert_func = _CONVERT_DATETIME_FOR_TYPE.get(requested_type)
     if convert_func is None:
         raise invalid_requested_type("datetime", requested_type)
@@ -90,7 +95,7 @@ def _(value: dt.datetime, /) -> ht.datetime:
         value.minute,
         value.second,
         value.microsecond,
-        value.tzinfo,
+        tzinfo=value.tzinfo,
         fold=value.fold,
     )
 
