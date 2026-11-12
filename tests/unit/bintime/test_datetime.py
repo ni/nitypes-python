@@ -4,14 +4,46 @@ import copy
 import datetime as dt
 import pickle
 from typing import assert_type
+from zoneinfo import ZoneInfo
 
 import hightime as ht
 import pytest
 from tzlocal import get_localzone
 
 from nitypes.bintime import DateTime, TimeDelta
+from nitypes.bintime._datetime import _datetime_to_utc
 from nitypes.bintime._time_value_tuple import TimeValueTuple
 from nitypes.bintime._timedelta import _BITS_PER_SECOND, _FRACTIONAL_SECONDS_MASK
+
+
+# TODO: Add negative offsets, non-UTC hightime sub-microsecond precision, and normalization at
+# datetime.min/max (both valid boundary crossings and overflow).
+# TODO (DST): Use a deterministic ZoneInfo zone such as America/New_York, not the host's zone.
+# Cover winter/summer offsets, both sides of spring/fall transitions, and fold=0/1 at the same
+# repeated wall time (2025-11-02 01:30 -> 05:30/06:30 UTC). Assert the instants differ by one hour.
+# Cover datetime, hightime, and component construction; components cannot select fold=1, so that
+# occurrence must be supplied as an already-disambiguated datetime unless the API is extended.
+# Ensure IANA zone data is available in CI, including on Windows.
+_NON_UTC_TZ = dt.timezone(dt.timedelta(hours=5, minutes=30))
+_NON_UTC_DATETIMES = [
+    dt.datetime(1850, 12, 25, 8, 15, 30, 123_456, tzinfo=_NON_UTC_TZ),
+    dt.datetime(1904, 1, 1, 0, 30, tzinfo=_NON_UTC_TZ),
+    dt.datetime(1950, 6, 15, 12, 0, 1, 654_321, tzinfo=_NON_UTC_TZ),
+    dt.datetime(2025, 2, 14, 8, 15, 59, 15625, tzinfo=_NON_UTC_TZ),
+]
+_NON_UTC_HIGHTIME_DATETIMES = [
+    ht.datetime(
+        value.year,
+        value.month,
+        value.day,
+        value.hour,
+        value.minute,
+        value.second,
+        value.microsecond,
+        tzinfo=value.tzinfo,
+    )
+    for value in _NON_UTC_DATETIMES
+]
 
 
 ###############################################################################
@@ -82,46 +114,118 @@ def test___unit_args___construct___returns_nearest_datetime() -> None:
     ) == (2025, 2, 14, 8, 15, 59, 15625, 123_456_789, 234_569_278)
 
 
+# TODO: Also reject datetime/hightime inputs with non-None tzinfo whose utcoffset() returns None.
 def test___naive_dt_datetime___construct___raises_value_error() -> None:
     with pytest.raises(ValueError) as exc:
         _ = DateTime(dt.datetime(2025, 2, 14, 8, 15, 59, 15625))
 
-    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
+    assert exc.value.args[0] == "value must be timezone-aware"
 
 
 def test___naive_ht_datetime___construct___raises_value_error() -> None:
     with pytest.raises(ValueError) as exc:
         _ = DateTime(ht.datetime(2025, 2, 14, 8, 15, 59, 15625))
 
-    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
+    assert exc.value.args[0] == "value must be timezone-aware"
 
 
 def test___naive_unit_args___construct___raises_value_error() -> None:
     with pytest.raises(ValueError) as exc:
         _ = DateTime(2025, 2, 14, 8, 15, 59, 15625, 123_456_789, 234_567_890)
 
-    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
+    assert exc.value.args[0] == "value must be timezone-aware"
 
 
-def test___local_dt_datetime___construct___raises_value_error() -> None:
-    with pytest.raises(ValueError) as exc:
-        _ = DateTime(dt.datetime(2025, 2, 14, 8, 15, 59, 15625, get_localzone()))
+# TODO: Assert UTC fields/instant, not just tzinfo; the host zone may already be UTC and these
+# February inputs do not establish DST coverage.
+def test___local_dt_datetime___construct___returns_utc_datetime() -> None:
+    value = DateTime(dt.datetime(2025, 2, 14, 8, 15, 59, 15625, get_localzone()))
 
-    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
-
-
-def test___local_ht_datetime___construct___raises_value_error() -> None:
-    with pytest.raises(ValueError) as exc:
-        _ = DateTime(ht.datetime(2025, 2, 14, 8, 15, 59, 15625, tzinfo=get_localzone()))
-
-    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
+    assert value.tzinfo is dt.timezone.utc
 
 
-def test___local_unit_args___construct___raises_value_error() -> None:
-    with pytest.raises(ValueError) as exc:
-        _ = DateTime(2025, 2, 14, 8, 15, 59, 15625, 123_456_789, 234_567_890, get_localzone())
+def test___local_ht_datetime___construct___returns_utc_datetime() -> None:
+    value = DateTime(ht.datetime(2025, 2, 14, 8, 15, 59, 15625, tzinfo=get_localzone()))
 
-    assert exc.value.args[0].startswith("The tzinfo must be datetime.timezone.utc.")
+    assert value.tzinfo is dt.timezone.utc
+
+
+def test___local_unit_args___construct___returns_utc_datetime() -> None:
+    value = DateTime(
+        2025,
+        2,
+        14,
+        8,
+        15,
+        59,
+        15625,
+        123_456_789,
+        234_567_890,
+        get_localzone(),
+    )
+
+    assert value.tzinfo is dt.timezone.utc
+
+
+@pytest.mark.parametrize("value", [*_NON_UTC_DATETIMES, *_NON_UTC_HIGHTIME_DATETIMES])
+def test___non_utc_datetime___datetime_to_utc___returns_utc_datetime(
+    value: dt.datetime | ht.datetime,
+) -> None:
+    value_utc = _datetime_to_utc(value)
+
+    offset = value.utcoffset()
+    assert offset is not None
+    assert value_utc == value.replace(tzinfo=dt.timezone.utc) - offset
+    assert value_utc.tzinfo is dt.timezone.utc
+
+
+@pytest.mark.parametrize("value", [*_NON_UTC_DATETIMES, *_NON_UTC_HIGHTIME_DATETIMES])
+def test___non_utc_datetime___construct___returns_utc_datetime(
+    value: dt.datetime | ht.datetime,
+) -> None:
+    value_out = DateTime(value)
+    # TODO: Use independently specified UTC expectations, rather than the helper under test.
+    # For DST cases, include a decided policy for nonexistent times such as 2025-03-09 02:30
+    # in America/New_York; currently the supplied offset is accepted without gap validation.
+    expected = DateTime(_datetime_to_utc(value))
+
+    assert value_out == expected
+    assert value_out.tzinfo is dt.timezone.utc
+
+
+###############################################################################
+# now
+###############################################################################
+@pytest.mark.parametrize(
+    "current",
+    [
+        dt.datetime(2025, 1, 15, 17, 0, 0, 15625, dt.timezone.utc),
+        dt.datetime(2025, 7, 15, 16, 0, 0, 15625, dt.timezone.utc),
+        dt.datetime(2025, 11, 2, 5, 30, 0, 15625, dt.timezone.utc),
+        dt.datetime(2025, 11, 2, 6, 30, 0, 15625, dt.timezone.utc),
+    ],
+)
+def test___zoneinfo___now___returns_current_utc_instant(
+    current: dt.datetime, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FrozenDateTime(dt.datetime):
+        @classmethod
+        def now(cls, tz: dt.tzinfo | None = None) -> FrozenDateTime:
+            return cls.fromtimestamp(current.timestamp(), tz)
+
+    monkeypatch.setattr(dt, "datetime", FrozenDateTime)
+
+    value = DateTime.now(ZoneInfo("America/New_York"))
+
+    assert value == DateTime(current)
+    assert value.tzinfo is dt.timezone.utc
+
+
+def test___no_timezone___now___raises_value_error() -> None:
+    with pytest.raises(ValueError, match="value must be timezone-aware"):
+        DateTime.now()
+    with pytest.raises(ValueError, match="value must be timezone-aware"):
+        DateTime.now(None)
 
 
 ###############################################################################
@@ -213,6 +317,8 @@ def test___various_values___unit_properties___return_unit_values(
 ###############################################################################
 # Binary arithmetic
 ###############################################################################
+# TODO (DST): Assert elapsed-time arithmetic across transitions, not local wall-clock arithmetic;
+# also test subtraction against aware non-UTC datetime/hightime operands in both directions.
 @pytest.mark.parametrize(
     "left, right, expected",
     [
@@ -307,6 +413,9 @@ def test___datetime___sub___returns_time_value(
 ###############################################################################
 # Comparison
 ###############################################################################
+# TODO: Cover equal instants with different offsets and both folds of a repeated local time.
+# Check mixed hightime comparisons separately: Python inter-zone equality for ambiguous local
+# times can be false even for the same instant, unlike comparison after explicit UTC normalization.
 @pytest.mark.parametrize(
     "left, right",
     [

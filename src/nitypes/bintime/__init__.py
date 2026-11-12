@@ -47,7 +47,10 @@ module to support up to yoctosecond precision.
 ``nitypes.bintime`` is not a replacement for ``hightime``. The two time formats have different
 strengths and weaknesses.
 
-* ``hightime`` supports local time zones and time-zone-naive times. ``bintime`` only supports UTC.
+* ``hightime`` supports local time zones and timezone-naive times. ``bintime`` only supports
+  timezone-aware times.
+  TODO: Clarify that non-UTC inputs are normalized to UTC; the original time zone is not stored,
+  and properties and conversions back to other datetime types return UTC.
 * ``hightime`` classes supports the same operations as the standard ``datetime`` classes.
   ``bintime`` classes support a subset of the standard ``datetime`` operations.
 * ``hightime`` has a larger memory footprint than NI-BTF. ``hightime`` objects are separately
